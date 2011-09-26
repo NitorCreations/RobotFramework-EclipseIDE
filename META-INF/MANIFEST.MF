@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Robot Framework Textfile Editor
+Bundle-SymbolicName: org.otherone.robotframework.eclipse.editor; singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.otherone.robotframework.eclipse.editor.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.jface.text,
+ org.eclipse.ui.editors
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
