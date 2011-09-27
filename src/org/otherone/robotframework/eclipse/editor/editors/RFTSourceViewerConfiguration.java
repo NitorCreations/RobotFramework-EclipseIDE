@@ -27,7 +27,8 @@ import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.otherone.robotframework.eclipse.editor.internal.hyperlinks.RFTKeywordCallHyperlinkDetector;
-import org.otherone.robotframework.eclipse.editor.internal.hyperlinks.RFTVariableHyperlinkDetector;
+import org.otherone.robotframework.eclipse.editor.internal.hyperlinks.RFTResourceHyperlinkDetector;
+import org.otherone.robotframework.eclipse.editor.internal.hyperlinks.RFTVariableAccessHyperlinkDetector;
 
 public class RFTSourceViewerConfiguration extends SourceViewerConfiguration {
 
@@ -64,8 +65,9 @@ public class RFTSourceViewerConfiguration extends SourceViewerConfiguration {
   public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
     List<IHyperlinkDetector> detectors = new ArrayList<IHyperlinkDetector>();
     detectors.addAll(Arrays.asList(super.getHyperlinkDetectors(sourceViewer)));
+    detectors.add(new RFTResourceHyperlinkDetector());
     detectors.add(new RFTKeywordCallHyperlinkDetector());
-    detectors.add(new RFTVariableHyperlinkDetector());
+    detectors.add(new RFTVariableAccessHyperlinkDetector());
     return detectors.toArray(new IHyperlinkDetector[detectors.size()]);
   }
 

@@ -32,7 +32,7 @@ import org.otherone.robotframework.eclipse.editor.internal.rules.RFTVariableUtil
  * 
  * @author xkr47
  */
-public class RFTVariableHyperlinkDetector implements IHyperlinkDetector {
+public class RFTVariableAccessHyperlinkDetector implements IHyperlinkDetector {
 
   /**
    * This detector assumes generated hyperlinks are static, i.e. the link target is calculated at
@@ -68,6 +68,8 @@ public class RFTVariableHyperlinkDetector implements IHyperlinkDetector {
       line = line.substring(0, argumentsIdx);
     }
 
+    // TODO do variables work in the SETTINGS table?
+
     int start = RFTArgumentUtils.findNextArgumentStart(line, 0);
     if (start == -1) {
       if (line.startsWith("${") || line.startsWith(" ${")) {
@@ -101,4 +103,5 @@ public class RFTVariableHyperlinkDetector implements IHyperlinkDetector {
       start = linkOffsetInLine + linkLength;
     }
   }
+
 }
