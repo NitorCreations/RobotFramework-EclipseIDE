@@ -15,17 +15,26 @@
  */
 package org.otherone.robotframework.eclipse.editor.internal.hyperlinks;
 
+import java.io.File;
+
 import org.eclipse.jface.text.IRegion;
+import org.otherone.robotframework.eclipse.editor.editors.ResourceManager;
 
 public class RFTKeywordCallHyperlink extends RFTHyperlink {
 
-  public RFTKeywordCallHyperlink(IRegion region, String text) {
-    super(region, text);
+  private final String keyword;
+  private final File currentFile;
+
+  public RFTKeywordCallHyperlink(IRegion region, String linkText, String keyword, File currentFile) {
+    super(region, linkText);
+    this.keyword = keyword;
+    this.currentFile = currentFile;
   }
 
   @Override
   public void open() {
-    System.out.println("TODO Open hyperlink RFT Keyword Call '" + text + "'");
+    System.out.println("Open hyperlink RFT Keyword Call '" + text + "'");
+    openLocation(ResourceManager.getResource(currentFile).findKeyword(keyword));
   }
 
 }

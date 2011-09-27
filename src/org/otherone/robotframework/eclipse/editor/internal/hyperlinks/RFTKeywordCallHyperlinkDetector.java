@@ -76,7 +76,6 @@ public class RFTKeywordCallHyperlinkDetector implements IHyperlinkDetector {
     String linkString = RFTArgumentUtils.unescapeArgument(line, linkOffsetInLine, linkLength);
 
     IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
-    return new IHyperlink[] { new RFTKeywordCallHyperlink(linkRegion, linkString) };
+    return new IHyperlink[] { new RFTKeywordCallHyperlink(linkRegion, linkString, linkString, null /* TODO */) };
   }
-
 }

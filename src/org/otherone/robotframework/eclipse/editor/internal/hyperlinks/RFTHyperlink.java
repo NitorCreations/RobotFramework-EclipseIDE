@@ -17,6 +17,7 @@ package org.otherone.robotframework.eclipse.editor.internal.hyperlinks;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
+import org.otherone.robotframework.eclipse.editor.editors.ResourceLocation;
 
 public abstract class RFTHyperlink implements IHyperlink {
 
@@ -41,6 +42,10 @@ public abstract class RFTHyperlink implements IHyperlink {
   @Override
   public String getHyperlinkText() {
     return text;
+  }
+
+  protected void openLocation(ResourceLocation location) {
+    System.out.println("TODO Open file " + location.resource.resourceFile + " on line " + location.line);
   }
 
 }
