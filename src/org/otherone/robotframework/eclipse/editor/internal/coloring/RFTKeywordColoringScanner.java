@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.coloring;
+package org.otherone.robotframework.eclipse.editor.internal.coloring;
 
-import org.eclipse.jface.text.rules.*;
-import org.eclipse.jface.text.*;
+import org.eclipse.jface.text.TextAttribute;
+import org.eclipse.jface.text.rules.IRule;
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.RuleBasedScanner;
+import org.eclipse.jface.text.rules.SingleLineRule;
+import org.eclipse.jface.text.rules.Token;
 import org.otherone.robotframework.eclipse.editor.editors.ColorManager;
 import org.otherone.robotframework.eclipse.editor.editors.IRFTColorConstants;
-import org.otherone.robotframework.eclipse.editor.rules.RFTArgumentRule;
-import org.otherone.robotframework.eclipse.editor.rules.RFTArgumentSeparatorRule;
+import org.otherone.robotframework.eclipse.editor.internal.rules.RFTArgumentRule;
 
 public class RFTKeywordColoringScanner extends RuleBasedScanner {
 

@@ -13,13 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.rules;
+package org.otherone.robotframework.eclipse.editor.internal.hyperlinks;
 
-import org.eclipse.jface.text.rules.IWhitespaceDetector;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.hyperlink.IHyperlink;
 
-public class RFTWhitespaceDetector implements IWhitespaceDetector {
+public abstract class RFTHyperlink implements IHyperlink {
 
-	public boolean isWhitespace(char c) {
-		return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
-	}
+  protected final IRegion region;
+  protected final String text;
+
+  public RFTHyperlink(IRegion region, String text) {
+    this.region = region;
+    this.text = text;
+  }
+
+  @Override
+  public IRegion getHyperlinkRegion() {
+    return region;
+  }
+
+  @Override
+  public String getTypeLabel() {
+    return null;
+  }
+
+  @Override
+  public String getHyperlinkText() {
+    return text;
+  }
+
 }

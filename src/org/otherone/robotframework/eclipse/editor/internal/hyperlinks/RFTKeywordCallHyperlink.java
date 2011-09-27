@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.coloring;
+package org.otherone.robotframework.eclipse.editor.internal.hyperlinks;
 
-import org.eclipse.jface.text.rules.*;
-import org.eclipse.jface.text.*;
-import org.otherone.robotframework.eclipse.editor.editors.ColorManager;
-import org.otherone.robotframework.eclipse.editor.editors.IRFTColorConstants;
+import org.eclipse.jface.text.IRegion;
 
-public class RFTCommentColoringScanner extends RuleBasedScanner {
+public class RFTKeywordCallHyperlink extends RFTHyperlink {
 
-  public RFTCommentColoringScanner(ColorManager manager) {
-    IToken tokCOMMENT = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.COMMENT)));
-
-    setDefaultReturnToken(tokCOMMENT);
+  public RFTKeywordCallHyperlink(IRegion region, String text) {
+    super(region, text);
   }
+
+  @Override
+  public void open() {
+    System.out.println("TODO Open hyperlink RFT Keyword Call '" + text + "'");
+  }
+
 }

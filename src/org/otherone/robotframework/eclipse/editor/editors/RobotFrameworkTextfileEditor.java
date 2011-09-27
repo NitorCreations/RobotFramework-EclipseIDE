@@ -20,21 +20,23 @@ import org.eclipse.ui.editors.text.TextEditor;
 
 /**
  * https://robotframework.googlecode.com/hg/doc/userguide/RobotFrameworkUserGuide.html?r=2.6.1
- * http://help.eclipse.org/helios/index.jsp?topic=/org.eclipse.platform.doc.isv/reference/api/org/eclipse/jface/text/source/package-summary.html
- *
+ * http:/
+ * /help.eclipse.org/helios/index.jsp?topic=/org.eclipse.platform.doc.isv/reference/api/org/eclipse
+ * /jface/text/source/package-summary.html
+ * 
  * @author xkr47
  */
 public class RobotFrameworkTextfileEditor extends TextEditor {
 
-  private ColorManager colorManager;
+  private final ColorManager colorManager;
 
   public RobotFrameworkTextfileEditor() {
-    super();
     colorManager = new ColorManager();
-    setSourceViewerConfiguration(new RFTConfiguration(colorManager));
+    setSourceViewerConfiguration(new RFTSourceViewerConfiguration(colorManager));
     setDocumentProvider(new RFTDocumentProvider());
   }
 
+  @Override
   public void dispose() {
     colorManager.dispose();
     super.dispose();
