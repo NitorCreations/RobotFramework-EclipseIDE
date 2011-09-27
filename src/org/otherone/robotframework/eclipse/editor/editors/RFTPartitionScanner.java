@@ -82,8 +82,9 @@ public class RFTPartitionScanner extends RuleBasedPartitionScanner {
     IToken tokTABLE = new Token(RFT_TABLE);
     IToken tokVARIABLE = new Token(RFT_VARIABLE);
     IPredicateRule[] rules = {
-        new SingleLineRule("***","", tokTABLE, '\0', true) {{ setColumnConstraint(0); }},
-        new SingleLineRule("${","}", tokVARIABLE, '\0', true),
+        new SingleLineRule("*","", tokTABLE, '\0', true) {{ setColumnConstraint(0); }},
+        new SingleLineRule("*","", tokTABLE, '\0', true) {{ setColumnConstraint(1); }},
+//        new SingleLineRule("${","}", tokVARIABLE, '\0', true),
 //        new SingleLineRule("***Setting", "***", tokTABLE_SETTING),
 //        new SingleLineRule("***Settings", "***", tokTABLE_SETTING),
 //        new SingleLineRule("***Metadata", "***", tokTABLE_SETTING),

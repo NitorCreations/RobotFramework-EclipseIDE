@@ -21,6 +21,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
+import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -28,7 +29,8 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 public class RFTConfiguration extends SourceViewerConfiguration {
   private ColorManager colorManager;
-  private RFTScanner scanner;
+  private ITokenScanner defaultColoringScanner;
+  private ITokenScanner tableColoringScanner;
 
   public RFTConfiguration(ColorManager colorManager) {
     this.colorManager = colorManager;
@@ -55,33 +57,24 @@ public class RFTConfiguration extends SourceViewerConfiguration {
     return super.getHyperlinkDetectors(sourceViewer);
   }
 
-  protected RFTScanner getRFTScanner() {
-    if (scanner == null) {
-      scanner = new RFTScanner(colorManager);
+  private ITokenScanner getDefaultColoringScanner() {
+    if (defaultColoringScanner == null) {
+      defaultColoringScanner = new RFTDefaultColoringScanner(colorManager);
     }
-    return scanner;
+    return defaultColoringScanner;
   }
-//  protected XMLTagScanner getXMLTagScanner() {
-//    if (tagScanner == null) {
-//      tagScanner = new XMLTagScanner(colorManager);
-//      tagScanner.setDefaultReturnToken(
-//          new Token(
-//              new TextAttribute(
-//                  colorManager.getColor(IXMLColorConstants.TAG))));
-//    }
-//    return tagScanner;
-//  }
+
+  private ITokenScanner getTableColoringScanner() {
+    if (tableColoringScanner == null) {
+      tableColoringScanner = new RFTTableColoringScanner(colorManager);
+    }
+    return tableColoringScanner;
+  }
 
   public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
     PresentationReconciler reconciler = new PresentationReconciler();
-    DefaultDamagerRepairer dr;
-//    dr = new DefaultDamagerRepairer(getRFTTagScanner());
-//    reconciler.setDamager(dr, RFTPartitionScanner.RFT_TABLE);
-//    reconciler.setRepairer(dr, RFTPartitionScanner.RFT_TABLE);
-
-    dr = new DefaultDamagerRepairer(getRFTScanner());
-    reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
-    reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
+    addColoringScanner(reconciler, RFTPartitionScanner.RFT_TABLE, getTableColoringScanner());
+    addColoringScanner(reconciler, IDocument.DEFAULT_CONTENT_TYPE, getDefaultColoringScanner());
 
 //    NonRuleBasedDamagerRepairer ndr =
 //                        new NonRuleBasedDamagerRepairer(
@@ -91,6 +84,13 @@ public class RFTConfiguration extends SourceViewerConfiguration {
 //    reconciler.setRepairer(ndr, RFTPartitionScanner.RFT_COMMENT);
 
     return reconciler;
-}
+  }
+
+  private static void addColoringScanner(PresentationReconciler reconciler, String partitionToken, ITokenScanner coloringScanner) {
+    DefaultDamagerRepairer dr;
+    dr = new DefaultDamagerRepairer(coloringScanner);
+    reconciler.setDamager(dr, partitionToken);
+    reconciler.setRepairer(dr, partitionToken);
+  }
 
 }

@@ -18,25 +18,14 @@ package org.otherone.robotframework.eclipse.editor.editors;
 import org.eclipse.jface.text.rules.*;
 import org.eclipse.jface.text.*;
 
-public class RFTScanner extends RuleBasedScanner {
+public class RFTTableColoringScanner extends RuleBasedScanner {
 
-  public RFTScanner(ColorManager manager) {
-    IToken tokVARIABLE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.VARIABLE)));
-//    IToken procInstr =
-//        new Token(
-//            new TextAttribute(
-//                manager.getColor(IRFTColorConstants.KEYWORD)));
-
-    //Add rule for processing instructions
-    IRule[] rules = {
-        new SingleLineRule("${", "}", tokVARIABLE),
-        new WhitespaceRule(new RFTWhitespaceDetector()),
-    };
-
-    setRules(rules);
-    setDefaultReturnToken(
-        new Token(
-            new TextAttribute(
-                manager.getColor(IRFTColorConstants.DEFAULT))));
+  public RFTTableColoringScanner(ColorManager manager) {
+    IToken tokDEFAULT = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.TABLE)));
+//    IRule[] rules = {
+//        new WhitespaceRule(new RFTWhitespaceDetector()),
+//    };
+//    setRules(rules);
+    setDefaultReturnToken(tokDEFAULT);
   }
 }
