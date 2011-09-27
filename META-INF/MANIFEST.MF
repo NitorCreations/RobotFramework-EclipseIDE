@@ -10,3 +10,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: org.otherone.robotframework.eclipse.editor,
+ org.otherone.robotframework.eclipse.editor.coloring,
+ org.otherone.robotframework.eclipse.editor.editors,
+ org.otherone.robotframework.eclipse.editor.rules

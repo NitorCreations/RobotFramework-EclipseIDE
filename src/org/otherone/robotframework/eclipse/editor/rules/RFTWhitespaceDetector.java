@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.editors;
+package org.otherone.robotframework.eclipse.editor.rules;
 
 import org.eclipse.jface.text.rules.IWhitespaceDetector;
 

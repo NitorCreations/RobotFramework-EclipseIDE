@@ -15,6 +15,10 @@
  */
 package org.otherone.robotframework.eclipse.editor.editors;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
@@ -26,6 +30,12 @@ import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.otherone.robotframework.eclipse.editor.coloring.RFTActionColoringScanner;
+import org.otherone.robotframework.eclipse.editor.coloring.RFTCommentColoringScanner;
+import org.otherone.robotframework.eclipse.editor.coloring.RFTDefaultColoringScanner;
+import org.otherone.robotframework.eclipse.editor.coloring.RFTKeywordColoringScanner;
+import org.otherone.robotframework.eclipse.editor.coloring.RFTTableColoringScanner;
+import org.otherone.robotframework.eclipse.editor.coloring.RFTVariableColoringScanner;
 
 public class RFTConfiguration extends SourceViewerConfiguration {
   private ColorManager colorManager;
@@ -73,8 +83,12 @@ public class RFTConfiguration extends SourceViewerConfiguration {
 
   public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
     PresentationReconciler reconciler = new PresentationReconciler();
-    addColoringScanner(reconciler, RFTPartitionScanner.RFT_TABLE, getTableColoringScanner());
-    addColoringScanner(reconciler, IDocument.DEFAULT_CONTENT_TYPE, getDefaultColoringScanner());
+    addColoringScanner(reconciler, RFTPartitionScanner.RFT_TABLE, RFTTableColoringScanner.class);
+    addColoringScanner(reconciler, RFTPartitionScanner.RFT_COMMENT, RFTCommentColoringScanner.class);
+    addColoringScanner(reconciler, RFTPartitionScanner.RFT_VARIABLE, RFTVariableColoringScanner.class);
+    addColoringScanner(reconciler, RFTPartitionScanner.RFT_KEYWORD, RFTKeywordColoringScanner.class);
+    addColoringScanner(reconciler, RFTPartitionScanner.RFT_ACTION, RFTActionColoringScanner.class);
+    addColoringScanner(reconciler, IDocument.DEFAULT_CONTENT_TYPE, RFTKeywordColoringScanner.class);
 
 //    NonRuleBasedDamagerRepairer ndr =
 //                        new NonRuleBasedDamagerRepairer(
@@ -85,10 +99,20 @@ public class RFTConfiguration extends SourceViewerConfiguration {
 
     return reconciler;
   }
+  
+  private final Map<Class<? extends ITokenScanner>, ITokenScanner> coloringScanners = new HashMap<Class<? extends ITokenScanner>, ITokenScanner>();
 
-  private static void addColoringScanner(PresentationReconciler reconciler, String partitionToken, ITokenScanner coloringScanner) {
-    DefaultDamagerRepairer dr;
-    dr = new DefaultDamagerRepairer(coloringScanner);
+  private void addColoringScanner(PresentationReconciler reconciler, String partitionToken, Class<? extends ITokenScanner> coloringScannerClass) {
+    ITokenScanner coloringScanner = coloringScanners.get(coloringScannerClass);
+    if (coloringScanner == null) {
+      try {
+        coloringScanner = coloringScannerClass.getConstructor(ColorManager.class).newInstance(colorManager);
+      } catch (Exception e) {
+        throw new RuntimeException("Failed to construct coloring scanner " + coloringScannerClass, e);
+      }
+      coloringScanners.put(coloringScannerClass, coloringScanner);
+    }
+    DefaultDamagerRepairer dr = new DefaultDamagerRepairer(coloringScanner);
     reconciler.setDamager(dr, partitionToken);
     reconciler.setRepairer(dr, partitionToken);
   }

@@ -15,6 +15,7 @@
  */
 package org.otherone.robotframework.eclipse.editor.editors;
 
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.editors.text.TextEditor;
 
 /**
@@ -33,9 +34,19 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
     setSourceViewerConfiguration(new RFTConfiguration(colorManager));
     setDocumentProvider(new RFTDocumentProvider());
   }
+
   public void dispose() {
     colorManager.dispose();
     super.dispose();
+  }
+
+  @Override
+  protected void initializeViewerColors(ISourceViewer viewer) {
+    super.initializeViewerColors(viewer);
+    viewer.getTextWidget().setForeground(colorManager.getColor(IRFTColorConstants.FG));
+    viewer.getTextWidget().setBackground(colorManager.getColor(IRFTColorConstants.BG));
+    viewer.getTextWidget().setSelectionForeground(colorManager.getColor(IRFTColorConstants.FG_SELECTION));
+    viewer.getTextWidget().setSelectionBackground(colorManager.getColor(IRFTColorConstants.BG_SELECTION));
   }
 
 }

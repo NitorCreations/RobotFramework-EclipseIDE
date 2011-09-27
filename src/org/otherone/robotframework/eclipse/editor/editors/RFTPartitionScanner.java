@@ -59,16 +59,8 @@ public class RFTPartitionScanner extends RuleBasedPartitionScanner {
 
   private final static String[] CONTENT_TYPES2 = {
     RFT_TABLE,
-    RFT_TABLE_SETTING,
-    RFT_TABLE_VARIABLE,
-    RFT_TABLE_TESTCASE,
-    RFT_TABLE_KEYWORD,
     RFT_COMMENT,
-    RFT_SETTING,
-    RFT_SETTING_VALUE,
     RFT_VARIABLE,
-    RFT_VARIABLE_VALUE,
-    RFT_TESTCASE,
     RFT_KEYWORD,
     RFT_ACTION,
     RFT_DEFAULT,
@@ -80,10 +72,24 @@ public class RFTPartitionScanner extends RuleBasedPartitionScanner {
 
   public RFTPartitionScanner() {
     IToken tokTABLE = new Token(RFT_TABLE);
+    IToken tokCOMMENT = new Token(RFT_COMMENT);
     IToken tokVARIABLE = new Token(RFT_VARIABLE);
+    IToken tokKEYWORD = new Token(RFT_KEYWORD);
+    IToken tokACTION = new Token(RFT_ACTION);
     IPredicateRule[] rules = {
-        new SingleLineRule("*","", tokTABLE, '\0', true) {{ setColumnConstraint(0); }},
-        new SingleLineRule("*","", tokTABLE, '\0', true) {{ setColumnConstraint(1); }},
+        new SingleLineRule("*","", tokTABLE, '\\', true) {{ setColumnConstraint(0); }},
+        new SingleLineRule(" *","", tokTABLE, '\\', true) {{ setColumnConstraint(0); }},
+        new SingleLineRule("#","", tokCOMMENT, '\\', true),
+        new SingleLineRule("$","", tokVARIABLE, '\\', true) {{ setColumnConstraint(0); }},
+        
+        new SingleLineRule("  ","", tokACTION, '\\', true) {{ setColumnConstraint(0); }},
+        new SingleLineRule(" \r","", tokACTION, '\\', true) {{ setColumnConstraint(0); }},
+        new SingleLineRule("\r ","", tokACTION, '\\', true) {{ setColumnConstraint(0); }},
+        new SingleLineRule("\t","", tokACTION, '\\', true) {{ setColumnConstraint(0); }},
+
+        new SingleLineRule(" ","", tokKEYWORD, '\\', true) {{ setColumnConstraint(0); }},
+        //new SingleLineRule("","", tokKEYWORD, '\\', true) {{ setColumnConstraint(0); }},
+
 //        new SingleLineRule("${","}", tokVARIABLE, '\0', true),
 //        new SingleLineRule("***Setting", "***", tokTABLE_SETTING),
 //        new SingleLineRule("***Settings", "***", tokTABLE_SETTING),
@@ -93,7 +99,7 @@ public class RFTPartitionScanner extends RuleBasedPartitionScanner {
     //rules[0] = new MultiLineRule("<!--", "-->", xmlComment);
     //rules[1] = new TagRule(tag);
 
-setPredicateRules(rules);
+    setPredicateRules(rules);
 
     //  IToken tokTABLE_SETTING = new Token(RFT_TABLE_SETTING);
 //    IToken tokTABLE_SETTING = new Token(RFT_TABLE_SETTING);

@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.editors;
+package org.otherone.robotframework.eclipse.editor.coloring;
 
 import org.eclipse.jface.text.rules.*;
 import org.eclipse.jface.text.*;
+import org.otherone.robotframework.eclipse.editor.editors.ColorManager;
+import org.otherone.robotframework.eclipse.editor.editors.IRFTColorConstants;
+import org.otherone.robotframework.eclipse.editor.rules.RFTArgumentSeparatorRule;
 
-public class RFTTableColoringScanner extends RuleBasedScanner {
+public class RFTDefaultColoringScanner extends RuleBasedScanner {
 
-  public RFTTableColoringScanner(ColorManager manager) {
-    IToken tokDEFAULT = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.TABLE)));
-//    IRule[] rules = {
-//        new WhitespaceRule(new RFTWhitespaceDetector()),
-//    };
-//    setRules(rules);
-    setDefaultReturnToken(tokDEFAULT);
+  public RFTDefaultColoringScanner(ColorManager manager) {
+    Token tokUNKNOWN = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.UNKNOWN)));
+
+    setDefaultReturnToken(tokUNKNOWN);
   }
 }
