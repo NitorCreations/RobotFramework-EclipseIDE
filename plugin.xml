@@ -13,5 +13,60 @@
             id="org.otherone.robotframework.eclipse.editor.editors.RobotFrameworkTextfileEditor">
       </editor>
    </extension>
+   <extension
+         id="testProblem"
+         name="Test Problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension
+         id="rfeBuilder"
+         name="Robot Framework Validator Project Builder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            callOnEmptyDelta="false"
+            hasNature="false">
+         <run
+               class="org.otherone.robotframework.eclipse.editor.builder.RFEBuilder">
+         </run>
+      </builder>
+      <builder
+            hasNature="true">
+      </builder>
+   </extension>
+   <extension
+         id="rfeNature"
+         name="Robot Framework Validator Project Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="org.otherone.robotframework.eclipse.editor.builder.RFENature">
+         </run>
+      </runtime>
+      <builder
+            id="org.otherone.robotframework.eclipse.editor.rfeBuilder">
+      </builder>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            id="org.otherone.robotframework.eclipse.editor.contribution1"
+            nameFilter="*"
+            objectClass="org.eclipse.core.resources.IProject">
+         <action
+               class="org.otherone.robotframework.eclipse.editor.builder.ToggleNatureAction"
+               enablesFor="+"
+               id="org.otherone.robotframework.eclipse.editor.addRemoveNatureAction"
+               label="Add/Remove Robot Framework Validation Nature"
+               menubarPath="additions">
+         </action>
+      </objectContribution>
+   </extension>
 
 </plugin>
