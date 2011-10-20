@@ -16,6 +16,7 @@
 package org.otherone.robotframework.eclipse.editor.builder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,6 +38,9 @@ public class TxtArgumentSplitter {
   static List<Argument> splitLineIntoArguments(String line, int charPos) {
     // remove trailing empty cells and whitespace
     line = rtrim(line);
+    if (line == null) {
+      return Collections.emptyList();
+    }
 
     // split line by tab-or-multiwhitespace
     Matcher m = SEPARATOR_RE.matcher(line);
@@ -44,11 +48,18 @@ public class TxtArgumentSplitter {
     int lastEnd = 0;
     while (true) {
       if (lastEnd < line.length() && line.charAt(lastEnd) == '#') {
-        // next cell starts with comment, so the rest of the line should be ignored
+        // next cell starts with #, so the rest of the line is a comment and should be ignored
         break;
       }
       boolean isLastArgument = !m.find();
       int nextStart = !isLastArgument ? m.start() : line.length();
+      if (lastEnd == 0 && nextStart > 0 && line.charAt(0) == ' ') {
+        /*
+         * spec says all arguments are trimmed - this is the only case when additional trimming is
+         * needed.
+         */
+        ++lastEnd;
+      }
       arguments.add(new Argument(line.substring(lastEnd, nextStart), charPos + lastEnd));
       if (isLastArgument) {
         // last argument
@@ -69,6 +80,7 @@ public class TxtArgumentSplitter {
         default:
           return line.substring(0, epos + 1);
       }
+      --epos;
     }
     return null; // empty line
   }
