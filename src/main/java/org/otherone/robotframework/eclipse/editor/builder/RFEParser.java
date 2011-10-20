@@ -15,8 +15,13 @@
  */
 package org.otherone.robotframework.eclipse.editor.builder;
 
-import java.io.InputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -25,20 +30,31 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.otherone.robotframework.eclipse.editor.builder.RFEParser.Info.Argument;
 
 public class RFEParser {
 
-  private final IFile file;
+  private final String filename;
+  private final Reader filestream;
   private final IProgressMonitor monitor;
+  private final MarkerCreator markerCreator;
 
-  private State state;
+  private State state = State.IGNORE;
 
   // abstract class State {
   // void parse(String line);
   // }
+
+  public static interface MarkerCreator {
+    /**
+     * @see IResource#createMarker(String)
+     */
+    public IMarker createMarker(String type) throws CoreException;
+  }
 
   static class Info {
     static class Argument {
@@ -49,6 +65,12 @@ public class RFEParser {
         this.value = value;
         this.argCharPos = argCharPos;
       }
+
+      @Override
+      public String toString() {
+        return '"' + value + '"';
+      }
+
     }
 
     final RFEParser parser;
@@ -162,7 +184,7 @@ public class RFEParser {
     }
 
     private void addMarker(Info info, String error, int severity, int startPos, int endPos) throws CoreException {
-      IMarker marker = info.parser.file.createMarker(RFEBuilder.MARKER_TYPE);
+      IMarker marker = info.parser.markerCreator.createMarker(RFEBuilder.MARKER_TYPE);
       marker.setAttribute(IMarker.MESSAGE, error);
       marker.setAttribute(IMarker.SEVERITY, severity);
       marker.setAttribute(IMarker.LINE_NUMBER, info.lineNo);
@@ -172,38 +194,68 @@ public class RFEParser {
     }
   }
 
-  public RFEParser(IFile file, IProgressMonitor monitor) {
-    this.file = file;
-    this.monitor = monitor;
-    state = State.IGNORE;
+  public RFEParser(final IFile file, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
+    this.filename = file.toString();
+    this.filestream = new InputStreamReader(file.getContents(), file.getCharset());
+    this.monitor = monitor == null ? new NullProgressMonitor() : monitor;
+    this.markerCreator = new MarkerCreator() {
+      @Override
+      public IMarker createMarker(String type) throws CoreException {
+        return file.createMarker(type);
+      }
+    };
+  }
+
+  /**
+   * For unit tests.
+   * 
+   * @param file
+   *          the file path
+   * @param charset
+   *          the charset to read the file in
+   * @param markerCreator
+   *          for tracking marker creation
+   * @throws UnsupportedEncodingException
+   * @throws FileNotFoundException
+   */
+  public RFEParser(File file, String charset, MarkerCreator markerCreator) throws UnsupportedEncodingException, FileNotFoundException {
+    this.filename = file.getName();
+    this.filestream = new InputStreamReader(new FileInputStream(file), charset);
+    this.monitor = new NullProgressMonitor();
+    this.markerCreator = markerCreator;
   }
 
   public void parse() throws CoreException {
     try {
-
-      String charset = file.getCharset();
-      System.out.println("Parsing " + file + " in charset " + charset);
-      InputStream contentsRaw = file.getContents();
-      try {
-        CountingLineReader contents = new CountingLineReader(new InputStreamReader(contentsRaw, charset));
-        String line;
-        int lineNo = 1;
-        int charPos = 0;
-        while (null != (line = contents.readLine())) {
-          if (monitor.isCanceled()) {
-            return;
-          }
-          parseLine(line, lineNo, charPos);
-          ++lineNo;
-          charPos = contents.getCharPos();
+      System.out.println("Parsing " + filename);
+      CountingLineReader contents = new CountingLineReader(filestream);
+      String line;
+      int lineNo = 1;
+      int charPos = 0;
+      while (null != (line = contents.readLine())) {
+        if (monitor.isCanceled()) {
+          return;
         }
-      } finally {
-        contentsRaw.close();
+        try {
+          parseLine(line, lineNo, charPos);
+        } catch (CoreException e) {
+          throw new RuntimeException("Internal parser error on line " + lineNo, e);
+        } catch (RuntimeException e) {
+          throw new RuntimeException("Internal parser error on line " + lineNo, e);
+        }
+        ++lineNo;
+        charPos = contents.getCharPos();
       }
 
       // TODO store results
     } catch (Exception e) {
       throw new RuntimeException("Error parsing robot file", e);
+    } finally {
+      try {
+        filestream.close();
+      } catch (IOException e) {
+        // ignore
+      }
     }
   }
 
@@ -211,6 +263,10 @@ public class RFEParser {
 
   private void parseLine(String line, int lineNo, int charPos) throws CoreException {
     List<Argument> arguments = TxtArgumentSplitter.splitLineIntoArguments(line, charPos);
+    if (arguments.isEmpty()) {
+      return;
+    }
+    System.out.println(arguments);
 
     state.parse(new Info(this, arguments, lineNo, charPos));
   }

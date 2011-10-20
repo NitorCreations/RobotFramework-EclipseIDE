@@ -1,0 +1,74 @@
+/**
+ * Copyright 2011 Nitor Creations Oy
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.otherone.robotframework.eclipse.editor.builder;
+
+import java.io.File;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.otherone.robotframework.eclipse.editor.builder.RFEParser.MarkerCreator;
+
+@RunWith(Parameterized.class)
+public class TestRFEParserWithStaticFiles {
+
+  public static final class NullMarkerParser implements MarkerCreator {
+
+    @Override
+    public IMarker createMarker(String type) throws CoreException {
+      InvocationHandler handler = new InvocationHandler() {
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+          return null;
+        }
+      };
+      return (IMarker) Proxy.newProxyInstance(NullMarkerParser.class.getClassLoader(), new Class[] { IMarker.class }, handler);
+    }
+
+  }
+
+  @Parameters
+  public static List<Object[]> files() {
+    File dir = new File("src/test/resources/RFEParser");
+    List<Object[]> files = new ArrayList<Object[]>();
+    for (File entry : dir.listFiles()) {
+      if (entry.isFile() && entry.getName().endsWith(".txt")) {
+        files.add(new Object[] { entry });
+      }
+    }
+    return files;
+  }
+
+  private final File file;
+
+  public TestRFEParserWithStaticFiles(File file) {
+    this.file = file;
+  }
+
+  @Test
+  public void testFile() throws Exception {
+    new RFEParser(file, "UTF-8", new NullMarkerParser()).parse();
+  }
+
+}
