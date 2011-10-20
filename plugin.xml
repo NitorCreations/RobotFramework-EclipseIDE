@@ -30,13 +30,10 @@
          point="org.eclipse.core.resources.builders">
       <builder
             callOnEmptyDelta="false"
-            hasNature="false">
+            hasNature="true">
          <run
                class="org.otherone.robotframework.eclipse.editor.builder.RFEBuilder">
          </run>
-      </builder>
-      <builder
-            hasNature="true">
       </builder>
    </extension>
    <extension
