@@ -36,6 +36,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.otherone.robotframework.eclipse.editor.builder.RFEParser.Info.Argument;
 
+/*
+ * TODO support the line continuation sequence "..."
+ * TODO support lists @{foo}, access @{foo}[0]
+ * TODO support environment variables %{foo} 
+ */
 public class RFEParser {
 
   static final int SEVERITY_IGNORE = -500;
@@ -43,7 +48,10 @@ public class RFEParser {
   static final int SEVERITY_UNKNOWN_TABLE = IMarker.SEVERITY_ERROR;
   static final int SEVERITY_IGNORED_LINE_OUTSIDE_RECOGNIZED_TABLE = IMarker.SEVERITY_INFO;
   static final int SEVERITY_IGNORED_LINE_IN_SETTING_TABLE = IMarker.SEVERITY_WARNING;
-  static final int SEVERITY_IGNORED_LINE_OUTSIDE_RECOGNIZED_TESTCASE_OR_KEYWORD = IMarker.SEVERITY_WARNING;
+  /**
+   * As per documentation.
+   */
+  static final int SEVERITY_IGNORED_LINE_OUTSIDE_RECOGNIZED_TESTCASE_OR_KEYWORD = IMarker.SEVERITY_ERROR;
 
   private final String filename;
   private final Reader filestream;
@@ -57,10 +65,6 @@ public class RFEParser {
     state = newState;
     this.testcaseOrKeywordBeingParsed = testcaseOrKeywordBeingParsed;
   }
-
-  // abstract class State {
-  // void parse(String line);
-  // }
 
   public static interface MarkerCreator {
     /**
