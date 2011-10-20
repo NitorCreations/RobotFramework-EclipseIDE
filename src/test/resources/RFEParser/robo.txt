@@ -17,19 +17,36 @@
 ***Settings*** # lol
 Library     OperatingSystem
  Resource   resource.txt
+    # foo
+
+***Settings***
+Library     OperatingSystem
+ Resource   resource.txt
+    # foo
 
 ***Variables***
+${MESSAGE}  Hello, world!
 ${MESSAGE}  Hello, worl  d! ${OTHERMESSAGE}
+${MESSAGE  Hello, worl  d! ${OTHERMESSAGE}
+{MESSAGE}  Hello, worl  d! ${OTHERMESSAGE}
+MESSAGE}  Hello, worl  d! ${OTHERMESSAGE}
+MESSAGE  Hello, worl  d! ${OTHERMESSAGE}
+${MESS}AGE}  Hello, worl  d! ${OTHERMESSAGE}
+    # foo
 
 ***Test Cases***
+    # foo
+
 My Test  [Documentation]  Example test
     Log         ${MESSAGE}
     My Keyword  /tmp
+    # foo
 
 Another Test
     Should Be Equal  ${MESSAGE}  Hello, world!
 
 ***Keywords***
+    # foo
 My Keyword is the ${foo} greatest  [Arguments]  ${path}
     [Arguments]  ${path}
     Directory Should Exist  ${path} # ${fooled}

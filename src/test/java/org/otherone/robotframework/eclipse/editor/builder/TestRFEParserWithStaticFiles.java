@@ -37,9 +37,13 @@ public class TestRFEParserWithStaticFiles {
 
     @Override
     public IMarker createMarker(String type) throws CoreException {
+      System.out.println("  New marker");
       InvocationHandler handler = new InvocationHandler() {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+          if (method.getName().equals("setAttribute")) {
+            System.out.println("    " + args[0] + " = \"" + args[1] + '"');
+          }
           return null;
         }
       };
