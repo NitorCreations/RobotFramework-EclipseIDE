@@ -17,7 +17,6 @@ package org.otherone.robotframework.eclipse.editor.builder.info;
 
 import java.util.List;
 
-
 public interface ITestCaseDefinition extends IKeywordSequence {
 
   /**
@@ -31,17 +30,17 @@ public interface ITestCaseDefinition extends IKeywordSequence {
    * {@link IRFEFileContents#getDefaultTestTags()} or {@link #getDeclaredStaticTags()}.
    * 
    * Please note that additional tags can be given from the command line, and the tag set can also
-   * be manipulated dynamically when the test case executes. These are not included in the
-   * returned set, only the "static" tags as defined above.
+   * be manipulated dynamically when the test case executes. These are not included in the returned
+   * set, only the "static" tags as defined above.
    * 
    * @return the "effective" set of static tags for this keyword.
    */
   List<IDynamicParsedString> getDeclaredAndInheritedStaticTags();
 
   /**
-   * Since Robot Framework 2.5.6, the {@link IKeywordCall#getKeyword()} may exceptionally return
-   * one of the special values "" or "NONE" when the user wants to override the file-default test
-   * setup with a no-op. (It's unknown why the "No Operation" keyword wasn't reused).
+   * Since Robot Framework 2.5.6, the {@link IKeywordCall#getKeyword()} may exceptionally return one
+   * of the special values "" or "NONE" when the user wants to override the file-default test setup
+   * with a no-op. (It's unknown why the "No Operation" keyword wasn't reused).
    */
   IKeywordCall getTestSetup();
 
@@ -51,8 +50,7 @@ public interface ITestCaseDefinition extends IKeywordSequence {
   IKeywordCall getTestTeardown();
 
   /**
-   * Since Robot Framework 2.5.6, the special template "NONE" indicates no template should be
-   * used.
+   * Since Robot Framework 2.5.6, the special template "NONE" indicates no template should be used.
    */
   IParsedKeywordString getTemplate(); // not dynamic
 
