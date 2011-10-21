@@ -25,9 +25,8 @@ public interface IParsedString {
   String getValue();
 
   /**
-   * @return the character offset (from the beginning of the file) where {@link #getValue()}
-   *         begins. If the value is synthesized, the value {@link #SYNTHESIZED_VALUE_CHAR_POS} is
-   *         returned.
+   * @return the character offset (from the beginning of the file) where {@link #getValue()} begins.
+   *         If the value is synthesized, the value {@link #SYNTHESIZED_VALUE_CHAR_POS} is returned.
    */
   int getArgCharPos();
 
@@ -41,5 +40,17 @@ public interface IParsedString {
    * @return a debug string representing this string.
    */
   String getDebugString();
+
+  /**
+   * @return the hash code of {@link #getValue()}.
+   */
+  @Override
+  public int hashCode();
+
+  /**
+   * @return getValue().equals(obj.getValue())
+   */
+  @Override
+  public boolean equals(Object obj);
 
 }

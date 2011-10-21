@@ -35,6 +35,12 @@ public class ParsedString implements IDynamicParsedKeywordString {
   private final List<IDynamicParsedString> parts;
 
   public ParsedString(String value, int argCharPos) {
+    if (value == null) {
+      throw new NullPointerException("value");
+    }
+    if (argCharPos < 0) {
+      throw new IllegalArgumentException("argCharPos < 0");
+    }
     this.value = value;
     this.argCharPos = argCharPos;
     this.parts = null;
@@ -45,6 +51,15 @@ public class ParsedString implements IDynamicParsedKeywordString {
    *          automatically wrapped using {@link Collections#unmodifiableList(List)}
    */
   public ParsedString(String value, int argCharPos, List<? extends IDynamicParsedString> parts) {
+    if (value == null) {
+      throw new NullPointerException("value");
+    }
+    if (argCharPos < 0) {
+      throw new IllegalArgumentException("argCharPos < 0");
+    }
+    if (parts == null) {
+      throw new NullPointerException("parts");
+    }
     this.value = value;
     this.argCharPos = argCharPos;
     this.parts = Collections.unmodifiableList(parts);
@@ -91,6 +106,16 @@ public class ParsedString implements IDynamicParsedKeywordString {
   @Override
   public String getDebugString() {
     return toString() + " @" + argCharPos + "-" + (getArgEndCharPos() - 1);
+  }
+
+  @Override
+  public int hashCode() {
+    return value.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return value.equals(obj);
   }
 
 }
