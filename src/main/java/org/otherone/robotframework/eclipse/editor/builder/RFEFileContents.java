@@ -18,9 +18,11 @@ package org.otherone.robotframework.eclipse.editor.builder;
 import java.util.List;
 import java.util.Map;
 
-public class RFEFileContents implements IRFEFileContents {
+import org.otherone.robotframework.eclipse.editor.builder.IRFEFileContents.IPositionedString;
 
-  public static class PositionedString {
+public class RFEFileContents /* implements IRFEFileContents */{
+
+  public static class PositionedString implements IPositionedString {
     private final String value;
     private final int argCharPos;
 
@@ -29,18 +31,21 @@ public class RFEFileContents implements IRFEFileContents {
       this.argCharPos = argCharPos;
     }
 
+    @Override
     public String getValue() {
       return value;
     }
 
-    public int argCharPos() {
+    @Override
+    public int getArgCharPos() {
       return argCharPos;
     }
 
     /**
      * End position, exclusively.
      */
-    public int argEndCharPos() {
+    @Override
+    public int getArgEndCharPos() {
       return argCharPos + value.length();
     }
 
@@ -49,14 +54,15 @@ public class RFEFileContents implements IRFEFileContents {
       return '"' + value + '"';
     }
 
-    public String debugString() {
-      return '"' + value + "\" @" + argCharPos + "-" + (argEndCharPos() - 1);
+    @Override
+    public String getDebugString() {
+      return '"' + value + "\" @" + argCharPos + "-" + (getArgEndCharPos() - 1);
     }
 
   }
-  
+
   public static class KeywordSequence {
-    private final ;
+    private int x;
   }
 
   List<PositionedString> resourceFiles;
