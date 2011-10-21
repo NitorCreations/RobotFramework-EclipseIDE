@@ -39,7 +39,10 @@ import org.otherone.robotframework.eclipse.editor.builder.RFEParser.Info.Argumen
 /*
  * TODO support the line continuation sequence "..."
  * TODO support lists @{foo}, access @{foo}[0]
- * TODO support environment variables %{foo} 
+ * TODO support environment variables %{foo}
+ * TODO support builtin variables, section 2.5.4 
+ * TODO since Robot Framework 2.6, support "number" variables ${123} ${0xFFF} ${0o777} ${0b111}
+ * TODO since Robot Framework 2.5.5, all setting names can optionally include a colon at the end, for example "Documentation:" 
  */
 public class RFEParser {
 
