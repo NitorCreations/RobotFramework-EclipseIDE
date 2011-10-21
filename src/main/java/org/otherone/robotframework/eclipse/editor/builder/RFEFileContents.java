@@ -18,11 +18,11 @@ package org.otherone.robotframework.eclipse.editor.builder;
 import java.util.List;
 import java.util.Map;
 
-import org.otherone.robotframework.eclipse.editor.builder.IRFEFileContents.IPositionedString;
+import org.otherone.robotframework.eclipse.editor.builder.info.IParsedString;
 
 public class RFEFileContents /* implements IRFEFileContents */{
 
-  public static class PositionedString implements IPositionedString {
+  public static class PositionedString implements IParsedString {
     private final String value;
     private final int argCharPos;
 
