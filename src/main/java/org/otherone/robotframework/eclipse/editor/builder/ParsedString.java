@@ -38,6 +38,9 @@ public class ParsedString implements IDynamicParsedKeywordString {
     if (value == null) {
       throw new NullPointerException("value");
     }
+    if (value.isEmpty()) {
+      throw new IllegalArgumentException("value is empty");
+    }
     if (argCharPos < 0) {
       throw new IllegalArgumentException("argCharPos < 0");
     }
@@ -54,11 +57,17 @@ public class ParsedString implements IDynamicParsedKeywordString {
     if (value == null) {
       throw new NullPointerException("value");
     }
+    if (value.isEmpty()) {
+      throw new IllegalArgumentException("value is empty");
+    }
     if (argCharPos < 0) {
       throw new IllegalArgumentException("argCharPos < 0");
     }
     if (parts == null) {
       throw new NullPointerException("parts");
+    }
+    if (parts.isEmpty()) {
+      throw new IllegalArgumentException("parts list is empty");
     }
     this.value = value;
     this.argCharPos = argCharPos;
