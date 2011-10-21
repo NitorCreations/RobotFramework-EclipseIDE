@@ -17,7 +17,9 @@ package org.otherone.robotframework.eclipse.editor.builder;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.otherone.robotframework.eclipse.editor.builder.info.IDynamicParsedString;
 import org.otherone.robotframework.eclipse.editor.builder.info.IKeywordCall;
@@ -25,6 +27,7 @@ import org.otherone.robotframework.eclipse.editor.builder.info.IUserKeywordDefin
 
 public class UserKeywordDefinition extends KeywordSequence implements IUserKeywordDefinition {
 
+  private Set<String> argumentsKeys;
   private List<IDynamicParsedString> arguments;
   private List<IDynamicParsedString> returnValues;
   private IKeywordCall keywordTeardown;
@@ -40,12 +43,16 @@ public class UserKeywordDefinition extends KeywordSequence implements IUserKeywo
 
   // lists
 
-  public void addArgument(IDynamicParsedString argument) {
+  public boolean addArgument(IDynamicParsedString argument) {
     if (this.arguments == null) {
+      this.argumentsKeys = new HashSet<String>();
       this.arguments = new ArrayList<IDynamicParsedString>();
       this.argumentsIMM = Collections.unmodifiableList(this.arguments);
     }
-    this.arguments.add(argument);
+    if (argumentsKeys.add(argument.getParts().get(0).getValue())) {
+      return false;
+    }
+    return this.arguments.add(argument);
   }
 
   public void addReturnValue(IDynamicParsedString returnValue) {

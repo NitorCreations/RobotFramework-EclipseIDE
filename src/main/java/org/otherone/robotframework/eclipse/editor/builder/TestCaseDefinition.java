@@ -17,23 +17,31 @@ package org.otherone.robotframework.eclipse.editor.builder;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.otherone.robotframework.eclipse.editor.builder.info.IDynamicParsedString;
 import org.otherone.robotframework.eclipse.editor.builder.info.IKeywordCall;
 import org.otherone.robotframework.eclipse.editor.builder.info.IParsedKeywordString;
+import org.otherone.robotframework.eclipse.editor.builder.info.IRFEFileContents;
 import org.otherone.robotframework.eclipse.editor.builder.info.ITestCaseDefinition;
 
 public class TestCaseDefinition extends KeywordSequence implements ITestCaseDefinition {
 
+  private Set<String> declaredStaticTagsKeys;
   private List<IDynamicParsedString> declaredStaticTags;
-  private List<IDynamicParsedString> declaredAndInheritedStaticTags;
   private IKeywordCall testSetup;
   private IKeywordCall testTeardown;
   private IParsedKeywordString template;
 
   private List<IDynamicParsedString> declaredStaticTagsIMM;
-  private List<IDynamicParsedString> declaredAndInheritedStaticTagsIMM;
+
+  private final IRFEFileContents fileContents;
+
+  public TestCaseDefinition(IRFEFileContents fileContents) {
+    this.fileContents = fileContents;
+  }
 
   // singles
 
@@ -51,20 +59,16 @@ public class TestCaseDefinition extends KeywordSequence implements ITestCaseDefi
 
   // lists
 
-  public void addDeclaredStaticTag(IDynamicParsedString declaredStaticTag) {
+  public boolean addDeclaredStaticTag(IDynamicParsedString declaredStaticTag) {
     if (this.declaredStaticTags == null) {
+      this.declaredStaticTagsKeys = new HashSet<String>();
       this.declaredStaticTags = new ArrayList<IDynamicParsedString>();
       this.declaredStaticTagsIMM = Collections.unmodifiableList(this.declaredStaticTags);
     }
-    this.declaredStaticTags.add(declaredStaticTag);
-  }
-
-  public void addDeclaredAndInheritedStaticTag(IDynamicParsedString declaredAndInheritedStaticTag) {
-    if (this.declaredAndInheritedStaticTags == null) {
-      this.declaredAndInheritedStaticTags = new ArrayList<IDynamicParsedString>();
-      this.declaredAndInheritedStaticTagsIMM = Collections.unmodifiableList(this.declaredAndInheritedStaticTags);
+    if (declaredStaticTagsKeys.add(declaredStaticTag.getValue())) {
+      return false;
     }
-    this.declaredAndInheritedStaticTags.add(declaredAndInheritedStaticTag);
+    return this.declaredStaticTags.add(declaredStaticTag);
   }
 
   // getters
@@ -76,7 +80,25 @@ public class TestCaseDefinition extends KeywordSequence implements ITestCaseDefi
 
   @Override
   public List<IDynamicParsedString> getDeclaredAndInheritedStaticTags() {
-    return declaredAndInheritedStaticTagsIMM;
+    if (fileContents.getForcedTestTags() == null) {
+      if (declaredStaticTagsIMM != null) {
+        return declaredStaticTagsIMM;
+      }
+      return fileContents.getDefaultTestTags();
+    }
+    if (declaredStaticTagsIMM != null) {
+      List<IDynamicParsedString> declaredAndInheritedStaticTags = new ArrayList<IDynamicParsedString>();
+      declaredAndInheritedStaticTags.addAll(fileContents.getForcedTestTags());
+      declaredAndInheritedStaticTags.addAll(declaredStaticTagsIMM);
+      return declaredAndInheritedStaticTags;
+    }
+    if (fileContents.getDefaultTestTags() != null) {
+      List<IDynamicParsedString> declaredAndInheritedStaticTags = new ArrayList<IDynamicParsedString>();
+      declaredAndInheritedStaticTags.addAll(fileContents.getForcedTestTags());
+      declaredStaticTagsIMM.addAll(fileContents.getDefaultTestTags());
+      return declaredAndInheritedStaticTags;
+    }
+    return fileContents.getForcedTestTags();
   }
 
   @Override
