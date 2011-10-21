@@ -22,9 +22,9 @@ public interface IDynamicParsedString extends IParsedString {
   /**
    * Returns the static and dynamic parts, one by one.
    * 
-   * @return when {@link #getValue()} returns "Get ${someVar} contents", this returns a list with
-   *         [ "Get ", "${someVar}", " contents" ]
+   * @return when {@link #getValue()} returns "Get ${someVar} contents", this returns a list with [
+   *         "Get ", "${someVar}", " contents" ]
    */
-  List<IParsedString> getParts();
+  List<IDynamicParsedString> getParts();
 
 }

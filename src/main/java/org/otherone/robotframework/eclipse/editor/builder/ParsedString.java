@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.otherone.robotframework.eclipse.editor.builder.info.IDynamicParsedKeywordString;
-import org.otherone.robotframework.eclipse.editor.builder.info.IParsedString;
+import org.otherone.robotframework.eclipse.editor.builder.info.IDynamicParsedString;
 
 /**
  * An immutable implementation of all the I*String interfaces in the ...builder.info package.
@@ -32,7 +32,7 @@ public class ParsedString implements IDynamicParsedKeywordString {
 
   private final String value;
   private final int argCharPos;
-  private final List<IParsedString> parts;
+  private final List<IDynamicParsedString> parts;
 
   public ParsedString(String value, int argCharPos) {
     this.value = value;
@@ -44,7 +44,7 @@ public class ParsedString implements IDynamicParsedKeywordString {
    * @param parts
    *          automatically wrapped using {@link Collections#unmodifiableList(List)}
    */
-  public ParsedString(String value, int argCharPos, List<? extends IParsedString> parts) {
+  public ParsedString(String value, int argCharPos, List<? extends IDynamicParsedString> parts) {
     this.value = value;
     this.argCharPos = argCharPos;
     this.parts = Collections.unmodifiableList(parts);
@@ -66,7 +66,7 @@ public class ParsedString implements IDynamicParsedKeywordString {
   }
 
   @Override
-  public List<IParsedString> getParts() {
+  public List<IDynamicParsedString> getParts() {
     // this method should not be visible to the user if "parts" is not defined
     assert parts != null;
     return parts;
