@@ -15,24 +15,19 @@
  */
 package org.otherone.robotframework.eclipse.editor.builder;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.otherone.robotframework.eclipse.editor.builder.info.IDynamicParsedKeywordString;
-import org.otherone.robotframework.eclipse.editor.builder.info.IDynamicParsedString;
+import org.otherone.robotframework.eclipse.editor.builder.info.IParsedKeywordString;
 
 /**
  * An immutable implementation of all the I*String interfaces in the ...builder.info package.
  * 
  * @author xkr47
  */
-public class ParsedString implements IDynamicParsedKeywordString {
+public class ParsedString implements IParsedKeywordString {
 
   private static String[] STRIPPABLE_PREFIXES = { "given ", "when ", "then ", "and " };
 
   private final String value;
   private final int argCharPos;
-  private final List<IDynamicParsedString> parts;
 
   public ParsedString(String value, int argCharPos) {
     if (value == null) {
@@ -46,32 +41,6 @@ public class ParsedString implements IDynamicParsedKeywordString {
     }
     this.value = value;
     this.argCharPos = argCharPos;
-    this.parts = null;
-  }
-
-  /**
-   * @param parts
-   *          automatically wrapped using {@link Collections#unmodifiableList(List)}
-   */
-  public ParsedString(String value, int argCharPos, List<? extends IDynamicParsedString> parts) {
-    if (value == null) {
-      throw new NullPointerException("value");
-    }
-    if (value.isEmpty()) {
-      throw new IllegalArgumentException("value is empty");
-    }
-    if (argCharPos < 0) {
-      throw new IllegalArgumentException("argCharPos < 0");
-    }
-    if (parts == null) {
-      throw new NullPointerException("parts");
-    }
-    if (parts.isEmpty()) {
-      throw new IllegalArgumentException("parts list is empty");
-    }
-    this.value = value;
-    this.argCharPos = argCharPos;
-    this.parts = Collections.unmodifiableList(parts);
   }
 
   @Override
@@ -90,13 +59,6 @@ public class ParsedString implements IDynamicParsedKeywordString {
   }
 
   @Override
-  public List<IDynamicParsedString> getParts() {
-    // this method should not be visible to the user if "parts" is not defined
-    assert parts != null;
-    return parts;
-  }
-
-  @Override
   public String getAlternateValue() {
     String lcValue = value.toLowerCase();
     for (String strippablePrefix : STRIPPABLE_PREFIXES) {
@@ -109,7 +71,7 @@ public class ParsedString implements IDynamicParsedKeywordString {
 
   @Override
   public String toString() {
-    return parts == null ? '"' + value + '"' : parts.toString();
+    return '"' + value + '"';
   }
 
   @Override
