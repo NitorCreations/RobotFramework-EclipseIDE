@@ -94,12 +94,12 @@ public class RFEFileContents implements IRFEFileContents {
 
   // Lists
 
-  public void addResourceFile(IDynamicParsedString resourceFile) {
+  public boolean addResourceFile(IDynamicParsedString resourceFile) {
     if (this.resourceFiles == null) {
       this.resourceFiles = new ArrayList<IDynamicParsedString>();
       this.resourceFilesIMM = Collections.unmodifiableList(this.resourceFiles);
     }
-    this.resourceFiles.add(resourceFile);
+    return this.resourceFiles.add(resourceFile);
   }
 
   public void addDocumentation(IDynamicParsedString documentation) {
@@ -110,54 +110,70 @@ public class RFEFileContents implements IRFEFileContents {
     this.documentation.add(documentation);
   }
 
-  public void addForcedTestTag(IDynamicParsedString forcedTestTag) {
+  public boolean addForcedTestTag(IDynamicParsedString forcedTestTag) {
     if (this.forcedTestTags == null) {
       this.forcedTestTags = new ArrayList<IDynamicParsedString>();
       this.forcedTestTagsIMM = Collections.unmodifiableList(this.forcedTestTags);
     }
-    this.forcedTestTags.add(forcedTestTag);
+    return this.forcedTestTags.add(forcedTestTag);
   }
 
-  public void addDefaultTestTag(IDynamicParsedString defaultTestTag) {
+  public boolean addDefaultTestTag(IDynamicParsedString defaultTestTag) {
     if (this.defaultTestTags == null) {
       this.defaultTestTags = new ArrayList<IDynamicParsedString>();
       this.defaultTestTagsIMM = Collections.unmodifiableList(this.defaultTestTags);
     }
-    this.defaultTestTags.add(defaultTestTag);
+    return this.defaultTestTags.add(defaultTestTag);
   }
 
   // Maps with single values
 
-  public void addLibraryFile(ILibraryFile libraryFile) {
+  public boolean addLibraryFile(ILibraryFile libraryFile) {
     if (this.libraryFiles == null) {
       this.libraryFiles = new HashMap<IDynamicParsedString, ILibraryFile>();
       this.libraryFilesIMM = Collections.unmodifiableMap(this.libraryFiles);
     }
+    if (this.libraryFiles.containsKey(libraryFile.getCustomName())) {
+      return false;
+    }
     this.libraryFiles.put(libraryFile.getCustomName(), libraryFile);
+    return true;
   }
 
-  public void addVariable(IParsedString key, IDynamicParsedString value) {
+  public boolean addVariable(IParsedString key, IDynamicParsedString value) {
     if (this.variables == null) {
       this.variables = new HashMap<IParsedString, IDynamicParsedString>();
       this.variablesIMM = Collections.unmodifiableMap(this.variables);
     }
+    if (this.variables.containsKey(key)) {
+      return false;
+    }
     this.variables.put(key, value);
+    return true;
   }
 
-  public void addTestCase(ITestCaseDefinition testCase) {
+  public boolean addTestCase(ITestCaseDefinition testCase) {
     if (this.testCases == null) {
       this.testCases = new HashMap<IParsedString, ITestCaseDefinition>();
       this.testCasesIMM = Collections.unmodifiableMap(this.testCases);
     }
+    if (this.testCases.containsKey(testCase.getSequenceName())) {
+      return false;
+    }
     this.testCases.put(testCase.getSequenceName(), testCase);
+    return true;
   }
 
-  public void addKeyword(IUserKeywordDefinition keyword) {
+  public boolean addKeyword(IUserKeywordDefinition keyword) {
     if (this.keywords == null) {
       this.keywords = new HashMap<IDynamicParsedString, IUserKeywordDefinition>();
       this.keywordsIMM = Collections.unmodifiableMap(this.keywords);
     }
+    if (this.keywords.containsKey(keyword.getSequenceName())) {
+      return false;
+    }
     this.keywords.put(keyword.getSequenceName(), keyword);
+    return true;
   }
 
   // Maps with list values
