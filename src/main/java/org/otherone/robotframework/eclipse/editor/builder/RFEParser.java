@@ -34,7 +34,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.otherone.robotframework.eclipse.editor.builder.RFEParser.Info.Argument;
 
 /*
  * TODO support the line continuation sequence "..."
@@ -77,38 +76,18 @@ public class RFEParser {
   }
 
   static class Info {
-    static class Argument {
-      final String value;
-      final int argCharPos;
-
-      public Argument(String value, int argCharPos) {
-        this.value = value;
-        this.argCharPos = argCharPos;
-      }
-
-      @Override
-      public String toString() {
-        return '"' + value + '"';
-        // return '"' + value + "\" @" + argCharPos + "-" + (argEndCharPos() - 1);
-      }
-
-      public int argEndCharPos() {
-        return argCharPos + value.length();
-      }
-
-    }
-
     final RFEParser parser;
-    final List<Argument> arguments;
+    final List<ParsedString> arguments;
     final int lineNo;
     final int lineCharPos;
 
-    public Info(RFEParser parser, List<Argument> arguments, int lineNo, int charPos) {
+    public Info(RFEParser parser, List<ParsedString> arguments, int lineNo, int charPos) {
       this.parser = parser;
       this.arguments = Collections.unmodifiableList(arguments);
       this.lineNo = lineNo;
       this.lineCharPos = charPos;
     }
+
   }
 
   enum State {
@@ -127,24 +106,24 @@ public class RFEParser {
         if (tryParseTableSwitch(info)) {
           return;
         }
-        Argument cmdArg = info.arguments.get(0);
-        String cmd = cmdArg.value;
+        ParsedString cmdArg = info.arguments.get(0);
+        String cmd = cmdArg.getValue();
         if (cmd.equals("Library")) {
           if (info.arguments.size() < 2) {
-            addError(info, "Missing argument, e.g. which library to load", cmdArg.argCharPos, cmdArg.argEndCharPos());
+            addError(info, "Missing argument, e.g. which library to load", cmdArg.getArgCharPos(), cmdArg.getArgEndCharPos());
             return;
           }
-          Argument library = info.arguments.get(1);
+          ParsedString library = info.arguments.get(1);
           System.out.println("Load library " + library);
           warnIgnoreUnusedArgs(info, 2);
           return;
         }
         if (cmd.equals("Resource")) {
           if (info.arguments.size() < 2) {
-            addError(info, "Missing argument, e.g. which library to load", cmdArg.argCharPos, cmdArg.argEndCharPos());
+            addError(info, "Missing argument, e.g. which library to load", cmdArg.getArgCharPos(), cmdArg.getArgEndCharPos());
             return;
           }
-          Argument resource = info.arguments.get(1);
+          ParsedString resource = info.arguments.get(1);
           System.out.println("Load resource " + resource);
           warnIgnoreUnusedArgs(info, 2);
           return;
@@ -161,7 +140,7 @@ public class RFEParser {
         if (!tryParseVariable(info, 0)) {
           return;
         }
-        Argument varArg = info.arguments.get(0);
+        ParsedString varArg = info.arguments.get(0);
         // TODO store location of variable definition
         tryParseArgument(info, 1, "variable content");
         warnIgnoreUnusedArgs(info, 2);
@@ -173,7 +152,7 @@ public class RFEParser {
         if (tryParseTableSwitch(info)) {
           return;
         }
-        if (info.arguments.get(0).value.isEmpty()) {
+        if (info.arguments.get(0).getValue().isEmpty()) {
           warnIgnoredLine(info, SEVERITY_IGNORED_LINE_OUTSIDE_RECOGNIZED_TESTCASE_OR_KEYWORD);
           return;
         }
@@ -181,7 +160,7 @@ public class RFEParser {
           // warnIgnoredLine(info, IMarker.SEVERITY_ERROR);
           return;
         }
-        info.parser.setState(TESTCASE_TABLE_ACTIVE, info.arguments.get(0).value);
+        info.parser.setState(TESTCASE_TABLE_ACTIVE, info.arguments.get(0).getValue());
       }
     },
     TESTCASE_TABLE_ACTIVE {
@@ -190,12 +169,12 @@ public class RFEParser {
         if (tryParseTableSwitch(info)) {
           return;
         }
-        if (!info.arguments.get(0).value.isEmpty()) {
+        if (!info.arguments.get(0).getValue().isEmpty()) {
           if (!tryParseArgument(info, 0, "testcase name")) {
             // warnIgnoredLine(info, IMarker.SEVERITY_ERROR);
             return;
           }
-          info.parser.setState(TESTCASE_TABLE_ACTIVE, info.arguments.get(0).value);
+          info.parser.setState(TESTCASE_TABLE_ACTIVE, info.arguments.get(0).getValue());
           return;
         }
         for (int i = 1; i < info.arguments.size(); ++i) {
@@ -225,18 +204,19 @@ public class RFEParser {
     abstract void parse(Info info) throws CoreException;
 
     protected boolean tryParseTableSwitch(Info info) throws CoreException {
-      Argument tableArgument = info.arguments.get(0);
-      if (!tableArgument.value.startsWith("*")) {
+      ParsedString tableArgument = info.arguments.get(0);
+      if (!tableArgument.getValue().startsWith("*")) {
         return false;
       }
-      String table = tableArgument.value.replace("*", "");
+      String table = tableArgument.getValue().replace("*", "");
       State nextState = tableNameToState.get(table);
       if (nextState == null) {
         nextState = State.IGNORE;
         // due to the replace above, we need to reverse engineer the exact position
-        int firstPos = tableArgument.value.indexOf(table.charAt(0));
-        int lastPos = tableArgument.value.lastIndexOf(table.charAt(table.length() - 1)) + 1;
-        addMarker(info, "Unknown table '" + table + "'", SEVERITY_UNKNOWN_TABLE, tableArgument.argCharPos + firstPos, tableArgument.argCharPos + lastPos);
+        int firstPos = tableArgument.getValue().indexOf(table.charAt(0));
+        int lastPos = tableArgument.getValue().lastIndexOf(table.charAt(table.length() - 1)) + 1;
+        addMarker(info, "Unknown table '" + table + "'", SEVERITY_UNKNOWN_TABLE, tableArgument.getArgCharPos() + firstPos, tableArgument.getArgCharPos()
+            + lastPos);
         return true;
       }
       info.parser.setState(nextState, null);
@@ -247,23 +227,23 @@ public class RFEParser {
      * Argument should be a single variable.
      */
     protected boolean tryParseVariable(Info info, int arg) throws CoreException {
-      Argument varArg = info.arguments.get(arg);
-      String var = varArg.value;
+      ParsedString varArg = info.arguments.get(arg);
+      String var = varArg.getValue();
       if (!var.startsWith("${")) {
         if (!var.endsWith("}")) {
-          addError(info, "Variable must start with ${ and end with }", varArg.argCharPos, varArg.argEndCharPos());
+          addError(info, "Variable must start with ${ and end with }", varArg.getArgCharPos(), varArg.getArgEndCharPos());
         } else {
-          addError(info, "Variable must start with ${", varArg.argCharPos, varArg.argEndCharPos());
+          addError(info, "Variable must start with ${", varArg.getArgCharPos(), varArg.getArgEndCharPos());
         }
         return false;
       }
       if (!var.endsWith("}")) {
-        addError(info, "Variable must end with }", varArg.argCharPos, varArg.argEndCharPos());
+        addError(info, "Variable must end with }", varArg.getArgCharPos(), varArg.getArgEndCharPos());
         return false;
       }
       int closingPos = var.indexOf('}', 2);
       if (closingPos != var.length() - 1) {
-        addError(info, "Variable name must not contain }", varArg.argCharPos + closingPos, varArg.argCharPos + closingPos + 1);
+        addError(info, "Variable name must not contain }", varArg.getArgCharPos() + closingPos, varArg.getArgCharPos() + closingPos + 1);
         return false;
       }
       // TODO further checks?
@@ -276,20 +256,21 @@ public class RFEParser {
      * @param argumentDescription
      */
     protected boolean tryParseArgument(Info info, int arg, String argumentDescription) throws CoreException {
-      Argument varArg = info.arguments.get(arg);
-      String var = varArg.value;
+      ParsedString varArg = info.arguments.get(arg);
+      String var = varArg.getValue();
       // TODO
       return true;
     }
 
     void warnIgnoreUnusedArgs(Info info, int usedArgs) throws CoreException {
       if (info.arguments.size() > usedArgs) {
-        addWarning(info, "Extra argument(s) ignored", info.arguments.get(usedArgs).argCharPos, info.arguments.get(info.arguments.size() - 1).argEndCharPos());
+        addWarning(info, "Extra argument(s) ignored", info.arguments.get(usedArgs).getArgCharPos(), info.arguments.get(info.arguments.size() - 1)
+            .getArgEndCharPos());
       }
     }
 
     void warnIgnoredLine(Info info, int severity) throws CoreException {
-      addMarker(info, "Unknown text ignored", severity, info.arguments.get(0).argCharPos, info.arguments.get(info.arguments.size() - 1).argEndCharPos());
+      addMarker(info, "Unknown text ignored", severity, info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
     }
 
     static final Pattern TABLE_RE = Pattern.compile("^\\s*\\*+\\s*([^*]+?)\\s*\\**\\s*$");
@@ -405,11 +386,11 @@ public class RFEParser {
   // private static final Pattern LINE_RE = Pattern.compile("\\G(?:[^#\\\\]|#|\\.)");
 
   private void parseLine(String line, int lineNo, int charPos) throws CoreException {
-    List<Argument> arguments = TxtArgumentSplitter.splitLineIntoArguments(line, charPos);
+    List<ParsedString> arguments = TxtArgumentSplitter.splitLineIntoArguments(line, charPos);
     if (arguments.isEmpty()) {
       return;
     }
-    if (arguments.size() == 1 && arguments.get(0).value.isEmpty()) {
+    if (arguments.size() == 1 && arguments.get(0).getValue().isEmpty()) {
       return;
     }
     System.out.println(arguments);

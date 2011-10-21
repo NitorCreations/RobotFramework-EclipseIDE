@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.otherone.robotframework.eclipse.editor.builder.RFEParser.Info.Argument;
-
 public class TxtArgumentSplitter {
 
   private static final Pattern SEPARATOR_RE = Pattern.compile("(?:\t| [ \t])[ \t]*");
@@ -35,7 +33,7 @@ public class TxtArgumentSplitter {
    * @param charPos
    * @return
    */
-  static List<Argument> splitLineIntoArguments(String line, int charPos) {
+  static List<ParsedString> splitLineIntoArguments(String line, int charPos) {
     // remove trailing empty cells and whitespace
     line = rtrim(line);
     if (line == null) {
@@ -44,7 +42,7 @@ public class TxtArgumentSplitter {
 
     // split line by tab-or-multiwhitespace
     Matcher m = SEPARATOR_RE.matcher(line);
-    List<Argument> arguments = new ArrayList<Argument>();
+    List<ParsedString> arguments = new ArrayList<ParsedString>();
     int lastEnd = 0;
     while (true) {
       if (lastEnd < line.length() && line.charAt(lastEnd) == '#') {
@@ -60,7 +58,7 @@ public class TxtArgumentSplitter {
          */
         ++lastEnd;
       }
-      arguments.add(new Argument(line.substring(lastEnd, nextStart), charPos + lastEnd));
+      arguments.add(new ParsedString(line.substring(lastEnd, nextStart), charPos + lastEnd));
       if (isLastArgument) {
         // last argument
         break;
