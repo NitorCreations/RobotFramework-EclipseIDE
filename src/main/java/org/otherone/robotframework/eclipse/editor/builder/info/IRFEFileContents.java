@@ -37,7 +37,7 @@ public interface IRFEFileContents {
    * Libraries to load, mapping to their arguments. TODO a library can be loaded many times with
    * different names (see section 2.4.2)
    */
-  Map<IDynamicParsedString, List<IDynamicParsedString>> getLibraryFiles();
+  Map<IDynamicParsedString, ILibraryFile> getLibraryFiles();
 
   @NotAllowedInResourceFiles
   IKeywordCall getSuiteSetup();
