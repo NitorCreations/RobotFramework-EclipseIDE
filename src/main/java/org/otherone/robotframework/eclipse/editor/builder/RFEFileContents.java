@@ -178,20 +178,28 @@ public class RFEFileContents implements IRFEFileContents {
 
   // Maps with list values
 
-  public void addVariableFile(IDynamicParsedString variableFile, List<IDynamicParsedString> arguments) {
+  public boolean addVariableFile(IDynamicParsedString variableFile, List<IDynamicParsedString> arguments) {
     if (this.variableFiles == null) {
       this.variableFiles = new HashMap<IDynamicParsedString, List<IDynamicParsedString>>();
       this.variableFilesIMM = Collections.unmodifiableMap(this.variableFiles);
     }
-    this.variableFilesIMM.put(variableFile, Collections.unmodifiableList(arguments));
+    if (this.variableFilesIMM.containsKey(variableFile)) {
+      return false;
+    }
+    this.variableFiles.put(variableFile, Collections.unmodifiableList(arguments));
+    return true;
   }
 
-  public void addMetadata(IParsedString key, List<IDynamicParsedString> values) {
+  public boolean addMetadata(IParsedString key, List<IDynamicParsedString> values) {
     if (this.metadata == null) {
       this.metadata = new HashMap<IParsedString, List<IDynamicParsedString>>();
       this.metadataIMM = Collections.unmodifiableMap(this.metadata);
     }
-    this.metadataIMM.put(key, Collections.unmodifiableList(values));
+    if (this.metadata.containsKey(key)) {
+      return false;
+    }
+    this.metadata.put(key, Collections.unmodifiableList(values));
+    return true;
   }
 
   // interface-specified getters
