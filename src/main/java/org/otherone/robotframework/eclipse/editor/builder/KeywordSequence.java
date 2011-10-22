@@ -51,7 +51,7 @@ public abstract class KeywordSequence implements IKeywordSequence {
 
   // lists
 
-  public void setDocumentation(List<IDynamicParsedString> documentation) {
+  public void setDocumentation(List<? extends IDynamicParsedString> documentation) {
     this.documentationIMM = Collections.unmodifiableList(documentation);
   }
 

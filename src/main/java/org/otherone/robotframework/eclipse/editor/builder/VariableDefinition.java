@@ -35,7 +35,7 @@ public class VariableDefinition implements IVariableDefinition {
 
   // lists
 
-  public void setValues(List<IDynamicParsedString> values) {
+  public void setValues(List<? extends IDynamicParsedString> values) {
     this.valuesIMM = Collections.unmodifiableList(values);
   }
 

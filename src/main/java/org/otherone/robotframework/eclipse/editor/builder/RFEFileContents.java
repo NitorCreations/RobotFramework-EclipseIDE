@@ -100,15 +100,15 @@ public class RFEFileContents implements IRFEFileContents {
     return this.resourceFiles.add(resourceFile);
   }
 
-  public void setDocumentation(List<IDynamicParsedString> documentation) {
+  public void setDocumentation(List<? extends IDynamicParsedString> documentation) {
     this.documentationIMM = Collections.unmodifiableList(documentation);
   }
 
-  public void setForcedTestTags(List<IDynamicParsedString> forcedTestTags) {
+  public void setForcedTestTags(List<? extends IDynamicParsedString> forcedTestTags) {
     this.forcedTestTagsIMM = Collections.unmodifiableList(forcedTestTags);
   }
 
-  public void setDefaultTestTags(List<IDynamicParsedString> defaultTestTags) {
+  public void setDefaultTestTags(List<? extends IDynamicParsedString> defaultTestTags) {
     this.defaultTestTagsIMM = Collections.unmodifiableList(defaultTestTags);
   }
 
@@ -164,7 +164,7 @@ public class RFEFileContents implements IRFEFileContents {
 
   // maps with list values
 
-  public boolean addVariableFile(IDynamicParsedString variableFile, List<IDynamicParsedString> arguments) {
+  public boolean addVariableFile(IDynamicParsedString variableFile, List<? extends IDynamicParsedString> arguments) {
     if (this.variableFiles == null) {
       this.variableFiles = new HashMap<IDynamicParsedString, List<IDynamicParsedString>>();
       this.variableFilesIMM = Collections.unmodifiableMap(this.variableFiles);
@@ -176,7 +176,7 @@ public class RFEFileContents implements IRFEFileContents {
     return true;
   }
 
-  public boolean addMetadata(IParsedString key, List<IDynamicParsedString> values) {
+  public boolean addMetadata(IParsedString key, List<? extends IDynamicParsedString> values) {
     if (this.metadata == null) {
       this.metadata = new HashMap<IParsedString, List<IDynamicParsedString>>();
       this.metadataIMM = Collections.unmodifiableMap(this.metadata);

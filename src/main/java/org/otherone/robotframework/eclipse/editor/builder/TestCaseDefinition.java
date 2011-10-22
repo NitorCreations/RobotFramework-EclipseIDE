@@ -54,7 +54,7 @@ public class TestCaseDefinition extends KeywordSequence implements ITestCaseDefi
 
   // lists
 
-  public void setDeclaredStaticTags(List<IDynamicParsedString> declaredStaticTags) {
+  public void setDeclaredStaticTags(List<? extends IDynamicParsedString> declaredStaticTags) {
     this.declaredStaticTagsIMM = Collections.unmodifiableList(declaredStaticTags);
   }
 

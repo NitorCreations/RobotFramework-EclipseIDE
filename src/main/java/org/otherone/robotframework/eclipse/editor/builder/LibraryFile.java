@@ -40,7 +40,7 @@ public class LibraryFile implements ILibraryFile {
 
   // lists
 
-  public void setArguments(List<IDynamicParsedString> arguments) {
+  public void setArguments(List<? extends IDynamicParsedString> arguments) {
     this.argumentsIMM = Collections.unmodifiableList(arguments);
   }
 

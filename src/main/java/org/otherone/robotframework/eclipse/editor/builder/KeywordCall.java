@@ -35,7 +35,7 @@ public class KeywordCall implements IKeywordCall {
 
   // lists
 
-  public void setArguments(List<IDynamicParsedString> arguments) {
+  public void setArguments(List<? extends IDynamicParsedString> arguments) {
     this.argumentsIMM = Collections.unmodifiableList(arguments);
   }
 
