@@ -82,7 +82,7 @@ public interface IRFEFileContents {
 
   // Other tables
 
-  Map<IParsedString, IDynamicParsedString> getVariables();
+  Map<IParsedString, IVariableDefinition> getVariables();
 
   Map<IParsedString, ITestCaseDefinition> getTestCases();
 

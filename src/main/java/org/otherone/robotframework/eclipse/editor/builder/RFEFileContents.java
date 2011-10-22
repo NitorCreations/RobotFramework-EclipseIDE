@@ -29,6 +29,7 @@ import org.otherone.robotframework.eclipse.editor.builder.info.IParsedString;
 import org.otherone.robotframework.eclipse.editor.builder.info.IRFEFileContents;
 import org.otherone.robotframework.eclipse.editor.builder.info.ITestCaseDefinition;
 import org.otherone.robotframework.eclipse.editor.builder.info.IUserKeywordDefinition;
+import org.otherone.robotframework.eclipse.editor.builder.info.IVariableDefinition;
 
 public class RFEFileContents implements IRFEFileContents {
 
@@ -46,7 +47,7 @@ public class RFEFileContents implements IRFEFileContents {
   private IParsedKeywordString template;
   private IDynamicParsedString defaultTestTimeout;
   private IParsedString defaultTestTimeoutMessage;
-  private Map<IParsedString, IDynamicParsedString> variables;
+  private Map<IParsedString, IVariableDefinition> variables;
   private Map<IParsedString, ITestCaseDefinition> testCases;
   private Map<IDynamicParsedString, IUserKeywordDefinition> keywords;
 
@@ -55,7 +56,7 @@ public class RFEFileContents implements IRFEFileContents {
   private Map<IDynamicParsedString, List<IDynamicParsedString>> variableFilesIMM;
   private Map<IDynamicParsedString, ILibraryFile> libraryFilesIMM;
   private Map<IParsedString, List<IDynamicParsedString>> metadataIMM;
-  private Map<IParsedString, IDynamicParsedString> variablesIMM;
+  private Map<IParsedString, IVariableDefinition> variablesIMM;
   private Map<IParsedString, ITestCaseDefinition> testCasesIMM;
   private Map<IDynamicParsedString, IUserKeywordDefinition> keywordsIMM;
 
@@ -125,15 +126,15 @@ public class RFEFileContents implements IRFEFileContents {
     return true;
   }
 
-  public boolean addVariable(IParsedString key, IDynamicParsedString value) {
+  public boolean addVariable(IVariableDefinition variable) {
     if (this.variables == null) {
-      this.variables = new HashMap<IParsedString, IDynamicParsedString>();
+      this.variables = new HashMap<IParsedString, IVariableDefinition>();
       this.variablesIMM = Collections.unmodifiableMap(this.variables);
     }
-    if (this.variables.containsKey(key)) {
+    if (this.variables.containsKey(variable.getVariable())) {
       return false;
     }
-    this.variables.put(key, value);
+    this.variables.put(variable.getVariable(), variable);
     return true;
   }
 
@@ -260,7 +261,7 @@ public class RFEFileContents implements IRFEFileContents {
   }
 
   @Override
-  public Map<IParsedString, IDynamicParsedString> getVariables() {
+  public Map<IParsedString, IVariableDefinition> getVariables() {
     return variablesIMM;
   }
 
