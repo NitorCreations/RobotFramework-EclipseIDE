@@ -17,9 +17,7 @@ package org.otherone.robotframework.eclipse.editor.builder;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.otherone.robotframework.eclipse.editor.builder.info.IDynamicParsedString;
 import org.otherone.robotframework.eclipse.editor.builder.info.IKeywordCall;
@@ -29,13 +27,10 @@ import org.otherone.robotframework.eclipse.editor.builder.info.ITestCaseDefiniti
 
 public class TestCaseDefinition extends KeywordSequence implements ITestCaseDefinition {
 
-  private Set<String> declaredStaticTagsKeys;
-  private List<IDynamicParsedString> declaredStaticTags;
+  private List<IDynamicParsedString> declaredStaticTagsIMM;
   private IKeywordCall testSetup;
   private IKeywordCall testTeardown;
   private IParsedKeywordString template;
-
-  private List<IDynamicParsedString> declaredStaticTagsIMM;
 
   private final IRFEFileContents fileContents;
 
@@ -59,16 +54,8 @@ public class TestCaseDefinition extends KeywordSequence implements ITestCaseDefi
 
   // lists
 
-  public boolean addDeclaredStaticTag(IDynamicParsedString declaredStaticTag) {
-    if (this.declaredStaticTags == null) {
-      this.declaredStaticTagsKeys = new HashSet<String>();
-      this.declaredStaticTags = new ArrayList<IDynamicParsedString>();
-      this.declaredStaticTagsIMM = Collections.unmodifiableList(this.declaredStaticTags);
-    }
-    if (declaredStaticTagsKeys.add(declaredStaticTag.getValue())) {
-      return false;
-    }
-    return this.declaredStaticTags.add(declaredStaticTag);
+  public void setDeclaredStaticTags(List<IDynamicParsedString> declaredStaticTags) {
+    this.declaredStaticTagsIMM = Collections.unmodifiableList(declaredStaticTags);
   }
 
   // getters

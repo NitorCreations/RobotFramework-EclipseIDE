@@ -15,7 +15,6 @@
  */
 package org.otherone.robotframework.eclipse.editor.builder;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,8 +26,6 @@ public class LibraryFile implements ILibraryFile {
 
   private IDynamicParsedKeywordString realName;
   private IDynamicParsedKeywordString customName;
-  private List<IDynamicParsedString> arguments;
-
   private List<IDynamicParsedString> argumentsIMM;
 
   // single
@@ -43,12 +40,8 @@ public class LibraryFile implements ILibraryFile {
 
   // lists
 
-  public void addArgument(IDynamicParsedString argument) {
-    if (this.arguments == null) {
-      this.arguments = new ArrayList<IDynamicParsedString>();
-      this.argumentsIMM = Collections.unmodifiableList(this.arguments);
-    }
-    this.arguments.add(argument);
+  public void setArguments(List<IDynamicParsedString> arguments) {
+    this.argumentsIMM = Collections.unmodifiableList(arguments);
   }
 
   // interface-specified getters

@@ -15,7 +15,6 @@
  */
 package org.otherone.robotframework.eclipse.editor.builder;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,11 +25,9 @@ import org.otherone.robotframework.eclipse.editor.builder.info.IKeywordCall;
 public class KeywordCall implements IKeywordCall {
 
   private IDynamicParsedKeywordString keyword;
-  private List<IDynamicParsedString> arguments;
-
   private List<IDynamicParsedString> argumentsIMM;
 
-  // single
+  // singles
 
   public void setKeyword(IDynamicParsedKeywordString keyword) {
     this.keyword = keyword;
@@ -38,15 +35,11 @@ public class KeywordCall implements IKeywordCall {
 
   // lists
 
-  public void addArgument(IDynamicParsedString argument) {
-    if (this.arguments == null) {
-      this.arguments = new ArrayList<IDynamicParsedString>();
-      this.argumentsIMM = Collections.unmodifiableList(this.arguments);
-    }
-    this.arguments.add(argument);
+  public void setArguments(List<IDynamicParsedString> arguments) {
+    this.argumentsIMM = Collections.unmodifiableList(arguments);
   }
 
-  // interface-specified getters
+  // getters
 
   @Override
   public IDynamicParsedKeywordString getKeyword() {

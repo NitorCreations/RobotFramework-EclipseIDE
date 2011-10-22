@@ -15,11 +15,8 @@
  */
 package org.otherone.robotframework.eclipse.editor.builder;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.otherone.robotframework.eclipse.editor.builder.info.IDynamicParsedString;
 import org.otherone.robotframework.eclipse.editor.builder.info.IKeywordCall;
@@ -27,13 +24,9 @@ import org.otherone.robotframework.eclipse.editor.builder.info.IUserKeywordDefin
 
 public class UserKeywordDefinition extends KeywordSequence implements IUserKeywordDefinition {
 
-  private Set<String> argumentsKeys;
-  private List<IDynamicParsedString> arguments;
-  private List<IDynamicParsedString> returnValues;
-  private IKeywordCall keywordTeardown;
-
   private List<IDynamicParsedString> argumentsIMM;
   private List<IDynamicParsedString> returnValuesIMM;
+  private IKeywordCall keywordTeardown;
 
   // singles
 
@@ -43,24 +36,12 @@ public class UserKeywordDefinition extends KeywordSequence implements IUserKeywo
 
   // lists
 
-  public boolean addArgument(IDynamicParsedString argument) {
-    if (this.arguments == null) {
-      this.argumentsKeys = new HashSet<String>();
-      this.arguments = new ArrayList<IDynamicParsedString>();
-      this.argumentsIMM = Collections.unmodifiableList(this.arguments);
-    }
-    if (argumentsKeys.add(argument.getParts().get(0).getValue())) {
-      return false;
-    }
-    return this.arguments.add(argument);
+  public void setArguments(List<? extends IDynamicParsedString> arguments) {
+    this.argumentsIMM = Collections.unmodifiableList(arguments);
   }
 
-  public void addReturnValue(IDynamicParsedString returnValue) {
-    if (this.returnValues == null) {
-      this.returnValues = new ArrayList<IDynamicParsedString>();
-      this.returnValuesIMM = Collections.unmodifiableList(this.returnValues);
-    }
-    this.returnValues.add(returnValue);
+  public void setReturnValues(List<? extends IDynamicParsedString> returnValues) {
+    this.returnValuesIMM = Collections.unmodifiableList(returnValues);
   }
 
   // getters

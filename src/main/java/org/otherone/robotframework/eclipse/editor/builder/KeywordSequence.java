@@ -27,12 +27,12 @@ import org.otherone.robotframework.eclipse.editor.builder.info.IParsedString;
 public abstract class KeywordSequence implements IKeywordSequence {
 
   private IDynamicParsedString sequenceName;
-  private List<IDynamicParsedString> documentation;
+  private List<IDynamicParsedString> documentationIMM;
   private IDynamicParsedString timeout;
   private IParsedString timeoutMessage;
   private List<IKeywordCall> keywordCalls;
 
-  private List<IDynamicParsedString> documentationIMM;
+  // immutable versions of above returned by getters
   private List<IKeywordCall> keywordCallsIMM;
 
   // singles
@@ -51,12 +51,8 @@ public abstract class KeywordSequence implements IKeywordSequence {
 
   // lists
 
-  public void addDocumentation(IDynamicParsedString documentation) {
-    if (this.documentation == null) {
-      this.documentation = new ArrayList<IDynamicParsedString>();
-      this.documentationIMM = Collections.unmodifiableList(this.documentation);
-    }
-    this.documentation.add(documentation);
+  public void setDocumentation(List<IDynamicParsedString> documentation) {
+    this.documentationIMM = Collections.unmodifiableList(documentation);
   }
 
   public void addKeywordCall(IKeywordCall keywordCall) {

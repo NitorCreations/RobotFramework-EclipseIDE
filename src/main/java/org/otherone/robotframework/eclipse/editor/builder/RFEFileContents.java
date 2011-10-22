@@ -37,10 +37,10 @@ public class RFEFileContents implements IRFEFileContents {
   private Map<IDynamicParsedString, ILibraryFile> libraryFiles;
   private IKeywordCall suiteSetup;
   private IKeywordCall suiteTeardown;
-  private List<IDynamicParsedString> documentation;
+  private List<IDynamicParsedString> documentationIMM;
   private Map<IParsedString, List<IDynamicParsedString>> metadata;
-  private List<IDynamicParsedString> forcedTestTags;
-  private List<IDynamicParsedString> defaultTestTags;
+  private List<IDynamicParsedString> forcedTestTagsIMM;
+  private List<IDynamicParsedString> defaultTestTagsIMM;
   private IKeywordCall defaultTestSetup;
   private IKeywordCall defaultTestTeardown;
   private IParsedKeywordString template;
@@ -50,19 +50,16 @@ public class RFEFileContents implements IRFEFileContents {
   private Map<IParsedString, ITestCaseDefinition> testCases;
   private Map<IDynamicParsedString, IUserKeywordDefinition> keywords;
 
-  // immutable versions returned by getters
+  // immutable versions of above returned by getters
   private List<IDynamicParsedString> resourceFilesIMM;
   private Map<IDynamicParsedString, List<IDynamicParsedString>> variableFilesIMM;
   private Map<IDynamicParsedString, ILibraryFile> libraryFilesIMM;
-  private List<IDynamicParsedString> documentationIMM;
   private Map<IParsedString, List<IDynamicParsedString>> metadataIMM;
-  private List<IDynamicParsedString> forcedTestTagsIMM;
-  private List<IDynamicParsedString> defaultTestTagsIMM;
   private Map<IParsedString, IDynamicParsedString> variablesIMM;
   private Map<IParsedString, ITestCaseDefinition> testCasesIMM;
   private Map<IDynamicParsedString, IUserKeywordDefinition> keywordsIMM;
 
-  // Single
+  // singles
 
   public void setSuiteSetup(IKeywordCall suiteSetup) {
     this.suiteSetup = suiteSetup;
@@ -92,7 +89,7 @@ public class RFEFileContents implements IRFEFileContents {
     this.defaultTestTimeoutMessage = defaultTestTimeoutMessage;
   }
 
-  // Lists
+  // lists
 
   public boolean addResourceFile(IDynamicParsedString resourceFile) {
     if (this.resourceFiles == null) {
@@ -102,31 +99,19 @@ public class RFEFileContents implements IRFEFileContents {
     return this.resourceFiles.add(resourceFile);
   }
 
-  public void addDocumentation(IDynamicParsedString documentation) {
-    if (this.documentation == null) {
-      this.documentation = new ArrayList<IDynamicParsedString>();
-      this.documentationIMM = Collections.unmodifiableList(this.documentation);
-    }
-    this.documentation.add(documentation);
+  public void setDocumentation(List<IDynamicParsedString> documentation) {
+    this.documentationIMM = Collections.unmodifiableList(documentation);
   }
 
-  public boolean addForcedTestTag(IDynamicParsedString forcedTestTag) {
-    if (this.forcedTestTags == null) {
-      this.forcedTestTags = new ArrayList<IDynamicParsedString>();
-      this.forcedTestTagsIMM = Collections.unmodifiableList(this.forcedTestTags);
-    }
-    return this.forcedTestTags.add(forcedTestTag);
+  public void setForcedTestTags(List<IDynamicParsedString> forcedTestTags) {
+    this.forcedTestTagsIMM = Collections.unmodifiableList(forcedTestTags);
   }
 
-  public boolean addDefaultTestTag(IDynamicParsedString defaultTestTag) {
-    if (this.defaultTestTags == null) {
-      this.defaultTestTags = new ArrayList<IDynamicParsedString>();
-      this.defaultTestTagsIMM = Collections.unmodifiableList(this.defaultTestTags);
-    }
-    return this.defaultTestTags.add(defaultTestTag);
+  public void setDefaultTestTags(List<IDynamicParsedString> defaultTestTags) {
+    this.defaultTestTagsIMM = Collections.unmodifiableList(defaultTestTags);
   }
 
-  // Maps with single values
+  // maps with single values
 
   public boolean addLibraryFile(ILibraryFile libraryFile) {
     if (this.libraryFiles == null) {
@@ -176,7 +161,7 @@ public class RFEFileContents implements IRFEFileContents {
     return true;
   }
 
-  // Maps with list values
+  // maps with list values
 
   public boolean addVariableFile(IDynamicParsedString variableFile, List<IDynamicParsedString> arguments) {
     if (this.variableFiles == null) {
@@ -202,7 +187,7 @@ public class RFEFileContents implements IRFEFileContents {
     return true;
   }
 
-  // interface-specified getters
+  // getters
 
   @Override
   public List<IDynamicParsedString> getResourceFiles() {
