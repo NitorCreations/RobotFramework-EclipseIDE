@@ -89,4 +89,9 @@ public class ParsedString implements IParsedKeywordString {
     return value.equals(obj);
   }
 
+  DynamicParsedString splitRegularArgument() {
+    // TODO implement
+    return new DynamicParsedString(value, argCharPos, null);
+  }
+
 }

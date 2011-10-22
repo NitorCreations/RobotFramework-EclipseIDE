@@ -61,11 +61,14 @@ public class RFEParser {
   private final MarkerCreator markerCreator;
 
   private State state = State.IGNORE;
-  String testcaseOrKeywordBeingParsed;
+  final RFEFileContents fc = new RFEFileContents();
+  KeywordSequence testcaseOrKeywordBeingParsed;
+  List<DynamicParsedString> listToContinue;
 
-  void setState(State newState, String testcaseOrKeywordBeingParsed) {
+  void setState(State newState, KeywordSequence testcaseOrKeywordBeingParsed, List<DynamicParsedString> listToContinue) {
     state = newState;
     this.testcaseOrKeywordBeingParsed = testcaseOrKeywordBeingParsed;
+    this.listToContinue = listToContinue;
   }
 
   public static interface MarkerCreator {
@@ -108,28 +111,115 @@ public class RFEParser {
         }
         ParsedString cmdArg = info.arguments.get(0);
         String cmd = cmdArg.getValue();
-        if (cmd.equals("Library")) {
-          if (info.arguments.size() < 2) {
-            addError(info, "Missing argument, e.g. which library to load", cmdArg.getArgCharPos(), cmdArg.getArgEndCharPos());
-            return;
-          }
-          ParsedString library = info.arguments.get(1);
-          System.out.println("Load library " + library);
-          warnIgnoreUnusedArgs(info, 2);
-          return;
+        if (cmd.endsWith(":")) {
+          cmd = cmd.substring(0, cmd.length() - 1);
         }
         if (cmd.equals("Resource")) {
-          if (info.arguments.size() < 2) {
-            addError(info, "Missing argument, e.g. which library to load", cmdArg.getArgCharPos(), cmdArg.getArgEndCharPos());
-            return;
-          }
-          ParsedString resource = info.arguments.get(1);
-          System.out.println("Load resource " + resource);
-          warnIgnoreUnusedArgs(info, 2);
+          parseResourceFile(info, cmdArg);
+        } else if (cmd.equals("Variables")) {
+          parseVariableFile(info, cmdArg);
+        } else if (cmd.equals("Library")) {
+          parseLibraryFile(info, cmdArg);
+        } else if (cmd.equals("Suite Setup")) {
+          parseSuiteSetup(info, cmdArg);
+        } else if (cmd.equals("Suite Teardown")) {
+          parseSuiteTeardown(info, cmdArg);
+        } else if (cmd.equals("Documentation")) {
+          parseDocumentation(info, cmdArg);
+        } else if (cmd.equals("Metadata")) {
+          parseMetadata(info, cmdArg);
+        } else if (cmd.equals("Force Tags")) {
+          parseForceTags(info, cmdArg);
+        } else if (cmd.equals("Default Tags")) {
+          parseDefaultTags(info, cmdArg);
+        } else if (cmd.equals("Test Setup")) {
+          parseTestSetup(info, cmdArg);
+        } else if (cmd.equals("Test Teardown")) {
+          parseTestTeardown(info, cmdArg);
+        } else if (cmd.equals("Test Template")) {
+          parseTestTemplate(info, cmdArg);
+        } else if (cmd.equals("Test Timeout")) {
+          parseTestTimeout(info, cmdArg);
+        } else {
+          warnIgnoredLine(info, SEVERITY_IGNORED_LINE_IN_SETTING_TABLE);
+        }
+      }
+
+      private void parseResourceFile(Info info, ParsedString cmdArg) throws CoreException {
+        if (info.arguments.size() < 2) {
+          addError(info, "Missing argument, e.g. which resource file to load", cmdArg.getArgCharPos(), cmdArg.getArgEndCharPos());
           return;
         }
-        warnIgnoredLine(info, SEVERITY_IGNORED_LINE_IN_SETTING_TABLE);
+        ParsedString resource = info.arguments.get(1);
+        System.out.println("Load resource " + resource);
+        boolean dupe = info.parser.fc.addResourceFile(resource.splitRegularArgument());
+        if (dupe) {
+          addWarning(info, "Duplicate resource load", resource.getArgCharPos(), resource.getArgEndCharPos());
+        }
+        warnIgnoreUnusedArgs(info, 2);
+        return;
       }
+
+      private void parseVariableFile(Info info, ParsedString cmdArg) throws CoreException {
+        if (info.arguments.size() < 2) {
+          addError(info, "Missing argument, e.g. which variable file to load", cmdArg.getArgCharPos(), cmdArg.getArgEndCharPos());
+          return;
+        }
+        ParsedString library = info.arguments.get(1);
+        System.out.println("Load library " + library);
+        return;
+      }
+
+      private void parseLibraryFile(Info info, ParsedString cmdArg) throws CoreException {
+        if (info.arguments.size() < 2) {
+          addError(info, "Missing argument, e.g. which library to load", cmdArg.getArgCharPos(), cmdArg.getArgEndCharPos());
+          return;
+        }
+        ParsedString library = info.arguments.get(1);
+        System.out.println("Load library " + library);
+        return;
+      }
+
+      private void parseSuiteSetup(Info info, ParsedString cmdArg) throws CoreException {
+        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+      }
+
+      private void parseSuiteTeardown(Info info, ParsedString cmdArg) throws CoreException {
+        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+      }
+
+      private void parseDocumentation(Info info, ParsedString cmdArg) throws CoreException {
+        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+      }
+
+      private void parseMetadata(Info info, ParsedString cmdArg) throws CoreException {
+        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+      }
+
+      private void parseForceTags(Info info, ParsedString cmdArg) throws CoreException {
+        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+      }
+
+      private void parseDefaultTags(Info info, ParsedString cmdArg) throws CoreException {
+        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+      }
+
+      private void parseTestSetup(Info info, ParsedString cmdArg) throws CoreException {
+        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+      }
+
+      private void parseTestTeardown(Info info, ParsedString cmdArg) throws CoreException {
+        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+      }
+
+      private void parseTestTemplate(Info info, ParsedString cmdArg) throws CoreException {
+        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+      }
+
+      private void parseTestTimeout(Info info, ParsedString cmdArg) throws CoreException {
+        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+      }
+
     },
     VARIABLE_TABLE {
       @Override
@@ -160,7 +250,7 @@ public class RFEParser {
           // warnIgnoredLine(info, IMarker.SEVERITY_ERROR);
           return;
         }
-        info.parser.setState(TESTCASE_TABLE_ACTIVE, info.arguments.get(0).getValue());
+        info.parser.setState(TESTCASE_TABLE_ACTIVE, null, null);
       }
     },
     TESTCASE_TABLE_ACTIVE {
@@ -174,7 +264,7 @@ public class RFEParser {
             // warnIgnoredLine(info, IMarker.SEVERITY_ERROR);
             return;
           }
-          info.parser.setState(TESTCASE_TABLE_ACTIVE, info.arguments.get(0).getValue());
+          info.parser.setState(TESTCASE_TABLE_ACTIVE, null, null);
           return;
         }
         for (int i = 1; i < info.arguments.size(); ++i) {
@@ -219,7 +309,7 @@ public class RFEParser {
             + lastPos);
         return true;
       }
-      info.parser.setState(nextState, null);
+      info.parser.setState(nextState, null, null);
       return true;
     }
 

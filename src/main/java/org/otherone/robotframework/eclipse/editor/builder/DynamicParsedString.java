@@ -27,17 +27,14 @@ public class DynamicParsedString extends ParsedString implements IDynamicParsedK
 
   /**
    * @param parts
-   *          automatically wrapped using {@link Collections#unmodifiableList(List)}
+   *          non-null automatically wrapped using {@link Collections#unmodifiableList(List)}
    */
   public DynamicParsedString(String value, int argCharPos, List<? extends IDynamicParsedString> parts) {
     super(value, argCharPos);
-    if (parts == null) {
-      throw new NullPointerException("parts");
-    }
-    if (parts.isEmpty()) {
+    if (parts != null && parts.isEmpty()) {
       throw new IllegalArgumentException("parts list is empty");
     }
-    this.parts = Collections.unmodifiableList(parts);
+    this.parts = parts == null ? null : Collections.unmodifiableList(parts);
   }
 
   @Override
@@ -47,7 +44,7 @@ public class DynamicParsedString extends ParsedString implements IDynamicParsedK
 
   @Override
   public String toString() {
-    return parts.toString();
+    return parts == null ? super.toString() : parts.toString();
   }
 
 }
