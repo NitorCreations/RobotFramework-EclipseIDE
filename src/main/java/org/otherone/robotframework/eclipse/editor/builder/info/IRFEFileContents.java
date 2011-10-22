@@ -15,7 +15,6 @@
  */
 package org.otherone.robotframework.eclipse.editor.builder.info;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,62 +24,9 @@ import java.util.Map;
  */
 public interface IRFEFileContents {
 
-  // TODO check the IParsedString:s below, could some of them be dynamic ?
+  // TODO check the IParsedString:s in all interfaces, could some of them be dynamic ?
 
-  // Setting table, suite stuff
-
-  List<IDynamicParsedString> getResourceFiles();
-
-  Map<IDynamicParsedString, List<IDynamicParsedString>> getVariableFiles();
-
-  /**
-   * Libraries to load, mapping to their arguments. TODO a library can be loaded many times with
-   * different names (see section 2.4.2)
-   */
-  Map<IDynamicParsedString, ILibraryFile> getLibraryFiles();
-
-  @NotAllowedInResourceFiles
-  IKeywordCall getSuiteSetup();
-
-  @NotAllowedInResourceFiles
-  IKeywordCall getSuiteTeardown();
-
-  List<IDynamicParsedString> getDocumentation();
-
-  @NotAllowedInResourceFiles
-  Map<IParsedString, List<IDynamicParsedString>> getMetadata();
-
-  // Setting table, test case stuff
-
-  @NotAllowedInResourceFiles
-  List<IDynamicParsedString> getForcedTestTags();
-
-  @NotAllowedInResourceFiles
-  @NotAllowedInTestSuiteInitializationFiles("2.5")
-  List<IDynamicParsedString> getDefaultTestTags();
-
-  @NotAllowedInResourceFiles
-  IKeywordCall getDefaultTestSetup();
-
-  @NotAllowedInResourceFiles
-  IKeywordCall getDefaultTestTeardown();
-
-  @NotAllowedInResourceFiles
-  @NotAllowedInTestSuiteInitializationFiles("2.5")
-  IParsedKeywordString getTemplate(); // not dynamic
-
-  /**
-   * Since 2.5.6, the special keyword "NONE" can be used.
-   */
-  @NotAllowedInResourceFiles
-  @NotAllowedInTestSuiteInitializationFiles("2.5")
-  IDynamicParsedString getDefaultTestTimeout();
-
-  @NotAllowedInResourceFiles
-  @NotAllowedInTestSuiteInitializationFiles("2.5")
-  IParsedString getDefaultTestTimeoutMessage();
-
-  // Other tables
+  ISettings getSettings();
 
   Map<IParsedString, IVariableDefinition> getVariables();
 

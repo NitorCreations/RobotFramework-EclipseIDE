@@ -67,25 +67,25 @@ public class TestCaseDefinition extends KeywordSequence implements ITestCaseDefi
 
   @Override
   public List<IDynamicParsedString> getDeclaredAndInheritedStaticTags() {
-    if (fileContents.getForcedTestTags() == null) {
+    if (fileContents.getSettings().getForcedTestTags() == null) {
       if (declaredStaticTagsIMM != null) {
         return declaredStaticTagsIMM;
       }
-      return fileContents.getDefaultTestTags();
+      return fileContents.getSettings().getDefaultTestTags();
     }
     if (declaredStaticTagsIMM != null) {
       List<IDynamicParsedString> declaredAndInheritedStaticTags = new ArrayList<IDynamicParsedString>();
-      declaredAndInheritedStaticTags.addAll(fileContents.getForcedTestTags());
+      declaredAndInheritedStaticTags.addAll(fileContents.getSettings().getForcedTestTags());
       declaredAndInheritedStaticTags.addAll(declaredStaticTagsIMM);
       return declaredAndInheritedStaticTags;
     }
-    if (fileContents.getDefaultTestTags() != null) {
+    if (fileContents.getSettings().getDefaultTestTags() != null) {
       List<IDynamicParsedString> declaredAndInheritedStaticTags = new ArrayList<IDynamicParsedString>();
-      declaredAndInheritedStaticTags.addAll(fileContents.getForcedTestTags());
-      declaredStaticTagsIMM.addAll(fileContents.getDefaultTestTags());
+      declaredAndInheritedStaticTags.addAll(fileContents.getSettings().getForcedTestTags());
+      declaredStaticTagsIMM.addAll(fileContents.getSettings().getDefaultTestTags());
       return declaredAndInheritedStaticTags;
     }
-    return fileContents.getForcedTestTags();
+    return fileContents.getSettings().getForcedTestTags();
   }
 
   @Override

@@ -152,7 +152,7 @@ public class RFEParser {
         }
         ParsedString resource = info.arguments.get(1);
         System.out.println("Load resource " + resource);
-        boolean dupe = info.parser.fc.addResourceFile(resource.splitRegularArgument());
+        boolean dupe = info.parser.fc.getSettingsInt().addResourceFile(resource.splitRegularArgument());
         if (dupe) {
           addWarning(info, "Duplicate resource load", resource.getArgCharPos(), resource.getArgEndCharPos());
         }
