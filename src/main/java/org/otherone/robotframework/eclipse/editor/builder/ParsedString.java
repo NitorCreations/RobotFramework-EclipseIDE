@@ -33,9 +33,6 @@ public class ParsedString implements IParsedKeywordString {
     if (value == null) {
       throw new NullPointerException("value");
     }
-    if (value.isEmpty()) {
-      throw new IllegalArgumentException("value is empty");
-    }
     if (argCharPos < 0) {
       throw new IllegalArgumentException("argCharPos < 0");
     }
