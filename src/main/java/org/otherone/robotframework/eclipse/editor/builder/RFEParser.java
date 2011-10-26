@@ -278,7 +278,15 @@ public class RFEParser {
         if (tryParseTableSwitch(info)) {
           return;
         }
-
+        if (info.arguments.get(0).getValue().isEmpty()) {
+          warnIgnoredLine(info, SEVERITY_IGNORED_LINE_OUTSIDE_RECOGNIZED_TESTCASE_OR_KEYWORD);
+          return;
+        }
+        if (!tryParseArgument(info, 0, "keyword name")) {
+          // warnIgnoredLine(info, IMarker.SEVERITY_ERROR);
+          return;
+        }
+        info.parser.setState(KEYWORD_TABLE_ACTIVE, null, null);
       }
     },
     KEYWORD_TABLE_ACTIVE {
@@ -321,9 +329,9 @@ public class RFEParser {
       String var = varArg.getValue();
       if (!var.startsWith("${")) {
         if (!var.endsWith("}")) {
-          addError(info, "Variable must start with ${ and end with }", varArg.getArgCharPos(), varArg.getArgEndCharPos());
+          addError(info, "Variable must start with ${ or @{ and end with }", varArg.getArgCharPos(), varArg.getArgEndCharPos());
         } else {
-          addError(info, "Variable must start with ${", varArg.getArgCharPos(), varArg.getArgEndCharPos());
+          addError(info, "Variable must start with ${ or @{", varArg.getArgCharPos(), varArg.getArgEndCharPos());
         }
         return false;
       }
@@ -333,6 +341,7 @@ public class RFEParser {
       }
       int closingPos = var.indexOf('}', 2);
       if (closingPos != var.length() - 1) {
+        // TODO this is wrong, recursion is actually allowed
         addError(info, "Variable name must not contain }", varArg.getArgCharPos() + closingPos, varArg.getArgCharPos() + closingPos + 1);
         return false;
       }
