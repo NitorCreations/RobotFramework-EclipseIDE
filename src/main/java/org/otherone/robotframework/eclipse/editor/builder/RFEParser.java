@@ -462,9 +462,9 @@ public class RFEParser {
         try {
           parseLine(line, lineNo, charPos);
         } catch (CoreException e) {
-          throw new RuntimeException("Internal parser error on line " + lineNo, e);
+          throw new RuntimeException("Error when parsing line " + lineNo + ": '" + line + "'", e);
         } catch (RuntimeException e) {
-          throw new RuntimeException("Internal parser error on line " + lineNo, e);
+          throw new RuntimeException("Internal error when parsing line " + lineNo + ": '" + line + "'", e);
         }
         ++lineNo;
         charPos = contents.getCharPos();
@@ -472,7 +472,7 @@ public class RFEParser {
 
       // TODO store results
     } catch (Exception e) {
-      throw new RuntimeException("Error parsing robot file", e);
+      throw new RuntimeException("Error parsing robot file " + filename, e);
     } finally {
       try {
         filestream.close();
