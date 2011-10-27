@@ -13,23 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder.info;
+package org.otherone.robotframework.eclipse.editor.structure.api;
 
 import java.util.List;
 
 
-public interface IKeywordSequence {
-
-  IDynamicParsedString getSequenceName(); // TODO just IPositionedString for test cases?
-
-  List<IDynamicParsedString> getDocumentation();
+public interface IUserKeywordDefinition extends IKeywordSequence {
 
   /**
-   * Since 2.5.6, the special keyword "NONE" can be used.
+   * When arguments have default values, {@link IDynamicParsedString#getParts()} returns two
+   * parts, "${argument}" and "=value".
    */
-  IDynamicParsedString getTimeout();
+  List<IDynamicParsedString> getArguments();
 
-  IParsedString getTimeoutMessage();
+  List<IDynamicParsedString> getReturnValues();
 
-  List<IKeywordCall> getKeywordCalls();
+  @AvailableFrom("2.6")
+  IKeywordCall getKeywordTeardown();
+
 }

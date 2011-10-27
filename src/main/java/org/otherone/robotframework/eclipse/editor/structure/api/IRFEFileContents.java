@@ -13,14 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder.info;
+package org.otherone.robotframework.eclipse.editor.structure.api;
 
-import java.util.List;
+import java.util.Map;
 
-public interface IVariableDefinition {
+/**
+ * This interface provides bean-ish access to the parsed structure of a robot file.
+ * 
+ * @author xkr47
+ */
+public interface IRFEFileContents {
 
-  IParsedString getVariable();
+  // TODO check the IParsedString:s in all interfaces, could some of them be dynamic ?
 
-  List<IDynamicParsedString> getValues();
+  ISettings getSettings();
+
+  Map<IParsedString, IVariableDefinition> getVariables();
+
+  Map<IParsedString, ITestCaseDefinition> getTestCases();
+
+  Map<IDynamicParsedString, IUserKeywordDefinition> getKeywords();
 
 }

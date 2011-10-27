@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder.info;
+package org.otherone.robotframework.eclipse.editor.structure.api;
 
 import java.util.List;
 
-public interface ILibraryFile {
-  IDynamicParsedString getRealName();
-
-  IDynamicParsedString getCustomName();
+public interface IKeywordCall {
+  /**
+   * Returns null if a template keyword is active, except if the keyword is ":FOR".
+   */
+  IDynamicParsedKeywordString getKeyword();
 
   List<IDynamicParsedString> getArguments();
 }

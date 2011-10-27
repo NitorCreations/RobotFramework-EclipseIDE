@@ -13,22 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder.info;
+package org.otherone.robotframework.eclipse.editor.structure.api;
 
-import java.util.List;
-
-
-public interface IUserKeywordDefinition extends IKeywordSequence {
-
-  /**
-   * When arguments have default values, {@link IDynamicParsedString#getParts()} returns two
-   * parts, "${argument}" and "=value".
-   */
-  List<IDynamicParsedString> getArguments();
-
-  List<IDynamicParsedString> getReturnValues();
-
-  @AvailableFrom("2.6")
-  IKeywordCall getKeywordTeardown();
-
+public interface IDynamicParsedKeywordString extends IDynamicParsedString, IKeywordString {
 }

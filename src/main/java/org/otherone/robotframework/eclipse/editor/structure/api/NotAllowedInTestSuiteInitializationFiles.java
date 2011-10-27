@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder.info;
+package org.otherone.robotframework.eclipse.editor.structure.api;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder;
+package org.otherone.robotframework.eclipse.editor.structure;
 
-import org.otherone.robotframework.eclipse.editor.builder.info.IParsedKeywordString;
+import org.otherone.robotframework.eclipse.editor.structure.api.IParsedKeywordString;
 
 /**
  * An immutable implementation of all the I*String interfaces in the ...builder.info package.
@@ -86,7 +86,7 @@ public class ParsedString implements IParsedKeywordString {
     return value.equals(obj);
   }
 
-  DynamicParsedString splitRegularArgument() {
+  public DynamicParsedString splitRegularArgument() {
     // TODO implement
     return new DynamicParsedString(value, argCharPos, null);
   }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder;
+package org.otherone.robotframework.eclipse.editor.structure;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,12 +21,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.otherone.robotframework.eclipse.editor.builder.info.IDynamicParsedString;
-import org.otherone.robotframework.eclipse.editor.builder.info.IKeywordCall;
-import org.otherone.robotframework.eclipse.editor.builder.info.ILibraryFile;
-import org.otherone.robotframework.eclipse.editor.builder.info.IParsedKeywordString;
-import org.otherone.robotframework.eclipse.editor.builder.info.IParsedString;
-import org.otherone.robotframework.eclipse.editor.builder.info.ISettings;
+import org.otherone.robotframework.eclipse.editor.structure.api.IDynamicParsedString;
+import org.otherone.robotframework.eclipse.editor.structure.api.IKeywordCall;
+import org.otherone.robotframework.eclipse.editor.structure.api.ILibraryFile;
+import org.otherone.robotframework.eclipse.editor.structure.api.IParsedKeywordString;
+import org.otherone.robotframework.eclipse.editor.structure.api.IParsedString;
+import org.otherone.robotframework.eclipse.editor.structure.api.ISettings;
 
 public class Settings implements ISettings {
 

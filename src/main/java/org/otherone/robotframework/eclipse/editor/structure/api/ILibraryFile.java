@@ -13,7 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder.info;
+package org.otherone.robotframework.eclipse.editor.structure.api;
 
-public interface IDynamicParsedKeywordString extends IDynamicParsedString, IKeywordString {
+import java.util.List;
+
+public interface ILibraryFile {
+  IDynamicParsedString getRealName();
+
+  IDynamicParsedString getCustomName();
+
+  List<IDynamicParsedString> getArguments();
 }

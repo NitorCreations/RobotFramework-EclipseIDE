@@ -13,7 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder.info;
+package org.otherone.robotframework.eclipse.editor.structure.api;
 
-public interface IParsedKeywordString extends IParsedString, IKeywordString {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * This is used to tag methods whose return value should always be null for robot files prior to a
+ * specific version.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface AvailableFrom {
+  /**
+   * @return since which Robot Framework version is it available?
+   */
+  String value();
 }

@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder;
+package org.otherone.robotframework.eclipse.editor.builder.parser;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.otherone.robotframework.eclipse.editor.structure.ParsedString;
 
 public class TxtArgumentSplitter {
 

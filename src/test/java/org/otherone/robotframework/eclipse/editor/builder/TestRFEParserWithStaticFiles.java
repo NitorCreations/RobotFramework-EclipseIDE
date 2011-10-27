@@ -28,7 +28,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.otherone.robotframework.eclipse.editor.builder.RFEParser.MarkerCreator;
+import org.otherone.robotframework.eclipse.editor.builder.parser.RFEParser;
+import org.otherone.robotframework.eclipse.editor.builder.parser.RFEParser.MarkerCreator;
 
 @RunWith(Parameterized.class)
 public class TestRFEParserWithStaticFiles {

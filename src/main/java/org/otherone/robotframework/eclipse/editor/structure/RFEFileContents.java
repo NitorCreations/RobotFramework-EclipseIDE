@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder;
+package org.otherone.robotframework.eclipse.editor.structure;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.otherone.robotframework.eclipse.editor.builder.info.IDynamicParsedString;
-import org.otherone.robotframework.eclipse.editor.builder.info.IParsedString;
-import org.otherone.robotframework.eclipse.editor.builder.info.IRFEFileContents;
-import org.otherone.robotframework.eclipse.editor.builder.info.ISettings;
-import org.otherone.robotframework.eclipse.editor.builder.info.ITestCaseDefinition;
-import org.otherone.robotframework.eclipse.editor.builder.info.IUserKeywordDefinition;
-import org.otherone.robotframework.eclipse.editor.builder.info.IVariableDefinition;
+import org.otherone.robotframework.eclipse.editor.structure.api.IDynamicParsedString;
+import org.otherone.robotframework.eclipse.editor.structure.api.IParsedString;
+import org.otherone.robotframework.eclipse.editor.structure.api.IRFEFileContents;
+import org.otherone.robotframework.eclipse.editor.structure.api.ISettings;
+import org.otherone.robotframework.eclipse.editor.structure.api.ITestCaseDefinition;
+import org.otherone.robotframework.eclipse.editor.structure.api.IUserKeywordDefinition;
+import org.otherone.robotframework.eclipse.editor.structure.api.IVariableDefinition;
 
 public class RFEFileContents implements IRFEFileContents {
 

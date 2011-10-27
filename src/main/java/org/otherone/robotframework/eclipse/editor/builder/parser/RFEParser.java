@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder;
+package org.otherone.robotframework.eclipse.editor.builder.parser;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,6 +34,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.otherone.robotframework.eclipse.editor.builder.CountingLineReader;
+import org.otherone.robotframework.eclipse.editor.builder.RFEBuilder;
+import org.otherone.robotframework.eclipse.editor.structure.DynamicParsedString;
+import org.otherone.robotframework.eclipse.editor.structure.KeywordSequence;
+import org.otherone.robotframework.eclipse.editor.structure.ParsedString;
+import org.otherone.robotframework.eclipse.editor.structure.RFEFileContents;
 
 /*
  * TODO support the line continuation sequence "..."

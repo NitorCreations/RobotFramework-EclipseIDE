@@ -13,24 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder;
+package org.otherone.robotframework.eclipse.editor.structure;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.otherone.robotframework.eclipse.editor.builder.info.IDynamicParsedKeywordString;
-import org.otherone.robotframework.eclipse.editor.builder.info.IDynamicParsedString;
-import org.otherone.robotframework.eclipse.editor.builder.info.IKeywordCall;
+import org.otherone.robotframework.eclipse.editor.structure.api.IDynamicParsedKeywordString;
+import org.otherone.robotframework.eclipse.editor.structure.api.IDynamicParsedString;
+import org.otherone.robotframework.eclipse.editor.structure.api.ILibraryFile;
 
-public class KeywordCall implements IKeywordCall {
+public class LibraryFile implements ILibraryFile {
 
-  private IDynamicParsedKeywordString keyword;
+  private IDynamicParsedKeywordString realName;
+  private IDynamicParsedKeywordString customName;
   private List<IDynamicParsedString> argumentsIMM;
 
-  // singles
+  // single
 
-  public void setKeyword(IDynamicParsedKeywordString keyword) {
-    this.keyword = keyword;
+  public void setRealName(IDynamicParsedKeywordString realName) {
+    this.realName = realName;
+  }
+
+  public void setCustomName(IDynamicParsedKeywordString customName) {
+    this.customName = customName;
   }
 
   // lists
@@ -39,11 +44,16 @@ public class KeywordCall implements IKeywordCall {
     this.argumentsIMM = Collections.unmodifiableList(arguments);
   }
 
-  // getters
+  // interface-specified getters
 
   @Override
-  public IDynamicParsedKeywordString getKeyword() {
-    return keyword;
+  public IDynamicParsedString getRealName() {
+    return realName;
+  }
+
+  @Override
+  public IDynamicParsedString getCustomName() {
+    return customName;
   }
 
   @Override

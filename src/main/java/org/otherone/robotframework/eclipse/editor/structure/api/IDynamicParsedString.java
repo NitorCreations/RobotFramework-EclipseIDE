@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder.info;
+package org.otherone.robotframework.eclipse.editor.structure.api;
 
 import java.util.List;
 
-public interface IKeywordCall {
-  /**
-   * Returns null if a template keyword is active, except if the keyword is ":FOR".
-   */
-  IDynamicParsedKeywordString getKeyword();
+public interface IDynamicParsedString extends IParsedString {
 
-  List<IDynamicParsedString> getArguments();
+  /**
+   * Returns the static and dynamic parts, one by one.
+   * 
+   * @return when {@link #getValue()} returns "Get ${someVar} contents", this returns a list with [
+   *         "Get ", "${someVar}", " contents" ]
+   */
+  List<IDynamicParsedString> getParts();
+
 }

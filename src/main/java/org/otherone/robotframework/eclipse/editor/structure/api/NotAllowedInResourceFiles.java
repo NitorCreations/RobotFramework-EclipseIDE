@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder.info;
+package org.otherone.robotframework.eclipse.editor.structure.api;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -21,14 +21,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This is used to tag methods whose return value should always be null for robot files prior to a
- * specific version.
+ * This is used to tag methods whose return value should always be null for resource files. I.e.
+ * the resource file is syntactically broken if the annotated method returns a non-null value.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface AvailableFrom {
+public @interface NotAllowedInResourceFiles {
   /**
-   * @return since which Robot Framework version is it available?
+   * @return since which Robot Framework version is it not allowed? (i.e. it was allowed before
+   *         this version)
    */
-  String value();
+  String value() default "";
 }

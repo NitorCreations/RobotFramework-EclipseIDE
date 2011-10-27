@@ -13,25 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder.info;
+package org.otherone.robotframework.eclipse.editor.structure.api;
 
-import java.util.Map;
+import java.util.List;
 
-/**
- * This interface provides bean-ish access to the parsed structure of a robot file.
- * 
- * @author xkr47
- */
-public interface IRFEFileContents {
 
-  // TODO check the IParsedString:s in all interfaces, could some of them be dynamic ?
+public interface IKeywordSequence {
 
-  ISettings getSettings();
+  IDynamicParsedString getSequenceName(); // TODO just IPositionedString for test cases?
 
-  Map<IParsedString, IVariableDefinition> getVariables();
+  List<IDynamicParsedString> getDocumentation();
 
-  Map<IParsedString, ITestCaseDefinition> getTestCases();
+  /**
+   * Since 2.5.6, the special keyword "NONE" can be used.
+   */
+  IDynamicParsedString getTimeout();
 
-  Map<IDynamicParsedString, IUserKeywordDefinition> getKeywords();
+  IParsedString getTimeoutMessage();
 
+  List<IKeywordCall> getKeywordCalls();
 }

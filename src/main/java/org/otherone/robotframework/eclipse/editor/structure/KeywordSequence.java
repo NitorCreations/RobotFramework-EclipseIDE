@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.otherone.robotframework.eclipse.editor.builder;
+package org.otherone.robotframework.eclipse.editor.structure;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.otherone.robotframework.eclipse.editor.builder.info.IDynamicParsedString;
-import org.otherone.robotframework.eclipse.editor.builder.info.IKeywordCall;
-import org.otherone.robotframework.eclipse.editor.builder.info.IKeywordSequence;
-import org.otherone.robotframework.eclipse.editor.builder.info.IParsedString;
+import org.otherone.robotframework.eclipse.editor.structure.api.IDynamicParsedString;
+import org.otherone.robotframework.eclipse.editor.structure.api.IKeywordCall;
+import org.otherone.robotframework.eclipse.editor.structure.api.IKeywordSequence;
+import org.otherone.robotframework.eclipse.editor.structure.api.IParsedString;
 
 public abstract class KeywordSequence implements IKeywordSequence {
 

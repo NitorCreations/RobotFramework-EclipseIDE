@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.otherone.robotframework.eclipse.editor.Activator;
+import org.otherone.robotframework.eclipse.editor.builder.parser.RFEParser;
 
 public class RFEBuilder extends IncrementalProjectBuilder {
 
@@ -79,7 +80,7 @@ public class RFEBuilder extends IncrementalProjectBuilder {
 
   public static final String BUILDER_ID = Activator.PLUGIN_ID + ".rfeBuilder";
 
-  static final String MARKER_TYPE = Activator.PLUGIN_ID + ".testProblem";
+  public static final String MARKER_TYPE = Activator.PLUGIN_ID + ".testProblem";
 
   @Override
   protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor) throws CoreException {
