@@ -17,10 +17,9 @@ package org.otherone.robotframework.eclipse.editor.structure.api;
 
 import java.util.List;
 
-
 public interface IKeywordSequence {
 
-  IDynamicParsedString getSequenceName(); // TODO just IPositionedString for test cases?
+  IParsedString getSequenceName();
 
   List<IDynamicParsedString> getDocumentation();
 

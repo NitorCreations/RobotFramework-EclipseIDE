@@ -17,12 +17,14 @@ package org.otherone.robotframework.eclipse.editor.structure.api;
 
 import java.util.List;
 
-
 public interface IUserKeywordDefinition extends IKeywordSequence {
 
+  @Override
+  IDynamicParsedString getSequenceName();
+
   /**
-   * When arguments have default values, {@link IDynamicParsedString#getParts()} returns two
-   * parts, "${argument}" and "=value".
+   * When arguments have default values, {@link IDynamicParsedString#getParts()} returns two parts,
+   * "${argument}" and "=value".
    */
   List<IDynamicParsedString> getArguments();
 

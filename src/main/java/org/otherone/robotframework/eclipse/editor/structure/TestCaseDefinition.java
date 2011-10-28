@@ -22,11 +22,13 @@ import java.util.List;
 import org.otherone.robotframework.eclipse.editor.structure.api.IDynamicParsedString;
 import org.otherone.robotframework.eclipse.editor.structure.api.IKeywordCall;
 import org.otherone.robotframework.eclipse.editor.structure.api.IParsedKeywordString;
+import org.otherone.robotframework.eclipse.editor.structure.api.IParsedString;
 import org.otherone.robotframework.eclipse.editor.structure.api.IRFEFileContents;
 import org.otherone.robotframework.eclipse.editor.structure.api.ITestCaseDefinition;
 
 public class TestCaseDefinition extends KeywordSequence implements ITestCaseDefinition {
 
+  private IParsedString sequenceName;
   private List<IDynamicParsedString> declaredStaticTagsIMM;
   private IKeywordCall testSetup;
   private IKeywordCall testTeardown;
@@ -39,6 +41,10 @@ public class TestCaseDefinition extends KeywordSequence implements ITestCaseDefi
   }
 
   // singles
+
+  public void setSequenceName(IParsedString sequenceName) {
+    this.sequenceName = sequenceName;
+  }
 
   public void setTestSetup(IKeywordCall testSetup) {
     this.testSetup = testSetup;
@@ -59,6 +65,11 @@ public class TestCaseDefinition extends KeywordSequence implements ITestCaseDefi
   }
 
   // getters
+
+  @Override
+  public IParsedString getSequenceName() {
+    return sequenceName;
+  }
 
   @Override
   public List<IDynamicParsedString> getDeclaredStaticTags() {

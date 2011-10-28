@@ -24,11 +24,16 @@ import org.otherone.robotframework.eclipse.editor.structure.api.IUserKeywordDefi
 
 public class UserKeywordDefinition extends KeywordSequence implements IUserKeywordDefinition {
 
+  private IDynamicParsedString sequenceName;
   private List<IDynamicParsedString> argumentsIMM;
   private List<IDynamicParsedString> returnValuesIMM;
   private IKeywordCall keywordTeardown;
 
   // singles
+
+  public void setSequenceName(IDynamicParsedString sequenceName) {
+    this.sequenceName = sequenceName;
+  }
 
   public void setKeywordTeardown(IKeywordCall keywordTeardown) {
     this.keywordTeardown = keywordTeardown;
@@ -45,6 +50,11 @@ public class UserKeywordDefinition extends KeywordSequence implements IUserKeywo
   }
 
   // getters
+
+  @Override
+  public IDynamicParsedString getSequenceName() {
+    return sequenceName;
+  }
 
   @Override
   public List<IDynamicParsedString> getArguments() {

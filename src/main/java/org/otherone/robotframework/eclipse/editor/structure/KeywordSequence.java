@@ -26,7 +26,6 @@ import org.otherone.robotframework.eclipse.editor.structure.api.IParsedString;
 
 public abstract class KeywordSequence implements IKeywordSequence {
 
-  private IDynamicParsedString sequenceName;
   private List<IDynamicParsedString> documentationIMM;
   private IDynamicParsedString timeout;
   private IParsedString timeoutMessage;
@@ -36,10 +35,6 @@ public abstract class KeywordSequence implements IKeywordSequence {
   private List<IKeywordCall> keywordCallsIMM;
 
   // singles
-
-  public void setSequenceName(IDynamicParsedString sequenceName) {
-    this.sequenceName = sequenceName;
-  }
 
   public void setTimeout(IDynamicParsedString timeout) {
     this.timeout = timeout;
@@ -66,9 +61,7 @@ public abstract class KeywordSequence implements IKeywordSequence {
   // getters
 
   @Override
-  public IDynamicParsedString getSequenceName() {
-    return sequenceName;
-  }
+  public abstract IParsedString getSequenceName();
 
   @Override
   public List<IDynamicParsedString> getDocumentation() {
