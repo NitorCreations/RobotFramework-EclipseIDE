@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -37,9 +38,16 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.otherone.robotframework.eclipse.editor.builder.CountingLineReader;
 import org.otherone.robotframework.eclipse.editor.builder.RFEBuilder;
 import org.otherone.robotframework.eclipse.editor.structure.DynamicParsedString;
+import org.otherone.robotframework.eclipse.editor.structure.KeywordCall;
 import org.otherone.robotframework.eclipse.editor.structure.KeywordSequence;
+import org.otherone.robotframework.eclipse.editor.structure.LibraryFile;
 import org.otherone.robotframework.eclipse.editor.structure.ParsedString;
 import org.otherone.robotframework.eclipse.editor.structure.RFEFileContents;
+import org.otherone.robotframework.eclipse.editor.structure.TestCaseDefinition;
+import org.otherone.robotframework.eclipse.editor.structure.UserKeywordDefinition;
+import org.otherone.robotframework.eclipse.editor.structure.VariableDefinition;
+import org.otherone.robotframework.eclipse.editor.structure.api.IDynamicParsedKeywordString;
+import org.otherone.robotframework.eclipse.editor.structure.api.IDynamicParsedString;
 
 /*
  * TODO support the line continuation sequence "..."
@@ -69,12 +77,20 @@ public class RFEParser {
   private State state = State.IGNORE;
   final RFEFileContents fc = new RFEFileContents();
   KeywordSequence testcaseOrKeywordBeingParsed;
-  List<DynamicParsedString> listToContinue;
+  List<? extends IDynamicParsedString> listToContinue;
 
-  void setState(State newState, KeywordSequence testcaseOrKeywordBeingParsed, List<DynamicParsedString> listToContinue) {
+  void setState(State newState, KeywordSequence testcaseOrKeywordBeingParsed) {
     state = newState;
     this.testcaseOrKeywordBeingParsed = testcaseOrKeywordBeingParsed;
+  }
+
+  void setContinuationList(List<? extends IDynamicParsedString> listToContinue) {
+    assert listToContinue != null;
     this.listToContinue = listToContinue;
+  }
+
+  void clearContinuationList() {
+    listToContinue = null;
   }
 
   public static interface MarkerCreator {
@@ -117,6 +133,11 @@ public class RFEParser {
         }
         ParsedString cmdArg = info.arguments.get(0);
         String cmd = cmdArg.getValue();
+        if (cmd.equals("...")) {
+          // TODO
+        } else {
+          info.parser.clearContinuationList();
+        }
         if (cmd.endsWith(":")) {
           cmd = cmd.substring(0, cmd.length() - 1);
         }
@@ -157,10 +178,10 @@ public class RFEParser {
           return;
         }
         ParsedString resource = info.arguments.get(1);
-        System.out.println("Load resource " + resource);
-        boolean dupe = info.parser.fc.getSettingsInt().addResourceFile(resource.splitRegularArgument());
-        if (dupe) {
-          addWarning(info, "Duplicate resource load", resource.getArgCharPos(), resource.getArgEndCharPos());
+        System.out.println("Load resource file " + resource);
+        boolean success = info.parser.fc.getSettingsInt().addResourceFile(resource.splitRegularArgument());
+        if (!success) {
+          addWarning(info, "Duplicate resource file", resource.getArgCharPos(), resource.getArgEndCharPos());
         }
         warnIgnoreUnusedArgs(info, 2);
         return;
@@ -171,9 +192,14 @@ public class RFEParser {
           addError(info, "Missing argument, e.g. which variable file to load", cmdArg.getArgCharPos(), cmdArg.getArgEndCharPos());
           return;
         }
-        ParsedString library = info.arguments.get(1);
-        System.out.println("Load library " + library);
-        return;
+        ParsedString varFile = info.arguments.get(1);
+        System.out.println("Load variable file " + varFile);
+        List<DynamicParsedString> arguments = splitRegularArguments(info, 2, 0);
+        boolean success = info.parser.fc.getSettingsInt().addVariableFile(varFile.splitRegularArgument(), arguments);
+        if (!success) {
+          addWarning(info, "Duplicate variable file", varFile.getArgCharPos(), varFile.getArgEndCharPos());
+        }
+        info.parser.setContinuationList(arguments);
       }
 
       private void parseLibraryFile(Info info, ParsedString cmdArg) throws CoreException {
@@ -183,47 +209,126 @@ public class RFEParser {
         }
         ParsedString library = info.arguments.get(1);
         System.out.println("Load library " + library);
-        return;
+        LibraryFile libraryFile = new LibraryFile();
+        libraryFile.setRealName(library.splitRegularArgument());
+        boolean hasCustomName = info.arguments.size() >= 4 && info.arguments.get(info.arguments.size() - 2).getValue().equalsIgnoreCase("WITH NAME");
+        if (hasCustomName) {
+          libraryFile.setCustomName(info.arguments.get(info.arguments.size() - 1).splitRegularArgument());
+        } else {
+          libraryFile.setCustomName(libraryFile.getRealName());
+        }
+        List<DynamicParsedString> arguments = splitRegularArguments(info, 2, hasCustomName ? 2 : 0);
+        libraryFile.setArguments(arguments);
+        boolean success = info.parser.fc.getSettingsInt().addLibraryFile(libraryFile);
+        if (!success) {
+          IDynamicParsedKeywordString customName = libraryFile.getCustomName();
+          addWarning(info, "Duplicate library file", customName.getArgCharPos(), customName.getArgEndCharPos());
+        }
+        info.parser.setContinuationList(arguments);
       }
 
       private void parseSuiteSetup(Info info, ParsedString cmdArg) throws CoreException {
-        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+        KeywordCall call = parseKeywordCall(info, cmdArg);
+        if (call != null) {
+          info.parser.fc.getSettingsInt().setSuiteSetup(call);
+          info.parser.setContinuationList(call.getArguments());
+        }
       }
 
       private void parseSuiteTeardown(Info info, ParsedString cmdArg) throws CoreException {
-        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+        KeywordCall call = parseKeywordCall(info, cmdArg);
+        if (call != null) {
+          info.parser.fc.getSettingsInt().setSuiteTeardown(call);
+          info.parser.setContinuationList(call.getArguments());
+        }
       }
 
       private void parseDocumentation(Info info, ParsedString cmdArg) throws CoreException {
-        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+        if (info.arguments.size() < 2) {
+          addError(info, "Missing argument, e.g. which tag(s) to force to all test cases", cmdArg.getArgCharPos(), cmdArg.getArgEndCharPos());
+          return;
+        }
+        List<DynamicParsedString> documentation = splitRegularArguments(info, 1, 0);
+        info.parser.fc.getSettingsInt().setDocumentation(documentation);
+        info.parser.setContinuationList(documentation);
       }
 
       private void parseMetadata(Info info, ParsedString cmdArg) throws CoreException {
-        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+        if (info.arguments.size() < 3) {
+          if (info.arguments.size() < 2) {
+            addError(info, "Missing argument(s), e.g. the metadata key and value(s)", cmdArg.getArgCharPos(), cmdArg.getArgEndCharPos());
+          } else {
+            addError(info, "Missing argument, e.g. the metadata value(s)", cmdArg.getArgCharPos(), cmdArg.getArgEndCharPos());
+          }
+          return;
+        }
+        List<DynamicParsedString> values = splitRegularArguments(info, 2, 0);
+        ParsedString key = info.arguments.get(1);
+        boolean success = info.parser.fc.getSettingsInt().addMetadata(key, values);
+        if (!success) {
+          addWarning(info, "Duplicate metadata key", key.getArgCharPos(), key.getArgEndCharPos());
+        }
+        info.parser.setContinuationList(values);
       }
 
       private void parseForceTags(Info info, ParsedString cmdArg) throws CoreException {
-        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+        if (info.arguments.size() < 2) {
+          addError(info, "Missing argument, e.g. which tag(s) to force to all test cases", cmdArg.getArgCharPos(), cmdArg.getArgEndCharPos());
+          return;
+        }
+        List<DynamicParsedString> tags = splitRegularArguments(info, 1, 0);
+        info.parser.fc.getSettingsInt().setForcedTestTags(tags);
+        info.parser.setContinuationList(tags);
       }
 
       private void parseDefaultTags(Info info, ParsedString cmdArg) throws CoreException {
-        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+        if (info.arguments.size() < 2) {
+          addError(info, "Missing argument, e.g. which tag(s) to use as default for test cases", cmdArg.getArgCharPos(), cmdArg.getArgEndCharPos());
+          return;
+        }
+        List<DynamicParsedString> tags = splitRegularArguments(info, 1, 0);
+        info.parser.fc.getSettingsInt().setDefaultTestTags(tags);
+        info.parser.setContinuationList(tags);
       }
 
       private void parseTestSetup(Info info, ParsedString cmdArg) throws CoreException {
-        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+        KeywordCall call = parseKeywordCall(info, cmdArg);
+        if (call != null) {
+          info.parser.fc.getSettingsInt().setDefaultTestSetup(call);
+          info.parser.setContinuationList(call.getArguments());
+        }
       }
 
       private void parseTestTeardown(Info info, ParsedString cmdArg) throws CoreException {
-        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+        KeywordCall call = parseKeywordCall(info, cmdArg);
+        if (call != null) {
+          info.parser.fc.getSettingsInt().setDefaultTestTeardown(call);
+          info.parser.setContinuationList(call.getArguments());
+        }
       }
 
       private void parseTestTemplate(Info info, ParsedString cmdArg) throws CoreException {
-        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+        if (info.arguments.size() < 2) {
+          addError(info, "Missing argument, e.g. which template to use as default for test cases", cmdArg.getArgCharPos(), cmdArg.getArgEndCharPos());
+          return;
+        }
+        ParsedString template = info.arguments.get(1);
+        info.parser.fc.getSettingsInt().setTemplate(template);
+        warnIgnoreUnusedArgs(info, 2);
       }
 
       private void parseTestTimeout(Info info, ParsedString cmdArg) throws CoreException {
-        addError(info, "Not implemented", info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
+        if (info.arguments.size() < 2) {
+          addError(info, "Missing argument, e.g. the default test case timeout", cmdArg.getArgCharPos(), cmdArg.getArgEndCharPos());
+          return;
+        }
+        ParsedString timeout = info.arguments.get(1);
+        info.parser.fc.getSettingsInt().setDefaultTestTimeout(timeout.splitRegularArgument());
+        if (info.arguments.size() >= 3) {
+          ParsedString message = info.arguments.get(2);
+          info.parser.fc.getSettingsInt().setDefaultTestTimeoutMessage(message);
+        }
+        warnIgnoreUnusedArgs(info, 3);
       }
 
     },
@@ -237,9 +342,13 @@ public class RFEParser {
           return;
         }
         ParsedString varArg = info.arguments.get(0);
-        // TODO store location of variable definition
-        tryParseArgument(info, 1, "variable content");
-        warnIgnoreUnusedArgs(info, 2);
+        // TODO tryParseArgument(info, 1, "variable content");
+        List<DynamicParsedString> values = splitRegularArguments(info, 1, 0);
+        VariableDefinition varDef = new VariableDefinition();
+        varDef.setVariable(varArg);
+        varDef.setValues(values);
+        info.parser.fc.addVariable(varDef);
+        info.parser.setContinuationList(values);
       }
     },
     TESTCASE_TABLE_INITIAL {
@@ -252,11 +361,19 @@ public class RFEParser {
           warnIgnoredLine(info, SEVERITY_IGNORED_LINE_OUTSIDE_RECOGNIZED_TESTCASE_OR_KEYWORD);
           return;
         }
-        if (!tryParseArgument(info, 0, "testcase name")) {
+        if (!tryParseArgument(info, 0, "test case name")) {
           // warnIgnoredLine(info, IMarker.SEVERITY_ERROR);
           return;
         }
-        info.parser.setState(TESTCASE_TABLE_ACTIVE, null, null);
+        // start new testcase
+        TestCaseDefinition tc = new TestCaseDefinition(info.parser.fc);
+        tc.setSequenceName(info.arguments.get(0));
+        info.parser.fc.addTestCase(tc);
+        info.parser.setState(TESTCASE_TABLE_ACTIVE, tc);
+        if (info.arguments.size() == 1) {
+          return;
+        }
+        parseTestcaseLine(info);
       }
     },
     TESTCASE_TABLE_ACTIVE {
@@ -266,16 +383,20 @@ public class RFEParser {
           return;
         }
         if (!info.arguments.get(0).getValue().isEmpty()) {
-          if (!tryParseArgument(info, 0, "testcase name")) {
+          // start new testcase
+          if (!tryParseArgument(info, 0, "test case name")) {
             // warnIgnoredLine(info, IMarker.SEVERITY_ERROR);
             return;
           }
-          info.parser.setState(TESTCASE_TABLE_ACTIVE, null, null);
-          return;
+          TestCaseDefinition tc = new TestCaseDefinition(info.parser.fc);
+          tc.setSequenceName(info.arguments.get(0));
+          info.parser.fc.addTestCase(tc);
+          info.parser.setState(TESTCASE_TABLE_ACTIVE, tc);
+          if (info.arguments.size() == 1) {
+            return;
+          }
         }
-        for (int i = 1; i < info.arguments.size(); ++i) {
-          tryParseArgument(info, i, i == 1 ? "keyword name" : "keyword argument " + (i - 1));
-        }
+        parseTestcaseLine(info);
       }
     },
     KEYWORD_TABLE_INITIAL {
@@ -288,11 +409,19 @@ public class RFEParser {
           warnIgnoredLine(info, SEVERITY_IGNORED_LINE_OUTSIDE_RECOGNIZED_TESTCASE_OR_KEYWORD);
           return;
         }
-        if (!tryParseArgument(info, 0, "keyword name")) {
+        if (!tryParseArgument(info, 0, "user keyword name")) {
           // warnIgnoredLine(info, IMarker.SEVERITY_ERROR);
           return;
         }
-        info.parser.setState(KEYWORD_TABLE_ACTIVE, null, null);
+        // start new user keyword
+        UserKeywordDefinition ukw = new UserKeywordDefinition();
+        ukw.setSequenceName(info.arguments.get(0).splitRegularArgument());
+        info.parser.fc.addKeyword(ukw);
+        info.parser.setState(KEYWORD_TABLE_ACTIVE, ukw);
+        if (info.arguments.size() == 1) {
+          return;
+        }
+        parseUserKeywordLine(info);
       }
     },
     KEYWORD_TABLE_ACTIVE {
@@ -301,11 +430,57 @@ public class RFEParser {
         if (tryParseTableSwitch(info)) {
           return;
         }
-
+        if (!info.arguments.get(0).getValue().isEmpty()) {
+          // start new testcase
+          if (!tryParseArgument(info, 0, "user keyword name")) {
+            // warnIgnoredLine(info, IMarker.SEVERITY_ERROR);
+            return;
+          }
+          UserKeywordDefinition ukw = new UserKeywordDefinition();
+          ukw.setSequenceName(info.arguments.get(0).splitRegularArgument());
+          info.parser.fc.addKeyword(ukw);
+          info.parser.setState(KEYWORD_TABLE_ACTIVE, ukw);
+          if (info.arguments.size() == 1) {
+            return;
+          }
+        }
+        parseUserKeywordLine(info);
       }
     },
     ;
+
     abstract void parse(Info info) throws CoreException;
+
+    protected void parseTestcaseLine(Info info) throws CoreException {
+      // TODO
+      parseTestcaseOrUserKeywordLine(info);
+    }
+
+    protected void parseUserKeywordLine(Info info) throws CoreException {
+      // TODO
+      parseTestcaseOrUserKeywordLine(info);
+    }
+
+    private void parseTestcaseOrUserKeywordLine(Info info) throws CoreException {
+      for (int i = 1; i < info.arguments.size(); ++i) {
+        tryParseArgument(info, i, i == 1 ? "keyword name" : "keyword argument " + (i - 1));
+      }
+      // TODO Auto-generated method stub
+
+    }
+
+    List<DynamicParsedString> splitRegularArguments(Info info, int startPos, int endSkip) {
+      List<DynamicParsedString> arguments = new ArrayList<DynamicParsedString>();
+      for (int i = startPos; i < info.arguments.size() - endSkip; ++i) {
+        arguments.add(info.arguments.get(i).splitRegularArgument());
+      }
+      return arguments;
+    }
+
+    protected KeywordCall parseKeywordCall(Info info, ParsedString cmdArg) {
+      // TODO Auto-generated method stub
+      return null;
+    }
 
     protected boolean tryParseTableSwitch(Info info) throws CoreException {
       ParsedString tableArgument = info.arguments.get(0);
@@ -323,7 +498,7 @@ public class RFEParser {
             + lastPos);
         return true;
       }
-      info.parser.setState(nextState, null, null);
+      info.parser.setState(nextState, null);
       return true;
     }
 
