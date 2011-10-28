@@ -47,12 +47,12 @@ public class LibraryFile implements ILibraryFile {
   // interface-specified getters
 
   @Override
-  public IDynamicParsedString getRealName() {
+  public IDynamicParsedKeywordString getRealName() {
     return realName;
   }
 
   @Override
-  public IDynamicParsedString getCustomName() {
+  public IDynamicParsedKeywordString getCustomName() {
     return customName;
   }
 
