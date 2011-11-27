@@ -35,7 +35,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.otherone.robotframework.eclipse.editor.builder.CountingLineReader;
 import org.otherone.robotframework.eclipse.editor.builder.RFEBuilder;
 import org.otherone.robotframework.eclipse.editor.structure.DynamicParsedString;
 import org.otherone.robotframework.eclipse.editor.structure.KeywordCall;
