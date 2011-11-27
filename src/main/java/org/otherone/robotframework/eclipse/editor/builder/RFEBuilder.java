@@ -97,13 +97,6 @@ public class RFEBuilder extends IncrementalProjectBuilder {
     return null;
   }
 
-  private void deleteMarkers(IFile file) {
-    try {
-      file.deleteMarkers(MARKER_TYPE, false, IResource.DEPTH_ZERO);
-    } catch (CoreException ce) {
-    }
-  }
-
   protected void fullBuild(final IProgressMonitor monitor) throws CoreException {
     getProject().accept(new ResourceVisitor(monitor));
   }
@@ -112,16 +105,23 @@ public class RFEBuilder extends IncrementalProjectBuilder {
     delta.accept(new ResourceDeltaVisitor(monitor));
   }
 
+  /**
+   * This is called for every resource that has changed (for example when saving a file or
+   * refreshing resources).
+   * 
+   * @param resource the resource that changed
+   * @param monitor progress monitor
+   */
   void validate(IResource resource, IProgressMonitor monitor) {
-    if (resource instanceof IFile && resource.getName().endsWith(".txt")) {
-      IFile file = (IFile) resource;
-      deleteMarkers(file);
-      try {
-        new RFEParser(file, monitor).parse();
-      } catch (Exception e1) {
-        // new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Internal error", e1)
-        throw new RuntimeException("Validation problem", e1);
-      }
+    if (!(resource instanceof IFile)) return;
+    if (!resource.getName().endsWith(".txt")) return;
+    IFile file = (IFile) resource;
+    try {
+      new RFEParser(file, monitor).parse();
+    } catch (Exception e1) {
+      // new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Internal error", e1)
+      throw new RuntimeException("Validation problem", e1);
     }
   }
+
 }

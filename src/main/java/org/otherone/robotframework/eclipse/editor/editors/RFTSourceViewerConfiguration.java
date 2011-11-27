@@ -40,10 +40,10 @@ public class RFTSourceViewerConfiguration extends SourceViewerConfiguration {
     this.colorManager = colorManager;
   }
 
-  @Override
-  public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
-    return RFTPartitionScanner.getContentTypes();
-  }
+  // @Override
+  // public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
+  // return RFTPartitionScanner.getContentTypes();
+  // }
 
   // public ITextDoubleClickStrategy getDoubleClickStrategy(
   // ISourceViewer sourceViewer,

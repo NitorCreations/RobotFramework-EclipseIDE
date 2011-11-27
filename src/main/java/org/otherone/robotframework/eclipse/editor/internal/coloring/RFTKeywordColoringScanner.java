@@ -36,6 +36,7 @@ public class RFTKeywordColoringScanner extends RuleBasedScanner {
     IToken tokARGUMENT_SEPARATOR = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.ARGUMENT_SEPARATOR), null, TextAttribute.UNDERLINE));
 
     IRule[] rules = {
+        new SingleLineRule("@{", "}", tokVARIABLE, '\\', true),
         new SingleLineRule("${", "}", tokVARIABLE, '\\', true),
         new SingleLineRule("[", "]", tokSETTING, '\\', true),
 //        new SingleLineRule("  ", "", tokACTION, '\\', true) {{ setColumnConstraint(0); }},

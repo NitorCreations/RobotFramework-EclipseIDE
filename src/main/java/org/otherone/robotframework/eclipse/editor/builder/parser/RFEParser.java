@@ -48,14 +48,11 @@ import org.otherone.robotframework.eclipse.editor.structure.VariableDefinition;
 import org.otherone.robotframework.eclipse.editor.structure.api.IDynamicParsedKeywordString;
 import org.otherone.robotframework.eclipse.editor.structure.api.IDynamicParsedString;
 
-/*
- * TODO support the line continuation sequence "..."
- * TODO support lists @{foo}, access @{foo}[0]
- * TODO support environment variables %{foo}
- * TODO support builtin variables, section 2.5.4 
- * TODO since Robot Framework 2.6, support "number" variables ${123} ${0xFFF} ${0o777} ${0b111}
- * TODO since Robot Framework 2.5.5, all setting names can optionally include a colon at the end, for example "Documentation:" 
- */
+/* TODO support the line continuation sequence "..." TODO support lists @{foo}, access @{foo}[0]
+ * TODO support environment variables %{foo} TODO support builtin variables, section 2.5.4 TODO
+ * since Robot Framework 2.6, support "number" variables ${123} ${0xFFF} ${0o777} ${0b111} TODO
+ * since Robot Framework 2.5.5, all setting names can optionally include a colon at the end, for
+ * example "Documentation:" */
 public class RFEParser {
 
   static final int SEVERITY_IGNORE = -500;
@@ -71,7 +68,7 @@ public class RFEParser {
   private final String filename;
   private final Reader filestream;
   private final IProgressMonitor monitor;
-  private final MarkerCreator markerCreator;
+  private final MarkerManager markerManager;
 
   private State state = State.IGNORE;
   final RFEFileContents fc = new RFEFileContents();
@@ -92,11 +89,13 @@ public class RFEParser {
     listToContinue = null;
   }
 
-  public static interface MarkerCreator {
+  public static interface MarkerManager {
     /**
      * @see IResource#createMarker(String)
      */
     public IMarker createMarker(String type) throws CoreException;
+
+    public void eraseMarkers();
   }
 
   static class Info {
@@ -586,7 +585,7 @@ public class RFEParser {
       if (severity == SEVERITY_IGNORE) {
         return;
       }
-      IMarker marker = info.parser.markerCreator.createMarker(RFEBuilder.MARKER_TYPE);
+      IMarker marker = info.parser.markerManager.createMarker(RFEBuilder.MARKER_TYPE);
       marker.setAttribute(IMarker.MESSAGE, error);
       marker.setAttribute(IMarker.SEVERITY, severity);
       marker.setAttribute(IMarker.LINE_NUMBER, info.lineNo);
@@ -601,10 +600,17 @@ public class RFEParser {
     this.filename = file.toString();
     this.filestream = new InputStreamReader(file.getContents(), file.getCharset());
     this.monitor = monitor == null ? new NullProgressMonitor() : monitor;
-    this.markerCreator = new MarkerCreator() {
+    this.markerManager = new MarkerManager() {
       @Override
       public IMarker createMarker(String type) throws CoreException {
         return file.createMarker(type);
+      }
+
+      @Override
+      public void eraseMarkers() {
+        try {
+          file.deleteMarkers(RFEBuilder.MARKER_TYPE, false, IResource.DEPTH_ZERO);
+        } catch (CoreException ce) {}
       }
     };
   }
@@ -612,25 +618,23 @@ public class RFEParser {
   /**
    * For unit tests.
    * 
-   * @param file
-   *          the file path
-   * @param charset
-   *          the charset to read the file in
-   * @param markerCreator
-   *          for tracking marker creation
+   * @param file the file path
+   * @param charset the charset to read the file in
+   * @param markerManager for managing markers
    * @throws UnsupportedEncodingException
    * @throws FileNotFoundException
    */
-  public RFEParser(File file, String charset, MarkerCreator markerCreator) throws UnsupportedEncodingException, FileNotFoundException {
+  public RFEParser(File file, String charset, MarkerManager markerManager) throws UnsupportedEncodingException, FileNotFoundException {
     this.filename = file.getName();
     this.filestream = new InputStreamReader(new FileInputStream(file), charset);
     this.monitor = new NullProgressMonitor();
-    this.markerCreator = markerCreator;
+    this.markerManager = markerManager;
   }
 
   public void parse() throws CoreException {
     try {
       System.out.println("Parsing " + filename);
+      markerManager.eraseMarkers();
       CountingLineReader contents = new CountingLineReader(filestream);
       String line;
       int lineNo = 1;

@@ -17,15 +17,15 @@ package org.otherone.robotframework.eclipse.editor.editors;
 
 import java.util.Map;
 
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.ITokenScanner;
-import org.otherone.robotframework.eclipse.editor.internal.coloring.RFTActionColoringScanner;
-import org.otherone.robotframework.eclipse.editor.internal.coloring.RFTCommentColoringScanner;
 import org.otherone.robotframework.eclipse.editor.internal.coloring.RFTKeywordColoringScanner;
-import org.otherone.robotframework.eclipse.editor.internal.coloring.RFTTableColoringScanner;
-import org.otherone.robotframework.eclipse.editor.internal.coloring.RFTVariableColoringScanner;
 
 public class RFTPresentationReconciler extends PresentationReconciler {
 
@@ -36,11 +36,11 @@ public class RFTPresentationReconciler extends PresentationReconciler {
     this.coloringScanners = coloringScanners;
     this.colorManager = colorManager;
     // TODO setDocumentPartitioning(partitioning);
-    addColoringScanner(RFTPartitionScanner.RFT_TABLE, RFTTableColoringScanner.class);
-    addColoringScanner(RFTPartitionScanner.RFT_COMMENT, RFTCommentColoringScanner.class);
-    addColoringScanner(RFTPartitionScanner.RFT_VARIABLE, RFTVariableColoringScanner.class);
-    addColoringScanner(RFTPartitionScanner.RFT_KEYWORD, RFTKeywordColoringScanner.class);
-    addColoringScanner(RFTPartitionScanner.RFT_ACTION, RFTActionColoringScanner.class);
+    //    addColoringScanner(RFTPartitionScanner.RFT_TABLE, RFTTableColoringScanner.class);
+    //    addColoringScanner(RFTPartitionScanner.RFT_COMMENT, RFTCommentColoringScanner.class);
+    //    addColoringScanner(RFTPartitionScanner.RFT_VARIABLE, RFTVariableColoringScanner.class);
+    //    addColoringScanner(RFTPartitionScanner.RFT_KEYWORD, RFTKeywordColoringScanner.class);
+    //    addColoringScanner(RFTPartitionScanner.RFT_ACTION, RFTActionColoringScanner.class);
     addColoringScanner(IDocument.DEFAULT_CONTENT_TYPE, RFTKeywordColoringScanner.class);
 
     // NonRuleBasedDamagerRepairer ndr =
@@ -64,9 +64,32 @@ public class RFTPresentationReconciler extends PresentationReconciler {
       }
       coloringScanners.put(coloringScannerClass, coloringScanner);
     }
-    DefaultDamagerRepairer dr = new DefaultDamagerRepairer(coloringScanner);
+    DefaultDamagerRepairer dr = new DefaultDamagerRepairer(coloringScanner) {
+      @Override
+      public IRegion getDamageRegion(ITypedRegion partition, DocumentEvent e, boolean documentPartitioningChanged) {
+        assert !documentPartitioningChanged;
+        IRegion damageRegion = super.getDamageRegion(partition, e, documentPartitioningChanged);
+        System.out.println("getDamageRegion(partition=" + partition + ", event=" + e + ") = " + damageRegion);
+        System.out.println();
+        return damageRegion;
+      }
+
+      @Override
+      public void createPresentation(TextPresentation presentation, ITypedRegion region) {
+        System.out.println("  createPresentation(region=" + region + ");");
+        super.createPresentation(presentation, region);
+      }
+    };
     setDamager(dr, partitionToken);
     setRepairer(dr, partitionToken);
+  }
+
+  @Override
+  protected TextPresentation createPresentation(IRegion damage, IDocument document) {
+    System.out.println("createPresentation(damage=" + damage + ");");
+    TextPresentation createPresentation = super.createPresentation(damage, document);
+    System.out.println();
+    return createPresentation;
   }
 
 }

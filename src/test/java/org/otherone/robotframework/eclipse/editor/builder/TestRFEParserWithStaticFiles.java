@@ -29,12 +29,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.otherone.robotframework.eclipse.editor.builder.parser.RFEParser;
-import org.otherone.robotframework.eclipse.editor.builder.parser.RFEParser.MarkerCreator;
+import org.otherone.robotframework.eclipse.editor.builder.parser.RFEParser.MarkerManager;
 
 @RunWith(Parameterized.class)
 public class TestRFEParserWithStaticFiles {
 
-  public static final class NullMarkerParser implements MarkerCreator {
+  public static final class NullMarkerParser implements MarkerManager {
 
     @Override
     public IMarker createMarker(String type) throws CoreException {
@@ -51,6 +51,10 @@ public class TestRFEParserWithStaticFiles {
       return (IMarker) Proxy.newProxyInstance(NullMarkerParser.class.getClassLoader(), new Class[] { IMarker.class }, handler);
     }
 
+    @Override
+    public void eraseMarkers() {
+      // when testing partial parsing perhaps
+    }
   }
 
   @Parameters
