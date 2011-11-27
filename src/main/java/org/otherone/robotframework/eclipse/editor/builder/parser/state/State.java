@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
@@ -79,8 +78,8 @@ public abstract class State {
       // due to the replace above, we need to reverse engineer the exact position
       int firstPos = tableArgument.getValue().indexOf(table.charAt(0));
       int lastPos = tableArgument.getValue().lastIndexOf(table.charAt(table.length() - 1)) + 1;
-      addMarker(info, "Unknown table '" + table + "'", SeverityConfig.UNKNOWN_TABLE, tableArgument.getArgCharPos() + firstPos,
-                tableArgument.getArgCharPos() + lastPos);
+      addMarker(info, "Unknown table '" + table + "'", SeverityConfig.UNKNOWN_TABLE, tableArgument.getArgCharPos() + firstPos, tableArgument.getArgCharPos()
+          + lastPos);
       return true;
     }
     info.setState(nextState, null);
@@ -137,8 +136,6 @@ public abstract class State {
   void warnIgnoredLine(ParsedLineInfo info, int severity) throws CoreException {
     addMarker(info, "Unknown text ignored", severity, info.arguments.get(0).getArgCharPos(), info.arguments.get(info.arguments.size() - 1).getArgEndCharPos());
   }
-
-  static final Pattern TABLE_RE = Pattern.compile("^\\s*\\*+\\s*([^*]+?)\\s*\\**\\s*$");
 
   static final Map<String, State> tableNameToState = new HashMap<String, State>();
 
