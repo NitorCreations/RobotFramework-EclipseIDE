@@ -92,7 +92,7 @@ public abstract class State {
   protected boolean tryParseVariable(ParsedLineInfo info, int arg) throws CoreException {
     ParsedString varArg = info.arguments.get(arg);
     String var = varArg.getValue();
-    if (!var.startsWith("${")) {
+    if (!var.startsWith("${") && !var.startsWith("@{")) {
       if (!var.endsWith("}")) {
         addError(info, "Variable must start with ${ or @{ and end with }", varArg.getArgCharPos(), varArg.getArgEndCharPos());
       } else {
@@ -104,12 +104,12 @@ public abstract class State {
       addError(info, "Variable must end with }", varArg.getArgCharPos(), varArg.getArgEndCharPos());
       return false;
     }
-    int closingPos = var.indexOf('}', 2);
-    if (closingPos != var.length() - 1) {
-      // TODO this is wrong, recursion is actually allowed
-      addError(info, "Variable name must not contain }", varArg.getArgCharPos() + closingPos, varArg.getArgCharPos() + closingPos + 1);
-      return false;
-    }
+    //    int closingPos = var.indexOf('}', 2);
+    //    if (closingPos != var.length() - 1) {
+    //      // TODO this is wrong, recursion is actually allowed
+    //      addError(info, "Variable name must not contain }", varArg.getArgCharPos() + closingPos, varArg.getArgCharPos() + closingPos + 1);
+    //      return false;
+    //    }
     // TODO further checks?
     return true;
   }

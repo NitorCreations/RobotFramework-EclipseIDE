@@ -16,8 +16,9 @@
 package org.otherone.robotframework.eclipse.editor.structure;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.otherone.robotframework.eclipse.editor.structure.api.IDynamicParsedString;
 import org.otherone.robotframework.eclipse.editor.structure.api.IParsedString;
@@ -28,6 +29,13 @@ import org.otherone.robotframework.eclipse.editor.structure.api.IUserKeywordDefi
 import org.otherone.robotframework.eclipse.editor.structure.api.IVariableDefinition;
 
 public class RFEFileContents implements IRFEFileContents {
+
+  private static final class IParsedStringOffsetComparator implements Comparator<IParsedString> {
+    @Override
+    public int compare(IParsedString o1, IParsedString o2) {
+      return o1.getArgCharPos() - o2.getArgCharPos();
+    }
+  }
 
   private final Settings settings = new Settings();
   private Map<IParsedString, IVariableDefinition> variables;
@@ -43,7 +51,7 @@ public class RFEFileContents implements IRFEFileContents {
 
   public boolean addVariable(IVariableDefinition variable) {
     if (this.variables == null) {
-      this.variables = new HashMap<IParsedString, IVariableDefinition>();
+      this.variables = new TreeMap<IParsedString, IVariableDefinition>(new IParsedStringOffsetComparator());
       this.variablesIMM = Collections.unmodifiableMap(this.variables);
     }
     if (this.variables.containsKey(variable.getVariable())) {
@@ -55,7 +63,7 @@ public class RFEFileContents implements IRFEFileContents {
 
   public boolean addTestCase(ITestCaseDefinition testCase) {
     if (this.testCases == null) {
-      this.testCases = new HashMap<IParsedString, ITestCaseDefinition>();
+      this.testCases = new TreeMap<IParsedString, ITestCaseDefinition>(new IParsedStringOffsetComparator());
       this.testCasesIMM = Collections.unmodifiableMap(this.testCases);
     }
     if (this.testCases.containsKey(testCase.getSequenceName())) {
@@ -67,7 +75,7 @@ public class RFEFileContents implements IRFEFileContents {
 
   public boolean addKeyword(IUserKeywordDefinition keyword) {
     if (this.keywords == null) {
-      this.keywords = new HashMap<IDynamicParsedString, IUserKeywordDefinition>();
+      this.keywords = new TreeMap<IDynamicParsedString, IUserKeywordDefinition>(new IParsedStringOffsetComparator());
       this.keywordsIMM = Collections.unmodifiableMap(this.keywords);
     }
     if (this.keywords.containsKey(keyword.getSequenceName())) {

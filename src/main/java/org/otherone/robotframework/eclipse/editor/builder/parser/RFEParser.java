@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.List;
@@ -31,13 +32,16 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.text.IDocument;
 import org.otherone.robotframework.eclipse.editor.builder.RFEBuilder;
 import org.otherone.robotframework.eclipse.editor.builder.parser.state.Ignore;
 import org.otherone.robotframework.eclipse.editor.builder.parser.state.State;
+import org.otherone.robotframework.eclipse.editor.builder.util.NullMarkerManager;
 import org.otherone.robotframework.eclipse.editor.structure.KeywordSequence;
 import org.otherone.robotframework.eclipse.editor.structure.ParsedString;
 import org.otherone.robotframework.eclipse.editor.structure.RFEFileContents;
 import org.otherone.robotframework.eclipse.editor.structure.api.IDynamicParsedString;
+import org.otherone.robotframework.eclipse.editor.structure.api.IRFEFileContents;
 
 /* TODO support the line continuation sequence "..." TODO support lists @{foo}, access @{foo}[0]
  * TODO support environment variables %{foo} TODO support builtin variables, section 2.5.4 TODO
@@ -114,6 +118,14 @@ public class RFEParser {
 
   }
 
+  /**
+   * For files being "compiled" from disk.
+   * 
+   * @param file
+   * @param monitor
+   * @throws UnsupportedEncodingException
+   * @throws CoreException
+   */
   public RFEParser(final IFile file, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
     this.filename = file.toString();
     this.filestream = new InputStreamReader(file.getContents(), file.getCharset());
@@ -149,7 +161,19 @@ public class RFEParser {
     this.markerManager = markerManager;
   }
 
-  public void parse() throws CoreException {
+  /**
+   * For documents being edited.
+   * 
+   * @param document
+   */
+  public RFEParser(IDocument document) {
+    this.filename = "<document being edited>";
+    this.filestream = new StringReader(document.get());
+    this.monitor = new NullProgressMonitor();
+    this.markerManager = new NullMarkerManager();
+  }
+
+  public IRFEFileContents parse() throws CoreException {
     try {
       System.out.println("Parsing " + filename);
       markerManager.eraseMarkers();
@@ -159,7 +183,7 @@ public class RFEParser {
       int charPos = 0;
       while (null != (line = contents.readLine())) {
         if (monitor.isCanceled()) {
-          return;
+          return null;
         }
         try {
           parseLine(line, lineNo, charPos);
@@ -182,6 +206,7 @@ public class RFEParser {
         // ignore
       }
     }
+    return fc;
   }
 
   // private static final Pattern LINE_RE = Pattern.compile("\\G(?:[^#\\\\]|#|\\.)");

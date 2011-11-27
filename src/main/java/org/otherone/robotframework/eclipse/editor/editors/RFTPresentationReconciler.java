@@ -25,7 +25,6 @@ import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.ITokenScanner;
-import org.otherone.robotframework.eclipse.editor.internal.coloring.RFTKeywordColoringScanner;
 
 public class RFTPresentationReconciler extends PresentationReconciler {
 
@@ -41,7 +40,17 @@ public class RFTPresentationReconciler extends PresentationReconciler {
     //    addColoringScanner(RFTPartitionScanner.RFT_VARIABLE, RFTVariableColoringScanner.class);
     //    addColoringScanner(RFTPartitionScanner.RFT_KEYWORD, RFTKeywordColoringScanner.class);
     //    addColoringScanner(RFTPartitionScanner.RFT_ACTION, RFTActionColoringScanner.class);
-    addColoringScanner(IDocument.DEFAULT_CONTENT_TYPE, RFTKeywordColoringScanner.class);
+    //    addColoringScanner(IDocument.DEFAULT_CONTENT_TYPE, RFTKeywordColoringScanner.class);
+
+    ITokenScanner coloringScanner = new RFTColoringScanner(colorManager);
+    DefaultDamagerRepairer dr = new DefaultDamagerRepairer(coloringScanner) {
+      @Override
+      public IRegion getDamageRegion(ITypedRegion partition, DocumentEvent e, boolean documentPartitioningChanged) {
+        return super.getDamageRegion(partition, e, true);
+      }
+    };
+    setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
+    setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
 
     // NonRuleBasedDamagerRepairer ndr =
     // new NonRuleBasedDamagerRepairer(
