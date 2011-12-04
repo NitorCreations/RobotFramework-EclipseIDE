@@ -21,13 +21,13 @@ public interface IRFTColorConstants {
   RGB COMMENT = new RGB(128, 128, 128);
   RGB TABLE = new RGB(192, 0, 192);
   RGB SETTING = new RGB(0, 192, 0);
-  //RGB SETTING_VALUE = new RGB(0, 192, 0);
+  RGB SETTING_VALUE = new RGB(0, 255, 0);
   RGB VARIABLE = new RGB(0, 170, 180);
   //RGB VARIABLE_VALUE = new RGB(0, 192, 192);
   //RGB TESTCASE = new RGB(222, 0, 0);
   RGB KEYWORD = new RGB(255, 180, 0);
   //RGB ACTION = new RGB(0, 100, 255);
-  RGB DEFAULT = new RGB(192,192,192);
+  RGB DEFAULT = new RGB(192, 192, 192);
   RGB UNKNOWN = new RGB(255, 140, 0);
   RGB FIELD_BG = new RGB(8, 16, 24);
 
