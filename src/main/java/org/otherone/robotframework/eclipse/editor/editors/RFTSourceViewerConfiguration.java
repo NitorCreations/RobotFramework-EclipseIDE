@@ -17,13 +17,10 @@ package org.otherone.robotframework.eclipse.editor.editors;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
-import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.otherone.robotframework.eclipse.editor.internal.hyperlinks.RFTKeywordCallHyperlinkDetector;
@@ -34,16 +31,9 @@ public class RFTSourceViewerConfiguration extends SourceViewerConfiguration {
 
   private final ColorManager colorManager;
 
-  private final Map<Class<? extends ITokenScanner>, ITokenScanner> coloringScanners = new HashMap<Class<? extends ITokenScanner>, ITokenScanner>();
-
   public RFTSourceViewerConfiguration(ColorManager colorManager) {
     this.colorManager = colorManager;
   }
-
-  // @Override
-  // public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
-  // return RFTPartitionScanner.getContentTypes();
-  // }
 
   // public ITextDoubleClickStrategy getDoubleClickStrategy(
   // ISourceViewer sourceViewer,
@@ -76,7 +66,7 @@ public class RFTSourceViewerConfiguration extends SourceViewerConfiguration {
    */
   @Override
   public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
-    return new RFTPresentationReconciler(coloringScanners, colorManager);
+    return new RFTPresentationReconciler(colorManager);
   }
 
 }
