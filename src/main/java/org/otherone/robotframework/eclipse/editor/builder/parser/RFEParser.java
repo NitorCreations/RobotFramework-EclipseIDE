@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.otherone.robotframework.eclipse.editor.builder.RFEBuilder;
+import org.otherone.robotframework.eclipse.editor.builder.parser.RFELexer.LexLine;
 import org.otherone.robotframework.eclipse.editor.builder.parser.state.Ignore;
 import org.otherone.robotframework.eclipse.editor.builder.parser.state.State;
 import org.otherone.robotframework.eclipse.editor.builder.util.NullMarkerManager;
@@ -53,7 +54,7 @@ public class RFEParser {
   final RFEFileContents fc = new RFEFileContents();
   KeywordSequence testcaseOrKeywordBeingParsed;
   List<? extends IDynamicParsedString> listToContinue;
-  private List<List<ParsedString>> lexedLines;
+  private List<LexLine> lexLines;
 
   public void setState(State newState, KeywordSequence testcaseOrKeywordBeingParsed) {
     state = newState;
@@ -121,9 +122,9 @@ public class RFEParser {
    * @throws UnsupportedEncodingException
    * @throws CoreException
    */
-  public RFEParser(final IFile file, List<List<ParsedString>> lexedLines, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
+  public RFEParser(final IFile file, List<LexLine> lexLines, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
     this.filename = file.toString();
-    this.lexedLines = lexedLines;
+    this.lexLines = lexLines;
     this.monitor = monitor == null ? new NullProgressMonitor() : monitor;
     this.markerManager = new MarkerManager() {
       @Override
@@ -149,9 +150,9 @@ public class RFEParser {
    * @throws UnsupportedEncodingException
    * @throws FileNotFoundException
    */
-  public RFEParser(File file, List<List<ParsedString>> lexedLines, MarkerManager markerManager) throws UnsupportedEncodingException, FileNotFoundException {
+  public RFEParser(File file, List<LexLine> lexLines, MarkerManager markerManager) throws UnsupportedEncodingException, FileNotFoundException {
     this.filename = file.getName();
-    this.lexedLines = lexedLines;
+    this.lexLines = lexLines;
     this.monitor = new NullProgressMonitor();
     this.markerManager = markerManager;
   }
@@ -161,9 +162,9 @@ public class RFEParser {
    * 
    * @param document
    */
-  public RFEParser(IDocument document, List<List<ParsedString>> lexedLines) {
+  public RFEParser(IDocument document, List<LexLine> lexLines) {
     this.filename = "<document being edited>";
-    this.lexedLines = lexedLines;
+    this.lexLines = lexLines;
     this.monitor = new NullProgressMonitor();
     this.markerManager = new NullMarkerManager();
   }
@@ -172,20 +173,17 @@ public class RFEParser {
     try {
       System.out.println("Parsing " + filename);
       markerManager.eraseMarkers();
-      for (List<ParsedString> line : lexedLines) {
+      for (LexLine line : lexLines) {
         if (monitor.isCanceled()) {
           return null;
         }
-        int lineNo = 0;
-        int charPos = line.get(0).getArgCharPos();
         try {
-          parseLine(line, lineNo, charPos);
+          parseLine(line.arguments, line.lineNo, line.lineCharPos);
         } catch (CoreException e) {
-          throw new RuntimeException("Error when parsing line " + lineNo + ": '" + line + "'", e);
+          throw new RuntimeException("Error when parsing line " + line.lineNo + ": '" + line.arguments + "'", e);
         } catch (RuntimeException e) {
-          throw new RuntimeException("Internal error when parsing line " + lineNo + ": '" + line + "'", e);
+          throw new RuntimeException("Internal error when parsing line " + line.lineNo + ": '" + line.arguments + "'", e);
         }
-        ++lineNo;
       }
 
       // TODO store results
