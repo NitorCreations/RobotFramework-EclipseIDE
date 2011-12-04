@@ -25,7 +25,9 @@ import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.rules.Token;
+import org.otherone.robotframework.eclipse.editor.builder.parser.RFELexer;
 import org.otherone.robotframework.eclipse.editor.builder.parser.RFEParser;
+import org.otherone.robotframework.eclipse.editor.structure.ParsedString;
 import org.otherone.robotframework.eclipse.editor.structure.api.IDynamicParsedString;
 import org.otherone.robotframework.eclipse.editor.structure.api.IParsedString;
 import org.otherone.robotframework.eclipse.editor.structure.api.IRFEFileContents;
@@ -52,7 +54,8 @@ public class RFTColoringScanner implements ITokenScanner {
   @Override
   public void setRange(IDocument document, int offset, int length) {
     try {
-      fileContents = new RFEParser(document).parse();
+      List<List<ParsedString>> lines = new RFELexer(document).lex();
+      fileContents = new RFEParser(document, lines).parse();
       this.fileContentsVariableIt = fileContents.getVariables().entrySet().iterator();
     } catch (CoreException e) {
       throw new RuntimeException("Error parsing", e);

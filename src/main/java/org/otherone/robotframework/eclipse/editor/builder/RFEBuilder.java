@@ -15,6 +15,7 @@
  */
 package org.otherone.robotframework.eclipse.editor.builder;
 
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -27,7 +28,9 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.otherone.robotframework.eclipse.editor.Activator;
+import org.otherone.robotframework.eclipse.editor.builder.parser.RFELexer;
 import org.otherone.robotframework.eclipse.editor.builder.parser.RFEParser;
+import org.otherone.robotframework.eclipse.editor.structure.ParsedString;
 
 public class RFEBuilder extends IncrementalProjectBuilder {
 
@@ -41,7 +44,7 @@ public class RFEBuilder extends IncrementalProjectBuilder {
 
     @Override
     public boolean visit(IResource resource) {
-      validate(resource, monitor);
+      build(resource, monitor);
       // return true to continue visiting children.
       return true;
     }
@@ -62,14 +65,14 @@ public class RFEBuilder extends IncrementalProjectBuilder {
       switch (delta.getKind()) {
         case IResourceDelta.ADDED:
           // handle added resource
-          validate(resource, monitor);
+          build(resource, monitor);
           break;
         case IResourceDelta.REMOVED:
           // handle removed resource
           break;
         case IResourceDelta.CHANGED:
           // handle changed resource
-          validate(resource, monitor);
+          build(resource, monitor);
           break;
       }
       // return true to continue visiting children.
@@ -112,12 +115,14 @@ public class RFEBuilder extends IncrementalProjectBuilder {
    * @param resource the resource that changed
    * @param monitor progress monitor
    */
-  void validate(IResource resource, IProgressMonitor monitor) {
+  void build(IResource resource, IProgressMonitor monitor) {
     if (!(resource instanceof IFile)) return;
     if (!resource.getName().endsWith(".txt")) return;
+    System.out.println("Build resource " + resource);
     IFile file = (IFile) resource;
     try {
-      new RFEParser(file, monitor).parse();
+      List<List<ParsedString>> lines = new RFELexer(file, monitor).lex();
+      new RFEParser(file, lines, monitor).parse();
     } catch (Exception e1) {
       // new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Internal error", e1)
       throw new RuntimeException("Validation problem", e1);

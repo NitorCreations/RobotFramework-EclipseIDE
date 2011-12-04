@@ -16,12 +16,7 @@
 package org.otherone.robotframework.eclipse.editor.builder.parser;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.List;
@@ -51,7 +46,6 @@ import org.otherone.robotframework.eclipse.editor.structure.api.IRFEFileContents
 public class RFEParser {
 
   private final String filename;
-  private final Reader filestream;
   private final IProgressMonitor monitor;
   private final MarkerManager markerManager;
 
@@ -59,6 +53,7 @@ public class RFEParser {
   final RFEFileContents fc = new RFEFileContents();
   KeywordSequence testcaseOrKeywordBeingParsed;
   List<? extends IDynamicParsedString> listToContinue;
+  private List<List<ParsedString>> lexedLines;
 
   public void setState(State newState, KeywordSequence testcaseOrKeywordBeingParsed) {
     state = newState;
@@ -126,9 +121,9 @@ public class RFEParser {
    * @throws UnsupportedEncodingException
    * @throws CoreException
    */
-  public RFEParser(final IFile file, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
+  public RFEParser(final IFile file, List<List<ParsedString>> lexedLines, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
     this.filename = file.toString();
-    this.filestream = new InputStreamReader(file.getContents(), file.getCharset());
+    this.lexedLines = lexedLines;
     this.monitor = monitor == null ? new NullProgressMonitor() : monitor;
     this.markerManager = new MarkerManager() {
       @Override
@@ -154,9 +149,9 @@ public class RFEParser {
    * @throws UnsupportedEncodingException
    * @throws FileNotFoundException
    */
-  public RFEParser(File file, String charset, MarkerManager markerManager) throws UnsupportedEncodingException, FileNotFoundException {
+  public RFEParser(File file, List<List<ParsedString>> lexedLines, MarkerManager markerManager) throws UnsupportedEncodingException, FileNotFoundException {
     this.filename = file.getName();
-    this.filestream = new InputStreamReader(new FileInputStream(file), charset);
+    this.lexedLines = lexedLines;
     this.monitor = new NullProgressMonitor();
     this.markerManager = markerManager;
   }
@@ -166,9 +161,9 @@ public class RFEParser {
    * 
    * @param document
    */
-  public RFEParser(IDocument document) {
+  public RFEParser(IDocument document, List<List<ParsedString>> lexedLines) {
     this.filename = "<document being edited>";
-    this.filestream = new StringReader(document.get());
+    this.lexedLines = lexedLines;
     this.monitor = new NullProgressMonitor();
     this.markerManager = new NullMarkerManager();
   }
@@ -177,14 +172,12 @@ public class RFEParser {
     try {
       System.out.println("Parsing " + filename);
       markerManager.eraseMarkers();
-      CountingLineReader contents = new CountingLineReader(filestream);
-      String line;
-      int lineNo = 1;
-      int charPos = 0;
-      while (null != (line = contents.readLine())) {
+      for (List<ParsedString> line : lexedLines) {
         if (monitor.isCanceled()) {
           return null;
         }
+        int lineNo = 0;
+        int charPos = line.get(0).getArgCharPos();
         try {
           parseLine(line, lineNo, charPos);
         } catch (CoreException e) {
@@ -193,32 +186,16 @@ public class RFEParser {
           throw new RuntimeException("Internal error when parsing line " + lineNo + ": '" + line + "'", e);
         }
         ++lineNo;
-        charPos = contents.getCharPos();
       }
 
       // TODO store results
     } catch (Exception e) {
       throw new RuntimeException("Error parsing robot file " + filename, e);
-    } finally {
-      try {
-        filestream.close();
-      } catch (IOException e) {
-        // ignore
-      }
     }
     return fc;
   }
 
-  // private static final Pattern LINE_RE = Pattern.compile("\\G(?:[^#\\\\]|#|\\.)");
-
-  private void parseLine(String line, int lineNo, int charPos) throws CoreException {
-    List<ParsedString> arguments = TxtArgumentSplitter.splitLineIntoArguments(line, charPos);
-    if (arguments.isEmpty()) {
-      return;
-    }
-    if (arguments.size() == 1 && arguments.get(0).getValue().isEmpty()) {
-      return;
-    }
+  private void parseLine(List<ParsedString> arguments, int lineNo, int charPos) throws CoreException {
     System.out.println(arguments);
     State oldState = state;
     state.parse(new ParsedLineInfo(this, arguments, lineNo, charPos));
