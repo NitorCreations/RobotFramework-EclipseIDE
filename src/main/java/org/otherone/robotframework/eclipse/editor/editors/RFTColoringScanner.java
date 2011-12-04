@@ -33,20 +33,42 @@ import org.otherone.robotframework.eclipse.editor.structure.ParsedString;
 public class RFTColoringScanner implements ITokenScanner {
 
   private final ColorManager manager;
-  private final Token tokVARIABLE;
-  private final Token tokVARIABLE_VAL;
+  private final TokenQueue tokenQueue = new TokenQueue();
+  private final IToken tokTABLE;
+  private final IToken tokSETTING_KEY;
+  private final IToken tokSETTING_VAL;
+  private final IToken tokVARIABLE_KEY;
+  private final IToken tokVARIABLE_VAL;
+  private final IToken tokCOMMENT;
+  private final IToken tokNEW_KEYWORD;
+  private final IToken tokKEYWORD_CALL;
+  private final IToken tokKEYWORD_ARG;
 
   private IDocument document;
   private Iterator<RFELine> lineIterator;
   private RFELine line;
   private int argOff;
+  private int argLen;
+  private boolean lineEndsWithComment;
+  private RFEPreParser.Type lastRealType;
 
+  private RFELine lastParsedLine;
 
   public RFTColoringScanner(ColorManager colorManager) {
     this.manager = colorManager;
     // TODO dynamically fetched colors
-    tokVARIABLE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.VARIABLE)));
+    tokTABLE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.TABLE)));
+    tokCOMMENT = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.COMMENT)));
+    tokSETTING_KEY = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING)));
+    tokSETTING_VAL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD)));
+    tokVARIABLE_KEY = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.VARIABLE)));
     tokVARIABLE_VAL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD)));
+    tokNEW_KEYWORD = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD)));
+    tokKEYWORD_CALL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD)));
+    tokKEYWORD_ARG = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.DEFAULT)));
+    //IToken tokARGUMENT = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.ARGUMENT)));
+    //IToken tokARGUMENT_SEPARATOR = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.ARGUMENT_SEPARATOR), null, TextAttribute.UNDERLINE));
+
   }
 
   @Override
@@ -57,6 +79,7 @@ public class RFTColoringScanner implements ITokenScanner {
       List<RFELine> lines = new RFELexer(document).lex();
       new RFEPreParser(document, lines).preParse();
       lineIterator = lines.iterator();
+      lastRealType = RFEPreParser.Type.IGNORE;
       prepareNextLine();
       // fileContents = new RFEParser(document, lines).parse();
       // this.fileContentsVariableIt = fileContents.getVariables().entrySet().iterator();
@@ -66,35 +89,51 @@ public class RFTColoringScanner implements ITokenScanner {
   }
 
   void prepareNextToken() {
-    ++argOff;
-    if (argOff >= line.arguments.size()) {
-      //prepareNextLine();
+    assert argOff >= 0;
+    assert argOff < argLen;
+    if (++argOff == argLen) {
       prepareNextLine();
     }
   }
 
   void prepareNextLine() {
+    assert argOff >= 0;
+    assert argOff <= argLen;
+    // if previous line ended with comment, add it to queue now
+    if (lineEndsWithComment) {
+      ParsedString comment = line.arguments.get(argLen);
+      if (comment.getValue().startsWith("#")) {
+        tokenQueue.add(comment, tokCOMMENT);
+      }
+    }
+    // next line
     if (lineIterator.hasNext()) {
       line = lineIterator.next();
+      argLen = line.arguments.size();
+      lineEndsWithComment = line.arguments.get(argLen - 1).getValue().startsWith("#");
+      if (lineEndsWithComment) {
+        --argLen; // exclude now, deal with it later (see top of method)
+      }
     } else {
       line = null;
+      argLen = 0;
+      lineEndsWithComment = false;
     }
     argOff = 0;
   }
 
-  RFELine l;
-
   @Override
   public IToken nextToken() {
-    if (!tokenQueue.hasPending()) {
-      l = line;
+    while (!tokenQueue.hasPending()) {
+      lastParsedLine = line;
       parseMoreTokens();
     }
     IToken t = tokenQueue.take();
     int tokenOff = getTokenOffset();
     int tokenLen = getTokenLength();
-    System.out.println("TOK: " + (l != null ? "[" + l.lineNo + ":" + l.lineCharPos + "] " : "") + t + " off " + tokenOff + " end " + (tokenOff + tokenLen)
-        + " len " + tokenLen + " txt \"" + document.get().substring(tokenOff, tokenOff + tokenLen) + "\"");
+    System.out.print("TOK: " + (lastParsedLine != null ? "[" + lastParsedLine.lineNo + ":" + lastParsedLine.lineCharPos + "] " : "") + t + " off " + tokenOff
+        + " end " + (tokenOff + tokenLen) + " len " + tokenLen);
+    System.out.println(" txt \"" + document.get().substring(tokenOff, tokenOff + tokenLen).replace("\n", "\\n") + "\"");
     return t;
   }
 
@@ -103,50 +142,115 @@ public class RFTColoringScanner implements ITokenScanner {
       tokenQueue.addEof();
       return;
     }
-    switch ((RFEPreParser.Type) line.info.get(RFEPreParser.Type.class)) {
-      case COMMENT_LINE: {
-        argOff = line.arguments.size() - 1;
-        ParsedString comment = line.arguments.get(argOff);
-        tokenQueue.add(comment.getArgCharPos(), comment.getValue().length(), tokVARIABLE);
+    RFEPreParser.Type type = (RFEPreParser.Type) line.info.get(RFEPreParser.Type.class);
+    if (type != RFEPreParser.Type.COMMENT_LINE && type != RFEPreParser.Type.CONTINUATION_LINE) {
+      lastRealType = type;
+    }
+    switch (type) {
+      case IGNORE_TABLE:
+      case SETTING_TABLE_BEGIN:
+      case VARIABLE_TABLE_BEGIN:
+      case TESTCASE_TABLE_BEGIN:
+      case KEYWORD_TABLE_BEGIN: {
+        assert argOff == 0;
+        ParsedString table = line.arguments.get(0);
+        tokenQueue.add(table, tokTABLE);
         prepareNextLine();
         return;
       }
-      default: {
-        ParsedString arg = line.arguments.get(argOff);
-        tokenQueue.add(arg.getArgCharPos(), arg.getValue().length(), tokVARIABLE_VAL);
-        prepareNextToken();
+      case SETTING_TABLE_LINE: {
+        switch (argOff) {
+          case 0: {
+            ParsedString setting = line.arguments.get(0);
+            tokenQueue.add(setting, tokSETTING_KEY);
+            prepareNextToken();
+            return;
+          }
+          default: {
+            ParsedString first = line.arguments.get(1);
+            ParsedString last = line.arguments.get(argLen - 1);
+            tokenQueue.add(first.getArgCharPos(), last.getArgEndCharPos(), tokSETTING_VAL);
+            prepareNextLine();
+            return;
+          }
+        }
+      }
+      case VARIABLE_TABLE_LINE: {
+        switch (argOff) {
+          case 0:
+            ParsedString setting = line.arguments.get(0);
+            tokenQueue.add(setting, tokVARIABLE_KEY);
+            prepareNextToken();
+            return;
+          default:
+            ParsedString first = line.arguments.get(1);
+            ParsedString last = line.arguments.get(argLen - 1);
+            tokenQueue.add(first.getArgCharPos(), last.getArgEndCharPos(), tokVARIABLE_VAL);
+            prepareNextLine();
+            return;
+        }
+      }
+      case COMMENT_LINE: // prepareNextLine handles the comments
+      case IGNORE:
+      case TESTCASE_TABLE_IGNORE:
+      case KEYWORD_TABLE_IGNORE: {
+        prepareNextLine();
         return;
       }
+      case TESTCASE_TABLE_TESTCASE_BEGIN:
+      case TESTCASE_TABLE_TESTCASE_LINE:
+      case KEYWORD_TABLE_KEYWORD_BEGIN:
+      case KEYWORD_TABLE_KEYWORD_LINE: {
+        switch (argOff) {
+          case 0: {
+            ParsedString newName = line.arguments.get(0);
+            if (!newName.getValue().isEmpty()) {
+              tokenQueue.add(newName, tokNEW_KEYWORD);
+            }
+            prepareNextToken();
+            return;
+          }
+          case 1: {
+            ParsedString newName = line.arguments.get(1);
+            if (newName.getValue().startsWith("[")) {
+              tokenQueue.add(newName, tokSETTING_KEY); // TODO remember
+            } else {
+              tokenQueue.add(newName, tokKEYWORD_CALL); // TODO template
+            }
+            prepareNextToken();
+            return;
+          }
+          default: {
+            ParsedString first = line.arguments.get(2);
+            ParsedString last = line.arguments.get(argLen - 1);
+            tokenQueue.add(first.getArgCharPos(), last.getArgEndCharPos(), tokKEYWORD_ARG);
+            prepareNextLine();
+            return;
+          }
+        }
+      }
+      case CONTINUATION_LINE: {
+        switch (lastRealType) {
+          case COMMENT_LINE:
+          case CONTINUATION_LINE:
+            throw new RuntimeException();
+          case IGNORE:
+          case TESTCASE_TABLE_IGNORE:
+          case KEYWORD_TABLE_IGNORE: {
+            prepareNextLine();
+            return;
+          }
+          default: {
+            prepareNextLine();
+            return;
+          }
+        }
+      }
     }
-    //    if (value) {
-    //      if (!fileContentsVariableIt.hasNext()) {
-    //        entry = null;
-    //        return Token.EOF;
-    //      }
-    //      entry = fileContentsVariableIt.next();
-    //      value = false;
-    //    } else {
-    //      value = true;
-    //    }
-    //    return value ? tokVARIABLE_VAL : tokVARIABLE;
   }
 
-  //  public int getTokenLength2() {
-  //    if (value) {
-  //      List<IDynamicParsedString> values = entry.getValue().getValues();
-  //      IDynamicParsedString val0 = values.get(0);
-  //      IDynamicPars7edString valn = values.get(values.size() - 1);
-  //      return valn.getArgEndCharPos() - val0.getArgCharPos();
-  //    } else {
-  //      IParsedString key = entry.getKey();
-  //      return key.getArgEndCharPos() - key.getArgCharPos();
-  //    }
-  //  }
-
-  private final TokenQueue tokenQueue = new TokenQueue();
-
   static class TokenQueue {
-    static class PendingToken {
+    private static class PendingToken {
       final IToken token;
       final int len;
 
@@ -160,14 +264,14 @@ public class RFTColoringScanner implements ITokenScanner {
     private int nextTokenStart = 0;
     private int curTokenOff, curTokenLen;
 
-    void reset() {
+    public void reset() {
       nextTokenStart = 0;
       assert pendingTokens.isEmpty();
       pendingTokens.clear();
       curTokenOff = curTokenLen = 0;
     }
 
-    IToken take() {
+    public IToken take() {
       PendingToken removed = pendingTokens.remove(0);
       curTokenOff += curTokenLen;
       curTokenLen = removed.len;
@@ -178,16 +282,20 @@ public class RFTColoringScanner implements ITokenScanner {
       addToken(0, Token.EOF);
     }
 
-    boolean hasPending() {
+    public boolean hasPending() {
       return !pendingTokens.isEmpty();
     }
 
-    void add(int off, int len, IToken token) {
+    public void add(ParsedString arg, IToken token) {
+      add(arg.getArgCharPos(), arg.getArgEndCharPos(), token);
+    }
+
+    public void add(int off, int eoff, IToken token) {
       if (off > nextTokenStart) {
         addToken(off - nextTokenStart, Token.UNDEFINED);
       }
-      addToken(len, token);
-      nextTokenStart = off + len;
+      addToken(eoff - off, token);
+      nextTokenStart = eoff;
     }
 
     private void addToken(int len, IToken token) {
