@@ -28,8 +28,8 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.otherone.robotframework.eclipse.editor.Activator;
+import org.otherone.robotframework.eclipse.editor.builder.parser.RFELine;
 import org.otherone.robotframework.eclipse.editor.builder.parser.RFELexer;
-import org.otherone.robotframework.eclipse.editor.builder.parser.RFELexer.LexLine;
 import org.otherone.robotframework.eclipse.editor.builder.parser.RFEParser;
 
 public class RFEBuilder extends IncrementalProjectBuilder {
@@ -121,7 +121,7 @@ public class RFEBuilder extends IncrementalProjectBuilder {
     System.out.println("Build resource " + resource);
     IFile file = (IFile) resource;
     try {
-      List<LexLine> lines = new RFELexer(file, monitor).lex();
+      List<RFELine> lines = new RFELexer(file, monitor).lex();
       new RFEParser(file, lines, monitor).parse();
     } catch (Exception e1) {
       // new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Internal error", e1)

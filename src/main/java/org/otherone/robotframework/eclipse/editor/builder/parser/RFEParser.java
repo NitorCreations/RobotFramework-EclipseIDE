@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.otherone.robotframework.eclipse.editor.builder.RFEBuilder;
-import org.otherone.robotframework.eclipse.editor.builder.parser.RFELexer.LexLine;
 import org.otherone.robotframework.eclipse.editor.builder.parser.state.Ignore;
 import org.otherone.robotframework.eclipse.editor.builder.parser.state.State;
 import org.otherone.robotframework.eclipse.editor.builder.util.NullMarkerManager;
@@ -54,7 +53,7 @@ public class RFEParser {
   final RFEFileContents fc = new RFEFileContents();
   KeywordSequence testcaseOrKeywordBeingParsed;
   List<? extends IDynamicParsedString> listToContinue;
-  private List<LexLine> lexLines;
+  private List<RFELine> lexLines;
 
   public void setState(State newState, KeywordSequence testcaseOrKeywordBeingParsed) {
     state = newState;
@@ -122,7 +121,7 @@ public class RFEParser {
    * @throws UnsupportedEncodingException
    * @throws CoreException
    */
-  public RFEParser(final IFile file, List<LexLine> lexLines, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
+  public RFEParser(final IFile file, List<RFELine> lexLines, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
     this.filename = file.toString();
     this.lexLines = lexLines;
     this.monitor = monitor == null ? new NullProgressMonitor() : monitor;
@@ -150,7 +149,7 @@ public class RFEParser {
    * @throws UnsupportedEncodingException
    * @throws FileNotFoundException
    */
-  public RFEParser(File file, List<LexLine> lexLines, MarkerManager markerManager) throws UnsupportedEncodingException, FileNotFoundException {
+  public RFEParser(File file, List<RFELine> lexLines, MarkerManager markerManager) throws UnsupportedEncodingException, FileNotFoundException {
     this.filename = file.getName();
     this.lexLines = lexLines;
     this.monitor = new NullProgressMonitor();
@@ -162,7 +161,7 @@ public class RFEParser {
    * 
    * @param document
    */
-  public RFEParser(IDocument document, List<LexLine> lexLines) {
+  public RFEParser(IDocument document, List<RFELine> lexLines) {
     this.filename = "<document being edited>";
     this.lexLines = lexLines;
     this.monitor = new NullProgressMonitor();
@@ -173,7 +172,7 @@ public class RFEParser {
     try {
       System.out.println("Parsing " + filename);
       markerManager.eraseMarkers();
-      for (LexLine line : lexLines) {
+      for (RFELine line : lexLines) {
         if (monitor.isCanceled()) {
           return null;
         }

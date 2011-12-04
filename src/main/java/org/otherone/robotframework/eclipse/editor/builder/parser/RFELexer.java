@@ -35,19 +35,7 @@ import org.otherone.robotframework.eclipse.editor.structure.ParsedString;
 
 public class RFELexer {
 
-  public static class LexLine {
-    public final int lineNo;
-    public final int lineCharPos;
-    public final List<ParsedString> arguments;
-
-    public LexLine(int lineNo, int lineCharPos, List<ParsedString> arguments) {
-      this.lineNo = lineNo;
-      this.lineCharPos = lineCharPos;
-      this.arguments = arguments;
-    }
-  }
-
-  private final List<LexLine> lexLines = new ArrayList<LexLine>();
+  private final List<RFELine> lexLines = new ArrayList<RFELine>();
   private final String filename;
   private final Reader filestream;
   private final IProgressMonitor monitor;
@@ -92,7 +80,7 @@ public class RFELexer {
     this.monitor = new NullProgressMonitor();
   }
 
-  public List<LexLine> lex() throws CoreException {
+  public List<RFELine> lex() throws CoreException {
     try {
       System.out.println("Lexing " + filename);
       CountingLineReader contents = new CountingLineReader(filestream);
@@ -135,7 +123,7 @@ public class RFELexer {
     if (arguments.size() == 1 && arguments.get(0).getValue().isEmpty()) {
       return;
     }
-    lexLines.add(new LexLine(lineNo, charPos, arguments));
+    lexLines.add(new RFELine(lineNo, charPos, arguments));
   }
 
 }

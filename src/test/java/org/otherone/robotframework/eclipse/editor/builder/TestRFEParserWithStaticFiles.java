@@ -28,8 +28,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.otherone.robotframework.eclipse.editor.builder.parser.RFELine;
 import org.otherone.robotframework.eclipse.editor.builder.parser.RFELexer;
-import org.otherone.robotframework.eclipse.editor.builder.parser.RFELexer.LexLine;
 import org.otherone.robotframework.eclipse.editor.builder.parser.RFEParser;
 import org.otherone.robotframework.eclipse.editor.builder.parser.RFEParser.MarkerManager;
 
@@ -79,7 +79,7 @@ public class TestRFEParserWithStaticFiles {
 
   @Test
   public void testFile() throws Exception {
-    List<LexLine> lines = new RFELexer(file, "UTF-8").lex();
+    List<RFELine> lines = new RFELexer(file, "UTF-8").lex();
     new RFEParser(file, lines, new NullMarkerParser()).parse();
   }
 
