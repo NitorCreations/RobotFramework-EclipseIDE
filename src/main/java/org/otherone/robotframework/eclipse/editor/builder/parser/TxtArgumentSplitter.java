@@ -32,7 +32,7 @@ public class TxtArgumentSplitter {
    * tab-or-multiple-whitespace separator right now.
    * 
    * @param line
-   * @param charPos
+   * @param charPos the file character position of the first character of the line
    * @return
    */
   static List<ParsedString> splitLineIntoArguments(String line, int charPos) {
@@ -47,11 +47,9 @@ public class TxtArgumentSplitter {
     List<ParsedString> arguments = new ArrayList<ParsedString>();
     int lastEnd = 0;
     while (true) {
-      if (lastEnd < line.length() && line.charAt(lastEnd) == '#') {
-        // next cell starts with #, so the rest of the line is a comment and should be ignored
-        break;
-      }
-      boolean isLastArgument = !m.find();
+      // if next cell starts with #, the rest of the line is a comment
+      boolean isComment = lastEnd < line.length() && line.charAt(lastEnd) == '#';
+      boolean isLastArgument = isComment || !m.find();
       int nextStart = !isLastArgument ? m.start() : line.length();
       if (lastEnd == 0 && nextStart > 0 && line.charAt(0) == ' ') {
         /*
