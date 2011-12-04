@@ -35,7 +35,6 @@ import org.otherone.robotframework.eclipse.editor.structure.api.IVariableDefinit
 
 public class RFTColoringScanner implements ITokenScanner {
 
-
   private IRFEFileContents fileContents;
   private Iterator<Entry<IParsedString, IVariableDefinition>> fileContentsVariableIt;
   private Entry<IParsedString, IVariableDefinition> entry;
@@ -47,6 +46,7 @@ public class RFTColoringScanner implements ITokenScanner {
 
   public RFTColoringScanner(ColorManager colorManager) {
     this.manager = colorManager;
+    // TODO dynamically fetched colors
     tokVARIABLE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.VARIABLE)));
     tokVARIABLE_VAL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD)));
   }
