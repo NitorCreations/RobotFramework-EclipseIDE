@@ -53,6 +53,7 @@ public class RFTColoringScanner implements ITokenScanner {
   private RFEPreParser.Type lastRealType;
 
   private RFELine lastParsedLine;
+  private boolean isSetting;
 
   public RFTColoringScanner(ColorManager colorManager) {
     this.manager = colorManager;
@@ -60,7 +61,7 @@ public class RFTColoringScanner implements ITokenScanner {
     tokTABLE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.TABLE)));
     tokCOMMENT = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.COMMENT)));
     tokSETTING_KEY = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING)));
-    tokSETTING_VAL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD)));
+    tokSETTING_VAL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING)));
     tokVARIABLE_KEY = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.VARIABLE)));
     tokVARIABLE_VAL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD)));
     tokNEW_KEYWORD = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD)));
@@ -129,11 +130,11 @@ public class RFTColoringScanner implements ITokenScanner {
       parseMoreTokens();
     }
     IToken t = tokenQueue.take();
-    int tokenOff = getTokenOffset();
-    int tokenLen = getTokenLength();
-    System.out.print("TOK: " + (lastParsedLine != null ? "[" + lastParsedLine.lineNo + ":" + lastParsedLine.lineCharPos + "] " : "") + t + " off " + tokenOff
-        + " end " + (tokenOff + tokenLen) + " len " + tokenLen);
-    System.out.println(" txt \"" + document.get().substring(tokenOff, tokenOff + tokenLen).replace("\n", "\\n") + "\"");
+    //    int tokenOff = getTokenOffset();
+    //    int tokenLen = getTokenLength();
+    //    System.out.print("TOK: " + (lastParsedLine != null ? "[" + lastParsedLine.lineNo + ":" + lastParsedLine.lineCharPos + "] " : "") + t + " off " + tokenOff
+    //        + " end " + (tokenOff + tokenLen) + " len " + tokenLen);
+    //    System.out.println(" txt \"" + document.get().substring(tokenOff, tokenOff + tokenLen).replace("\n", "\\n") + "\"");
     return t;
   }
 
@@ -212,8 +213,9 @@ public class RFTColoringScanner implements ITokenScanner {
           }
           case 1: {
             ParsedString newName = line.arguments.get(1);
-            if (newName.getValue().startsWith("[")) {
-              tokenQueue.add(newName, tokSETTING_KEY); // TODO remember
+            isSetting = newName.getValue().startsWith("[");
+            if (isSetting) {
+              tokenQueue.add(newName, tokSETTING_KEY);
             } else {
               tokenQueue.add(newName, tokKEYWORD_CALL); // TODO template
             }
@@ -223,7 +225,7 @@ public class RFTColoringScanner implements ITokenScanner {
           default: {
             ParsedString first = line.arguments.get(2);
             ParsedString last = line.arguments.get(argLen - 1);
-            tokenQueue.add(first.getArgCharPos(), last.getArgEndCharPos(), tokKEYWORD_ARG);
+            tokenQueue.add(first.getArgCharPos(), last.getArgEndCharPos(), isSetting ? tokSETTING_VAL : tokKEYWORD_ARG);
             prepareNextLine();
             return;
           }
