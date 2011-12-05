@@ -39,7 +39,7 @@ public class RFTColoringScanner implements ITokenScanner {
     UNKNOWN, STRING, FILE, FILE_ARGS, KEYWORD_ARGS,
   }
 
-  static final Map<String, SettingType> settingTypes = new HashMap<String, RFTColoringScanner.SettingType>();
+  static final Map<String, SettingType> settingTypes = new HashMap<String, SettingType>();
   static {
     settingTypes.put("Resource", SettingType.FILE_ARGS);
     settingTypes.put("Variables", SettingType.FILE);
@@ -72,7 +72,7 @@ public class RFTColoringScanner implements ITokenScanner {
   private final IToken tokKEYWORD_CALL;
   private final IToken tokKEYWORD_ARG;
 
-  private IDocument document;
+  // private IDocument document;
   private Iterator<RFELine> lineIterator;
   private RFELine line;
   private int argOff;
@@ -80,7 +80,7 @@ public class RFTColoringScanner implements ITokenScanner {
   private boolean lineEndsWithComment;
   private RFEPreParser.Type lastRealType;
 
-  private RFELine lastParsedLine;
+  // private RFELine lastParsedLine;
   private boolean keywordSequence_isSetting;
   private SettingType setting_type;
   private boolean setting_gotFirstArg;
@@ -108,7 +108,7 @@ public class RFTColoringScanner implements ITokenScanner {
   @Override
   public void setRange(IDocument document, int offset, int length) {
     try {
-      this.document = document;
+      // this.document = document;
       tokenQueue.reset();
       List<RFELine> lines = new RFELexer(document).lex();
       new RFEPreParser(document, lines).preParse();
@@ -159,7 +159,7 @@ public class RFTColoringScanner implements ITokenScanner {
   @Override
   public IToken nextToken() {
     while (!tokenQueue.hasPending()) {
-      lastParsedLine = line;
+      // lastParsedLine = line;
       parseMoreTokens();
     }
     IToken t = tokenQueue.take();
