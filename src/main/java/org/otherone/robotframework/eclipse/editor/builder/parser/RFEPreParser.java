@@ -26,7 +26,7 @@ import org.otherone.robotframework.eclipse.editor.structure.ParsedString;
 // TODO case sensitivity
 public class RFEPreParser {
 
-  private static final String CONTINUATION_STR = "...";
+  public static final String CONTINUATION_STR = "...";
   private final String filename;
   private final List<RFELine> lines;
 

@@ -65,6 +65,8 @@ public class RFTColoringScanner implements ITokenScanner {
   private final IToken tokSETTING_KEYWORD_ARG;
   private final IToken tokSETTING_FILE;
   private final IToken tokSETTING_FILE_ARG;
+  private final IToken tokSETTING_FILE_WITH_NAME_KEY;
+  private final IToken tokSETTING_FILE_WITH_NAME_VALUE;
   private final IToken tokVARIABLE_KEY;
   private final IToken tokVARIABLE_VAL;
   private final IToken tokCOMMENT;
@@ -84,6 +86,11 @@ public class RFTColoringScanner implements ITokenScanner {
   private boolean keywordSequence_isSetting;
   private SettingType setting_type;
   private boolean setting_gotFirstArg;
+  private WithNameState setting_withNameState;
+
+  enum WithNameState {
+    NONE, GOT_KEY, GOT_VALUE
+  }
 
   public RFTColoringScanner(ColorManager colorManager) {
     this.manager = colorManager;
@@ -94,6 +101,8 @@ public class RFTColoringScanner implements ITokenScanner {
     tokSETTING_VAL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_VALUE)));
     tokSETTING_FILE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_FILE)));
     tokSETTING_FILE_ARG = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_FILE_ARG)));
+    tokSETTING_FILE_WITH_NAME_KEY = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.DEFAULT)));
+    tokSETTING_FILE_WITH_NAME_VALUE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_FILE)));
     tokVARIABLE_KEY = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.VARIABLE)));
     tokVARIABLE_VAL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.VARIABLE_VALUE)));
     tokNEW_KEYWORD = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD_NEW)));
@@ -262,7 +271,7 @@ public class RFTColoringScanner implements ITokenScanner {
       }
       case CONTINUATION_LINE: {
         if (argOff == 0) {
-          argOff = line.arguments.get(0).getValue().isEmpty() ? 2 : 1;
+          argOff = line.arguments.get(0).getValue().equals(RFEPreParser.CONTINUATION_STR) ? 1 : 2;
           if (argOff >= argLen) {
             prepareNextLine();
             return;
@@ -337,6 +346,7 @@ public class RFTColoringScanner implements ITokenScanner {
           tokenQueue.add(file, tokSETTING_FILE);
           prepareNextToken();
           setting_gotFirstArg = true;
+          setting_withNameState = WithNameState.NONE;
           return;
         }
         case KEYWORD_ARGS: {
@@ -351,11 +361,27 @@ public class RFTColoringScanner implements ITokenScanner {
     } else {
       switch (setting_type) {
         case FILE_ARGS: {
-          ParsedString first = line.arguments.get(argOff);
-          ParsedString last = line.arguments.get(argLen - 1);
-          tokenQueue.add(first.getArgCharPos(), last.getArgEndCharPos(), tokSETTING_FILE_ARG);
-          prepareNextLine();
-          return;
+          switch (setting_withNameState) {
+            case NONE:
+              ParsedString arg = line.arguments.get(argOff);
+              if (arg.getValue().equals("WITH NAME")) {
+                setting_withNameState = WithNameState.GOT_KEY;
+                tokenQueue.add(arg, tokSETTING_FILE_WITH_NAME_KEY);
+              } else {
+                tokenQueue.add(arg, tokSETTING_FILE_ARG);
+              }
+              prepareNextToken();
+              return;
+            case GOT_KEY:
+              ParsedString name = line.arguments.get(argOff);
+              tokenQueue.add(name, tokSETTING_FILE_WITH_NAME_VALUE);
+              setting_withNameState = WithNameState.GOT_VALUE;
+              prepareNextLine();
+              return;
+            case GOT_VALUE:
+              prepareNextLine();
+              return;
+          }
         }
         case KEYWORD_ARGS: {
           ParsedString first = line.arguments.get(argOff);

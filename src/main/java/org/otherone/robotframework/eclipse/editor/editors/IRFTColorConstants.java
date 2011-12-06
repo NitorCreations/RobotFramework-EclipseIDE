@@ -22,7 +22,7 @@ public interface IRFTColorConstants {
   RGB TABLE = new RGB(192, 0, 192);
   RGB SETTING = new RGB(0, 192, 0);
   RGB SETTING_VALUE = new RGB(0, 255, 0);
-  RGB SETTING_FILE = new RGB(0, 255, 128);
+  RGB SETTING_FILE = new RGB(255, 255, 255);
   RGB SETTING_FILE_ARG = new RGB(0, 255, 64);
   RGB VARIABLE = new RGB(0, 170, 180);
   RGB VARIABLE_VALUE = new RGB(180, 192, 202);
