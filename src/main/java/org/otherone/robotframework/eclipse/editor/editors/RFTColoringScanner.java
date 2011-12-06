@@ -314,7 +314,6 @@ public class RFTColoringScanner implements ITokenScanner {
 
   private void parseSettingArgs() {
     if (!setting_gotFirstArg) {
-      setting_gotFirstArg = true;
       switch (setting_type) {
         case UNKNOWN: {
           prepareNextLine();
@@ -337,12 +336,14 @@ public class RFTColoringScanner implements ITokenScanner {
           ParsedString file = line.arguments.get(argOff);
           tokenQueue.add(file, tokSETTING_FILE);
           prepareNextToken();
+          setting_gotFirstArg = true;
           return;
         }
         case KEYWORD_ARGS: {
           ParsedString file = line.arguments.get(argOff);
           tokenQueue.add(file, tokSETTING_KEYWORD_CALL);
           prepareNextToken();
+          setting_gotFirstArg = true;
           return;
         }
       }
