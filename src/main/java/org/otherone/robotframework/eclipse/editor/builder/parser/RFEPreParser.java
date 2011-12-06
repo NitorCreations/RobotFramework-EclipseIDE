@@ -23,8 +23,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 import org.otherone.robotframework.eclipse.editor.structure.ParsedString;
 
+// TODO case sensitivity
 public class RFEPreParser {
 
+  private static final String CONTINUATION_STR = "...";
   private final String filename;
   private final List<RFELine> lines;
 
@@ -126,9 +128,9 @@ public class RFEPreParser {
 
   private boolean tryParseContinuationLine(RFELine line) throws CoreException {
     ParsedString arg = line.arguments.get(0);
-    if (!arg.getValue().equals("\\")) {
+    if (!arg.getValue().equals(CONTINUATION_STR)) {
       // first column not continuation, try second-column continuation
-      if (!arg.getValue().isEmpty()) {
+      if (!arg.getValue().isEmpty() && !arg.getValue().equals("\\")) { // "  ..." or "\  ...", documentation does not clearly state either, and both are semantically valid
         // first column must be empty for second-column continuation
         return false;
       }
@@ -136,7 +138,7 @@ public class RFEPreParser {
         // must have two columns 
         return false;
       }
-      if (!line.arguments.get(1).getValue().equals("\\")) {
+      if (!line.arguments.get(1).getValue().equals(CONTINUATION_STR)) {
         // second column not continuation either
         return false;
       }
