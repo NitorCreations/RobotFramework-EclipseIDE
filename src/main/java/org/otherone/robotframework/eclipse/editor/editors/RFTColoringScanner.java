@@ -52,8 +52,20 @@ public class RFTColoringScanner implements ITokenScanner {
     settingTypes.put("Default Tags", SettingType.STRING);
     settingTypes.put("Test Setup", SettingType.KEYWORD_ARGS);
     settingTypes.put("Test Teardown", SettingType.KEYWORD_ARGS);
-    settingTypes.put("Test Template", SettingType.KEYWORD_ARGS);
+    settingTypes.put("Test Template", SettingType.KEYWORD_ARGS); // or just keyword ?
     settingTypes.put("Test Timeout", SettingType.STRING);
+  }
+
+  static final Map<String, SettingType> keywordSequenceSettingTypes = new HashMap<String, SettingType>();
+  static {
+    keywordSequenceSettingTypes.put("[Documentation]", SettingType.STRING);
+    keywordSequenceSettingTypes.put("[Tags]", SettingType.STRING);
+    keywordSequenceSettingTypes.put("[Setup]", SettingType.KEYWORD_ARGS);
+    keywordSequenceSettingTypes.put("[Teardown]", SettingType.KEYWORD_ARGS);
+    keywordSequenceSettingTypes.put("[Template]", SettingType.KEYWORD_ARGS); // or just keyword ?
+    keywordSequenceSettingTypes.put("[Timeout]", SettingType.STRING);
+    keywordSequenceSettingTypes.put("[Arguments]", SettingType.STRING);
+    keywordSequenceSettingTypes.put("[Return]", SettingType.STRING);
   }
 
   private final ColorManager manager;
@@ -84,7 +96,11 @@ public class RFTColoringScanner implements ITokenScanner {
   private RFEPreParser.Type lastRealType;
 
   // private RFELine lastParsedLine;
+
   private boolean keywordSequence_isSetting;
+  private SettingType keywordSequence_settingType;
+  private boolean keywordSequence_settingGotFirstArg;
+
   private SettingType setting_type;
   private boolean setting_gotFirstArg;
   private WithNameState setting_withNameState;
@@ -255,12 +271,17 @@ public class RFTColoringScanner implements ITokenScanner {
             return;
           }
           case 1: {
-            ParsedString newName = line.arguments.get(1);
-            keywordSequence_isSetting = newName.getValue().startsWith("[");
+            ParsedString keywordOrSetting = line.arguments.get(1);
+            keywordSequence_isSetting = keywordOrSetting.getValue().startsWith("[");
             if (keywordSequence_isSetting) {
-              tokenQueue.add(newName, tokSETTING_KEY);
+              keywordSequence_settingType = keywordSequenceSettingTypes.get(keywordOrSetting.getValue());
+              if (keywordSequence_settingType == null) {
+                keywordSequence_settingType = SettingType.UNKNOWN;
+              }
+              keywordSequence_settingGotFirstArg = false;
+              tokenQueue.add(keywordOrSetting, tokSETTING_KEY);
             } else {
-              tokenQueue.add(newName, tokKEYWORD_CALL); // TODO template
+              tokenQueue.add(keywordOrSetting, tokKEYWORD_CALL); // TODO template
             }
             prepareNextToken();
             return;
@@ -405,10 +426,48 @@ public class RFTColoringScanner implements ITokenScanner {
   }
 
   private void parseKeywordSequenceArgs() {
-    ParsedString first = line.arguments.get(argOff);
-    ParsedString last = line.arguments.get(argLen - 1);
-    tokenQueue.add(first.getArgCharPos(), last.getArgEndCharPos(), keywordSequence_isSetting ? tokSETTING_VAL : tokKEYWORD_ARG);
-    prepareNextLine();
+    if (keywordSequence_isSetting) {
+      if (!keywordSequence_settingGotFirstArg) {
+        switch (keywordSequence_settingType) {
+          case UNKNOWN: {
+            prepareNextLine();
+            return;
+          }
+          case STRING: {
+            ParsedString first = line.arguments.get(argOff);
+            ParsedString last = line.arguments.get(argLen - 1);
+            tokenQueue.add(first.getArgCharPos(), last.getArgEndCharPos(), tokSETTING_VAL);
+            prepareNextLine();
+            return;
+          }
+          case KEYWORD_ARGS: {
+            ParsedString file = line.arguments.get(argOff);
+            tokenQueue.add(file, tokSETTING_KEYWORD_CALL);
+            prepareNextToken();
+            keywordSequence_settingGotFirstArg = true;
+            return;
+          }
+        }
+        throw new RuntimeException();
+      } else {
+        switch (keywordSequence_settingType) {
+          case KEYWORD_ARGS: {
+            ParsedString first = line.arguments.get(argOff);
+            ParsedString last = line.arguments.get(argLen - 1);
+            tokenQueue.add(first.getArgCharPos(), last.getArgEndCharPos(), tokSETTING_KEYWORD_ARG);
+            prepareNextLine();
+            return;
+          }
+        }
+        throw new RuntimeException();
+      }
+
+    } else {
+      ParsedString first = line.arguments.get(argOff);
+      ParsedString last = line.arguments.get(argLen - 1);
+      tokenQueue.add(first.getArgCharPos(), last.getArgEndCharPos(), tokKEYWORD_ARG);
+      prepareNextLine();
+    }
   }
 
   static class TokenQueue {
