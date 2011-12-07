@@ -70,6 +70,7 @@ public class RFTColoringScanner implements ITokenScanner {
   private final IToken tokVARIABLE_KEY;
   private final IToken tokVARIABLE_VAL;
   private final IToken tokCOMMENT;
+  private final IToken tokNEW_TESTCASE;
   private final IToken tokNEW_KEYWORD;
   private final IToken tokKEYWORD_CALL;
   private final IToken tokKEYWORD_ARG;
@@ -105,6 +106,7 @@ public class RFTColoringScanner implements ITokenScanner {
     tokSETTING_FILE_WITH_NAME_VALUE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_FILE)));
     tokVARIABLE_KEY = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.VARIABLE)));
     tokVARIABLE_VAL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.VARIABLE_VALUE)));
+    tokNEW_TESTCASE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.TESTCASE_NEW)));
     tokNEW_KEYWORD = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD_NEW)));
     tokKEYWORD_CALL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD)));
     tokKEYWORD_ARG = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD_ARG)));
@@ -247,7 +249,7 @@ public class RFTColoringScanner implements ITokenScanner {
           case 0: {
             ParsedString newName = line.arguments.get(0);
             if (!newName.getValue().isEmpty()) {
-              tokenQueue.add(newName, tokNEW_KEYWORD);
+              tokenQueue.add(newName, type == RFEPreParser.Type.TESTCASE_TABLE_TESTCASE_BEGIN ? tokNEW_TESTCASE : tokNEW_KEYWORD);
             }
             prepareNextToken();
             return;
