@@ -28,6 +28,7 @@ public interface IRFTColorConstants {
   RGB VARIABLE_VALUE = new RGB(180, 192, 202);
   RGB TESTCASE_NEW = new RGB(222, 0, 0);
   RGB KEYWORD_NEW = new RGB(255, 255, 50);
+  RGB KEYWORD_LVALUE = new RGB(255, 0, 180);
   RGB KEYWORD = new RGB(255, 180, 0);
   RGB KEYWORD_ARG = new RGB(255, 100, 0);
   //RGB ACTION = new RGB(0, 100, 255);
