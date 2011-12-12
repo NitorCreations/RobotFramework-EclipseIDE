@@ -84,8 +84,9 @@ public class RFEPreParser {
       // prevLineType not updated
       return;
     }
-    String first = line.arguments.get(0).getValue();
-    boolean firstEmpty = first.isEmpty();
+    ParsedString firstArg = line.arguments.get(0);
+    boolean firstEmpty = firstArg.isEmpty();
+    String first = firstArg.getValue();
     String second = line.arguments.size() < 2 ? "" : line.arguments.get(1).getValue();
     if (first.startsWith("#") || firstEmpty && second.startsWith("#")) {
       line.info.put(Type.class, Type.COMMENT_LINE);
@@ -130,7 +131,7 @@ public class RFEPreParser {
     ParsedString arg = line.arguments.get(0);
     if (!arg.getValue().equals(CONTINUATION_STR)) {
       // first column not continuation, try second-column continuation
-      if (!arg.getValue().isEmpty() && !arg.getValue().equals("\\")) { // "  ..." or "\  ...", documentation does not clearly state either, and both are semantically valid
+      if (!arg.isEmpty()) { // "  ..." or "\  ...", documentation does not clearly state either, and both are semantically valid
         // first column must be empty for second-column continuation
         return false;
       }

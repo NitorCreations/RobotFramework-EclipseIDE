@@ -45,6 +45,10 @@ public class ParsedString implements IParsedKeywordString {
     return value;
   }
 
+  public boolean isEmpty() {
+    return value.isEmpty() || value.equals("\\");
+  }
+
   @Override
   public int getArgCharPos() {
     return argCharPos;
