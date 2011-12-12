@@ -40,7 +40,10 @@ public class RFTColoringScanner implements ITokenScanner {
   }
 
   enum KeywordCallState {
-    UNDETERMINED, UNDETERMINED_GOTVARIABLE, LVALUE, KEYWORD_NOTFIRST, KEYWORD, ARGS,
+    UNDETERMINED, UNDETERMINED_NOT_FOR_NOINDENT, UNDETERMINED_GOTVARIABLE, LVALUE_NOINDENT, LVALUE, KEYWORD, KEYWORD_NOT_FOR_NOINDENT, FOR_ARGS, ARGS, ;
+    public boolean isUndetermined() {
+      return name().startsWith("UNDETERMINED");
+    }
   }
 
   static final Map<String, SettingType> settingTypes = new HashMap<String, SettingType>();
@@ -81,7 +84,7 @@ public class RFTColoringScanner implements ITokenScanner {
   private final IToken tokSETTING_FILE_ARG;
   private final IToken tokSETTING_FILE_WITH_NAME_KEY;
   private final IToken tokSETTING_FILE_WITH_NAME_VALUE;
-  private final IToken tokVARIABLE_KEY;
+  private final IToken tokVARIABLE_KEY; // TODO consider combining with tokKEYWORD_LVALUE
   private final IToken tokVARIABLE_VAL;
   private final IToken tokCOMMENT;
   private final IToken tokNEW_TESTCASE;
@@ -89,6 +92,7 @@ public class RFTColoringScanner implements ITokenScanner {
   private final IToken tokKEYWORD_LVALUE;
   private final IToken tokKEYWORD_CALL;
   private final IToken tokKEYWORD_ARG;
+  private final IToken tokFOR_PART;
 
   // private IDocument document;
   private List<RFELine> lines;
@@ -131,6 +135,7 @@ public class RFTColoringScanner implements ITokenScanner {
     tokKEYWORD_LVALUE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD_LVALUE)));
     tokKEYWORD_CALL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD)));
     tokKEYWORD_ARG = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD_ARG)));
+    tokFOR_PART = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.FOR_PART)));
     //IToken tokARGUMENT = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.ARGUMENT)));
     //IToken tokARGUMENT_SEPARATOR = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.ARGUMENT_SEPARATOR), null, TextAttribute.UNDERLINE));
   }
@@ -234,7 +239,7 @@ public class RFTColoringScanner implements ITokenScanner {
               setting_type = SettingType.UNKNOWN;
             }
             setting_gotFirstArg = false;
-            keywordSequence_keywordCallState = KeywordCallState.UNDETERMINED;
+            keywordSequence_keywordCallState = KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT; // TODO possibly should be KEYWORD_NOT_FOR_NOINDENT
             prepareNextToken();
             return;
           }
@@ -285,9 +290,9 @@ public class RFTColoringScanner implements ITokenScanner {
           }
           case 1: {
             ParsedString keywordOrSetting = line.arguments.get(1);
-            keywordSequence_keywordCallState = KeywordCallState.UNDETERMINED;
             keywordSequence_isSetting = keywordOrSetting.getValue().startsWith("[");
             if (keywordSequence_isSetting) {
+              keywordSequence_keywordCallState = KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT; // TODO possibly should be KEYWORD_NOT_FOR_NOINDENT
               keywordSequence_settingType = keywordSequenceSettingTypes.get(keywordOrSetting.getValue());
               if (keywordSequence_settingType == null) {
                 keywordSequence_settingType = SettingType.UNKNOWN;
@@ -295,6 +300,7 @@ public class RFTColoringScanner implements ITokenScanner {
               tokenQueue.add(keywordOrSetting, tokSETTING_KEY);
               prepareNextToken();
             } else {
+              keywordSequence_keywordCallState = KeywordCallState.UNDETERMINED;
               parseKeywordCall();
             }
             return;
@@ -457,29 +463,52 @@ public class RFTColoringScanner implements ITokenScanner {
     throw new RuntimeException();
   }
 
+  /**
+   * Before this is called the first time, keywordSequence_keywordCallState must be initialized to
+   * either UNDETERMINED, UNDETERMINED_NOINDENT, KEYWORD_NOINDENT, KEYWORD_NOT_FOR_NOINDENT
+   */
   private void parseKeywordCall() {
-    if (keywordSequence_keywordCallState == KeywordCallState.UNDETERMINED) {
-      keywordSequence_keywordCallState = determineInitialKeywordCallState();
+    if (keywordSequence_keywordCallState.isUndetermined()) {
+      keywordSequence_keywordCallState = determineInitialKeywordCallState(keywordSequence_keywordCallState);
     }
     switch (keywordSequence_keywordCallState) {
+      case LVALUE_NOINDENT:
       case LVALUE: {
         ParsedString variable = line.arguments.get(argOff);
-        if (!variable.isEmpty()) {
+        if (!variable.isEmpty() || keywordSequence_keywordCallState == KeywordCallState.LVALUE_NOINDENT) {
           tokenQueue.add(variable, tokKEYWORD_LVALUE);
           if (variable.getValue().endsWith("=")) {
-            keywordSequence_keywordCallState = KeywordCallState.KEYWORD_NOTFIRST;
+            keywordSequence_keywordCallState = KeywordCallState.KEYWORD_NOT_FOR_NOINDENT;
           }
         }
         prepareNextToken();
         return;
       }
-      case KEYWORD_NOTFIRST:
+      case KEYWORD_NOT_FOR_NOINDENT:
       case KEYWORD: {
         ParsedString keyword = line.arguments.get(argOff);
-        if (!keyword.isEmpty() || keywordSequence_keywordCallState == KeywordCallState.KEYWORD_NOTFIRST) {
-          tokenQueue.add(keyword, tokKEYWORD_CALL);
-          keywordSequence_keywordCallState = KeywordCallState.ARGS;
+        if (!keyword.isEmpty() || keywordSequence_keywordCallState == KeywordCallState.KEYWORD_NOT_FOR_NOINDENT) {
+          if (keyword.getValue().equals(":FOR") && keywordSequence_keywordCallState != KeywordCallState.KEYWORD_NOT_FOR_NOINDENT) {
+            tokenQueue.add(keyword, tokFOR_PART);
+            keywordSequence_keywordCallState = KeywordCallState.FOR_ARGS;
+          } else {
+            tokenQueue.add(keyword, tokKEYWORD_CALL);
+            keywordSequence_keywordCallState = KeywordCallState.ARGS;
+          }
         }
+        prepareNextToken();
+        return;
+      }
+      case FOR_ARGS: {
+        ParsedString arg = line.arguments.get(argOff);
+        String argVal = arg.getValue();
+        if (argVal.equals("IN") || argVal.equals("IN RANGE")) {
+          tokenQueue.add(arg, tokFOR_PART);
+          keywordSequence_keywordCallState = KeywordCallState.ARGS;
+          prepareNextToken();
+          return;
+        }
+        tokenQueue.add(arg, tokKEYWORD_LVALUE);
         prepareNextToken();
         return;
       }
@@ -494,7 +523,7 @@ public class RFTColoringScanner implements ITokenScanner {
     throw new RuntimeException();
   }
 
-  KeywordCallState determineInitialKeywordCallState() {
+  KeywordCallState determineInitialKeywordCallState(KeywordCallState initialKeywordCallState) {
     /* in this particular case, we need to do lookahead to see if we have
      * zero or more direct variable references, followed by a variable
      * reference suffixed with an equal sign. If this is the case, those
@@ -503,8 +532,8 @@ public class RFTColoringScanner implements ITokenScanner {
      */
     // TODO if template then go directly to ARGS state
 
-    KeywordCallState keywordCallState = scanLine(KeywordCallState.UNDETERMINED, line, argOff);
-    if (keywordCallState != KeywordCallState.UNDETERMINED && keywordCallState != KeywordCallState.UNDETERMINED_GOTVARIABLE) {
+    KeywordCallState keywordCallState = scanLine(initialKeywordCallState, line, argOff);
+    if (!keywordCallState.isUndetermined()) {
       return keywordCallState;
     }
 
@@ -518,7 +547,7 @@ public class RFTColoringScanner implements ITokenScanner {
         case CONTINUATION_LINE: {
           int nextLineArgOff = determineContinuationLineArgOff(nextLine);
           keywordCallState = scanLine(keywordCallState, nextLine, nextLineArgOff);
-          if (keywordCallState != KeywordCallState.UNDETERMINED && keywordCallState != KeywordCallState.UNDETERMINED_GOTVARIABLE) {
+          if (!keywordCallState.isUndetermined()) {
             return keywordCallState;
           }
           break;
@@ -528,11 +557,11 @@ public class RFTColoringScanner implements ITokenScanner {
       }
     }
     // no equal sign found so..
-    return KeywordCallState.KEYWORD;
+    return initialKeywordCallState == KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT ? KeywordCallState.KEYWORD_NOT_FOR_NOINDENT : KeywordCallState.KEYWORD;
   }
 
   private KeywordCallState scanLine(KeywordCallState initialKeywordCallState, RFELine scanLine, int scanOff) {
-    assert initialKeywordCallState == KeywordCallState.UNDETERMINED || initialKeywordCallState == KeywordCallState.UNDETERMINED_GOTVARIABLE;
+    assert initialKeywordCallState.isUndetermined();
     for (; scanOff < scanLine.arguments.size(); ++scanOff) {
       ParsedString parsedString = scanLine.arguments.get(scanOff);
       if (parsedString.isEmpty()) {
@@ -541,7 +570,8 @@ public class RFTColoringScanner implements ITokenScanner {
           continue;
         } else {
           // no equal sign found before first non-variable parameter
-          return KeywordCallState.KEYWORD;
+          return initialKeywordCallState == KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT ? KeywordCallState.KEYWORD_NOT_FOR_NOINDENT
+              : KeywordCallState.KEYWORD;
         }
       }
       String arg = parsedString.getValue();
@@ -553,10 +583,11 @@ public class RFTColoringScanner implements ITokenScanner {
           break;
         default:
           // non-variable and no prior lvalue indication, so..
-          return KeywordCallState.KEYWORD;
+          return initialKeywordCallState == KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT ? KeywordCallState.KEYWORD_NOT_FOR_NOINDENT
+              : KeywordCallState.KEYWORD;
       }
       if (arg.endsWith("=")) {
-        return KeywordCallState.LVALUE;
+        return initialKeywordCallState == KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT ? KeywordCallState.LVALUE_NOINDENT : KeywordCallState.LVALUE;
       }
     }
     return initialKeywordCallState;

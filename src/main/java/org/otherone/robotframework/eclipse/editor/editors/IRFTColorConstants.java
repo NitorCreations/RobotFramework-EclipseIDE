@@ -31,6 +31,7 @@ public interface IRFTColorConstants {
   RGB KEYWORD_LVALUE = new RGB(255, 0, 180);
   RGB KEYWORD = new RGB(255, 180, 0);
   RGB KEYWORD_ARG = new RGB(255, 100, 0);
+  RGB FOR_PART = new RGB(0, 255, 255);
   //RGB ACTION = new RGB(0, 100, 255);
   RGB DEFAULT = new RGB(192, 192, 192);
   RGB UNKNOWN = new RGB(255, 140, 0);
