@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 Nitor Creations Oy
+ * Copyright 2012 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public class RFTColoringScanner implements ITokenScanner {
   private final IToken tokKEYWORD_ARG;
   private final IToken tokFOR_PART;
 
-  // private IDocument document;
+  //  private IDocument document;
   private List<RFELine> lines;
   private ListIterator<RFELine> lineIterator;
   private RFELine line;
@@ -103,7 +103,7 @@ public class RFTColoringScanner implements ITokenScanner {
   private boolean lineEndsWithComment;
   private RFEPreParser.Type lastRealType;
 
-  // private RFELine lastParsedLine;
+  //  private RFELine lastParsedLine;
 
   private boolean keywordSequence_isSetting;
   private SettingType keywordSequence_settingType;
@@ -143,7 +143,7 @@ public class RFTColoringScanner implements ITokenScanner {
   @Override
   public void setRange(IDocument document, int offset, int length) {
     try {
-      // this.document = document;
+      //      this.document = document;
       tokenQueue.reset();
       lines = new RFELexer(document).lex();
       new RFEPreParser(document, lines).preParse();
@@ -204,6 +204,13 @@ public class RFTColoringScanner implements ITokenScanner {
     //    int tokenLen = getTokenLength();
     //    System.out.print("TOK: " + (lastParsedLine != null ? "[" + lastParsedLine.lineNo + ":" + lastParsedLine.lineCharPos + "] " : "") + t + " off " + tokenOff
     //        + " end " + (tokenOff + tokenLen) + " len " + tokenLen);
+    //    if (t instanceof Token) {
+    //      Token tt = (Token) t;
+    //      if (tt.getData() instanceof TextAttribute) {
+    //        TextAttribute ta = (TextAttribute) tt.getData();
+    //        System.out.print(" " + ta.getForeground());
+    //      }
+    //    }
     //    System.out.println(" txt \"" + document.get().substring(tokenOff, tokenOff + tokenLen).replace("\n", "\\n") + "\"");
     return t;
   }
