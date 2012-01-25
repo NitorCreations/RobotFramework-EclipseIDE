@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 Nitor Creations Oy
+ * Copyright 2012 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.otherone.robotframework.eclipse.editor.builder.RFEBuilder;
 import org.otherone.robotframework.eclipse.editor.builder.parser.RFEParser.ParsedLineInfo;
 import org.otherone.robotframework.eclipse.editor.builder.parser.SeverityConfig;
+import org.otherone.robotframework.eclipse.editor.builder.parser.util.ParserUtil;
 import org.otherone.robotframework.eclipse.editor.structure.DynamicParsedString;
 import org.otherone.robotframework.eclipse.editor.structure.KeywordCall;
 import org.otherone.robotframework.eclipse.editor.structure.ParsedString;
@@ -71,7 +72,7 @@ public abstract class State {
     if (!tableArgument.getValue().startsWith("*")) {
       return false;
     }
-    String table = tableArgument.getValue().replace("*", "");
+    String table = ParserUtil.parseTable(tableArgument.getValue());
     State nextState = tableNameToState.get(table);
     if (nextState == null) {
       nextState = Ignore.STATE;

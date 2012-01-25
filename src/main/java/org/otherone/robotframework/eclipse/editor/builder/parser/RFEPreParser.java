@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 Nitor Creations Oy
+ * Copyright 2012 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
+import org.otherone.robotframework.eclipse.editor.builder.parser.util.ParserUtil;
 import org.otherone.robotframework.eclipse.editor.structure.ParsedString;
 
 // TODO case sensitivity
@@ -103,7 +104,7 @@ public class RFEPreParser {
     if (!tableArgument.getValue().startsWith("*")) {
       return null;
     }
-    String table = tableArgument.getValue().replace("*", "");
+    String table = ParserUtil.parseTable(tableArgument.getValue());
     Type curType = tableNameToType.get(table);
     if (curType == null) {
       return Type.IGNORE_TABLE;
