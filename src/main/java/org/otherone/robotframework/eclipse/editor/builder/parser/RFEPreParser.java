@@ -115,17 +115,17 @@ public class RFEPreParser {
   private static final Map<String, Type> tableNameToType = new HashMap<String, Type>();
 
   static {
-    tableNameToType.put("Setting", Type.SETTING_TABLE_BEGIN);
-    tableNameToType.put("Settings", Type.SETTING_TABLE_BEGIN);
-    tableNameToType.put("Metadata", Type.SETTING_TABLE_BEGIN);
-    tableNameToType.put("Variable", Type.VARIABLE_TABLE_BEGIN);
-    tableNameToType.put("Variables", Type.VARIABLE_TABLE_BEGIN);
-    tableNameToType.put("Test Case", Type.TESTCASE_TABLE_BEGIN);
-    tableNameToType.put("Test Cases", Type.TESTCASE_TABLE_BEGIN);
-    tableNameToType.put("Keyword", Type.KEYWORD_TABLE_BEGIN);
-    tableNameToType.put("Keywords", Type.KEYWORD_TABLE_BEGIN);
-    tableNameToType.put("User Keyword", Type.KEYWORD_TABLE_BEGIN);
-    tableNameToType.put("User Keywords", Type.KEYWORD_TABLE_BEGIN);
+    tableNameToType.put("setting", Type.SETTING_TABLE_BEGIN);
+    tableNameToType.put("settings", Type.SETTING_TABLE_BEGIN);
+    tableNameToType.put("metadata", Type.SETTING_TABLE_BEGIN);
+    tableNameToType.put("variable", Type.VARIABLE_TABLE_BEGIN);
+    tableNameToType.put("variables", Type.VARIABLE_TABLE_BEGIN);
+    tableNameToType.put("testcase", Type.TESTCASE_TABLE_BEGIN);
+    tableNameToType.put("testcases", Type.TESTCASE_TABLE_BEGIN);
+    tableNameToType.put("keyword", Type.KEYWORD_TABLE_BEGIN);
+    tableNameToType.put("keywords", Type.KEYWORD_TABLE_BEGIN);
+    tableNameToType.put("userkeyword", Type.KEYWORD_TABLE_BEGIN);
+    tableNameToType.put("userkeywords", Type.KEYWORD_TABLE_BEGIN);
   }
 
   private boolean tryParseContinuationLine(RFELine line) throws CoreException {

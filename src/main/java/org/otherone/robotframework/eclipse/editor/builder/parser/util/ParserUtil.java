@@ -15,8 +15,12 @@
  */
 package org.otherone.robotframework.eclipse.editor.builder.parser.util;
 
+import java.util.regex.Pattern;
+
 public class ParserUtil {
+  private static final Pattern PAT_ASTERISKS_AND_BLANKS = Pattern.compile("[* ]+");
+
   public static String parseTable(String line) {
-    return line.replace("*", "").trim();
+    return PAT_ASTERISKS_AND_BLANKS.matcher(line).replaceAll("").toLowerCase();
   }
 }

@@ -141,17 +141,17 @@ public abstract class State {
   static final Map<String, State> tableNameToState = new HashMap<String, State>();
 
   static {
-    tableNameToState.put("Setting", SettingTable.STATE);
-    tableNameToState.put("Settings", SettingTable.STATE);
-    tableNameToState.put("Metadata", SettingTable.STATE);
-    tableNameToState.put("Variable", VariableTable.STATE);
-    tableNameToState.put("Variables", VariableTable.STATE);
-    tableNameToState.put("Test Case", TestcaseTableInitial.STATE);
-    tableNameToState.put("Test Cases", TestcaseTableInitial.STATE);
-    tableNameToState.put("Keyword", KeywordTableInitial.STATE);
-    tableNameToState.put("Keywords", KeywordTableInitial.STATE);
-    tableNameToState.put("User Keyword", KeywordTableInitial.STATE);
-    tableNameToState.put("User Keywords", KeywordTableInitial.STATE);
+    tableNameToState.put("setting", SettingTable.STATE);
+    tableNameToState.put("settings", SettingTable.STATE);
+    tableNameToState.put("metadata", SettingTable.STATE);
+    tableNameToState.put("variable", VariableTable.STATE);
+    tableNameToState.put("variables", VariableTable.STATE);
+    tableNameToState.put("testcase", TestcaseTableInitial.STATE);
+    tableNameToState.put("testcases", TestcaseTableInitial.STATE);
+    tableNameToState.put("keyword", KeywordTableInitial.STATE);
+    tableNameToState.put("keywords", KeywordTableInitial.STATE);
+    tableNameToState.put("userkeyword", KeywordTableInitial.STATE);
+    tableNameToState.put("userkeywords", KeywordTableInitial.STATE);
   }
 
   void addError(ParsedLineInfo info, String error, int startPos, int endPos) throws CoreException {
