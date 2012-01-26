@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 Nitor Creations Oy
+ * Copyright 2012 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.otherone.robotframework.eclipse.editor.Activator;
-import org.otherone.robotframework.eclipse.editor.builder.parser.RFELine;
 import org.otherone.robotframework.eclipse.editor.builder.parser.RFELexer;
+import org.otherone.robotframework.eclipse.editor.builder.parser.RFELine;
 import org.otherone.robotframework.eclipse.editor.builder.parser.RFEParser;
 
 public class RFEBuilder extends IncrementalProjectBuilder {
@@ -118,6 +118,7 @@ public class RFEBuilder extends IncrementalProjectBuilder {
   void build(IResource resource, IProgressMonitor monitor) {
     if (!(resource instanceof IFile)) return;
     if (!resource.getName().endsWith(".txt")) return;
+    if (resource.getProjectRelativePath().toPortableString().startsWith("target/")) return; // hacky maven support :)
     System.out.println("Build resource " + resource);
     IFile file = (IFile) resource;
     try {
