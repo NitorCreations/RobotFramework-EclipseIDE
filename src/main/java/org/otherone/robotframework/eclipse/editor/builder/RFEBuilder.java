@@ -117,10 +117,16 @@ public class RFEBuilder extends IncrementalProjectBuilder {
    */
   void build(IResource resource, IProgressMonitor monitor) {
     if (!(resource instanceof IFile)) return;
-    if (!resource.getName().endsWith(".txt")) return;
-    if (resource.getProjectRelativePath().toPortableString().startsWith("target/")) return; // hacky maven support :)
-    System.out.println("Build resource " + resource);
     IFile file = (IFile) resource;
+    if (!file.getName().endsWith(".txt") || file.getProjectRelativePath().toPortableString().startsWith("target/")) {
+      try {
+        file.deleteMarkers(RFEBuilder.MARKER_TYPE, false, IResource.DEPTH_ZERO);
+      } catch (CoreException e) {
+        // ignore
+      }
+      return;
+    }
+    System.out.println("Build resource " + resource);
     try {
       List<RFELine> lines = new RFELexer(file, monitor).lex();
       new RFEParser(file, lines, monitor).parse();
