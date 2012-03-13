@@ -9,7 +9,7 @@
             extensions="txt"
             icon="icons/robo1.png"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
-            class="org.otherone.robotframework.eclipse.editor.editors.RobotFrameworkTextfileEditor"
+            class="com.nitorcreations.robotframework.eclipseide.editors.RobotFrameworkTextfileEditor"
             id="org.otherone.robotframework.eclipse.editor.editors.RobotFrameworkTextfileEditor">
       </editor>
    </extension>
@@ -32,7 +32,7 @@
             callOnEmptyDelta="false"
             hasNature="true">
          <run
-               class="org.otherone.robotframework.eclipse.editor.builder.RFEBuilder">
+               class="com.nitorcreations.robotframework.eclipseide.builder.RFEBuilder">
          </run>
       </builder>
    </extension>
@@ -42,7 +42,7 @@
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="org.otherone.robotframework.eclipse.editor.builder.RFENature">
+               class="com.nitorcreations.robotframework.eclipseide.builder.RFENature">
          </run>
       </runtime>
       <builder
@@ -57,7 +57,7 @@
             nameFilter="*"
             objectClass="org.eclipse.core.resources.IProject">
          <action
-               class="org.otherone.robotframework.eclipse.editor.builder.ToggleNatureAction"
+               class="com.nitorcreations.robotframework.eclipseide.builder.ToggleNatureAction"
                enablesFor="+"
                id="org.otherone.robotframework.eclipse.editor.addRemoveNatureAction"
                label="Add/Remove Robot Framework Validation Nature"
