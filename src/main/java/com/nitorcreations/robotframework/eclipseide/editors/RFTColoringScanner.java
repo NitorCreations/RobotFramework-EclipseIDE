@@ -85,23 +85,6 @@ public class RFTColoringScanner implements ITokenScanner {
 
     private final ColorManager manager;
     private final TokenQueue tokenQueue = new TokenQueue();
-    private IToken tokTABLE;
-    private IToken tokSETTING_KEY;
-    private IToken tokSETTING_VAL;
-    private IToken tokSETTING_FILE;
-    private IToken tokSETTING_FILE_ARG;
-    private IToken tokSETTING_FILE_WITH_NAME_KEY;
-    private IToken tokSETTING_FILE_WITH_NAME_VALUE;
-    private IToken tokVARIABLE_KEY; // TODO consider combining with
-                                    // tokKEYWORD_LVALUE
-    private IToken tokVARIABLE_VAL;
-    private IToken tokCOMMENT;
-    private IToken tokNEW_TESTCASE;
-    private IToken tokNEW_KEYWORD;
-    private IToken tokKEYWORD_LVALUE;
-    private IToken tokKEYWORD_CALL;
-    private IToken tokKEYWORD_ARG;
-    private IToken tokFOR_PART;
 
     // private IDocument document;
     private List<RFELine> lines;
@@ -109,22 +92,8 @@ public class RFTColoringScanner implements ITokenScanner {
     private RFELine line;
     private int argOff;
     private int argLen;
-    private boolean lineEndsWithComment;
-    private RFEPreParser.Type lastRealType;
 
     // private RFELine lastParsedLine;
-
-    private boolean keywordSequence_isSetting;
-    private SettingType keywordSequence_settingType;
-    private KeywordCallState keywordSequence_keywordCallState;
-
-    private SettingType setting_type;
-    private boolean setting_gotFirstArg;
-    private WithNameState setting_withNameState;
-
-    enum WithNameState {
-        NONE, GOT_KEY, GOT_VALUE
-    }
 
     public RFTColoringScanner(ColorManager colorManager) {
         this.manager = colorManager;
@@ -139,38 +108,23 @@ public class RFTColoringScanner implements ITokenScanner {
 
     private void prepareTokens() {
         // TODO dynamically fetched colors
-        tokTABLE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.TABLE)));
-        tokCOMMENT = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.COMMENT)));
-        tokSETTING_KEY = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING)));
-        tokSETTING_VAL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_VALUE)));
-        tokSETTING_FILE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_FILE)));
-        tokSETTING_FILE_ARG = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_FILE_ARG)));
-        tokSETTING_FILE_WITH_NAME_KEY = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.DEFAULT)));
-        tokSETTING_FILE_WITH_NAME_VALUE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_FILE)));
-        tokVARIABLE_KEY = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.VARIABLE)));
-        tokVARIABLE_VAL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.VARIABLE_VALUE)));
-        tokNEW_TESTCASE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.TESTCASE_NEW)));
-        tokNEW_KEYWORD = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD_NEW)));
-        tokKEYWORD_LVALUE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD_LVALUE)));
-        tokKEYWORD_CALL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD)));
-        tokKEYWORD_ARG = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD_ARG)));
-        tokFOR_PART = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.FOR_PART)));
-        argTypeToTokenMap.put(ArgumentType.COMMENT, tokCOMMENT);
-        argTypeToTokenMap.put(ArgumentType.TABLE, tokTABLE);
-        argTypeToTokenMap.put(ArgumentType.SETTING_KEY, tokSETTING_KEY);
-        argTypeToTokenMap.put(ArgumentType.VARIABLE_KEY, tokVARIABLE_KEY);
-        argTypeToTokenMap.put(ArgumentType.NEW_TESTCASE, tokNEW_TESTCASE);
-        argTypeToTokenMap.put(ArgumentType.NEW_KEYWORD, tokNEW_KEYWORD);
-        argTypeToTokenMap.put(ArgumentType.SETTING_VAL, tokSETTING_VAL);
-        argTypeToTokenMap.put(ArgumentType.SETTING_FILE, tokSETTING_FILE);
-        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_WITH_NAME_KEY, tokSETTING_FILE_WITH_NAME_KEY);
-        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_ARG, tokSETTING_FILE_ARG);
-        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_WITH_NAME_VALUE, tokSETTING_FILE_WITH_NAME_VALUE);
-        argTypeToTokenMap.put(ArgumentType.VARIABLE_VAL, tokVARIABLE_VAL);
-        argTypeToTokenMap.put(ArgumentType.KEYWORD_LVALUE, tokKEYWORD_LVALUE);
-        argTypeToTokenMap.put(ArgumentType.FOR_PART, tokFOR_PART);
-        argTypeToTokenMap.put(ArgumentType.KEYWORD_CALL, tokKEYWORD_CALL);
-        argTypeToTokenMap.put(ArgumentType.KEYWORD_ARG, tokKEYWORD_ARG);
+        // TODO consider combining tokVARIABLE_KEY with tokKEYWORD_LVALUE
+        argTypeToTokenMap.put(ArgumentType.COMMENT, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.COMMENT))));
+        argTypeToTokenMap.put(ArgumentType.TABLE, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.TABLE))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_KEY, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING))));
+        argTypeToTokenMap.put(ArgumentType.VARIABLE_KEY, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.VARIABLE))));
+        argTypeToTokenMap.put(ArgumentType.NEW_TESTCASE, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.TESTCASE_NEW))));
+        argTypeToTokenMap.put(ArgumentType.NEW_KEYWORD, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD_NEW))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_VAL, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_VALUE))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_FILE, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_FILE))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_WITH_NAME_KEY, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.DEFAULT))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_ARG, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_FILE_ARG))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_WITH_NAME_VALUE, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_FILE))));
+        argTypeToTokenMap.put(ArgumentType.VARIABLE_VAL, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.VARIABLE_VALUE))));
+        argTypeToTokenMap.put(ArgumentType.KEYWORD_LVALUE, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD_LVALUE))));
+        argTypeToTokenMap.put(ArgumentType.FOR_PART, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.FOR_PART))));
+        argTypeToTokenMap.put(ArgumentType.KEYWORD_CALL, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD))));
+        argTypeToTokenMap.put(ArgumentType.KEYWORD_ARG, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD_ARG))));
     }
 
     @Override
@@ -185,7 +139,6 @@ public class RFTColoringScanner implements ITokenScanner {
             argumentPreParser.setRange(lines);
             argumentPreParser.parseAll();
             lineIterator = lines.listIterator();
-            lastRealType = RFEPreParser.Type.IGNORE;
             prepareNextLine();
             // fileContents = new RFEParser(document, lines).parse();
             // this.fileContentsVariableIt =
@@ -206,28 +159,14 @@ public class RFTColoringScanner implements ITokenScanner {
     void prepareNextLine() {
         assert argOff >= 0;
         assert argOff <= argLen;
-        // if previous line ended with comment, add it to queue now
-        if (lineEndsWithComment) {
-            ParsedString comment = line.arguments.get(argLen);
-            if (comment.getValue().startsWith("#")) {
-                tokenQueue.add(comment, tokCOMMENT);
-            }
-        }
-        // next line
         if (lineIterator.hasNext()) {
             line = lineIterator.next();
             argLen = line.arguments.size();
-            // lineEndsWithComment = line.arguments.get(argLen - 1).getType() ==
-            // ArgumentType.COMMENT;
-            // if (lineEndsWithComment) {
-            // --argLen; // exclude now, deal with it later (see top of method)
-            // }
         } else {
             lines = null;
             lineIterator = null;
             line = null;
             argLen = 0;
-            lineEndsWithComment = false;
         }
         argOff = 0;
     }
