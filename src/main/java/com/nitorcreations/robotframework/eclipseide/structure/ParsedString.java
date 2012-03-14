@@ -29,6 +29,11 @@ public class ParsedString implements IParsedKeywordString {
 
     private final String value;
     private final int argCharPos;
+    private ArgumentType type = ArgumentType.IGNORED;
+
+    public enum ArgumentType {
+        IGNORED, COMMENT, TABLE, SETTING_KEY, VARIABLE_KEY, NEW_TESTCASE, NEW_KEYWORD, SETTING_VAL, SETTING_FILE, SETTING_FILE_WITH_NAME_KEY, SETTING_FILE_ARG, SETTING_FILE_WITH_NAME_VALUE, VARIABLE_VAL, KEYWORD_LVALUE, FOR_PART, KEYWORD_CALL, KEYWORD_ARG,
+    }
 
     public ParsedString(String value, int argCharPos) {
         if (value == null) {
@@ -69,6 +74,15 @@ public class ParsedString implements IParsedKeywordString {
             }
         }
         return null;
+    }
+
+    public ArgumentType getType() {
+        return type;
+    }
+
+    public void setType(ArgumentType type) {
+        assert type != null;
+        this.type = type;
     }
 
     @Override
