@@ -19,6 +19,7 @@ import static com.nitorcreations.robotframework.eclipseide.structure.ParsedStrin
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.KEYWORD_ARG;
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.KEYWORD_CALL;
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.NEW_TESTCASE;
+import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.SETTING_FILE;
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.SETTING_KEY;
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.TABLE;
 
@@ -31,25 +32,38 @@ import junit.framework.AssertionFailedError;
 
 import org.eclipse.core.runtime.CoreException;
 import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
 
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
+@RunWith(Enclosed.class)
 public class TestArgumentPreParser {
 
-    @Test
-    public void basic_testcases_should_convert_cleanly() throws Exception {
-        t("*Test cases\nTC1  Log  Hello", TABLE, NEW_TESTCASE, KEYWORD_CALL, KEYWORD_ARG);
-        t("*Test cases\nTC1\n  Log  Hello", TABLE, NEW_TESTCASE, IGNORED, KEYWORD_CALL, KEYWORD_ARG);
+    public static class Setting_table_parsing {
+        @Test
+        public void basic_settings() throws Exception {
+            t("*Settings\nResource  foo.txt", TABLE, SETTING_KEY, SETTING_FILE);
+            t("*Settings\nLibrary  OperatingSystem", TABLE, SETTING_KEY, SETTING_FILE);
+        }
     }
 
-    @Test
-    public void when_testcase_template_is_set_then_regular_lines_should_emit_KEYWORD_ARG_only() throws Exception {
-        t("*Test cases\nTC1  [Template]  Log\n  Hello", TABLE, NEW_TESTCASE, SETTING_KEY, KEYWORD_CALL, IGNORED, KEYWORD_ARG);
-        t("*Test cases\nTC1\n  Hello\n  [Template]  Log", TABLE, NEW_TESTCASE, IGNORED, KEYWORD_ARG, IGNORED, SETTING_KEY, KEYWORD_CALL);
+    public static class Test_case_parsing {
+        @Test
+        public void basic_testcases_should_convert_cleanly() throws Exception {
+            t("*Test cases\nTC1  Log  Hello", TABLE, NEW_TESTCASE, KEYWORD_CALL, KEYWORD_ARG);
+            t("*Test cases\nTC1\n  Log  Hello", TABLE, NEW_TESTCASE, IGNORED, KEYWORD_CALL, KEYWORD_ARG);
+        }
+
+        @Test
+        public void when_testcase_template_is_set_then_regular_lines_should_emit_KEYWORD_ARG_only() throws Exception {
+            t("*Test cases\nTC1  [Template]  Log\n  Hello", TABLE, NEW_TESTCASE, SETTING_KEY, KEYWORD_CALL, IGNORED, KEYWORD_ARG);
+            t("*Test cases\nTC1\n  Hello\n  [Template]  Log", TABLE, NEW_TESTCASE, IGNORED, KEYWORD_ARG, IGNORED, SETTING_KEY, KEYWORD_CALL);
+        }
     }
 
-    public void t(String input, ArgumentType... expected) throws Exception {
+    static void t(String input, ArgumentType... expected) throws Exception {
         List<RFELine> lines = parse(input);
         int p = 0;
         for (RFELine rfeLine : lines) {
@@ -69,7 +83,7 @@ public class TestArgumentPreParser {
         }
     }
 
-    private List<RFELine> parse(String fileContents) throws UnsupportedEncodingException, FileNotFoundException, CoreException {
+    private static List<RFELine> parse(String fileContents) throws UnsupportedEncodingException, FileNotFoundException, CoreException {
         RFELexer lexer = new RFELexer(fileContents);
         List<RFELine> lines = lexer.lex();
         new RFEPreParser(null, lines).preParse();
