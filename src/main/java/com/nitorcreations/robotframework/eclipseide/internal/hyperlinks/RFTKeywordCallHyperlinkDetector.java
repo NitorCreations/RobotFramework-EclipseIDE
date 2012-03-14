@@ -15,6 +15,9 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
+import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -23,7 +26,11 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELexer;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEPreParser;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
+import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 /**
  * This hyperlink detector creates hyperlinks for keyword calls, e.g.
@@ -77,7 +84,22 @@ public class RFTKeywordCallHyperlinkDetector implements IHyperlinkDetector {
         String linkString = RFTArgumentUtils.unescapeArgument(line, linkOffsetInLine, linkLength);
 
         IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
-        IRegion targetRegion = new Region(100, 10);
-        return new IHyperlink[] { new RFTHyperlink(linkRegion, linkString, targetRegion) };
+        List<RFELine> lines;
+        try {
+            lines = new RFELexer(document).lex();
+            new RFEPreParser(document, lines).preParse();
+            for (RFELine rfeLine : lines) {
+                if (rfeLine.isKeywordDefinition()) {
+                    ParsedString keyword = rfeLine.arguments.get(0);
+                    if (keyword.equals(linkString)) {
+                        IRegion targetRegion = new Region(keyword.getArgCharPos(), keyword.getValue().length());
+                        return new IHyperlink[] { new RFTHyperlink(linkRegion, linkString, targetRegion) };
+                    }
+                }
+            }
+        } catch (CoreException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

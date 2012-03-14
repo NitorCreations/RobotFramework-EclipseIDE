@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEPreParser.Type;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class RFELine {
@@ -31,6 +32,11 @@ public class RFELine {
         this.lineNo = lineNo;
         this.lineCharPos = lineCharPos;
         this.arguments = arguments;
+    }
+
+    public boolean isKeywordDefinition() {
+        Type type = (Type) info.get(Type.class);
+        return type == Type.KEYWORD_TABLE_KEYWORD_BEGIN;
     }
 
 }
