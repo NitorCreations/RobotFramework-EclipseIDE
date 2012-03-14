@@ -10,7 +10,7 @@
             icon="icons/robo1.png"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             class="com.nitorcreations.robotframework.eclipseide.editors.RobotFrameworkTextfileEditor"
-            id="org.otherone.robotframework.eclipse.editor.editors.RobotFrameworkTextfileEditor">
+            id="com.nitorcreations.robotframework.eclipseide.editors.RobotFrameworkTextfileEditor">
       </editor>
    </extension>
    <extension
@@ -46,20 +46,20 @@
          </run>
       </runtime>
       <builder
-            id="org.otherone.robotframework.eclipse.editor.rfeBuilder">
+            id="com.nitorcreations.robotframework.eclipseide.rfeBuilder">
       </builder>
    </extension>
    <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
             adaptable="true"
-            id="org.otherone.robotframework.eclipse.editor.contribution1"
+            id="com.nitorcreations.robotframework.eclipseide.contribution1"
             nameFilter="*"
             objectClass="org.eclipse.core.resources.IProject">
          <action
                class="com.nitorcreations.robotframework.eclipseide.builder.ToggleNatureAction"
                enablesFor="+"
-               id="org.otherone.robotframework.eclipse.editor.addRemoveNatureAction"
+               id="com.nitorcreations.robotframework.eclipseide.addRemoveNatureAction"
                label="Add/Remove Robot Framework Validation Nature"
                menubarPath="additions">
          </action>
