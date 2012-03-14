@@ -22,7 +22,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.Type;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.util.ParserUtil;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
@@ -67,18 +67,18 @@ public class RFEPreParser {
     // TESTCASE_TABLE_ACTIVE, KEYWORD_TABLE_INITIAL, KEYWORD_TABLE_ACTIVE,
     // }
 
-    private Type prevLineType = Type.IGNORE;
+    private LineType prevLineType = LineType.IGNORE;
 
     private void parseLine(RFELine line) throws CoreException {
         // System.out.println(line.arguments);
-        Type tableType = tryParseTableSwitch(line);
+        LineType tableType = tryParseTableSwitch(line);
         if (tableType != null) {
             line.type = tableType;
             prevLineType = tableType;
             return;
         }
         if (tryParseContinuationLine(line)) {
-            line.type = Type.CONTINUATION_LINE;
+            line.type = LineType.CONTINUATION_LINE;
             // prevLineType not updated
             return;
         }
@@ -87,42 +87,42 @@ public class RFEPreParser {
         String first = firstArg.getValue();
         String second = line.arguments.size() < 2 ? "" : line.arguments.get(1).getValue();
         if (first.startsWith("#") || firstEmpty && second.startsWith("#")) {
-            line.type = Type.COMMENT_LINE;
+            line.type = LineType.COMMENT_LINE;
             // prevLineType not updated
             return;
         }
-        Type lineType = determineLineTypeFromPrevious(firstEmpty);
+        LineType lineType = determineLineTypeFromPrevious(firstEmpty);
         line.type = lineType;
         prevLineType = lineType;
     }
 
-    private Type tryParseTableSwitch(RFELine line) throws CoreException {
+    private LineType tryParseTableSwitch(RFELine line) throws CoreException {
         ParsedString tableArgument = line.arguments.get(0);
         if (!tableArgument.getValue().startsWith("*")) {
             return null;
         }
         String table = ParserUtil.parseTable(tableArgument.getValue());
-        Type curType = tableNameToType.get(table);
+        LineType curType = tableNameToType.get(table);
         if (curType == null) {
-            return Type.IGNORE_TABLE;
+            return LineType.IGNORE_TABLE;
         }
         return curType;
     }
 
-    private static final Map<String, Type> tableNameToType = new HashMap<String, Type>();
+    private static final Map<String, LineType> tableNameToType = new HashMap<String, LineType>();
 
     static {
-        tableNameToType.put("setting", Type.SETTING_TABLE_BEGIN);
-        tableNameToType.put("settings", Type.SETTING_TABLE_BEGIN);
-        tableNameToType.put("metadata", Type.SETTING_TABLE_BEGIN);
-        tableNameToType.put("variable", Type.VARIABLE_TABLE_BEGIN);
-        tableNameToType.put("variables", Type.VARIABLE_TABLE_BEGIN);
-        tableNameToType.put("testcase", Type.TESTCASE_TABLE_BEGIN);
-        tableNameToType.put("testcases", Type.TESTCASE_TABLE_BEGIN);
-        tableNameToType.put("keyword", Type.KEYWORD_TABLE_BEGIN);
-        tableNameToType.put("keywords", Type.KEYWORD_TABLE_BEGIN);
-        tableNameToType.put("userkeyword", Type.KEYWORD_TABLE_BEGIN);
-        tableNameToType.put("userkeywords", Type.KEYWORD_TABLE_BEGIN);
+        tableNameToType.put("setting", LineType.SETTING_TABLE_BEGIN);
+        tableNameToType.put("settings", LineType.SETTING_TABLE_BEGIN);
+        tableNameToType.put("metadata", LineType.SETTING_TABLE_BEGIN);
+        tableNameToType.put("variable", LineType.VARIABLE_TABLE_BEGIN);
+        tableNameToType.put("variables", LineType.VARIABLE_TABLE_BEGIN);
+        tableNameToType.put("testcase", LineType.TESTCASE_TABLE_BEGIN);
+        tableNameToType.put("testcases", LineType.TESTCASE_TABLE_BEGIN);
+        tableNameToType.put("keyword", LineType.KEYWORD_TABLE_BEGIN);
+        tableNameToType.put("keywords", LineType.KEYWORD_TABLE_BEGIN);
+        tableNameToType.put("userkeyword", LineType.KEYWORD_TABLE_BEGIN);
+        tableNameToType.put("userkeywords", LineType.KEYWORD_TABLE_BEGIN);
     }
 
     private boolean tryParseContinuationLine(RFELine line) throws CoreException {
@@ -147,30 +147,30 @@ public class RFEPreParser {
         return true;
     }
 
-    private Type determineLineTypeFromPrevious(boolean firstEmpty) {
+    private LineType determineLineTypeFromPrevious(boolean firstEmpty) {
         switch (prevLineType) {
         case IGNORE:
-            return Type.IGNORE;
+            return LineType.IGNORE;
         case SETTING_TABLE_BEGIN:
         case SETTING_TABLE_LINE:
-            return Type.SETTING_TABLE_LINE;
+            return LineType.SETTING_TABLE_LINE;
         case VARIABLE_TABLE_BEGIN:
         case VARIABLE_TABLE_LINE:
-            return Type.VARIABLE_TABLE_LINE;
+            return LineType.VARIABLE_TABLE_LINE;
         case TESTCASE_TABLE_BEGIN:
         case TESTCASE_TABLE_IGNORE:
-            return !firstEmpty ? Type.TESTCASE_TABLE_TESTCASE_BEGIN : Type.TESTCASE_TABLE_IGNORE;
+            return !firstEmpty ? LineType.TESTCASE_TABLE_TESTCASE_BEGIN : LineType.TESTCASE_TABLE_IGNORE;
         case TESTCASE_TABLE_TESTCASE_BEGIN:
         case TESTCASE_TABLE_TESTCASE_LINE:
-            return !firstEmpty ? Type.TESTCASE_TABLE_TESTCASE_BEGIN : Type.TESTCASE_TABLE_TESTCASE_LINE;
+            return !firstEmpty ? LineType.TESTCASE_TABLE_TESTCASE_BEGIN : LineType.TESTCASE_TABLE_TESTCASE_LINE;
         case KEYWORD_TABLE_BEGIN:
         case KEYWORD_TABLE_IGNORE:
-            return !firstEmpty ? Type.KEYWORD_TABLE_KEYWORD_BEGIN : Type.KEYWORD_TABLE_IGNORE;
+            return !firstEmpty ? LineType.KEYWORD_TABLE_KEYWORD_BEGIN : LineType.KEYWORD_TABLE_IGNORE;
         case KEYWORD_TABLE_KEYWORD_BEGIN:
         case KEYWORD_TABLE_KEYWORD_LINE:
-            return !firstEmpty ? Type.KEYWORD_TABLE_KEYWORD_BEGIN : Type.KEYWORD_TABLE_KEYWORD_LINE;
+            return !firstEmpty ? LineType.KEYWORD_TABLE_KEYWORD_BEGIN : LineType.KEYWORD_TABLE_KEYWORD_LINE;
         case IGNORE_TABLE:
-            return Type.IGNORE;
+            return LineType.IGNORE;
         }
         throw new RuntimeException("Unhandled previous line type " + prevLineType);
     }

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.Type;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -77,7 +77,7 @@ public class ArgumentPreParser {
     private int argOff;
     private int argLen;
     private boolean lineEndsWithComment;
-    private Type lastRealType;
+    private LineType lastRealType;
 
     private boolean keywordSequence_isSetting;
     private SettingType keywordSequence_settingType;
@@ -96,7 +96,7 @@ public class ArgumentPreParser {
     public void setRange(List<RFELine> lines) {
         this.lines = lines;
         lineIterator = lines.listIterator();
-        lastRealType = Type.IGNORE;
+        lastRealType = LineType.IGNORE;
         prepareNextLine();
     }
 
@@ -146,8 +146,8 @@ public class ArgumentPreParser {
         if (line == null) {
             return;
         }
-        Type type = line.type;
-        if (type != Type.COMMENT_LINE && type != Type.CONTINUATION_LINE) {
+        LineType type = line.type;
+        if (type != LineType.COMMENT_LINE && type != LineType.CONTINUATION_LINE) {
             lastRealType = type;
         }
         switch (type) {
@@ -210,7 +210,7 @@ public class ArgumentPreParser {
             if (argOff == 0) {
                 ParsedString newName = line.arguments.get(0);
                 if (!newName.isEmpty()) {
-                    boolean isTestCase = type == Type.TESTCASE_TABLE_TESTCASE_BEGIN;
+                    boolean isTestCase = type == LineType.TESTCASE_TABLE_TESTCASE_BEGIN;
                     newName.setType(isTestCase ? ArgumentType.NEW_TESTCASE : ArgumentType.NEW_KEYWORD);
                 }
                 prepareNextToken();
@@ -475,7 +475,7 @@ public class ArgumentPreParser {
 
         outer: for (int line = lineIterator.nextIndex(); line < lines.size(); ++line) {
             RFELine nextLine = lines.get(line);
-            Type type = nextLine.type;
+            LineType type = nextLine.type;
             switch (type) {
             case COMMENT_LINE:
                 continue;

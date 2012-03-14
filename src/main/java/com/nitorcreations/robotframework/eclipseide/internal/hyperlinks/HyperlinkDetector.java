@@ -26,12 +26,12 @@ import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELexer;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.Type;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEPreParser;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public abstract class HyperlinkDetector implements IHyperlinkDetector {
-    protected IHyperlink[] getLinks(IDocument document, String linkString, IRegion linkRegion, Type type) {
+    protected IHyperlink[] getLinks(IDocument document, String linkString, IRegion linkRegion, LineType type) {
         try {
             List<RFELine> lines = new RFELexer(document).lex();
             new RFEPreParser(document, lines).preParse();

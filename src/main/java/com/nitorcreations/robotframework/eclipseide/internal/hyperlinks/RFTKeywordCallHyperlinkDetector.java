@@ -22,7 +22,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.Type;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
 
 /**
@@ -76,7 +76,7 @@ public class RFTKeywordCallHyperlinkDetector extends HyperlinkDetector {
 
         String linkString = RFTArgumentUtils.unescapeArgument(line, linkOffsetInLine, linkLength);
         IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
-        return getLinks(document, linkString, linkRegion, Type.KEYWORD_TABLE_KEYWORD_BEGIN);
+        return getLinks(document, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
     }
 
 }

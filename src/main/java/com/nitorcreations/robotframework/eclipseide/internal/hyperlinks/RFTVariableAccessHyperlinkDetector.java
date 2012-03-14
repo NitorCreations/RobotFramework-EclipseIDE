@@ -22,7 +22,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.Type;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTVariableUtils;
 
@@ -103,7 +103,7 @@ public class RFTVariableAccessHyperlinkDetector extends HyperlinkDetector {
                 // pointing at variable access!
                 String linkString = line.substring(linkOffsetInLine, linkOffsetInLine + linkLength);
                 IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
-                IHyperlink[] links = getLinks(document, linkString, linkRegion, Type.VARIABLE_TABLE_LINE);
+                IHyperlink[] links = getLinks(document, linkString, linkRegion, LineType.VARIABLE_TABLE_LINE);
                 if (links != null) {
                     return links;
                 }

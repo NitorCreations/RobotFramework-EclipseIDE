@@ -23,9 +23,9 @@ public class RFELine {
     public final int lineNo;
     public final int lineCharPos;
     public final List<ParsedString> arguments;
-    public Type type;
+    public LineType type;
 
-    public enum Type {
+    public enum LineType {
         IGNORE, IGNORE_TABLE, SETTING_TABLE_BEGIN, SETTING_TABLE_LINE, VARIABLE_TABLE_BEGIN, VARIABLE_TABLE_LINE, TESTCASE_TABLE_BEGIN, TESTCASE_TABLE_IGNORE, TESTCASE_TABLE_TESTCASE_BEGIN, TESTCASE_TABLE_TESTCASE_LINE, KEYWORD_TABLE_BEGIN, KEYWORD_TABLE_IGNORE, KEYWORD_TABLE_KEYWORD_BEGIN, KEYWORD_TABLE_KEYWORD_LINE, CONTINUATION_LINE, COMMENT_LINE,
     }
 
@@ -35,7 +35,7 @@ public class RFELine {
         this.arguments = arguments;
     }
 
-    public boolean isType(Type type) {
+    public boolean isType(LineType type) {
         return this.type == type;
     }
 
