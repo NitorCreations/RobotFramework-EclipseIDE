@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
+package com.nitorcreations.robotframework.eclipseide.editors;
 
-import org.eclipse.jface.text.IRegion;
 
-public class RFTResourceHyperlink extends RFTHyperlink {
+public class EditorResolver {
+    private static RobotFrameworkTextfileEditor lastOpenedEditor;
 
-    public RFTResourceHyperlink(IRegion region, String path) {
-        super(region, path);
+    public static RobotFrameworkTextfileEditor getEditor() {
+        return lastOpenedEditor;
     }
 
-    @Override
-    public void open() {
-        System.out.println("TODO Open hyperlink RFT Resource '" + text + "'");
+    public static void setLastOpenedEditor(RobotFrameworkTextfileEditor editor) {
+        lastOpenedEditor = editor;
     }
-
 }
