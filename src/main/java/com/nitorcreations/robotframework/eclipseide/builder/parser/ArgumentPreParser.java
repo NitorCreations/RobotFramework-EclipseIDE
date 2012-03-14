@@ -323,9 +323,7 @@ public class ArgumentPreParser {
             return;
         }
         case STRING: {
-            for (int i = argOff; i < argLen; ++i) {
-                line.arguments.get(i).setType(ArgumentType.SETTING_VAL);
-            }
+            setArgTypesToEol(ArgumentType.SETTING_VAL);
             prepareNextLine();
             return;
         }
@@ -377,9 +375,7 @@ public class ArgumentPreParser {
     }
 
     private void parseVariableArgs() {
-        for (int i = argOff; i < argLen; ++i) {
-            line.arguments.get(i).setType(ArgumentType.VARIABLE_VAL);
-        }
+        setArgTypesToEol(ArgumentType.VARIABLE_VAL);
         prepareNextLine();
     }
 
@@ -390,9 +386,7 @@ public class ArgumentPreParser {
             return;
         }
         case STRING: {
-            for (int i = argOff; i < argLen; ++i) {
-                line.arguments.get(i).setType(ArgumentType.SETTING_VAL);
-            }
+            setArgTypesToEol(ArgumentType.SETTING_VAL);
             prepareNextLine();
             return;
         }
@@ -455,9 +449,7 @@ public class ArgumentPreParser {
             return;
         }
         case ARGS: {
-            for (int i = argOff; i < argLen; ++i) {
-                line.arguments.get(i).setType(ArgumentType.KEYWORD_ARG);
-            }
+            setArgTypesToEol(ArgumentType.KEYWORD_ARG);
             prepareNextLine();
             return;
         }
@@ -531,6 +523,12 @@ public class ArgumentPreParser {
             }
         }
         return initialKeywordCallState;
+    }
+
+    private void setArgTypesToEol(ArgumentType settingVal) {
+        for (int i = argOff; i < argLen; ++i) {
+            line.arguments.get(i).setType(settingVal);
+        }
     }
 
 }
