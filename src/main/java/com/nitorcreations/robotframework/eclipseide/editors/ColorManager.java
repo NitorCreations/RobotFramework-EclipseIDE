@@ -20,28 +20,34 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
 public class ColorManager {
 
-    protected Map<RGB, Color> fColorTable = new HashMap<RGB, Color>(10);
+    protected Map<IRFTColorConstants, Color> fColorTable = new HashMap<IRFTColorConstants, Color>(10);
+    private boolean isDarkBackground;
 
     public void dispose() {
         Iterator<Color> e = fColorTable.values().iterator();
         while (e.hasNext())
-            ((Color) e.next()).dispose();
+            e.next().dispose();
     }
 
-    public Color getColor(RGB rgb) {
-        if (rgb == null) {
+    public Color getColor(IRFTColorConstants irftColor) {
+        if (irftColor == null) {
             return null;
         }
-        Color color = (Color) fColorTable.get(rgb);
+        Color color = fColorTable.get(irftColor);
         if (color == null) {
-            color = new Color(Display.getCurrent(), rgb);
-            fColorTable.put(rgb, color);
+            color = new Color(Display.getCurrent(), irftColor.getColor(isDarkBackground));
+            fColorTable.put(irftColor, color);
         }
         return color;
+    }
+
+    public void setDarkBackgroundScheme(boolean isDarkBackground) {
+        this.isDarkBackground = isDarkBackground;
+        dispose();
+        fColorTable.clear();
     }
 }

@@ -16,6 +16,7 @@
 package com.nitorcreations.robotframework.eclipseide.editors;
 
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.editors.text.TextEditor;
 
 /**
@@ -47,10 +48,12 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
     @Override
     protected void initializeViewerColors(ISourceViewer viewer) {
         super.initializeViewerColors(viewer);
-        viewer.getTextWidget().setForeground(colorManager.getColor(IRFTColorConstants.FG));
-        viewer.getTextWidget().setBackground(colorManager.getColor(IRFTColorConstants.BG));
-        viewer.getTextWidget().setSelectionForeground(colorManager.getColor(IRFTColorConstants.FG_SELECTION));
-        viewer.getTextWidget().setSelectionBackground(colorManager.getColor(IRFTColorConstants.BG_SELECTION));
+        colorManager.setDarkBackgroundScheme(isDarkBackground(viewer));
     }
 
+    private boolean isDarkBackground(ISourceViewer viewer) {
+        Color background = viewer.getTextWidget().getBackground();
+        int lightness = background.getBlue() * 11 + background.getGreen() * 59 + background.getRed() * 30;
+        return lightness < 12800;
+    }
 }

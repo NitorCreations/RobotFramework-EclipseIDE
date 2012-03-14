@@ -83,23 +83,23 @@ public class RFTColoringScanner implements ITokenScanner {
 
     private final ColorManager manager;
     private final TokenQueue tokenQueue = new TokenQueue();
-    private final IToken tokTABLE;
-    private final IToken tokSETTING_KEY;
-    private final IToken tokSETTING_VAL;
-    private final IToken tokSETTING_FILE;
-    private final IToken tokSETTING_FILE_ARG;
-    private final IToken tokSETTING_FILE_WITH_NAME_KEY;
-    private final IToken tokSETTING_FILE_WITH_NAME_VALUE;
-    private final IToken tokVARIABLE_KEY; // TODO consider combining with
-                                          // tokKEYWORD_LVALUE
-    private final IToken tokVARIABLE_VAL;
-    private final IToken tokCOMMENT;
-    private final IToken tokNEW_TESTCASE;
-    private final IToken tokNEW_KEYWORD;
-    private final IToken tokKEYWORD_LVALUE;
-    private final IToken tokKEYWORD_CALL;
-    private final IToken tokKEYWORD_ARG;
-    private final IToken tokFOR_PART;
+    private IToken tokTABLE;
+    private IToken tokSETTING_KEY;
+    private IToken tokSETTING_VAL;
+    private IToken tokSETTING_FILE;
+    private IToken tokSETTING_FILE_ARG;
+    private IToken tokSETTING_FILE_WITH_NAME_KEY;
+    private IToken tokSETTING_FILE_WITH_NAME_VALUE;
+    private IToken tokVARIABLE_KEY; // TODO consider combining with
+                                    // tokKEYWORD_LVALUE
+    private IToken tokVARIABLE_VAL;
+    private IToken tokCOMMENT;
+    private IToken tokNEW_TESTCASE;
+    private IToken tokNEW_KEYWORD;
+    private IToken tokKEYWORD_LVALUE;
+    private IToken tokKEYWORD_CALL;
+    private IToken tokKEYWORD_ARG;
+    private IToken tokFOR_PART;
 
     // private IDocument document;
     private List<RFELine> lines;
@@ -126,6 +126,14 @@ public class RFTColoringScanner implements ITokenScanner {
 
     public RFTColoringScanner(ColorManager colorManager) {
         this.manager = colorManager;
+        // IToken tokARGUMENT = new Token(new
+        // TextAttribute(manager.getColor(IRFTColorConstants.ARGUMENT)));
+        // IToken tokARGUMENT_SEPARATOR = new Token(new
+        // TextAttribute(manager.getColor(IRFTColorConstants.ARGUMENT_SEPARATOR),
+        // null, TextAttribute.UNDERLINE));
+    }
+
+    private void prepareTokens() {
         // TODO dynamically fetched colors
         tokTABLE = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.TABLE)));
         tokCOMMENT = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.COMMENT)));
@@ -143,15 +151,11 @@ public class RFTColoringScanner implements ITokenScanner {
         tokKEYWORD_CALL = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD)));
         tokKEYWORD_ARG = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD_ARG)));
         tokFOR_PART = new Token(new TextAttribute(manager.getColor(IRFTColorConstants.FOR_PART)));
-        // IToken tokARGUMENT = new Token(new
-        // TextAttribute(manager.getColor(IRFTColorConstants.ARGUMENT)));
-        // IToken tokARGUMENT_SEPARATOR = new Token(new
-        // TextAttribute(manager.getColor(IRFTColorConstants.ARGUMENT_SEPARATOR),
-        // null, TextAttribute.UNDERLINE));
     }
 
     @Override
     public void setRange(IDocument document, int offset, int length) {
+        prepareTokens();
         try {
             // this.document = document;
             tokenQueue.reset();
