@@ -23,60 +23,68 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
+import com.nitorcreations.robotframework.eclipseide.editors.RobotFrameworkTextfileEditor;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
 
 /**
- * This hyperlink detector creates hyperlinks for keyword calls, e.g. "  SomeKeyword FooArgument"
- * --> "SomeKeyword" is linked.
+ * This hyperlink detector creates hyperlinks for keyword calls, e.g.
+ * "  SomeKeyword FooArgument" --> "SomeKeyword" is linked.
  * 
  * @author xkr47
  */
 public class RFTKeywordCallHyperlinkDetector implements IHyperlinkDetector {
 
-  @Override
-  public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
-    if (region == null || textViewer == null) {
-      return null;
+    private final RobotFrameworkTextfileEditor editor;
+
+    public RFTKeywordCallHyperlinkDetector(RobotFrameworkTextfileEditor editor) {
+        this.editor = editor;
+
     }
 
-    IDocument document = textViewer.getDocument();
-    if (document == null) {
-      return null;
+    @Override
+    public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
+        if (region == null || textViewer == null) {
+            return null;
+        }
+
+        IDocument document = textViewer.getDocument();
+        if (document == null) {
+            return null;
+        }
+
+        int offset = region.getOffset();
+
+        IRegion lineInfo;
+        String line;
+        try {
+            lineInfo = document.getLineInformationOfOffset(offset);
+            line = document.get(lineInfo.getOffset(), lineInfo.getLength());
+        } catch (BadLocationException ex) {
+            return null;
+        }
+
+        int linkOffsetInLine = RFTArgumentUtils.findNextArgumentStart(line, 0);
+        if (linkOffsetInLine == -1) {
+            // testcase & keyword definitions fit into this category
+            return null;
+        }
+
+        if (line.charAt(linkOffsetInLine) == '[') {
+            // it's a Setting
+            return null;
+        }
+
+        int linkLength = RFTArgumentUtils.calculateArgumentLength(line, linkOffsetInLine);
+
+        int offsetInLine = offset - lineInfo.getOffset();
+        if (offsetInLine < linkOffsetInLine || offsetInLine >= linkOffsetInLine + linkLength) {
+            // outside
+            return null;
+        }
+
+        String linkString = RFTArgumentUtils.unescapeArgument(line, linkOffsetInLine, linkLength);
+
+        IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
+        return new IHyperlink[] { new RFTKeywordCallHyperlink(linkRegion, linkString, linkString, null /* TODO */, editor) };
     }
-
-    int offset = region.getOffset();
-
-    IRegion lineInfo;
-    String line;
-    try {
-      lineInfo = document.getLineInformationOfOffset(offset);
-      line = document.get(lineInfo.getOffset(), lineInfo.getLength());
-    } catch (BadLocationException ex) {
-      return null;
-    }
-
-    int linkOffsetInLine = RFTArgumentUtils.findNextArgumentStart(line, 0);
-    if (linkOffsetInLine == -1) {
-      // testcase & keyword definitions fit into this category
-      return null;
-    }
-
-    if (line.charAt(linkOffsetInLine) == '[') {
-      // it's a Setting
-      return null;
-    }
-
-    int linkLength = RFTArgumentUtils.calculateArgumentLength(line, linkOffsetInLine);
-
-    int offsetInLine = offset - lineInfo.getOffset();
-    if (offsetInLine < linkOffsetInLine || offsetInLine >= linkOffsetInLine + linkLength) {
-      // outside
-      return null;
-    }
-
-    String linkString = RFTArgumentUtils.unescapeArgument(line, linkOffsetInLine, linkLength);
-
-    IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
-    return new IHyperlink[] { new RFTKeywordCallHyperlink(linkRegion, linkString, linkString, null /* TODO */) };
-  }
 }

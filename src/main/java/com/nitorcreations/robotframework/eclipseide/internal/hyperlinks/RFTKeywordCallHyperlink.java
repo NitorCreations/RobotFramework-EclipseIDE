@@ -18,24 +18,29 @@ package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 import java.io.File;
 
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 
-import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
+import com.nitorcreations.robotframework.eclipseide.editors.RobotFrameworkTextfileEditor;
 
 public class RFTKeywordCallHyperlink extends RFTHyperlink {
 
-  private final String keyword;
-  private final File currentFile;
+    private final String keyword;
+    private final File currentFile;
+    private final RobotFrameworkTextfileEditor editor;
 
-  public RFTKeywordCallHyperlink(IRegion region, String linkText, String keyword, File currentFile) {
-    super(region, linkText);
-    this.keyword = keyword;
-    this.currentFile = currentFile;
-  }
+    public RFTKeywordCallHyperlink(IRegion region, String linkText, String keyword, File currentFile, RobotFrameworkTextfileEditor editor) {
+        super(region, linkText);
+        this.keyword = keyword;
+        this.currentFile = currentFile;
+        this.editor = editor;
+    }
 
-  @Override
-  public void open() {
-    System.out.println("Open hyperlink RFT Keyword Call '" + text + "'");
-    openLocation(ResourceManager.getResource(currentFile).findKeyword(keyword));
-  }
+    @Override
+    public void open() {
+        System.out.println("Open hyperlink RFT Keyword Call '" + text + "'");
+        // openLocation(ResourceManager.getResource(currentFile).findKeyword(keyword));
+        IRegion target = new Region(100, 10);
+        editor.selectAndReveal(target.getOffset(), target.getLength());
+    }
 
 }

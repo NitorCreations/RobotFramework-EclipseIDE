@@ -30,44 +30,47 @@ import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.RFTVaria
 
 public class RFTSourceViewerConfiguration extends SourceViewerConfiguration {
 
-  private final ColorManager colorManager;
+    private final ColorManager colorManager;
+    private final RobotFrameworkTextfileEditor editor;
 
-  public RFTSourceViewerConfiguration(ColorManager colorManager) {
-    this.colorManager = colorManager;
-  }
+    public RFTSourceViewerConfiguration(ColorManager colorManager, RobotFrameworkTextfileEditor editor) {
+        this.colorManager = colorManager;
+        this.editor = editor;
 
-  // public ITextDoubleClickStrategy getDoubleClickStrategy(
-  // ISourceViewer sourceViewer,
-  // String contentType) {
-  // if (doubleClickStrategy == null)
-  // doubleClickStrategy = new RFTDoubleClickStrategy();
-  // return doubleClickStrategy;
-  // }
+    }
 
-  // @Override
-  // public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
-  // return super.getAnnotationHover(sourceViewer);
-  // }
+    // public ITextDoubleClickStrategy getDoubleClickStrategy(
+    // ISourceViewer sourceViewer,
+    // String contentType) {
+    // if (doubleClickStrategy == null)
+    // doubleClickStrategy = new RFTDoubleClickStrategy();
+    // return doubleClickStrategy;
+    // }
 
-  /**
-   * This creates links that can be followed by ctrl-mouseclick.
-   */
-  @Override
-  public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
-    List<IHyperlinkDetector> detectors = new ArrayList<IHyperlinkDetector>();
-    detectors.addAll(Arrays.asList(super.getHyperlinkDetectors(sourceViewer)));
-    detectors.add(new RFTResourceHyperlinkDetector());
-    detectors.add(new RFTKeywordCallHyperlinkDetector());
-    detectors.add(new RFTVariableAccessHyperlinkDetector());
-    return detectors.toArray(new IHyperlinkDetector[detectors.size()]);
-  }
+    // @Override
+    // public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+    // return super.getAnnotationHover(sourceViewer);
+    // }
 
-  /**
-   * This handles the syntax coloring of the code.
-   */
-  @Override
-  public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
-    return new RFTPresentationReconciler(colorManager);
-  }
+    /**
+     * This creates links that can be followed by ctrl-mouseclick.
+     */
+    @Override
+    public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
+        List<IHyperlinkDetector> detectors = new ArrayList<IHyperlinkDetector>();
+        detectors.addAll(Arrays.asList(super.getHyperlinkDetectors(sourceViewer)));
+        detectors.add(new RFTResourceHyperlinkDetector());
+        detectors.add(new RFTKeywordCallHyperlinkDetector(editor));
+        detectors.add(new RFTVariableAccessHyperlinkDetector());
+        return detectors.toArray(new IHyperlinkDetector[detectors.size()]);
+    }
+
+    /**
+     * This handles the syntax coloring of the code.
+     */
+    @Override
+    public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
+        return new RFTPresentationReconciler(colorManager);
+    }
 
 }
