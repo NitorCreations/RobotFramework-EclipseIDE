@@ -34,6 +34,10 @@ import org.eclipse.jface.text.IDocument;
 
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
+/**
+ * This class splits a robot text files into individual lines, each represented
+ * by an instance of {@link RFELine}.
+ */
 public class RFELexer {
 
     private final List<RFELine> lexLines = new ArrayList<RFELine>();
