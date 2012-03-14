@@ -109,6 +109,7 @@ public class RFTColoringScanner implements ITokenScanner {
     private void prepareTokens() {
         // TODO dynamically fetched colors
         // TODO consider combining tokVARIABLE_KEY with tokKEYWORD_LVALUE
+        // ArgumentType.IGNORED is deliberately left out here
         argTypeToTokenMap.put(ArgumentType.COMMENT, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.COMMENT))));
         argTypeToTokenMap.put(ArgumentType.TABLE, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.TABLE))));
         argTypeToTokenMap.put(ArgumentType.SETTING_KEY, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING))));
@@ -201,6 +202,8 @@ public class RFTColoringScanner implements ITokenScanner {
             tokenQueue.addEof();
             return;
         }
+        // TODO merge successive arguments with same type into one token, even
+        // spanning multiple lines
         ParsedString arg = line.arguments.get(argOff);
         IToken token = argTypeToTokenMap.get(arg.getType());
         if (token != null) {
