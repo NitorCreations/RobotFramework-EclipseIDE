@@ -32,6 +32,7 @@ import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELexer;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEPreParser;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
+import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 // TODO Variable references
 public class RFTColoringScanner implements ITokenScanner {
@@ -188,6 +189,7 @@ public class RFTColoringScanner implements ITokenScanner {
             ParsedString comment = line.arguments.get(argLen);
             if (comment.getValue().startsWith("#")) {
                 tokenQueue.add(comment, tokCOMMENT);
+                comment.setType(ArgumentType.COMMENT);
             }
         }
         // next line
@@ -250,6 +252,7 @@ public class RFTColoringScanner implements ITokenScanner {
         case KEYWORD_TABLE_BEGIN: {
             assert argOff == 0;
             ParsedString table = line.arguments.get(0);
+            table.setType(ArgumentType.TABLE);
             tokenQueue.add(table, tokTABLE);
             prepareNextLine();
             return;
@@ -258,6 +261,7 @@ public class RFTColoringScanner implements ITokenScanner {
             switch (argOff) {
             case 0: {
                 ParsedString setting = line.arguments.get(0);
+                setting.setType(ArgumentType.SETTING_KEY);
                 tokenQueue.add(setting, tokSETTING_KEY);
                 setting_type = settingTypes.get(setting.getValue());
                 if (setting_type == null) {
@@ -281,8 +285,9 @@ public class RFTColoringScanner implements ITokenScanner {
         case VARIABLE_TABLE_LINE: {
             switch (argOff) {
             case 0:
-                ParsedString setting = line.arguments.get(0);
-                tokenQueue.add(setting, tokVARIABLE_KEY);
+                ParsedString variable = line.arguments.get(0);
+                variable.setType(ArgumentType.VARIABLE_KEY);
+                tokenQueue.add(variable, tokVARIABLE_KEY);
                 prepareNextToken();
                 return;
             default:
@@ -302,7 +307,9 @@ public class RFTColoringScanner implements ITokenScanner {
             if (argOff == 0) {
                 ParsedString newName = line.arguments.get(0);
                 if (!newName.isEmpty()) {
-                    tokenQueue.add(newName, type == RFEPreParser.Type.TESTCASE_TABLE_TESTCASE_BEGIN ? tokNEW_TESTCASE : tokNEW_KEYWORD);
+                    boolean isTestCase = type == RFEPreParser.Type.TESTCASE_TABLE_TESTCASE_BEGIN;
+                    newName.setType(isTestCase ? ArgumentType.NEW_TEST_CASE : ArgumentType.NEW_KEYWORD);
+                    tokenQueue.add(newName, isTestCase ? tokNEW_TESTCASE : tokNEW_KEYWORD);
                 }
                 prepareNextToken();
                 return;
@@ -330,6 +337,7 @@ public class RFTColoringScanner implements ITokenScanner {
                     if (keywordSequence_settingType == null) {
                         keywordSequence_settingType = SettingType.UNKNOWN;
                     }
+                    keywordOrSetting.setType(ArgumentType.SETTING_KEY);
                     tokenQueue.add(keywordOrSetting, tokSETTING_KEY);
                     prepareNextToken();
                 } else {
@@ -417,12 +425,16 @@ public class RFTColoringScanner implements ITokenScanner {
         case STRING: {
             ParsedString first = line.arguments.get(argOff);
             ParsedString last = line.arguments.get(argLen - 1);
+            for (int i = argOff; i < argLen; ++i) {
+                line.arguments.get(i).setType(ArgumentType.SETTING_VAL);
+            }
             tokenQueue.add(first.getArgCharPos(), last.getArgEndCharPos(), tokSETTING_VAL);
             prepareNextLine();
             return;
         }
         case FILE: {
             ParsedString file = line.arguments.get(argOff);
+            file.setType(ArgumentType.SETTING_FILE);
             tokenQueue.add(file, tokSETTING_FILE);
             prepareNextLine();
             return;
@@ -430,6 +442,7 @@ public class RFTColoringScanner implements ITokenScanner {
         case FILE_ARGS: {
             if (!setting_gotFirstArg) {
                 ParsedString file = line.arguments.get(argOff);
+                file.setType(ArgumentType.SETTING_FILE);
                 tokenQueue.add(file, tokSETTING_FILE);
                 prepareNextToken();
                 setting_gotFirstArg = true;
@@ -441,14 +454,17 @@ public class RFTColoringScanner implements ITokenScanner {
                     ParsedString arg = line.arguments.get(argOff);
                     if (arg.getValue().equals("WITH NAME")) {
                         setting_withNameState = WithNameState.GOT_KEY;
+                        arg.setType(ArgumentType.SETTING_FILE_WITH_NAME_KEY);
                         tokenQueue.add(arg, tokSETTING_FILE_WITH_NAME_KEY);
                     } else {
+                        arg.setType(ArgumentType.SETTING_FILE_ARG);
                         tokenQueue.add(arg, tokSETTING_FILE_ARG);
                     }
                     prepareNextToken();
                     return;
                 case GOT_KEY:
                     ParsedString name = line.arguments.get(argOff);
+                    name.setType(ArgumentType.SETTING_FILE_WITH_NAME_VALUE);
                     tokenQueue.add(name, tokSETTING_FILE_WITH_NAME_VALUE);
                     setting_withNameState = WithNameState.GOT_VALUE;
                     prepareNextLine();
@@ -471,6 +487,9 @@ public class RFTColoringScanner implements ITokenScanner {
     private void parseVariableArgs() {
         ParsedString first = line.arguments.get(argOff);
         ParsedString last = line.arguments.get(argLen - 1);
+        for (int i = argOff; i < argLen; ++i) {
+            line.arguments.get(i).setType(ArgumentType.VARIABLE_VAL);
+        }
         tokenQueue.add(first.getArgCharPos(), last.getArgEndCharPos(), tokVARIABLE_VAL);
         prepareNextLine();
     }
@@ -484,6 +503,9 @@ public class RFTColoringScanner implements ITokenScanner {
         case STRING: {
             ParsedString first = line.arguments.get(argOff);
             ParsedString last = line.arguments.get(argLen - 1);
+            for (int i = argOff; i < argLen; ++i) {
+                line.arguments.get(i).setType(ArgumentType.SETTING_VAL);
+            }
             tokenQueue.add(first.getArgCharPos(), last.getArgEndCharPos(), tokSETTING_VAL);
             prepareNextLine();
             return;
@@ -510,6 +532,7 @@ public class RFTColoringScanner implements ITokenScanner {
         case LVALUE: {
             ParsedString variable = line.arguments.get(argOff);
             if (!variable.isEmpty() || keywordSequence_keywordCallState == KeywordCallState.LVALUE_NOINDENT) {
+                variable.setType(ArgumentType.KEYWORD_LVALUE);
                 tokenQueue.add(variable, tokKEYWORD_LVALUE);
                 if (variable.getValue().endsWith("=")) {
                     keywordSequence_keywordCallState = KeywordCallState.KEYWORD_NOT_FOR_NOINDENT;
@@ -523,9 +546,11 @@ public class RFTColoringScanner implements ITokenScanner {
             ParsedString keyword = line.arguments.get(argOff);
             if (!keyword.isEmpty() || keywordSequence_keywordCallState == KeywordCallState.KEYWORD_NOT_FOR_NOINDENT) {
                 if (keyword.getValue().equals(":FOR") && keywordSequence_keywordCallState != KeywordCallState.KEYWORD_NOT_FOR_NOINDENT) {
+                    keyword.setType(ArgumentType.FOR_PART);
                     tokenQueue.add(keyword, tokFOR_PART);
                     keywordSequence_keywordCallState = KeywordCallState.FOR_ARGS;
                 } else {
+                    keyword.setType(ArgumentType.KEYWORD_CALL);
                     tokenQueue.add(keyword, tokKEYWORD_CALL);
                     keywordSequence_keywordCallState = KeywordCallState.ARGS;
                 }
@@ -537,11 +562,13 @@ public class RFTColoringScanner implements ITokenScanner {
             ParsedString arg = line.arguments.get(argOff);
             String argVal = arg.getValue();
             if (argVal.equals("IN") || argVal.equals("IN RANGE")) {
+                arg.setType(ArgumentType.FOR_PART);
                 tokenQueue.add(arg, tokFOR_PART);
                 keywordSequence_keywordCallState = KeywordCallState.ARGS;
                 prepareNextToken();
                 return;
             }
+            arg.setType(ArgumentType.KEYWORD_LVALUE);
             tokenQueue.add(arg, tokKEYWORD_LVALUE);
             prepareNextToken();
             return;
@@ -549,6 +576,9 @@ public class RFTColoringScanner implements ITokenScanner {
         case ARGS: {
             ParsedString first = line.arguments.get(argOff);
             ParsedString last = line.arguments.get(argLen - 1);
+            for (int i = argOff; i < argLen; ++i) {
+                line.arguments.get(i).setType(ArgumentType.KEYWORD_ARG);
+            }
             tokenQueue.add(first.getArgCharPos(), last.getArgEndCharPos(), tokKEYWORD_ARG);
             prepareNextLine();
             return;
