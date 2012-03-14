@@ -19,8 +19,8 @@ import java.util.List;
 
 public interface IVariableDefinition {
 
-  IParsedString getVariable();
+    IParsedString getVariable();
 
-  List<IDynamicParsedString> getValues();
+    List<IDynamicParsedString> getValues();
 
 }

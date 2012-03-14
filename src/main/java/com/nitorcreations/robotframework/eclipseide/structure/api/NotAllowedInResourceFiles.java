@@ -21,15 +21,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This is used to tag methods whose return value should always be null for resource files. I.e.
- * the resource file is syntactically broken if the annotated method returns a non-null value.
+ * This is used to tag methods whose return value should always be null for
+ * resource files. I.e. the resource file is syntactically broken if the
+ * annotated method returns a non-null value.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface NotAllowedInResourceFiles {
-  /**
-   * @return since which Robot Framework version is it not allowed? (i.e. it was allowed before
-   *         this version)
-   */
-  String value() default "";
+    /**
+     * @return since which Robot Framework version is it not allowed? (i.e. it
+     *         was allowed before this version)
+     */
+    String value() default "";
 }

@@ -20,57 +20,57 @@ import java.util.Map;
 
 public interface ISettings {
 
-  // suite stuff
+    // suite stuff
 
-  List<IDynamicParsedString> getResourceFiles();
+    List<IDynamicParsedString> getResourceFiles();
 
-  Map<IDynamicParsedString, List<IDynamicParsedString>> getVariableFiles();
+    Map<IDynamicParsedString, List<IDynamicParsedString>> getVariableFiles();
 
-  /**
-   * Libraries to load, mapping to their arguments. TODO a library can be loaded many times with
-   * different names (see section 2.4.2)
-   */
-  Map<IDynamicParsedString, ILibraryFile> getLibraryFiles();
+    /**
+     * Libraries to load, mapping to their arguments. TODO a library can be
+     * loaded many times with different names (see section 2.4.2)
+     */
+    Map<IDynamicParsedString, ILibraryFile> getLibraryFiles();
 
-  @NotAllowedInResourceFiles
-  IKeywordCall getSuiteSetup();
+    @NotAllowedInResourceFiles
+    IKeywordCall getSuiteSetup();
 
-  @NotAllowedInResourceFiles
-  IKeywordCall getSuiteTeardown();
+    @NotAllowedInResourceFiles
+    IKeywordCall getSuiteTeardown();
 
-  List<IDynamicParsedString> getDocumentation();
+    List<IDynamicParsedString> getDocumentation();
 
-  @NotAllowedInResourceFiles
-  Map<IParsedString, List<IDynamicParsedString>> getMetadata();
+    @NotAllowedInResourceFiles
+    Map<IParsedString, List<IDynamicParsedString>> getMetadata();
 
-  // test case stuff
+    // test case stuff
 
-  @NotAllowedInResourceFiles
-  List<IDynamicParsedString> getForcedTestTags();
+    @NotAllowedInResourceFiles
+    List<IDynamicParsedString> getForcedTestTags();
 
-  @NotAllowedInResourceFiles
-  @NotAllowedInTestSuiteInitializationFiles("2.5")
-  List<IDynamicParsedString> getDefaultTestTags();
+    @NotAllowedInResourceFiles
+    @NotAllowedInTestSuiteInitializationFiles("2.5")
+    List<IDynamicParsedString> getDefaultTestTags();
 
-  @NotAllowedInResourceFiles
-  IKeywordCall getDefaultTestSetup();
+    @NotAllowedInResourceFiles
+    IKeywordCall getDefaultTestSetup();
 
-  @NotAllowedInResourceFiles
-  IKeywordCall getDefaultTestTeardown();
+    @NotAllowedInResourceFiles
+    IKeywordCall getDefaultTestTeardown();
 
-  @NotAllowedInResourceFiles
-  @NotAllowedInTestSuiteInitializationFiles("2.5")
-  IParsedKeywordString getTemplate(); // not dynamic
+    @NotAllowedInResourceFiles
+    @NotAllowedInTestSuiteInitializationFiles("2.5")
+    IParsedKeywordString getTemplate(); // not dynamic
 
-  /**
-   * Since 2.5.6, the special keyword "NONE" can be used.
-   */
-  @NotAllowedInResourceFiles
-  @NotAllowedInTestSuiteInitializationFiles("2.5")
-  IDynamicParsedString getDefaultTestTimeout();
+    /**
+     * Since 2.5.6, the special keyword "NONE" can be used.
+     */
+    @NotAllowedInResourceFiles
+    @NotAllowedInTestSuiteInitializationFiles("2.5")
+    IDynamicParsedString getDefaultTestTimeout();
 
-  @NotAllowedInResourceFiles
-  @NotAllowedInTestSuiteInitializationFiles("2.5")
-  IParsedString getDefaultTestTimeoutMessage();
+    @NotAllowedInResourceFiles
+    @NotAllowedInTestSuiteInitializationFiles("2.5")
+    IParsedString getDefaultTestTimeoutMessage();
 
 }

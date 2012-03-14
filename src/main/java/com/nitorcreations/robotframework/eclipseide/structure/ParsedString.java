@@ -18,81 +18,82 @@ package com.nitorcreations.robotframework.eclipseide.structure;
 import com.nitorcreations.robotframework.eclipseide.structure.api.IParsedKeywordString;
 
 /**
- * An immutable implementation of all the I*String interfaces in the ...builder.info package.
+ * An immutable implementation of all the I*String interfaces in the
+ * ...builder.info package.
  * 
  * @author xkr47
  */
 public class ParsedString implements IParsedKeywordString {
 
-  private static String[] STRIPPABLE_PREFIXES = { "given ", "when ", "then ", "and " };
+    private static String[] STRIPPABLE_PREFIXES = { "given ", "when ", "then ", "and " };
 
-  private final String value;
-  private final int argCharPos;
+    private final String value;
+    private final int argCharPos;
 
-  public ParsedString(String value, int argCharPos) {
-    if (value == null) {
-      throw new NullPointerException("value");
+    public ParsedString(String value, int argCharPos) {
+        if (value == null) {
+            throw new NullPointerException("value");
+        }
+        if (argCharPos < 0) {
+            throw new IllegalArgumentException("argCharPos < 0");
+        }
+        this.value = value;
+        this.argCharPos = argCharPos;
     }
-    if (argCharPos < 0) {
-      throw new IllegalArgumentException("argCharPos < 0");
+
+    @Override
+    public String getValue() {
+        return value;
     }
-    this.value = value;
-    this.argCharPos = argCharPos;
-  }
 
-  @Override
-  public String getValue() {
-    return value;
-  }
-
-  public boolean isEmpty() {
-    return value.isEmpty() || value.equals("\\");
-  }
-
-  @Override
-  public int getArgCharPos() {
-    return argCharPos;
-  }
-
-  @Override
-  public int getArgEndCharPos() {
-    return argCharPos + value.length();
-  }
-
-  @Override
-  public String getAlternateValue() {
-    String lcValue = value.toLowerCase();
-    for (String strippablePrefix : STRIPPABLE_PREFIXES) {
-      if (lcValue.startsWith(strippablePrefix)) {
-        return value.substring(strippablePrefix.length());
-      }
+    public boolean isEmpty() {
+        return value.isEmpty() || value.equals("\\");
     }
-    return null;
-  }
 
-  @Override
-  public String toString() {
-    return '"' + value + '"';
-  }
+    @Override
+    public int getArgCharPos() {
+        return argCharPos;
+    }
 
-  @Override
-  public String getDebugString() {
-    return toString() + " @" + argCharPos + "-" + (getArgEndCharPos() - 1);
-  }
+    @Override
+    public int getArgEndCharPos() {
+        return argCharPos + value.length();
+    }
 
-  @Override
-  public int hashCode() {
-    return value.hashCode();
-  }
+    @Override
+    public String getAlternateValue() {
+        String lcValue = value.toLowerCase();
+        for (String strippablePrefix : STRIPPABLE_PREFIXES) {
+            if (lcValue.startsWith(strippablePrefix)) {
+                return value.substring(strippablePrefix.length());
+            }
+        }
+        return null;
+    }
 
-  @Override
-  public boolean equals(Object obj) {
-    return value.equals(obj);
-  }
+    @Override
+    public String toString() {
+        return '"' + value + '"';
+    }
 
-  public DynamicParsedString splitRegularArgument() {
-    // TODO implement
-    return new DynamicParsedString(value, argCharPos, null);
-  }
+    @Override
+    public String getDebugString() {
+        return toString() + " @" + argCharPos + "-" + (getArgEndCharPos() - 1);
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return value.equals(obj);
+    }
+
+    public DynamicParsedString splitRegularArgument() {
+        // TODO implement
+        return new DynamicParsedString(value, argCharPos, null);
+    }
 
 }

@@ -21,15 +21,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This is used to tag methods whose return value should always be null for test suite
- * initialization files, e.g. "__init__.txt".
+ * This is used to tag methods whose return value should always be null for test
+ * suite initialization files, e.g. "__init__.txt".
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface NotAllowedInTestSuiteInitializationFiles {
-  /**
-   * @return since which Robot Framework version is it not allowed? (i.e. it was allowed before
-   *         this version)
-   */
-  String value() default "";
+    /**
+     * @return since which Robot Framework version is it not allowed? (i.e. it
+     *         was allowed before this version)
+     */
+    String value() default "";
 }

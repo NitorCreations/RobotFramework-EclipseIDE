@@ -19,13 +19,13 @@ import org.eclipse.jface.text.IRegion;
 
 public class RFTResourceHyperlink extends RFTHyperlink {
 
-  public RFTResourceHyperlink(IRegion region, String path) {
-    super(region, path);
-  }
+    public RFTResourceHyperlink(IRegion region, String path) {
+        super(region, path);
+    }
 
-  @Override
-  public void open() {
-    System.out.println("TODO Open hyperlink RFT Resource '" + text + "'");
-  }
+    @Override
+    public void open() {
+        System.out.println("TODO Open hyperlink RFT Resource '" + text + "'");
+    }
 
 }

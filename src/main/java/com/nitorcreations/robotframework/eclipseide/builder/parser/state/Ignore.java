@@ -22,14 +22,14 @@ import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEParser.Par
 
 public class Ignore extends State {
 
-  public static final State STATE = new Ignore();
+    public static final State STATE = new Ignore();
 
-  @Override
-  public void parse(ParsedLineInfo info) throws CoreException {
-    if (tryParseTableSwitch(info)) {
-      return;
+    @Override
+    public void parse(ParsedLineInfo info) throws CoreException {
+        if (tryParseTableSwitch(info)) {
+            return;
+        }
+        warnIgnoredLine(info, SeverityConfig.IGNORED_LINE_OUTSIDE_RECOGNIZED_TABLE);
     }
-    warnIgnoredLine(info, SeverityConfig.IGNORED_LINE_OUTSIDE_RECOGNIZED_TABLE);
-  }
 
 }

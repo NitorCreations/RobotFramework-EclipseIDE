@@ -26,25 +26,26 @@ import org.eclipse.jface.text.rules.ITokenScanner;
 
 public class RFTPresentationReconciler extends PresentationReconciler {
 
-  public RFTPresentationReconciler(ColorManager colorManager) {
-    ITokenScanner coloringScanner = new RFTColoringScanner(colorManager);
-    DefaultDamagerRepairer dr = new DefaultDamagerRepairer(coloringScanner) {
-      @Override
-      public IRegion getDamageRegion(ITypedRegion partition, DocumentEvent e, boolean documentPartitioningChanged) {
-        // force damaging entire document for now; we don't support partial reparsing just yet
-        return partition;
-      }
-    };
-    setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
-    setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
-  }
+    public RFTPresentationReconciler(ColorManager colorManager) {
+        ITokenScanner coloringScanner = new RFTColoringScanner(colorManager);
+        DefaultDamagerRepairer dr = new DefaultDamagerRepairer(coloringScanner) {
+            @Override
+            public IRegion getDamageRegion(ITypedRegion partition, DocumentEvent e, boolean documentPartitioningChanged) {
+                // force damaging entire document for now; we don't support
+                // partial reparsing just yet
+                return partition;
+            }
+        };
+        setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
+        setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
+    }
 
-  @Override
-  protected TextPresentation createPresentation(IRegion damage, IDocument document) {
-    System.out.println("createPresentation(damage=" + damage + ");");
-    TextPresentation createPresentation = super.createPresentation(damage, document);
-    System.out.println();
-    return createPresentation;
-  }
+    @Override
+    protected TextPresentation createPresentation(IRegion damage, IDocument document) {
+        System.out.println("createPresentation(damage=" + damage + ");");
+        TextPresentation createPresentation = super.createPresentation(damage, document);
+        System.out.println();
+        return createPresentation;
+    }
 
 }

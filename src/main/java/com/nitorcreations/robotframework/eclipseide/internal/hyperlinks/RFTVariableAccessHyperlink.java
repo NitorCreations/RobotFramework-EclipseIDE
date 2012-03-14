@@ -23,19 +23,19 @@ import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 
 public class RFTVariableAccessHyperlink extends RFTHyperlink {
 
-  private final String variable;
-  private final File currentFile;
+    private final String variable;
+    private final File currentFile;
 
-  public RFTVariableAccessHyperlink(IRegion region, String linkText, String variable, File currentFile) {
-    super(region, linkText);
-    this.variable = variable;
-    this.currentFile = currentFile;
-  }
+    public RFTVariableAccessHyperlink(IRegion region, String linkText, String variable, File currentFile) {
+        super(region, linkText);
+        this.variable = variable;
+        this.currentFile = currentFile;
+    }
 
-  @Override
-  public void open() {
-    System.out.println("Open hyperlink RFT Variable Access '" + text + "'");
-    openLocation(ResourceManager.getResource(currentFile).findVariable(variable));
-  }
+    @Override
+    public void open() {
+        System.out.println("Open hyperlink RFT Variable Access '" + text + "'");
+        openLocation(ResourceManager.getResource(currentFile).findVariable(variable));
+    }
 
 }

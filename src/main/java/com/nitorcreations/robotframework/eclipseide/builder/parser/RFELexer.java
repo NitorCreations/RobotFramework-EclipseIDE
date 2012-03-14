@@ -36,95 +36,98 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class RFELexer {
 
-  private final List<RFELine> lexLines = new ArrayList<RFELine>();
-  private final String filename;
-  private final Reader filestream;
-  private final IProgressMonitor monitor;
+    private final List<RFELine> lexLines = new ArrayList<RFELine>();
+    private final String filename;
+    private final Reader filestream;
+    private final IProgressMonitor monitor;
 
-  /**
-   * For files being "compiled" from disk.
-   * 
-   * @param file
-   * @param monitor
-   * @throws UnsupportedEncodingException
-   * @throws CoreException
-   */
-  public RFELexer(final IFile file, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
-    this.filename = file.toString();
-    this.filestream = new InputStreamReader(file.getContents(), file.getCharset());
-    this.monitor = monitor == null ? new NullProgressMonitor() : monitor;
-  }
+    /**
+     * For files being "compiled" from disk.
+     * 
+     * @param file
+     * @param monitor
+     * @throws UnsupportedEncodingException
+     * @throws CoreException
+     */
+    public RFELexer(final IFile file, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
+        this.filename = file.toString();
+        this.filestream = new InputStreamReader(file.getContents(), file.getCharset());
+        this.monitor = monitor == null ? new NullProgressMonitor() : monitor;
+    }
 
-  /**
-   * For unit tests.
-   * 
-   * @param file the file path
-   * @param charset the charset to read the file in
-   * @param markerManager for managing markers
-   * @throws UnsupportedEncodingException
-   * @throws FileNotFoundException
-   */
-  public RFELexer(File file, String charset) throws UnsupportedEncodingException, FileNotFoundException {
-    this.filename = file.getName();
-    this.filestream = new InputStreamReader(new FileInputStream(file), charset);
-    this.monitor = new NullProgressMonitor();
-  }
+    /**
+     * For unit tests.
+     * 
+     * @param file
+     *            the file path
+     * @param charset
+     *            the charset to read the file in
+     * @param markerManager
+     *            for managing markers
+     * @throws UnsupportedEncodingException
+     * @throws FileNotFoundException
+     */
+    public RFELexer(File file, String charset) throws UnsupportedEncodingException, FileNotFoundException {
+        this.filename = file.getName();
+        this.filestream = new InputStreamReader(new FileInputStream(file), charset);
+        this.monitor = new NullProgressMonitor();
+    }
 
-  /**
-   * For documents being edited.
-   * 
-   * @param document
-   */
-  public RFELexer(IDocument document) {
-    this.filename = "<document being edited>";
-    this.filestream = new StringReader(document.get());
-    this.monitor = new NullProgressMonitor();
-  }
+    /**
+     * For documents being edited.
+     * 
+     * @param document
+     */
+    public RFELexer(IDocument document) {
+        this.filename = "<document being edited>";
+        this.filestream = new StringReader(document.get());
+        this.monitor = new NullProgressMonitor();
+    }
 
-  public List<RFELine> lex() throws CoreException {
-    try {
-      System.out.println("Lexing " + filename);
-      CountingLineReader contents = new CountingLineReader(filestream);
-      String line;
-      int lineNo = 1;
-      int charPos = 0;
-      while (null != (line = contents.readLine())) {
-        if (monitor.isCanceled()) {
-          return null;
-        }
+    public List<RFELine> lex() throws CoreException {
         try {
-          lexLine(line, lineNo, charPos);
-        } catch (CoreException e) {
-          throw new RuntimeException("Error when lexing line " + lineNo + ": '" + line + "'", e);
-        } catch (RuntimeException e) {
-          throw new RuntimeException("Internal error when lexing line " + lineNo + ": '" + line + "'", e);
+            System.out.println("Lexing " + filename);
+            CountingLineReader contents = new CountingLineReader(filestream);
+            String line;
+            int lineNo = 1;
+            int charPos = 0;
+            while (null != (line = contents.readLine())) {
+                if (monitor.isCanceled()) {
+                    return null;
+                }
+                try {
+                    lexLine(line, lineNo, charPos);
+                } catch (CoreException e) {
+                    throw new RuntimeException("Error when lexing line " + lineNo + ": '" + line + "'", e);
+                } catch (RuntimeException e) {
+                    throw new RuntimeException("Internal error when lexing line " + lineNo + ": '" + line + "'", e);
+                }
+                ++lineNo;
+                charPos = contents.getCharPos();
+            }
+
+            // TODO store results
+        } catch (Exception e) {
+            throw new RuntimeException("Error lexing robot file " + filename, e);
+        } finally {
+            try {
+                filestream.close();
+            } catch (IOException e) {
+                // ignore
+            }
         }
-        ++lineNo;
-        charPos = contents.getCharPos();
-      }
+        return lexLines;
+    }
 
-      // TODO store results
-    } catch (Exception e) {
-      throw new RuntimeException("Error lexing robot file " + filename, e);
-    } finally {
-      try {
-        filestream.close();
-      } catch (IOException e) {
-        // ignore
-      }
+    private void lexLine(String line, int lineNo, int charPos) throws CoreException {
+        List<ParsedString> arguments = TxtArgumentSplitter.splitLineIntoArguments(line, charPos);
+        if (arguments.isEmpty()) {
+            return;
+        }
+        if (arguments.size() == 1 && arguments.get(0).getValue().isEmpty()) {
+            return;
+        }
+        lexLines.add(new RFELine(lineNo, charPos, arguments));
     }
-    return lexLines;
-  }
-
-  private void lexLine(String line, int lineNo, int charPos) throws CoreException {
-    List<ParsedString> arguments = TxtArgumentSplitter.splitLineIntoArguments(line, charPos);
-    if (arguments.isEmpty()) {
-      return;
-    }
-    if (arguments.size() == 1 && arguments.get(0).getValue().isEmpty()) {
-      return;
-    }
-    lexLines.add(new RFELine(lineNo, charPos, arguments));
-  }
 
 }

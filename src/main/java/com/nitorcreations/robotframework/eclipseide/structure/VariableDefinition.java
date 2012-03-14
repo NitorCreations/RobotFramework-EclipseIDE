@@ -24,31 +24,31 @@ import com.nitorcreations.robotframework.eclipseide.structure.api.IVariableDefin
 
 public class VariableDefinition implements IVariableDefinition {
 
-  private IParsedString variable;
-  private List<IDynamicParsedString> valuesIMM;
+    private IParsedString variable;
+    private List<IDynamicParsedString> valuesIMM;
 
-  // singles
+    // singles
 
-  public void setVariable(IParsedString variable) {
-    this.variable = variable;
-  }
+    public void setVariable(IParsedString variable) {
+        this.variable = variable;
+    }
 
-  // lists
+    // lists
 
-  public void setValues(List<? extends IDynamicParsedString> values) {
-    this.valuesIMM = Collections.unmodifiableList(values);
-  }
+    public void setValues(List<? extends IDynamicParsedString> values) {
+        this.valuesIMM = Collections.unmodifiableList(values);
+    }
 
-  // getters
+    // getters
 
-  @Override
-  public IParsedString getVariable() {
-    return variable;
-  }
+    @Override
+    public IParsedString getVariable() {
+        return variable;
+    }
 
-  @Override
-  public List<IDynamicParsedString> getValues() {
-    return valuesIMM;
-  }
+    @Override
+    public List<IDynamicParsedString> getValues() {
+        return valuesIMM;
+    }
 
 }

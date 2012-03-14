@@ -25,62 +25,63 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class TxtArgumentSplitter {
 
-  private static final Pattern SEPARATOR_RE = Pattern.compile("(?:\t| [ \t])[ \t]*");
+    private static final Pattern SEPARATOR_RE = Pattern.compile("(?:\t| [ \t])[ \t]*");
 
-  /**
-   * Splits a line from a robot TXT file into arguments. Only supports the
-   * tab-or-multiple-whitespace separator right now.
-   * 
-   * @param line
-   * @param charPos the file character position of the first character of the line
-   * @return
-   */
-  static List<ParsedString> splitLineIntoArguments(String line, int charPos) {
-    // remove trailing empty cells and whitespace
-    line = rtrim(line);
-    if (line == null) {
-      return Collections.emptyList();
+    /**
+     * Splits a line from a robot TXT file into arguments. Only supports the
+     * tab-or-multiple-whitespace separator right now.
+     * 
+     * @param line
+     * @param charPos
+     *            the file character position of the first character of the line
+     * @return
+     */
+    static List<ParsedString> splitLineIntoArguments(String line, int charPos) {
+        // remove trailing empty cells and whitespace
+        line = rtrim(line);
+        if (line == null) {
+            return Collections.emptyList();
+        }
+
+        // split line by tab-or-multiwhitespace
+        Matcher m = SEPARATOR_RE.matcher(line);
+        List<ParsedString> arguments = new ArrayList<ParsedString>();
+        int lastEnd = 0;
+        while (true) {
+            // if next cell starts with #, the rest of the line is a comment
+            boolean isComment = lastEnd < line.length() && line.charAt(lastEnd) == '#';
+            boolean isLastArgument = isComment || !m.find();
+            int nextStart = !isLastArgument ? m.start() : line.length();
+            if (lastEnd == 0 && nextStart > 0 && line.charAt(0) == ' ') {
+                /*
+                 * spec says all arguments are trimmed - this is the only case
+                 * when additional trimming is needed.
+                 */
+                ++lastEnd;
+            }
+            arguments.add(new ParsedString(line.substring(lastEnd, nextStart), charPos + lastEnd));
+            if (isLastArgument) {
+                // last argument
+                break;
+            }
+            lastEnd = m.end();
+        }
+        return arguments;
     }
 
-    // split line by tab-or-multiwhitespace
-    Matcher m = SEPARATOR_RE.matcher(line);
-    List<ParsedString> arguments = new ArrayList<ParsedString>();
-    int lastEnd = 0;
-    while (true) {
-      // if next cell starts with #, the rest of the line is a comment
-      boolean isComment = lastEnd < line.length() && line.charAt(lastEnd) == '#';
-      boolean isLastArgument = isComment || !m.find();
-      int nextStart = !isLastArgument ? m.start() : line.length();
-      if (lastEnd == 0 && nextStart > 0 && line.charAt(0) == ' ') {
-        /*
-         * spec says all arguments are trimmed - this is the only case when additional trimming is
-         * needed.
-         */
-        ++lastEnd;
-      }
-      arguments.add(new ParsedString(line.substring(lastEnd, nextStart), charPos + lastEnd));
-      if (isLastArgument) {
-        // last argument
-        break;
-      }
-      lastEnd = m.end();
+    static String rtrim(String line) {
+        int epos = line.length() - 1;
+        while (epos >= 0) {
+            switch (line.charAt(epos)) {
+            case ' ':
+            case '\t':
+                break;
+            default:
+                return line.substring(0, epos + 1);
+            }
+            --epos;
+        }
+        return null; // empty line
     }
-    return arguments;
-  }
-
-  static String rtrim(String line) {
-    int epos = line.length() - 1;
-    while (epos >= 0) {
-      switch (line.charAt(epos)) {
-        case ' ':
-        case '\t':
-          break;
-        default:
-          return line.substring(0, epos + 1);
-      }
-      --epos;
-    }
-    return null; // empty line
-  }
 
 }

@@ -23,30 +23,30 @@ import com.nitorcreations.robotframework.eclipseide.structure.UserKeywordDefinit
 
 public class KeywordTableInitial extends State {
 
-  public static final State STATE = new KeywordTableInitial();
+    public static final State STATE = new KeywordTableInitial();
 
-  @Override
-  public void parse(ParsedLineInfo info) throws CoreException {
-    if (tryParseTableSwitch(info)) {
-      return;
+    @Override
+    public void parse(ParsedLineInfo info) throws CoreException {
+        if (tryParseTableSwitch(info)) {
+            return;
+        }
+        if (info.arguments.get(0).getValue().isEmpty()) {
+            warnIgnoredLine(info, SeverityConfig.IGNORED_LINE_OUTSIDE_RECOGNIZED_TESTCASE_OR_KEYWORD);
+            return;
+        }
+        if (!tryParseArgument(info, 0, "user keyword name")) {
+            // warnIgnoredLine(info, IMarker.SEVERITY_ERROR);
+            return;
+        }
+        // start new user keyword
+        UserKeywordDefinition ukw = new UserKeywordDefinition();
+        ukw.setSequenceName(info.arguments.get(0).splitRegularArgument());
+        info.fc().addKeyword(ukw);
+        info.setState(KeywordTableActive.STATE, ukw);
+        if (info.arguments.size() == 1) {
+            return;
+        }
+        parseUserKeywordLine(info);
     }
-    if (info.arguments.get(0).getValue().isEmpty()) {
-      warnIgnoredLine(info, SeverityConfig.IGNORED_LINE_OUTSIDE_RECOGNIZED_TESTCASE_OR_KEYWORD);
-      return;
-    }
-    if (!tryParseArgument(info, 0, "user keyword name")) {
-      // warnIgnoredLine(info, IMarker.SEVERITY_ERROR);
-      return;
-    }
-    // start new user keyword
-    UserKeywordDefinition ukw = new UserKeywordDefinition();
-    ukw.setSequenceName(info.arguments.get(0).splitRegularArgument());
-    info.fc().addKeyword(ukw);
-    info.setState(KeywordTableActive.STATE, ukw);
-    if (info.arguments.size() == 1) {
-      return;
-    }
-    parseUserKeywordLine(info);
-  }
 
 }

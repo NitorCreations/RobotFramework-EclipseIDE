@@ -21,14 +21,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This is used to tag methods whose return value should always be null for robot files prior to a
- * specific version.
+ * This is used to tag methods whose return value should always be null for
+ * robot files prior to a specific version.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface AvailableFrom {
-  /**
-   * @return since which Robot Framework version is it available?
-   */
-  String value();
+    /**
+     * @return since which Robot Framework version is it available?
+     */
+    String value();
 }

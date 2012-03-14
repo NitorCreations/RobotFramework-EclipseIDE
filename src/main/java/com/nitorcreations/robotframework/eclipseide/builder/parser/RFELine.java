@@ -22,15 +22,15 @@ import java.util.Map;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class RFELine {
-  public final int lineNo;
-  public final int lineCharPos;
-  public final List<ParsedString> arguments;
-  public final Map<Object, Object> info = new LinkedHashMap<Object, Object>();
+    public final int lineNo;
+    public final int lineCharPos;
+    public final List<ParsedString> arguments;
+    public final Map<Object, Object> info = new LinkedHashMap<Object, Object>();
 
-  public RFELine(int lineNo, int lineCharPos, List<ParsedString> arguments) {
-    this.lineNo = lineNo;
-    this.lineCharPos = lineCharPos;
-    this.arguments = arguments;
-  }
+    public RFELine(int lineNo, int lineCharPos, List<ParsedString> arguments) {
+        this.lineNo = lineNo;
+        this.lineCharPos = lineCharPos;
+        this.arguments = arguments;
+    }
 
 }

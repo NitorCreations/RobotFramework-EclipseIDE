@@ -18,9 +18,9 @@ package com.nitorcreations.robotframework.eclipseide.structure.api;
 import java.util.List;
 
 public interface ILibraryFile {
-  IDynamicParsedString getRealName();
+    IDynamicParsedString getRealName();
 
-  IDynamicParsedString getCustomName();
+    IDynamicParsedString getCustomName();
 
-  List<IDynamicParsedString> getArguments();
+    List<IDynamicParsedString> getArguments();
 }

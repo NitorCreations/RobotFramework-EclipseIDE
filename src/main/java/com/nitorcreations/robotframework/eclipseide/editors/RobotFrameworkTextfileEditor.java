@@ -19,35 +19,37 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.editors.text.TextEditor;
 
 /**
- * https://robotframework.googlecode.com/hg/doc/userguide/RobotFrameworkUserGuide.html?r=2.6.1
- * http:/ /help.eclipse.org/helios/index.jsp?topic=/org.eclipse.platform.doc.isv/reference/api/org/
- * eclipse /jface/text/source/package-summary.html
+ * https://robotframework.googlecode.com/hg/doc/userguide/
+ * RobotFrameworkUserGuide.html?r=2.6.1 http:/
+ * /help.eclipse.org/helios/index.jsp
+ * ?topic=/org.eclipse.platform.doc.isv/reference/api/org/ eclipse
+ * /jface/text/source/package-summary.html
  * 
  * @author xkr47
  */
 public class RobotFrameworkTextfileEditor extends TextEditor {
 
-  private final ColorManager colorManager;
+    private final ColorManager colorManager;
 
-  public RobotFrameworkTextfileEditor() {
-    colorManager = new ColorManager();
-    setSourceViewerConfiguration(new RFTSourceViewerConfiguration(colorManager, this));
-    setDocumentProvider(new RFTDocumentProvider());
-  }
+    public RobotFrameworkTextfileEditor() {
+        colorManager = new ColorManager();
+        setSourceViewerConfiguration(new RFTSourceViewerConfiguration(colorManager, this));
+        setDocumentProvider(new RFTDocumentProvider());
+    }
 
-  @Override
-  public void dispose() {
-    colorManager.dispose();
-    super.dispose();
-  }
+    @Override
+    public void dispose() {
+        colorManager.dispose();
+        super.dispose();
+    }
 
-  @Override
-  protected void initializeViewerColors(ISourceViewer viewer) {
-    super.initializeViewerColors(viewer);
-    viewer.getTextWidget().setForeground(colorManager.getColor(IRFTColorConstants.FG));
-    viewer.getTextWidget().setBackground(colorManager.getColor(IRFTColorConstants.BG));
-    viewer.getTextWidget().setSelectionForeground(colorManager.getColor(IRFTColorConstants.FG_SELECTION));
-    viewer.getTextWidget().setSelectionBackground(colorManager.getColor(IRFTColorConstants.BG_SELECTION));
-  }
+    @Override
+    protected void initializeViewerColors(ISourceViewer viewer) {
+        super.initializeViewerColors(viewer);
+        viewer.getTextWidget().setForeground(colorManager.getColor(IRFTColorConstants.FG));
+        viewer.getTextWidget().setBackground(colorManager.getColor(IRFTColorConstants.BG));
+        viewer.getTextWidget().setSelectionForeground(colorManager.getColor(IRFTColorConstants.FG_SELECTION));
+        viewer.getTextWidget().setSelectionBackground(colorManager.getColor(IRFTColorConstants.BG_SELECTION));
+    }
 
 }

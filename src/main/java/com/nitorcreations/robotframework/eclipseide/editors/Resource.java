@@ -22,74 +22,75 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A representation of a robot framework file, which is here called a "resource".
+ * A representation of a robot framework file, which is here called a
+ * "resource".
  * 
  * @author xkr47
  */
 public class Resource {
 
-  /**
-   * The resource.
-   */
-  public final File resourceFile;
+    /**
+     * The resource.
+     */
+    public final File resourceFile;
 
-  /**
-   * The list of included resource files.
-   */
-  public final List<File> includedResources = new ArrayList<File>();
+    /**
+     * The list of included resource files.
+     */
+    public final List<File> includedResources = new ArrayList<File>();
 
-  /**
-   * Map of defined variables, mapping to line numbers.
-   */
-  public final Map<String, Integer> definedVariables = new LinkedHashMap<String, Integer>();
+    /**
+     * Map of defined variables, mapping to line numbers.
+     */
+    public final Map<String, Integer> definedVariables = new LinkedHashMap<String, Integer>();
 
-  /**
-   * Map of defined keywords, mapping to line numbers.
-   */
-  public final Map<String, Integer> definedKeywords = new LinkedHashMap<String, Integer>();
+    /**
+     * Map of defined keywords, mapping to line numbers.
+     */
+    public final Map<String, Integer> definedKeywords = new LinkedHashMap<String, Integer>();
 
-  public Resource(File resourceFile) {
-    this.resourceFile = resourceFile;
-  }
-
-  public ResourceLocation findVariable(String name) {
-    Integer line = definedVariables.get(name);
-    if (line != null) {
-      return new ResourceLocation(this, line);
+    public Resource(File resourceFile) {
+        this.resourceFile = resourceFile;
     }
-    for (File f : includedResources) {
-      Resource r = ResourceManager.getResource(f);
-      if (r == null) {
-        continue;
-      }
-      ResourceLocation l = r.findVariable(name);
-      if (l != null) {
-        return l;
-      }
-    }
-    return null;
-  }
 
-  public ResourceLocation findKeyword(String name) {
-    Integer line = definedKeywords.get(name);
-    if (line != null) {
-      return new ResourceLocation(this, line);
+    public ResourceLocation findVariable(String name) {
+        Integer line = definedVariables.get(name);
+        if (line != null) {
+            return new ResourceLocation(this, line);
+        }
+        for (File f : includedResources) {
+            Resource r = ResourceManager.getResource(f);
+            if (r == null) {
+                continue;
+            }
+            ResourceLocation l = r.findVariable(name);
+            if (l != null) {
+                return l;
+            }
+        }
+        return null;
     }
-    for (File f : includedResources) {
-      Resource r = ResourceManager.getResource(f);
-      if (r == null) {
-        continue;
-      }
-      ResourceLocation l = r.findKeyword(name);
-      if (l != null) {
-        return l;
-      }
-    }
-    return null;
-  }
 
-  public void loadFromDisk() {
-    // TODO
-  }
+    public ResourceLocation findKeyword(String name) {
+        Integer line = definedKeywords.get(name);
+        if (line != null) {
+            return new ResourceLocation(this, line);
+        }
+        for (File f : includedResources) {
+            Resource r = ResourceManager.getResource(f);
+            if (r == null) {
+                continue;
+            }
+            ResourceLocation l = r.findKeyword(name);
+            if (l != null) {
+                return l;
+            }
+        }
+        return null;
+    }
+
+    public void loadFromDisk() {
+        // TODO
+    }
 
 }

@@ -19,18 +19,19 @@ import java.util.List;
 
 public interface IUserKeywordDefinition extends IKeywordSequence {
 
-  @Override
-  IDynamicParsedString getSequenceName();
+    @Override
+    IDynamicParsedString getSequenceName();
 
-  /**
-   * When arguments have default values, {@link IDynamicParsedString#getParts()} returns two parts,
-   * "${argument}" and "=value".
-   */
-  List<IDynamicParsedString> getArguments();
+    /**
+     * When arguments have default values,
+     * {@link IDynamicParsedString#getParts()} returns two parts, "${argument}"
+     * and "=value".
+     */
+    List<IDynamicParsedString> getArguments();
 
-  List<IDynamicParsedString> getReturnValues();
+    List<IDynamicParsedString> getReturnValues();
 
-  @AvailableFrom("2.6")
-  IKeywordCall getKeywordTeardown();
+    @AvailableFrom("2.6")
+    IKeywordCall getKeywordTeardown();
 
 }

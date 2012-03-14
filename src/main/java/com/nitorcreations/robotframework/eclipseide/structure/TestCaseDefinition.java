@@ -28,90 +28,90 @@ import com.nitorcreations.robotframework.eclipseide.structure.api.ITestCaseDefin
 
 public class TestCaseDefinition extends KeywordSequence implements ITestCaseDefinition {
 
-  private IParsedString sequenceName;
-  private List<IDynamicParsedString> declaredStaticTagsIMM;
-  private IKeywordCall testSetup;
-  private IKeywordCall testTeardown;
-  private IParsedKeywordString template;
+    private IParsedString sequenceName;
+    private List<IDynamicParsedString> declaredStaticTagsIMM;
+    private IKeywordCall testSetup;
+    private IKeywordCall testTeardown;
+    private IParsedKeywordString template;
 
-  private final IRFEFileContents fileContents;
+    private final IRFEFileContents fileContents;
 
-  public TestCaseDefinition(IRFEFileContents fileContents) {
-    this.fileContents = fileContents;
-  }
+    public TestCaseDefinition(IRFEFileContents fileContents) {
+        this.fileContents = fileContents;
+    }
 
-  // singles
+    // singles
 
-  public void setSequenceName(IParsedString sequenceName) {
-    this.sequenceName = sequenceName;
-  }
+    public void setSequenceName(IParsedString sequenceName) {
+        this.sequenceName = sequenceName;
+    }
 
-  public void setTestSetup(IKeywordCall testSetup) {
-    this.testSetup = testSetup;
-  }
+    public void setTestSetup(IKeywordCall testSetup) {
+        this.testSetup = testSetup;
+    }
 
-  public void setTestTeardown(IKeywordCall testTeardown) {
-    this.testTeardown = testTeardown;
-  }
+    public void setTestTeardown(IKeywordCall testTeardown) {
+        this.testTeardown = testTeardown;
+    }
 
-  public void setTemplate(IParsedKeywordString template) {
-    this.template = template;
-  }
+    public void setTemplate(IParsedKeywordString template) {
+        this.template = template;
+    }
 
-  // lists
+    // lists
 
-  public void setDeclaredStaticTags(List<? extends IDynamicParsedString> declaredStaticTags) {
-    this.declaredStaticTagsIMM = Collections.unmodifiableList(declaredStaticTags);
-  }
+    public void setDeclaredStaticTags(List<? extends IDynamicParsedString> declaredStaticTags) {
+        this.declaredStaticTagsIMM = Collections.unmodifiableList(declaredStaticTags);
+    }
 
-  // getters
+    // getters
 
-  @Override
-  public IParsedString getSequenceName() {
-    return sequenceName;
-  }
+    @Override
+    public IParsedString getSequenceName() {
+        return sequenceName;
+    }
 
-  @Override
-  public List<IDynamicParsedString> getDeclaredStaticTags() {
-    return declaredStaticTagsIMM;
-  }
-
-  @Override
-  public List<IDynamicParsedString> getDeclaredAndInheritedStaticTags() {
-    if (fileContents.getSettings().getForcedTestTags() == null) {
-      if (declaredStaticTagsIMM != null) {
+    @Override
+    public List<IDynamicParsedString> getDeclaredStaticTags() {
         return declaredStaticTagsIMM;
-      }
-      return fileContents.getSettings().getDefaultTestTags();
     }
-    if (declaredStaticTagsIMM != null) {
-      List<IDynamicParsedString> declaredAndInheritedStaticTags = new ArrayList<IDynamicParsedString>();
-      declaredAndInheritedStaticTags.addAll(fileContents.getSettings().getForcedTestTags());
-      declaredAndInheritedStaticTags.addAll(declaredStaticTagsIMM);
-      return declaredAndInheritedStaticTags;
+
+    @Override
+    public List<IDynamicParsedString> getDeclaredAndInheritedStaticTags() {
+        if (fileContents.getSettings().getForcedTestTags() == null) {
+            if (declaredStaticTagsIMM != null) {
+                return declaredStaticTagsIMM;
+            }
+            return fileContents.getSettings().getDefaultTestTags();
+        }
+        if (declaredStaticTagsIMM != null) {
+            List<IDynamicParsedString> declaredAndInheritedStaticTags = new ArrayList<IDynamicParsedString>();
+            declaredAndInheritedStaticTags.addAll(fileContents.getSettings().getForcedTestTags());
+            declaredAndInheritedStaticTags.addAll(declaredStaticTagsIMM);
+            return declaredAndInheritedStaticTags;
+        }
+        if (fileContents.getSettings().getDefaultTestTags() != null) {
+            List<IDynamicParsedString> declaredAndInheritedStaticTags = new ArrayList<IDynamicParsedString>();
+            declaredAndInheritedStaticTags.addAll(fileContents.getSettings().getForcedTestTags());
+            declaredStaticTagsIMM.addAll(fileContents.getSettings().getDefaultTestTags());
+            return declaredAndInheritedStaticTags;
+        }
+        return fileContents.getSettings().getForcedTestTags();
     }
-    if (fileContents.getSettings().getDefaultTestTags() != null) {
-      List<IDynamicParsedString> declaredAndInheritedStaticTags = new ArrayList<IDynamicParsedString>();
-      declaredAndInheritedStaticTags.addAll(fileContents.getSettings().getForcedTestTags());
-      declaredStaticTagsIMM.addAll(fileContents.getSettings().getDefaultTestTags());
-      return declaredAndInheritedStaticTags;
+
+    @Override
+    public IKeywordCall getTestSetup() {
+        return testSetup;
     }
-    return fileContents.getSettings().getForcedTestTags();
-  }
 
-  @Override
-  public IKeywordCall getTestSetup() {
-    return testSetup;
-  }
+    @Override
+    public IKeywordCall getTestTeardown() {
+        return testTeardown;
+    }
 
-  @Override
-  public IKeywordCall getTestTeardown() {
-    return testTeardown;
-  }
-
-  @Override
-  public IParsedKeywordString getTemplate() {
-    return template;
-  }
+    @Override
+    public IParsedKeywordString getTemplate() {
+        return template;
+    }
 
 }

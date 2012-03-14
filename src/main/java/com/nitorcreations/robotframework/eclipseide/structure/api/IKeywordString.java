@@ -16,18 +16,19 @@
 package com.nitorcreations.robotframework.eclipseide.structure.api;
 
 /**
- * This represents the additional functionality available for {@link IParsedString}s that happen to
- * be keywords.
+ * This represents the additional functionality available for
+ * {@link IParsedString}s that happen to be keywords.
  * 
  * @author xkr47
  */
 public interface IKeywordString {
 
-  /**
-   * @return If the keyword (returned by {@link IParsedString#getValue()}) starts with one of the
-   *         "Given", "When", "Then" or "And" prefixes, the alternate keyword with the prefix
-   *         stripped is returned. Otherwise, null is returned.
-   */
-  String getAlternateValue();
+    /**
+     * @return If the keyword (returned by {@link IParsedString#getValue()})
+     *         starts with one of the "Given", "When", "Then" or "And" prefixes,
+     *         the alternate keyword with the prefix stripped is returned.
+     *         Otherwise, null is returned.
+     */
+    String getAlternateValue();
 
 }

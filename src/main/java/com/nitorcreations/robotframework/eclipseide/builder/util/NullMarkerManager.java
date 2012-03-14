@@ -25,98 +25,105 @@ import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEParser.Mar
 
 public class NullMarkerManager implements MarkerManager {
 
-  @Override
-  public IMarker createMarker(String type) throws CoreException {
-    return new IMarker() {
+    @Override
+    public IMarker createMarker(String type) throws CoreException {
+        return new IMarker() {
 
-      @SuppressWarnings("rawtypes")
-      @Override
-      public Object getAdapter(Class adapter) {
-        return null;
-      }
+            @SuppressWarnings("rawtypes")
+            @Override
+            public Object getAdapter(Class adapter) {
+                return null;
+            }
 
-      @Override
-      public void delete() throws CoreException {}
+            @Override
+            public void delete() throws CoreException {
+            }
 
-      @Override
-      public boolean exists() {
-        return false;
-      }
+            @Override
+            public boolean exists() {
+                return false;
+            }
 
-      @Override
-      public Object getAttribute(String attributeName) throws CoreException {
-        return null;
-      }
+            @Override
+            public Object getAttribute(String attributeName) throws CoreException {
+                return null;
+            }
 
-      @Override
-      public int getAttribute(String attributeName, int defaultValue) {
-        return 0;
-      }
+            @Override
+            public int getAttribute(String attributeName, int defaultValue) {
+                return 0;
+            }
 
-      @Override
-      public String getAttribute(String attributeName, String defaultValue) {
-        return null;
-      }
+            @Override
+            public String getAttribute(String attributeName, String defaultValue) {
+                return null;
+            }
 
-      @Override
-      public boolean getAttribute(String attributeName, boolean defaultValue) {
-        return false;
-      }
+            @Override
+            public boolean getAttribute(String attributeName, boolean defaultValue) {
+                return false;
+            }
 
-      @Override
-      public Map<String, Object> getAttributes() throws CoreException {
-        return null;
-      }
+            @Override
+            public Map<String, Object> getAttributes() throws CoreException {
+                return null;
+            }
 
-      @Override
-      public Object[] getAttributes(String[] attributeNames) throws CoreException {
-        return null;
-      }
+            @Override
+            public Object[] getAttributes(String[] attributeNames) throws CoreException {
+                return null;
+            }
 
-      @Override
-      public long getCreationTime() throws CoreException {
-        return 0;
-      }
+            @Override
+            public long getCreationTime() throws CoreException {
+                return 0;
+            }
 
-      @Override
-      public long getId() {
-        return 0;
-      }
+            @Override
+            public long getId() {
+                return 0;
+            }
 
-      @Override
-      public IResource getResource() {
-        return null;
-      }
+            @Override
+            public IResource getResource() {
+                return null;
+            }
 
-      @Override
-      public String getType() throws CoreException {
-        return null;
-      }
+            @Override
+            public String getType() throws CoreException {
+                return null;
+            }
 
-      @Override
-      public boolean isSubtypeOf(String superType) throws CoreException {
-        return false;
-      }
+            @Override
+            public boolean isSubtypeOf(String superType) throws CoreException {
+                return false;
+            }
 
-      @Override
-      public void setAttribute(String attributeName, int value) throws CoreException {}
+            @Override
+            public void setAttribute(String attributeName, int value) throws CoreException {
+            }
 
-      @Override
-      public void setAttribute(String attributeName, Object value) throws CoreException {}
+            @Override
+            public void setAttribute(String attributeName, Object value) throws CoreException {
+            }
 
-      @Override
-      public void setAttribute(String attributeName, boolean value) throws CoreException {}
+            @Override
+            public void setAttribute(String attributeName, boolean value) throws CoreException {
+            }
 
-      @Override
-      public void setAttributes(String[] attributeNames, Object[] values) throws CoreException {}
+            @Override
+            public void setAttributes(String[] attributeNames, Object[] values) throws CoreException {
+            }
 
-      @Override
-      public void setAttributes(Map<String, ? extends Object> attributes) throws CoreException {}
+            @Override
+            public void setAttributes(Map<String, ? extends Object> attributes) throws CoreException {
+            }
 
-    };
-  }
+        };
+    }
 
-  @Override
-  public void eraseMarkers() {}
+    @Override
+    public void eraseMarkers() {
+    }
 
 }

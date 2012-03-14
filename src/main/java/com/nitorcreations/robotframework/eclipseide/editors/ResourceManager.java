@@ -22,24 +22,24 @@ import java.util.Map;
 
 public final class ResourceManager {
 
-  private static final Map<File, Resource> resources = new HashMap<File, Resource>();
+    private static final Map<File, Resource> resources = new HashMap<File, Resource>();
 
-  public static Resource getResource(File path) {
-    try {
-      Resource r;
-      synchronized (ResourceManager.class) {
-        File canonicalPath = path.getCanonicalFile();
-        r = resources.get(canonicalPath);
-        if (r == null) {
-          r = new Resource(canonicalPath);
-          r.loadFromDisk();
-          resources.put(canonicalPath, r);
+    public static Resource getResource(File path) {
+        try {
+            Resource r;
+            synchronized (ResourceManager.class) {
+                File canonicalPath = path.getCanonicalFile();
+                r = resources.get(canonicalPath);
+                if (r == null) {
+                    r = new Resource(canonicalPath);
+                    r.loadFromDisk();
+                    resources.put(canonicalPath, r);
+                }
+            }
+            return r;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-      }
-      return r;
-    } catch (IOException e) {
-      throw new RuntimeException(e);
     }
-  }
 
 }

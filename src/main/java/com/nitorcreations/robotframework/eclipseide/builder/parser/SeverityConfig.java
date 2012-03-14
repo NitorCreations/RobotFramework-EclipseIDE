@@ -19,14 +19,14 @@ import org.eclipse.core.resources.IMarker;
 
 public class SeverityConfig {
 
-  // usable severities: IMarker.SEVERITY_* and State.SEVERITY_IGNORE
+    // usable severities: IMarker.SEVERITY_* and State.SEVERITY_IGNORE
 
-  public static final int UNKNOWN_TABLE = IMarker.SEVERITY_ERROR;
-  public static final int IGNORED_LINE_OUTSIDE_RECOGNIZED_TABLE = IMarker.SEVERITY_INFO;
-  public static final int IGNORED_LINE_IN_SETTING_TABLE = IMarker.SEVERITY_WARNING;
-  /**
-   * As per documentation.
-   */
-  public static final int IGNORED_LINE_OUTSIDE_RECOGNIZED_TESTCASE_OR_KEYWORD = IMarker.SEVERITY_ERROR;
+    public static final int UNKNOWN_TABLE = IMarker.SEVERITY_ERROR;
+    public static final int IGNORED_LINE_OUTSIDE_RECOGNIZED_TABLE = IMarker.SEVERITY_INFO;
+    public static final int IGNORED_LINE_IN_SETTING_TABLE = IMarker.SEVERITY_WARNING;
+    /**
+     * As per documentation.
+     */
+    public static final int IGNORED_LINE_OUTSIDE_RECOGNIZED_TESTCASE_OR_KEYWORD = IMarker.SEVERITY_ERROR;
 
 }

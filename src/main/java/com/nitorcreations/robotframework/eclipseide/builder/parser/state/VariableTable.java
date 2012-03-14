@@ -26,24 +26,24 @@ import com.nitorcreations.robotframework.eclipseide.structure.VariableDefinition
 
 public class VariableTable extends State {
 
-  public static final State STATE = new VariableTable();
+    public static final State STATE = new VariableTable();
 
-  @Override
-  public void parse(ParsedLineInfo info) throws CoreException {
-    if (tryParseTableSwitch(info)) {
-      return;
+    @Override
+    public void parse(ParsedLineInfo info) throws CoreException {
+        if (tryParseTableSwitch(info)) {
+            return;
+        }
+        if (!tryParseVariable(info, 0)) {
+            return;
+        }
+        ParsedString varArg = info.arguments.get(0);
+        // TODO tryParseArgument(info, 1, "variable content");
+        List<DynamicParsedString> values = splitRegularArguments(info, 1, 0);
+        VariableDefinition varDef = new VariableDefinition();
+        varDef.setVariable(varArg);
+        varDef.setValues(values);
+        info.fc().addVariable(varDef);
+        info.setContinuationList(values);
     }
-    if (!tryParseVariable(info, 0)) {
-      return;
-    }
-    ParsedString varArg = info.arguments.get(0);
-    // TODO tryParseArgument(info, 1, "variable content");
-    List<DynamicParsedString> values = splitRegularArguments(info, 1, 0);
-    VariableDefinition varDef = new VariableDefinition();
-    varDef.setVariable(varArg);
-    varDef.setValues(values);
-    info.fc().addVariable(varDef);
-    info.setContinuationList(values);
-  }
 
 }

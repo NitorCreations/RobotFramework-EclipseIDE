@@ -19,8 +19,8 @@ import org.eclipse.jface.text.reconciler.DirtyRegion;
 
 public class RFTDamagedRegion extends DirtyRegion {
 
-  public RFTDamagedRegion(int offset, int length) {
-    super(offset, length, null, null);
-  }
+    public RFTDamagedRegion(int offset, int length) {
+        super(offset, length, null, null);
+    }
 
 }

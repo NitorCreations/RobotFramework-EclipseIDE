@@ -23,28 +23,29 @@ import com.nitorcreations.robotframework.eclipseide.structure.api.IDynamicParsed
 
 public class DynamicParsedString extends ParsedString implements IDynamicParsedKeywordString {
 
-  private final List<IDynamicParsedString> parts;
+    private final List<IDynamicParsedString> parts;
 
-  /**
-   * @param parts
-   *          non-null automatically wrapped using {@link Collections#unmodifiableList(List)}
-   */
-  public DynamicParsedString(String value, int argCharPos, List<? extends IDynamicParsedString> parts) {
-    super(value, argCharPos);
-    if (parts != null && parts.isEmpty()) {
-      throw new IllegalArgumentException("parts list is empty");
+    /**
+     * @param parts
+     *            non-null automatically wrapped using
+     *            {@link Collections#unmodifiableList(List)}
+     */
+    public DynamicParsedString(String value, int argCharPos, List<? extends IDynamicParsedString> parts) {
+        super(value, argCharPos);
+        if (parts != null && parts.isEmpty()) {
+            throw new IllegalArgumentException("parts list is empty");
+        }
+        this.parts = parts == null ? null : Collections.unmodifiableList(parts);
     }
-    this.parts = parts == null ? null : Collections.unmodifiableList(parts);
-  }
 
-  @Override
-  public List<IDynamicParsedString> getParts() {
-    return parts;
-  }
+    @Override
+    public List<IDynamicParsedString> getParts() {
+        return parts;
+    }
 
-  @Override
-  public String toString() {
-    return parts == null ? super.toString() : parts.toString();
-  }
+    @Override
+    public String toString() {
+        return parts == null ? super.toString() : parts.toString();
+    }
 
 }

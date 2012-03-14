@@ -17,55 +17,57 @@ package com.nitorcreations.robotframework.eclipseide.internal.rules;
 
 public final class RFTVariableUtils {
 
-  /**
-   * Finds the start of the next variable, when scanning from the offset given. The name of the
-   * variable must be at least one character for it to be detected as a link.
-   * 
-   * @param line
-   *          the line to scan
-   * @param start
-   *          the position to start scanning on
-   * @return the position at which the next variable starts, or -1 if no more variables are found.
-   */
-  public static int findNextVariableStart(String line, int start) {
-    for (; start < line.length() - 3; ++start) {
-      if (line.charAt(start) == '$' && line.charAt(start + 1) == '{') {
-        return start;
-      }
-      if (line.charAt(start) == '#') {
+    /**
+     * Finds the start of the next variable, when scanning from the offset
+     * given. The name of the variable must be at least one character for it to
+     * be detected as a link.
+     * 
+     * @param line
+     *            the line to scan
+     * @param start
+     *            the position to start scanning on
+     * @return the position at which the next variable starts, or -1 if no more
+     *         variables are found.
+     */
+    public static int findNextVariableStart(String line, int start) {
+        for (; start < line.length() - 3; ++start) {
+            if (line.charAt(start) == '$' && line.charAt(start + 1) == '{') {
+                return start;
+            }
+            if (line.charAt(start) == '#') {
+                return -1;
+            }
+            if (line.charAt(start) == '\\') {
+                // skip next character, possibly $
+                ++start;
+            }
+        }
         return -1;
-      }
-      if (line.charAt(start) == '\\') {
-        // skip next character, possibly $
-        ++start;
-      }
     }
-    return -1;
-  }
 
-  /**
-   * Calculate the length of the variable starting at the given position, or -1 if the variable does
-   * not end with }.
-   * 
-   * @param line
-   *          the line to scan
-   * @param start
-   *          the start position of the variable
-   * @return the number of characters in the variable
-   */
-  public static int calculateVariableLength(String line, int start) {
-    final int origStart = start;
-    for (; start < line.length(); ++start) {
-      if (line.charAt(start) == '}') {
-        return start - origStart + 1;
-      }
-      if (line.charAt(start) == '\\') {
-        // skip next character, possibly }
-        ++start;
-      }
+    /**
+     * Calculate the length of the variable starting at the given position, or
+     * -1 if the variable does not end with }.
+     * 
+     * @param line
+     *            the line to scan
+     * @param start
+     *            the start position of the variable
+     * @return the number of characters in the variable
+     */
+    public static int calculateVariableLength(String line, int start) {
+        final int origStart = start;
+        for (; start < line.length(); ++start) {
+            if (line.charAt(start) == '}') {
+                return start - origStart + 1;
+            }
+            if (line.charAt(start) == '\\') {
+                // skip next character, possibly }
+                ++start;
+            }
+        }
+        // if we get here, variable did not end with }
+        return -1;
     }
-    // if we get here, variable did not end with }
-    return -1;
-  }
 
 }

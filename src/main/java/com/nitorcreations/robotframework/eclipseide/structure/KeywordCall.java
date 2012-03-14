@@ -24,31 +24,31 @@ import com.nitorcreations.robotframework.eclipseide.structure.api.IKeywordCall;
 
 public class KeywordCall implements IKeywordCall {
 
-  private IDynamicParsedKeywordString keyword;
-  private List<IDynamicParsedString> argumentsIMM;
+    private IDynamicParsedKeywordString keyword;
+    private List<IDynamicParsedString> argumentsIMM;
 
-  // singles
+    // singles
 
-  public void setKeyword(IDynamicParsedKeywordString keyword) {
-    this.keyword = keyword;
-  }
+    public void setKeyword(IDynamicParsedKeywordString keyword) {
+        this.keyword = keyword;
+    }
 
-  // lists
+    // lists
 
-  public void setArguments(List<? extends IDynamicParsedString> arguments) {
-    this.argumentsIMM = Collections.unmodifiableList(arguments);
-  }
+    public void setArguments(List<? extends IDynamicParsedString> arguments) {
+        this.argumentsIMM = Collections.unmodifiableList(arguments);
+    }
 
-  // getters
+    // getters
 
-  @Override
-  public IDynamicParsedKeywordString getKeyword() {
-    return keyword;
-  }
+    @Override
+    public IDynamicParsedKeywordString getKeyword() {
+        return keyword;
+    }
 
-  @Override
-  public List<IDynamicParsedString> getArguments() {
-    return argumentsIMM;
-  }
+    @Override
+    public List<IDynamicParsedString> getArguments() {
+        return argumentsIMM;
+    }
 
 }

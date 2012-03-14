@@ -18,10 +18,11 @@ package com.nitorcreations.robotframework.eclipseide.structure.api;
 import java.util.List;
 
 public interface IKeywordCall {
-  /**
-   * Returns null if a template keyword is active, except if the keyword is ":FOR".
-   */
-  IDynamicParsedKeywordString getKeyword();
+    /**
+     * Returns null if a template keyword is active, except if the keyword is
+     * ":FOR".
+     */
+    IDynamicParsedKeywordString getKeyword();
 
-  List<IDynamicParsedString> getArguments();
+    List<IDynamicParsedString> getArguments();
 }

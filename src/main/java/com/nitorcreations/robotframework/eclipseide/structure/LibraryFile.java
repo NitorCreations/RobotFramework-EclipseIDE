@@ -24,41 +24,41 @@ import com.nitorcreations.robotframework.eclipseide.structure.api.ILibraryFile;
 
 public class LibraryFile implements ILibraryFile {
 
-  private IDynamicParsedKeywordString realName;
-  private IDynamicParsedKeywordString customName;
-  private List<IDynamicParsedString> argumentsIMM;
+    private IDynamicParsedKeywordString realName;
+    private IDynamicParsedKeywordString customName;
+    private List<IDynamicParsedString> argumentsIMM;
 
-  // single
+    // single
 
-  public void setRealName(IDynamicParsedKeywordString realName) {
-    this.realName = realName;
-  }
+    public void setRealName(IDynamicParsedKeywordString realName) {
+        this.realName = realName;
+    }
 
-  public void setCustomName(IDynamicParsedKeywordString customName) {
-    this.customName = customName;
-  }
+    public void setCustomName(IDynamicParsedKeywordString customName) {
+        this.customName = customName;
+    }
 
-  // lists
+    // lists
 
-  public void setArguments(List<? extends IDynamicParsedString> arguments) {
-    this.argumentsIMM = Collections.unmodifiableList(arguments);
-  }
+    public void setArguments(List<? extends IDynamicParsedString> arguments) {
+        this.argumentsIMM = Collections.unmodifiableList(arguments);
+    }
 
-  // interface-specified getters
+    // interface-specified getters
 
-  @Override
-  public IDynamicParsedKeywordString getRealName() {
-    return realName;
-  }
+    @Override
+    public IDynamicParsedKeywordString getRealName() {
+        return realName;
+    }
 
-  @Override
-  public IDynamicParsedKeywordString getCustomName() {
-    return customName;
-  }
+    @Override
+    public IDynamicParsedKeywordString getCustomName() {
+        return customName;
+    }
 
-  @Override
-  public List<IDynamicParsedString> getArguments() {
-    return argumentsIMM;
-  }
+    @Override
+    public List<IDynamicParsedString> getArguments() {
+        return argumentsIMM;
+    }
 
 }

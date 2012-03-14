@@ -16,11 +16,11 @@
 package com.nitorcreations.robotframework.eclipseide.editors;
 
 public class ResourceLocation {
-  public final Resource resource;
-  public final int line;
+    public final Resource resource;
+    public final int line;
 
-  public ResourceLocation(Resource resource, int line) {
-    this.resource = resource;
-    this.line = line;
-  }
+    public ResourceLocation(Resource resource, int line) {
+        this.resource = resource;
+        this.line = line;
+    }
 }

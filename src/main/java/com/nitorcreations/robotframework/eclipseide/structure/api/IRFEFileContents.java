@@ -18,20 +18,22 @@ package com.nitorcreations.robotframework.eclipseide.structure.api;
 import java.util.Map;
 
 /**
- * This interface provides bean-ish access to the parsed structure of a robot file.
+ * This interface provides bean-ish access to the parsed structure of a robot
+ * file.
  * 
  * @author xkr47
  */
 public interface IRFEFileContents {
 
-  // TODO check the IParsedString:s in all interfaces, could some of them be dynamic ?
+    // TODO check the IParsedString:s in all interfaces, could some of them be
+    // dynamic ?
 
-  ISettings getSettings();
+    ISettings getSettings();
 
-  Map<IParsedString, IVariableDefinition> getVariables();
+    Map<IParsedString, IVariableDefinition> getVariables();
 
-  Map<IParsedString, ITestCaseDefinition> getTestCases();
+    Map<IParsedString, ITestCaseDefinition> getTestCases();
 
-  Map<IDynamicParsedString, IUserKeywordDefinition> getKeywords();
+    Map<IDynamicParsedString, IUserKeywordDefinition> getKeywords();
 
 }

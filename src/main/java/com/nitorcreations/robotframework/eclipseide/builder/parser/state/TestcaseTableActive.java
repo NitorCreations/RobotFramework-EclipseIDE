@@ -22,28 +22,28 @@ import com.nitorcreations.robotframework.eclipseide.structure.TestCaseDefinition
 
 public class TestcaseTableActive extends State {
 
-  public static final State STATE = new TestcaseTableActive();
+    public static final State STATE = new TestcaseTableActive();
 
-  @Override
-  public void parse(ParsedLineInfo info) throws CoreException {
-    if (tryParseTableSwitch(info)) {
-      return;
+    @Override
+    public void parse(ParsedLineInfo info) throws CoreException {
+        if (tryParseTableSwitch(info)) {
+            return;
+        }
+        if (!info.arguments.get(0).getValue().isEmpty()) {
+            // start new testcase
+            if (!tryParseArgument(info, 0, "test case name")) {
+                // warnIgnoredLine(info, IMarker.SEVERITY_ERROR);
+                return;
+            }
+            TestCaseDefinition tc = new TestCaseDefinition(info.fc());
+            tc.setSequenceName(info.arguments.get(0));
+            info.fc().addTestCase(tc);
+            info.setState(STATE, tc);
+            if (info.arguments.size() == 1) {
+                return;
+            }
+        }
+        parseTestcaseLine(info);
     }
-    if (!info.arguments.get(0).getValue().isEmpty()) {
-      // start new testcase
-      if (!tryParseArgument(info, 0, "test case name")) {
-        // warnIgnoredLine(info, IMarker.SEVERITY_ERROR);
-        return;
-      }
-      TestCaseDefinition tc = new TestCaseDefinition(info.fc());
-      tc.setSequenceName(info.arguments.get(0));
-      info.fc().addTestCase(tc);
-      info.setState(STATE, tc);
-      if (info.arguments.size() == 1) {
-        return;
-      }
-    }
-    parseTestcaseLine(info);
-  }
 
 }

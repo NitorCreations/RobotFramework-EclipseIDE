@@ -23,30 +23,30 @@ import com.nitorcreations.robotframework.eclipseide.structure.TestCaseDefinition
 
 public class TestcaseTableInitial extends State {
 
-  public static final State STATE = new TestcaseTableInitial();
+    public static final State STATE = new TestcaseTableInitial();
 
-  @Override
-  public void parse(ParsedLineInfo info) throws CoreException {
-    if (tryParseTableSwitch(info)) {
-      return;
+    @Override
+    public void parse(ParsedLineInfo info) throws CoreException {
+        if (tryParseTableSwitch(info)) {
+            return;
+        }
+        if (info.arguments.get(0).getValue().isEmpty()) {
+            warnIgnoredLine(info, SeverityConfig.IGNORED_LINE_OUTSIDE_RECOGNIZED_TESTCASE_OR_KEYWORD);
+            return;
+        }
+        if (!tryParseArgument(info, 0, "test case name")) {
+            // warnIgnoredLine(info, IMarker.SEVERITY_ERROR);
+            return;
+        }
+        // start new testcase
+        TestCaseDefinition tc = new TestCaseDefinition(info.fc());
+        tc.setSequenceName(info.arguments.get(0));
+        info.fc().addTestCase(tc);
+        info.setState(TestcaseTableActive.STATE, tc);
+        if (info.arguments.size() == 1) {
+            return;
+        }
+        parseTestcaseLine(info);
     }
-    if (info.arguments.get(0).getValue().isEmpty()) {
-      warnIgnoredLine(info, SeverityConfig.IGNORED_LINE_OUTSIDE_RECOGNIZED_TESTCASE_OR_KEYWORD);
-      return;
-    }
-    if (!tryParseArgument(info, 0, "test case name")) {
-      // warnIgnoredLine(info, IMarker.SEVERITY_ERROR);
-      return;
-    }
-    // start new testcase
-    TestCaseDefinition tc = new TestCaseDefinition(info.fc());
-    tc.setSequenceName(info.arguments.get(0));
-    info.fc().addTestCase(tc);
-    info.setState(TestcaseTableActive.STATE, tc);
-    if (info.arguments.size() == 1) {
-      return;
-    }
-    parseTestcaseLine(info);
-  }
 
 }

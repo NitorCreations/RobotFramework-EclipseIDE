@@ -19,16 +19,16 @@ import java.util.List;
 
 public interface IKeywordSequence {
 
-  IParsedString getSequenceName();
+    IParsedString getSequenceName();
 
-  List<IDynamicParsedString> getDocumentation();
+    List<IDynamicParsedString> getDocumentation();
 
-  /**
-   * Since 2.5.6, the special keyword "NONE" can be used.
-   */
-  IDynamicParsedString getTimeout();
+    /**
+     * Since 2.5.6, the special keyword "NONE" can be used.
+     */
+    IDynamicParsedString getTimeout();
 
-  IParsedString getTimeoutMessage();
+    IParsedString getTimeoutMessage();
 
-  List<IKeywordCall> getKeywordCalls();
+    List<IKeywordCall> getKeywordCalls();
 }

@@ -18,9 +18,9 @@ package com.nitorcreations.robotframework.eclipseide.builder.parser.util;
 import java.util.regex.Pattern;
 
 public class ParserUtil {
-  private static final Pattern PAT_ASTERISKS_AND_BLANKS = Pattern.compile("[* ]+");
+    private static final Pattern PAT_ASTERISKS_AND_BLANKS = Pattern.compile("[* ]+");
 
-  public static String parseTable(String line) {
-    return PAT_ASTERISKS_AND_BLANKS.matcher(line).replaceAll("").toLowerCase();
-  }
+    public static String parseTable(String line) {
+        return PAT_ASTERISKS_AND_BLANKS.matcher(line).replaceAll("").toLowerCase();
+    }
 }

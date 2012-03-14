@@ -26,71 +26,72 @@ import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
 
 /**
- * This hyperlink detector creates hyperlinks for resource references, e.g. "Resource foo.txt" -->
- * "foo.txt" is linked.
+ * This hyperlink detector creates hyperlinks for resource references, e.g.
+ * "Resource foo.txt" --> "foo.txt" is linked.
  * 
  * @author xkr47
  */
 public class RFTResourceHyperlinkDetector implements IHyperlinkDetector {
 
-  /**
-   * This detector assumes generated hyperlinks are static, i.e. the link target is calculated at
-   * detection time and not changed even if the code would update later.
-   */
-  @Override
-  public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
-    if (region == null || textViewer == null) {
-      return null;
+    /**
+     * This detector assumes generated hyperlinks are static, i.e. the link
+     * target is calculated at detection time and not changed even if the code
+     * would update later.
+     */
+    @Override
+    public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
+        if (region == null || textViewer == null) {
+            return null;
+        }
+
+        IDocument document = textViewer.getDocument();
+        if (document == null) {
+            return null;
+        }
+
+        int offset = region.getOffset();
+
+        IRegion lineInfo;
+        String line;
+        try {
+            lineInfo = document.getLineInformationOfOffset(offset);
+            line = document.get(lineInfo.getOffset(), lineInfo.getLength());
+        } catch (BadLocationException ex) {
+            return null;
+        }
+
+        // TODO detect if we are in the SETTINGS table
+        int linkOffsetInLine;
+        if (line.startsWith("Resource")) {
+            linkOffsetInLine = 8;
+        } else if (line.startsWith(" Resource")) {
+            linkOffsetInLine = 9;
+        } else {
+            return null;
+        }
+
+        linkOffsetInLine = RFTArgumentUtils.findNextArgumentStart(line, linkOffsetInLine);
+        if (linkOffsetInLine == -1) {
+            return null;
+        }
+
+        int linkPos = linkOffsetInLine;
+        int linkEnd;
+        do {
+            linkEnd = linkPos + RFTArgumentUtils.calculateArgumentLength(line, linkPos);
+            linkPos = RFTArgumentUtils.findNextArgumentStart(line, linkEnd);
+        } while (linkPos != -1);
+        int linkLength = linkEnd - linkOffsetInLine;
+
+        int offsetInLine = offset - lineInfo.getOffset();
+        if (offsetInLine < linkOffsetInLine || offsetInLine >= linkOffsetInLine + linkLength) {
+            // outside
+            return null;
+        }
+
+        String linkString = RFTArgumentUtils.unescapeArgument(line, linkOffsetInLine, linkLength);
+        IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
+        return new IHyperlink[] { new RFTResourceHyperlink(linkRegion, linkString) };
     }
-
-    IDocument document = textViewer.getDocument();
-    if (document == null) {
-      return null;
-    }
-
-    int offset = region.getOffset();
-
-    IRegion lineInfo;
-    String line;
-    try {
-      lineInfo = document.getLineInformationOfOffset(offset);
-      line = document.get(lineInfo.getOffset(), lineInfo.getLength());
-    } catch (BadLocationException ex) {
-      return null;
-    }
-
-    // TODO detect if we are in the SETTINGS table
-    int linkOffsetInLine;
-    if (line.startsWith("Resource")) {
-      linkOffsetInLine = 8;
-    } else if (line.startsWith(" Resource")) {
-      linkOffsetInLine = 9;
-    } else {
-      return null;
-    }
-
-    linkOffsetInLine = RFTArgumentUtils.findNextArgumentStart(line, linkOffsetInLine);
-    if (linkOffsetInLine == -1) {
-      return null;
-    }
-
-    int linkPos = linkOffsetInLine;
-    int linkEnd;
-    do {
-      linkEnd = linkPos + RFTArgumentUtils.calculateArgumentLength(line, linkPos);
-      linkPos = RFTArgumentUtils.findNextArgumentStart(line, linkEnd);
-    } while (linkPos != -1);
-    int linkLength = linkEnd - linkOffsetInLine;
-
-    int offsetInLine = offset - lineInfo.getOffset();
-    if (offsetInLine < linkOffsetInLine || offsetInLine >= linkOffsetInLine + linkLength) {
-      // outside
-      return null;
-    }
-
-    String linkString = RFTArgumentUtils.unescapeArgument(line, linkOffsetInLine, linkLength);
-    IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
-    return new IHyperlink[] { new RFTResourceHyperlink(linkRegion, linkString) };
-  }
 
 }

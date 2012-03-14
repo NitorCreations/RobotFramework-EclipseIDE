@@ -17,8 +17,8 @@ package com.nitorcreations.robotframework.eclipseide.internal.rules;
 
 public class RFTWhitespace {
 
-  public static boolean isWhitespace(char c) {
-    return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
-  }
+    public static boolean isWhitespace(char c) {
+        return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
+    }
 
 }

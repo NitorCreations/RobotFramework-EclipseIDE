@@ -24,51 +24,51 @@ import com.nitorcreations.robotframework.eclipseide.structure.api.IUserKeywordDe
 
 public class UserKeywordDefinition extends KeywordSequence implements IUserKeywordDefinition {
 
-  private IDynamicParsedString sequenceName;
-  private List<IDynamicParsedString> argumentsIMM;
-  private List<IDynamicParsedString> returnValuesIMM;
-  private IKeywordCall keywordTeardown;
+    private IDynamicParsedString sequenceName;
+    private List<IDynamicParsedString> argumentsIMM;
+    private List<IDynamicParsedString> returnValuesIMM;
+    private IKeywordCall keywordTeardown;
 
-  // singles
+    // singles
 
-  public void setSequenceName(IDynamicParsedString sequenceName) {
-    this.sequenceName = sequenceName;
-  }
+    public void setSequenceName(IDynamicParsedString sequenceName) {
+        this.sequenceName = sequenceName;
+    }
 
-  public void setKeywordTeardown(IKeywordCall keywordTeardown) {
-    this.keywordTeardown = keywordTeardown;
-  }
+    public void setKeywordTeardown(IKeywordCall keywordTeardown) {
+        this.keywordTeardown = keywordTeardown;
+    }
 
-  // lists
+    // lists
 
-  public void setArguments(List<? extends IDynamicParsedString> arguments) {
-    this.argumentsIMM = Collections.unmodifiableList(arguments);
-  }
+    public void setArguments(List<? extends IDynamicParsedString> arguments) {
+        this.argumentsIMM = Collections.unmodifiableList(arguments);
+    }
 
-  public void setReturnValues(List<? extends IDynamicParsedString> returnValues) {
-    this.returnValuesIMM = Collections.unmodifiableList(returnValues);
-  }
+    public void setReturnValues(List<? extends IDynamicParsedString> returnValues) {
+        this.returnValuesIMM = Collections.unmodifiableList(returnValues);
+    }
 
-  // getters
+    // getters
 
-  @Override
-  public IDynamicParsedString getSequenceName() {
-    return sequenceName;
-  }
+    @Override
+    public IDynamicParsedString getSequenceName() {
+        return sequenceName;
+    }
 
-  @Override
-  public List<IDynamicParsedString> getArguments() {
-    return argumentsIMM;
-  }
+    @Override
+    public List<IDynamicParsedString> getArguments() {
+        return argumentsIMM;
+    }
 
-  @Override
-  public List<IDynamicParsedString> getReturnValues() {
-    return returnValuesIMM;
-  }
+    @Override
+    public List<IDynamicParsedString> getReturnValues() {
+        return returnValuesIMM;
+    }
 
-  @Override
-  public IKeywordCall getKeywordTeardown() {
-    return keywordTeardown;
-  }
+    @Override
+    public IKeywordCall getKeywordTeardown() {
+        return keywordTeardown;
+    }
 
 }

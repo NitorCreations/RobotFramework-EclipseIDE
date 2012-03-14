@@ -22,31 +22,31 @@ import com.nitorcreations.robotframework.eclipseide.editors.ResourceLocation;
 
 public abstract class RFTHyperlink implements IHyperlink {
 
-  protected final IRegion region;
-  protected final String text;
+    protected final IRegion region;
+    protected final String text;
 
-  public RFTHyperlink(IRegion region, String text) {
-    this.region = region;
-    this.text = text;
-  }
+    public RFTHyperlink(IRegion region, String text) {
+        this.region = region;
+        this.text = text;
+    }
 
-  @Override
-  public IRegion getHyperlinkRegion() {
-    return region;
-  }
+    @Override
+    public IRegion getHyperlinkRegion() {
+        return region;
+    }
 
-  @Override
-  public String getTypeLabel() {
-    return null;
-  }
+    @Override
+    public String getTypeLabel() {
+        return null;
+    }
 
-  @Override
-  public String getHyperlinkText() {
-    return text;
-  }
+    @Override
+    public String getHyperlinkText() {
+        return text;
+    }
 
-  protected void openLocation(ResourceLocation location) {
-    System.out.println("TODO Open file " + location.resource.resourceFile + " on line " + location.line);
-  }
+    protected void openLocation(ResourceLocation location) {
+        System.out.println("TODO Open file " + location.resource.resourceFile + " on line " + location.line);
+    }
 
 }

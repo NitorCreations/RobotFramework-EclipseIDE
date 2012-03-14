@@ -46,160 +46,164 @@ import com.nitorcreations.robotframework.eclipseide.structure.api.IRFEFileConten
  * example "Documentation:" */
 public class RFEParser {
 
-  private final String filename;
-  private final IProgressMonitor monitor;
-  private final MarkerManager markerManager;
+    private final String filename;
+    private final IProgressMonitor monitor;
+    private final MarkerManager markerManager;
 
-  private State state = Ignore.STATE;
-  final RFEFileContents fc = new RFEFileContents();
-  KeywordSequence testcaseOrKeywordBeingParsed;
-  List<? extends IDynamicParsedString> listToContinue;
-  private List<RFELine> lexLines;
+    private State state = Ignore.STATE;
+    final RFEFileContents fc = new RFEFileContents();
+    KeywordSequence testcaseOrKeywordBeingParsed;
+    List<? extends IDynamicParsedString> listToContinue;
+    private List<RFELine> lexLines;
 
-  public void setState(State newState, KeywordSequence testcaseOrKeywordBeingParsed) {
-    state = newState;
-    this.testcaseOrKeywordBeingParsed = testcaseOrKeywordBeingParsed;
-  }
+    public void setState(State newState, KeywordSequence testcaseOrKeywordBeingParsed) {
+        state = newState;
+        this.testcaseOrKeywordBeingParsed = testcaseOrKeywordBeingParsed;
+    }
 
-  void setContinuationList(List<? extends IDynamicParsedString> listToContinue) {
-    assert listToContinue != null;
-    this.listToContinue = listToContinue;
-  }
+    void setContinuationList(List<? extends IDynamicParsedString> listToContinue) {
+        assert listToContinue != null;
+        this.listToContinue = listToContinue;
+    }
 
-  void clearContinuationList() {
-    listToContinue = null;
-  }
+    void clearContinuationList() {
+        listToContinue = null;
+    }
 
-  public static interface MarkerManager {
+    public static interface MarkerManager {
+        /**
+         * @see IResource#createMarker(String)
+         */
+        public IMarker createMarker(String type) throws CoreException;
+
+        public void eraseMarkers();
+    }
+
+    public static class ParsedLineInfo {
+        final RFEParser parser;
+        public final List<ParsedString> arguments;
+        public final int lineNo;
+        public final int lineCharPos;
+
+        public ParsedLineInfo(RFEParser parser, List<ParsedString> arguments, int lineNo, int charPos) {
+            this.parser = parser;
+            this.arguments = Collections.unmodifiableList(arguments);
+            this.lineNo = lineNo;
+            this.lineCharPos = charPos;
+        }
+
+        public RFEFileContents fc() {
+            return parser.fc;
+        }
+
+        public void setState(State state, KeywordSequence testcaseOrKeywordBeingParsed) {
+            parser.setState(state, testcaseOrKeywordBeingParsed);
+        }
+
+        public void clearContinuationList() {
+            parser.clearContinuationList();
+        }
+
+        public void setContinuationList(List<? extends IDynamicParsedString> listToContinue) {
+            parser.setContinuationList(listToContinue);
+        }
+
+        public MarkerManager markerManager() {
+            return parser.markerManager;
+        }
+
+    }
+
     /**
-     * @see IResource#createMarker(String)
+     * For files being "compiled" from disk.
+     * 
+     * @param file
+     * @param monitor
+     * @throws UnsupportedEncodingException
+     * @throws CoreException
      */
-    public IMarker createMarker(String type) throws CoreException;
+    public RFEParser(final IFile file, List<RFELine> lexLines, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
+        this.filename = file.toString();
+        this.lexLines = lexLines;
+        this.monitor = monitor == null ? new NullProgressMonitor() : monitor;
+        this.markerManager = new MarkerManager() {
+            @Override
+            public IMarker createMarker(String type) throws CoreException {
+                return file.createMarker(type);
+            }
 
-    public void eraseMarkers();
-  }
-
-  public static class ParsedLineInfo {
-    final RFEParser parser;
-    public final List<ParsedString> arguments;
-    public final int lineNo;
-    public final int lineCharPos;
-
-    public ParsedLineInfo(RFEParser parser, List<ParsedString> arguments, int lineNo, int charPos) {
-      this.parser = parser;
-      this.arguments = Collections.unmodifiableList(arguments);
-      this.lineNo = lineNo;
-      this.lineCharPos = charPos;
+            @Override
+            public void eraseMarkers() {
+                try {
+                    file.deleteMarkers(RFEBuilder.MARKER_TYPE, false, IResource.DEPTH_ZERO);
+                } catch (CoreException ce) {
+                }
+            }
+        };
     }
 
-    public RFEFileContents fc() {
-      return parser.fc;
+    /**
+     * For unit tests.
+     * 
+     * @param file
+     *            the file path
+     * @param charset
+     *            the charset to read the file in
+     * @param markerManager
+     *            for managing markers
+     * @throws UnsupportedEncodingException
+     * @throws FileNotFoundException
+     */
+    public RFEParser(File file, List<RFELine> lexLines, MarkerManager markerManager) throws UnsupportedEncodingException, FileNotFoundException {
+        this.filename = file.getName();
+        this.lexLines = lexLines;
+        this.monitor = new NullProgressMonitor();
+        this.markerManager = markerManager;
     }
 
-    public void setState(State state, KeywordSequence testcaseOrKeywordBeingParsed) {
-      parser.setState(state, testcaseOrKeywordBeingParsed);
+    /**
+     * For documents being edited.
+     * 
+     * @param document
+     */
+    public RFEParser(IDocument document, List<RFELine> lexLines) {
+        this.filename = "<document being edited>";
+        this.lexLines = lexLines;
+        this.monitor = new NullProgressMonitor();
+        this.markerManager = new NullMarkerManager();
     }
 
-    public void clearContinuationList() {
-      parser.clearContinuationList();
-    }
-
-    public void setContinuationList(List<? extends IDynamicParsedString> listToContinue) {
-      parser.setContinuationList(listToContinue);
-    }
-
-    public MarkerManager markerManager() {
-      return parser.markerManager;
-    }
-
-  }
-
-  /**
-   * For files being "compiled" from disk.
-   * 
-   * @param file
-   * @param monitor
-   * @throws UnsupportedEncodingException
-   * @throws CoreException
-   */
-  public RFEParser(final IFile file, List<RFELine> lexLines, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
-    this.filename = file.toString();
-    this.lexLines = lexLines;
-    this.monitor = monitor == null ? new NullProgressMonitor() : monitor;
-    this.markerManager = new MarkerManager() {
-      @Override
-      public IMarker createMarker(String type) throws CoreException {
-        return file.createMarker(type);
-      }
-
-      @Override
-      public void eraseMarkers() {
+    public IRFEFileContents parse() throws CoreException {
         try {
-          file.deleteMarkers(RFEBuilder.MARKER_TYPE, false, IResource.DEPTH_ZERO);
-        } catch (CoreException ce) {}
-      }
-    };
-  }
+            System.out.println("Parsing " + filename);
+            markerManager.eraseMarkers();
+            for (RFELine line : lexLines) {
+                if (monitor.isCanceled()) {
+                    return null;
+                }
+                try {
+                    parseLine(line.arguments, line.lineNo, line.lineCharPos);
+                } catch (CoreException e) {
+                    throw new RuntimeException("Error when parsing line " + line.lineNo + ": '" + line.arguments + "'", e);
+                } catch (RuntimeException e) {
+                    throw new RuntimeException("Internal error when parsing line " + line.lineNo + ": '" + line.arguments + "'", e);
+                }
+            }
 
-  /**
-   * For unit tests.
-   * 
-   * @param file the file path
-   * @param charset the charset to read the file in
-   * @param markerManager for managing markers
-   * @throws UnsupportedEncodingException
-   * @throws FileNotFoundException
-   */
-  public RFEParser(File file, List<RFELine> lexLines, MarkerManager markerManager) throws UnsupportedEncodingException, FileNotFoundException {
-    this.filename = file.getName();
-    this.lexLines = lexLines;
-    this.monitor = new NullProgressMonitor();
-    this.markerManager = markerManager;
-  }
-
-  /**
-   * For documents being edited.
-   * 
-   * @param document
-   */
-  public RFEParser(IDocument document, List<RFELine> lexLines) {
-    this.filename = "<document being edited>";
-    this.lexLines = lexLines;
-    this.monitor = new NullProgressMonitor();
-    this.markerManager = new NullMarkerManager();
-  }
-
-  public IRFEFileContents parse() throws CoreException {
-    try {
-      System.out.println("Parsing " + filename);
-      markerManager.eraseMarkers();
-      for (RFELine line : lexLines) {
-        if (monitor.isCanceled()) {
-          return null;
+            // TODO store results
+        } catch (Exception e) {
+            throw new RuntimeException("Error parsing robot file " + filename, e);
         }
-        try {
-          parseLine(line.arguments, line.lineNo, line.lineCharPos);
-        } catch (CoreException e) {
-          throw new RuntimeException("Error when parsing line " + line.lineNo + ": '" + line.arguments + "'", e);
-        } catch (RuntimeException e) {
-          throw new RuntimeException("Internal error when parsing line " + line.lineNo + ": '" + line.arguments + "'", e);
+        return fc;
+    }
+
+    private void parseLine(List<ParsedString> arguments, int lineNo, int charPos) throws CoreException {
+        System.out.println(arguments);
+        State oldState = state;
+        state.parse(new ParsedLineInfo(this, arguments, lineNo, charPos));
+        if (oldState != state) {
+            System.out.println("State " + oldState + " -> " + state);
         }
-      }
-
-      // TODO store results
-    } catch (Exception e) {
-      throw new RuntimeException("Error parsing robot file " + filename, e);
     }
-    return fc;
-  }
-
-  private void parseLine(List<ParsedString> arguments, int lineNo, int charPos) throws CoreException {
-    System.out.println(arguments);
-    State oldState = state;
-    state.parse(new ParsedLineInfo(this, arguments, lineNo, charPos));
-    if (oldState != state) {
-      System.out.println("State " + oldState + " -> " + state);
-    }
-  }
 
 }

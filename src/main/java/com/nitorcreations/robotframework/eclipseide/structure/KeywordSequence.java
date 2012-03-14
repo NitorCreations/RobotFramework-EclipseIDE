@@ -26,61 +26,61 @@ import com.nitorcreations.robotframework.eclipseide.structure.api.IParsedString;
 
 public abstract class KeywordSequence implements IKeywordSequence {
 
-  private List<IDynamicParsedString> documentationIMM;
-  private IDynamicParsedString timeout;
-  private IParsedString timeoutMessage;
-  private List<IKeywordCall> keywordCalls;
+    private List<IDynamicParsedString> documentationIMM;
+    private IDynamicParsedString timeout;
+    private IParsedString timeoutMessage;
+    private List<IKeywordCall> keywordCalls;
 
-  // immutable versions of above returned by getters
-  private List<IKeywordCall> keywordCallsIMM;
+    // immutable versions of above returned by getters
+    private List<IKeywordCall> keywordCallsIMM;
 
-  // singles
+    // singles
 
-  public void setTimeout(IDynamicParsedString timeout) {
-    this.timeout = timeout;
-  }
-
-  public void setTimeoutMessage(IParsedString timeoutMessage) {
-    this.timeoutMessage = timeoutMessage;
-  }
-
-  // lists
-
-  public void setDocumentation(List<? extends IDynamicParsedString> documentation) {
-    this.documentationIMM = Collections.unmodifiableList(documentation);
-  }
-
-  public void addKeywordCall(IKeywordCall keywordCall) {
-    if (this.keywordCalls == null) {
-      this.keywordCalls = new ArrayList<IKeywordCall>();
-      this.keywordCallsIMM = Collections.unmodifiableList(this.keywordCalls);
+    public void setTimeout(IDynamicParsedString timeout) {
+        this.timeout = timeout;
     }
-    this.keywordCalls.add(keywordCall);
-  }
 
-  // getters
+    public void setTimeoutMessage(IParsedString timeoutMessage) {
+        this.timeoutMessage = timeoutMessage;
+    }
 
-  @Override
-  public abstract IParsedString getSequenceName();
+    // lists
 
-  @Override
-  public List<IDynamicParsedString> getDocumentation() {
-    return documentationIMM;
-  }
+    public void setDocumentation(List<? extends IDynamicParsedString> documentation) {
+        this.documentationIMM = Collections.unmodifiableList(documentation);
+    }
 
-  @Override
-  public IDynamicParsedString getTimeout() {
-    return timeout;
-  }
+    public void addKeywordCall(IKeywordCall keywordCall) {
+        if (this.keywordCalls == null) {
+            this.keywordCalls = new ArrayList<IKeywordCall>();
+            this.keywordCallsIMM = Collections.unmodifiableList(this.keywordCalls);
+        }
+        this.keywordCalls.add(keywordCall);
+    }
 
-  @Override
-  public IParsedString getTimeoutMessage() {
-    return timeoutMessage;
-  }
+    // getters
 
-  @Override
-  public List<IKeywordCall> getKeywordCalls() {
-    return keywordCallsIMM;
-  }
+    @Override
+    public abstract IParsedString getSequenceName();
+
+    @Override
+    public List<IDynamicParsedString> getDocumentation() {
+        return documentationIMM;
+    }
+
+    @Override
+    public IDynamicParsedString getTimeout() {
+        return timeout;
+    }
+
+    @Override
+    public IParsedString getTimeoutMessage() {
+        return timeoutMessage;
+    }
+
+    @Override
+    public List<IKeywordCall> getKeywordCalls() {
+        return keywordCallsIMM;
+    }
 
 }

@@ -20,53 +20,53 @@ import java.io.Reader;
 
 public class CountingLineReader {
 
-  private final Reader reader;
+    private final Reader reader;
 
-  private int charsConsumed;
+    private int charsConsumed;
 
-  private final StringBuilder sb = new StringBuilder();
+    private final StringBuilder sb = new StringBuilder();
 
-  public CountingLineReader(Reader reader) {
-    this.reader = reader;
-  }
-
-  public void close() throws IOException {
-    reader.close();
-  }
-
-  public int getCharPos() {
-    return charsConsumed;
-  }
-
-  public String readLine() throws IOException {
-    int lf;
-    do {
-      lf = sb.indexOf("\n");
-    } while (lf == -1 && fill());
-    String ret;
-    if (lf == -1) {
-      ret = sb.toString();
-      if (ret.length() == 0) {
-        ret = null;
-      }
-      sb.setLength(0);
-      charsConsumed += lf;
-    } else {
-      ret = sb.substring(0, lf);
-      sb.delete(0, lf + 1);
-      charsConsumed += lf + 1;
+    public CountingLineReader(Reader reader) {
+        this.reader = reader;
     }
-    return ret;
-  }
 
-  private boolean fill() throws IOException {
-    char[] buf = new char[1024];
-    int read = reader.read(buf);
-    if (read == -1) {
-      return false;
+    public void close() throws IOException {
+        reader.close();
     }
-    sb.append(buf, 0, read);
-    return true;
-  }
+
+    public int getCharPos() {
+        return charsConsumed;
+    }
+
+    public String readLine() throws IOException {
+        int lf;
+        do {
+            lf = sb.indexOf("\n");
+        } while (lf == -1 && fill());
+        String ret;
+        if (lf == -1) {
+            ret = sb.toString();
+            if (ret.length() == 0) {
+                ret = null;
+            }
+            sb.setLength(0);
+            charsConsumed += lf;
+        } else {
+            ret = sb.substring(0, lf);
+            sb.delete(0, lf + 1);
+            charsConsumed += lf + 1;
+        }
+        return ret;
+    }
+
+    private boolean fill() throws IOException {
+        char[] buf = new char[1024];
+        int read = reader.read(buf);
+        if (read == -1) {
+            return false;
+        }
+        sb.append(buf, 0, read);
+        return true;
+    }
 
 }

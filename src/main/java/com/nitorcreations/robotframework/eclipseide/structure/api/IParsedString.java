@@ -17,40 +17,41 @@ package com.nitorcreations.robotframework.eclipseide.structure.api;
 
 public interface IParsedString {
 
-  int SYNTHESIZED_VALUE_CHAR_POS = -1;
+    int SYNTHESIZED_VALUE_CHAR_POS = -1;
 
-  /**
-   * @return the string value.
-   */
-  String getValue();
+    /**
+     * @return the string value.
+     */
+    String getValue();
 
-  /**
-   * @return the character offset (from the beginning of the file) where {@link #getValue()} begins.
-   *         If the value is synthesized, the value {@link #SYNTHESIZED_VALUE_CHAR_POS} is returned.
-   */
-  int getArgCharPos();
+    /**
+     * @return the character offset (from the beginning of the file) where
+     *         {@link #getValue()} begins. If the value is synthesized, the
+     *         value {@link #SYNTHESIZED_VALUE_CHAR_POS} is returned.
+     */
+    int getArgCharPos();
 
-  /**
-   * @return the character offset (from the beginning of the file) where {@link #getValue()} ends,
-   *         exclusively.
-   */
-  int getArgEndCharPos();
+    /**
+     * @return the character offset (from the beginning of the file) where
+     *         {@link #getValue()} ends, exclusively.
+     */
+    int getArgEndCharPos();
 
-  /**
-   * @return a debug string representing this string.
-   */
-  String getDebugString();
+    /**
+     * @return a debug string representing this string.
+     */
+    String getDebugString();
 
-  /**
-   * @return the hash code of {@link #getValue()}.
-   */
-  @Override
-  public int hashCode();
+    /**
+     * @return the hash code of {@link #getValue()}.
+     */
+    @Override
+    public int hashCode();
 
-  /**
-   * @return getValue().equals(obj.getValue())
-   */
-  @Override
-  public boolean equals(Object obj);
+    /**
+     * @return getValue().equals(obj.getValue())
+     */
+    @Override
+    public boolean equals(Object obj);
 
 }
