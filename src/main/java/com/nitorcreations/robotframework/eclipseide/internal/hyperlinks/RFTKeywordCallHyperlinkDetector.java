@@ -23,7 +23,6 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
-import com.nitorcreations.robotframework.eclipseide.editors.RobotFrameworkTextfileEditor;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
 
 /**
@@ -33,13 +32,6 @@ import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUt
  * @author xkr47
  */
 public class RFTKeywordCallHyperlinkDetector implements IHyperlinkDetector {
-
-    private final RobotFrameworkTextfileEditor editor;
-
-    public RFTKeywordCallHyperlinkDetector(RobotFrameworkTextfileEditor editor) {
-        this.editor = editor;
-
-    }
 
     @Override
     public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
@@ -85,6 +77,7 @@ public class RFTKeywordCallHyperlinkDetector implements IHyperlinkDetector {
         String linkString = RFTArgumentUtils.unescapeArgument(line, linkOffsetInLine, linkLength);
 
         IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
-        return new IHyperlink[] { new RFTKeywordCallHyperlink(linkRegion, linkString, linkString, null /* TODO */, editor) };
+        IRegion targetRegion = new Region(100, 10);
+        return new IHyperlink[] { new RFTHyperlink(linkRegion, linkString, targetRegion) };
     }
 }

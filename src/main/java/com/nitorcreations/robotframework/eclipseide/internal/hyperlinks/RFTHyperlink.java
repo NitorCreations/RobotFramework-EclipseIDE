@@ -18,21 +18,24 @@ package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
-import com.nitorcreations.robotframework.eclipseide.editors.ResourceLocation;
+import com.nitorcreations.robotframework.eclipseide.editors.EditorResolver;
 
-public abstract class RFTHyperlink implements IHyperlink {
+public class RFTHyperlink implements IHyperlink {
 
-    protected final IRegion region;
-    protected final String text;
+    protected final IRegion linkRegion;
+    protected final String linkText;
+    private final IRegion targetRegion;
 
-    public RFTHyperlink(IRegion region, String text) {
-        this.region = region;
-        this.text = text;
+    public RFTHyperlink(IRegion linkRegion, String linkText, IRegion targetRegion) {
+        this.linkRegion = linkRegion;
+        this.linkText = linkText;
+        this.targetRegion = targetRegion;
+
     }
 
     @Override
     public IRegion getHyperlinkRegion() {
-        return region;
+        return linkRegion;
     }
 
     @Override
@@ -42,11 +45,12 @@ public abstract class RFTHyperlink implements IHyperlink {
 
     @Override
     public String getHyperlinkText() {
-        return text;
+        return linkText;
     }
 
-    protected void openLocation(ResourceLocation location) {
-        System.out.println("TODO Open file " + location.resource.resourceFile + " on line " + location.line);
+    @Override
+    public void open() {
+        EditorResolver.getEditor().selectAndReveal(targetRegion.getOffset(), targetRegion.getLength());
     }
 
 }

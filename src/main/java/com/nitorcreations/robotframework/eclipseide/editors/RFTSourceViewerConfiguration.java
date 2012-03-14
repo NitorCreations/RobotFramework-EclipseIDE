@@ -31,11 +31,9 @@ import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.RFTVaria
 public class RFTSourceViewerConfiguration extends SourceViewerConfiguration {
 
     private final ColorManager colorManager;
-    private final RobotFrameworkTextfileEditor editor;
 
-    public RFTSourceViewerConfiguration(ColorManager colorManager, RobotFrameworkTextfileEditor editor) {
+    public RFTSourceViewerConfiguration(ColorManager colorManager) {
         this.colorManager = colorManager;
-        this.editor = editor;
 
     }
 
@@ -60,7 +58,7 @@ public class RFTSourceViewerConfiguration extends SourceViewerConfiguration {
         List<IHyperlinkDetector> detectors = new ArrayList<IHyperlinkDetector>();
         detectors.addAll(Arrays.asList(super.getHyperlinkDetectors(sourceViewer)));
         detectors.add(new RFTResourceHyperlinkDetector());
-        detectors.add(new RFTKeywordCallHyperlinkDetector(editor));
+        detectors.add(new RFTKeywordCallHyperlinkDetector());
         detectors.add(new RFTVariableAccessHyperlinkDetector());
         return detectors.toArray(new IHyperlinkDetector[detectors.size()]);
     }

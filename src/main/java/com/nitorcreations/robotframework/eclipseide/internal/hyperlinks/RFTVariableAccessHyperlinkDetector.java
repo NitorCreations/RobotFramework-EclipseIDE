@@ -103,7 +103,8 @@ public class RFTVariableAccessHyperlinkDetector implements IHyperlinkDetector {
                 // pointing at variable access!
                 String linkString = line.substring(linkOffsetInLine, linkOffsetInLine + linkLength);
                 IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
-                return new IHyperlink[] { new RFTVariableAccessHyperlink(linkRegion, linkString, linkString, null /* TODO */) };
+                IRegion targetRegion = new Region(100, 10);
+                return new IHyperlink[] { new RFTHyperlink(linkRegion, linkString, targetRegion) };
             }
             start = linkOffsetInLine + linkLength;
         }
