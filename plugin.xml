@@ -7,7 +7,7 @@
       <editor
             name="Robot Framework Textfile Editor"
             extensions="txt"
-            icon="icons/robo1.png"
+            icon="src/main/resources/robo1.png"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             class="com.nitorcreations.robotframework.eclipseide.editors.RobotFrameworkTextfileEditor"
             id="com.nitorcreations.robotframework.eclipseide.editors.RobotFrameworkTextfileEditor">
