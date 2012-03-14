@@ -15,8 +15,6 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
-import static com.nitorcreations.robotframework.eclipseide.builder.parser.RFEPreParser.Type.VARIABLE_TABLE_LINE;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -24,6 +22,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.Type;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTVariableUtils;
 
@@ -104,7 +103,7 @@ public class RFTVariableAccessHyperlinkDetector extends HyperlinkDetector {
                 // pointing at variable access!
                 String linkString = line.substring(linkOffsetInLine, linkOffsetInLine + linkLength);
                 IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
-                IHyperlink[] links = getLinks(document, linkString, linkRegion, VARIABLE_TABLE_LINE);
+                IHyperlink[] links = getLinks(document, linkString, linkRegion, Type.VARIABLE_TABLE_LINE);
                 if (links != null) {
                     return links;
                 }

@@ -22,6 +22,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.Type;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.util.ParserUtil;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
@@ -66,22 +67,18 @@ public class RFEPreParser {
     // TESTCASE_TABLE_ACTIVE, KEYWORD_TABLE_INITIAL, KEYWORD_TABLE_ACTIVE,
     // }
 
-    public enum Type {
-        IGNORE, IGNORE_TABLE, SETTING_TABLE_BEGIN, SETTING_TABLE_LINE, VARIABLE_TABLE_BEGIN, VARIABLE_TABLE_LINE, TESTCASE_TABLE_BEGIN, TESTCASE_TABLE_IGNORE, TESTCASE_TABLE_TESTCASE_BEGIN, TESTCASE_TABLE_TESTCASE_LINE, KEYWORD_TABLE_BEGIN, KEYWORD_TABLE_IGNORE, KEYWORD_TABLE_KEYWORD_BEGIN, KEYWORD_TABLE_KEYWORD_LINE, CONTINUATION_LINE, COMMENT_LINE,
-    }
-
     private Type prevLineType = Type.IGNORE;
 
     private void parseLine(RFELine line) throws CoreException {
         // System.out.println(line.arguments);
         Type tableType = tryParseTableSwitch(line);
         if (tableType != null) {
-            line.info.put(Type.class, tableType);
+            line.type = tableType;
             prevLineType = tableType;
             return;
         }
         if (tryParseContinuationLine(line)) {
-            line.info.put(Type.class, Type.CONTINUATION_LINE);
+            line.type = Type.CONTINUATION_LINE;
             // prevLineType not updated
             return;
         }
@@ -90,12 +87,12 @@ public class RFEPreParser {
         String first = firstArg.getValue();
         String second = line.arguments.size() < 2 ? "" : line.arguments.get(1).getValue();
         if (first.startsWith("#") || firstEmpty && second.startsWith("#")) {
-            line.info.put(Type.class, Type.COMMENT_LINE);
+            line.type = Type.COMMENT_LINE;
             // prevLineType not updated
             return;
         }
         Type lineType = determineLineTypeFromPrevious(firstEmpty);
-        line.info.put(Type.class, lineType);
+        line.type = lineType;
         prevLineType = lineType;
     }
 

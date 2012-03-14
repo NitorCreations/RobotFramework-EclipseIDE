@@ -15,18 +15,19 @@
  */
 package com.nitorcreations.robotframework.eclipseide.builder.parser;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEPreParser.Type;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class RFELine {
     public final int lineNo;
     public final int lineCharPos;
     public final List<ParsedString> arguments;
-    public final Map<Object, Object> info = new LinkedHashMap<Object, Object>();
+    public Type type;
+
+    public enum Type {
+        IGNORE, IGNORE_TABLE, SETTING_TABLE_BEGIN, SETTING_TABLE_LINE, VARIABLE_TABLE_BEGIN, VARIABLE_TABLE_LINE, TESTCASE_TABLE_BEGIN, TESTCASE_TABLE_IGNORE, TESTCASE_TABLE_TESTCASE_BEGIN, TESTCASE_TABLE_TESTCASE_LINE, KEYWORD_TABLE_BEGIN, KEYWORD_TABLE_IGNORE, KEYWORD_TABLE_KEYWORD_BEGIN, KEYWORD_TABLE_KEYWORD_LINE, CONTINUATION_LINE, COMMENT_LINE,
+    }
 
     public RFELine(int lineNo, int lineCharPos, List<ParsedString> arguments) {
         this.lineNo = lineNo;
@@ -35,7 +36,7 @@ public class RFELine {
     }
 
     public boolean isType(Type type) {
-        return type == (Type) info.get(Type.class);
+        return this.type == type;
     }
 
 }

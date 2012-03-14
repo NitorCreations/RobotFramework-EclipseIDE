@@ -15,8 +15,6 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
-import static com.nitorcreations.robotframework.eclipseide.builder.parser.RFEPreParser.Type.KEYWORD_TABLE_KEYWORD_BEGIN;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -24,6 +22,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.Type;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
 
 /**
@@ -77,7 +76,7 @@ public class RFTKeywordCallHyperlinkDetector extends HyperlinkDetector {
 
         String linkString = RFTArgumentUtils.unescapeArgument(line, linkOffsetInLine, linkLength);
         IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
-        return getLinks(document, linkString, linkRegion, KEYWORD_TABLE_KEYWORD_BEGIN);
+        return getLinks(document, linkString, linkRegion, Type.KEYWORD_TABLE_KEYWORD_BEGIN);
     }
 
 }

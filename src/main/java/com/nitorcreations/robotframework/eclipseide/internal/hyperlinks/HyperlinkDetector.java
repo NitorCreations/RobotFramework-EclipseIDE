@@ -26,8 +26,8 @@ import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELexer;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.Type;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEPreParser;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEPreParser.Type;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public abstract class HyperlinkDetector implements IHyperlinkDetector {
