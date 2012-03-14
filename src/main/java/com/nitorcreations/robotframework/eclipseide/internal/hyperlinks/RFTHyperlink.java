@@ -15,6 +15,7 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
@@ -25,11 +26,13 @@ public class RFTHyperlink implements IHyperlink {
     protected final IRegion linkRegion;
     protected final String linkText;
     private final IRegion targetRegion;
+    private final IDocument targetDocument;
 
-    public RFTHyperlink(IRegion linkRegion, String linkText, IRegion targetRegion) {
+    public RFTHyperlink(IRegion linkRegion, String linkText, IRegion targetRegion, IDocument targetDocument) {
         this.linkRegion = linkRegion;
         this.linkText = linkText;
         this.targetRegion = targetRegion;
+        this.targetDocument = targetDocument;
 
     }
 
@@ -50,7 +53,7 @@ public class RFTHyperlink implements IHyperlink {
 
     @Override
     public void open() {
-        EditorResolver.getEditor().selectAndReveal(targetRegion.getOffset(), targetRegion.getLength());
+        EditorResolver.getEditor(targetDocument).selectAndReveal(targetRegion.getOffset(), targetRegion.getLength());
     }
 
 }

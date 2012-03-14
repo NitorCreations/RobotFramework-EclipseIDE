@@ -92,7 +92,7 @@ public class RFTResourceHyperlinkDetector implements IHyperlinkDetector {
         String linkString = RFTArgumentUtils.unescapeArgument(line, linkOffsetInLine, linkLength);
         IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
         IRegion targetRegion = new Region(100, 10);
-        return new IHyperlink[] { new RFTHyperlink(linkRegion, linkString, targetRegion) };
+        return new IHyperlink[] { new RFTHyperlink(linkRegion, linkString, targetRegion, document) };
     }
 
 }

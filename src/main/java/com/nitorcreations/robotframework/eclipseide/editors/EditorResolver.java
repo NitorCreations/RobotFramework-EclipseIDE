@@ -15,15 +15,19 @@
  */
 package com.nitorcreations.robotframework.eclipseide.editors;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.jface.text.IDocument;
 
 public class EditorResolver {
-    private static RobotFrameworkTextfileEditor lastOpenedEditor;
+    private static final Map<IDocument, RobotFrameworkTextfileEditor> EDITORS = new HashMap<IDocument, RobotFrameworkTextfileEditor>();
 
-    public static RobotFrameworkTextfileEditor getEditor() {
-        return lastOpenedEditor;
+    public static RobotFrameworkTextfileEditor getEditor(IDocument document) {
+        return EDITORS.get(document);
     }
 
-    public static void setLastOpenedEditor(RobotFrameworkTextfileEditor editor) {
-        lastOpenedEditor = editor;
+    public static void addEditorForFile(RobotFrameworkTextfileEditor editor, IDocument document) {
+        EDITORS.put(document, editor);
     }
 }

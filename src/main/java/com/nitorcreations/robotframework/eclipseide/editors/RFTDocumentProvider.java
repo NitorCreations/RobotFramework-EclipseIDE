@@ -21,13 +21,22 @@ import org.eclipse.ui.editors.text.FileDocumentProvider;
 
 public class RFTDocumentProvider extends FileDocumentProvider {
 
+    private final RobotFrameworkTextfileEditor editor;
+
+    public RFTDocumentProvider(RobotFrameworkTextfileEditor editor) {
+        this.editor = editor;
+    }
+
     @Override
     protected IDocument createDocument(Object element) throws CoreException {
         IDocument document = super.createDocument(element);
         if (document != null) {
-            // ..
+            // if (element instanceof IFileEditorInput) {
+            // IFileEditorInput input = (IFileEditorInput) element;
+            // IFile file = input.getFile();
+            EditorResolver.addEditorForFile(editor, document);
+            // }
         }
         return document;
     }
-
 }

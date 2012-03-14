@@ -40,7 +40,7 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
                     ParsedString firstArgument = rfeLine.arguments.get(0);
                     if (firstArgument.equals(linkString)) {
                         IRegion targetRegion = new Region(firstArgument.getArgEndCharPos(), 0);
-                        return new IHyperlink[] { new RFTHyperlink(linkRegion, linkString, targetRegion) };
+                        return new IHyperlink[] { new RFTHyperlink(linkRegion, linkString, targetRegion, document) };
                     }
                 }
             }
