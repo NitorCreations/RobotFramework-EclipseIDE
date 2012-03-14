@@ -59,6 +59,7 @@
          <action
                class="com.nitorcreations.robotframework.eclipseide.builder.ToggleNatureAction"
                enablesFor="+"
+               icon="src/main/resources/robo1.png"
                id="com.nitorcreations.robotframework.eclipseide.addRemoveNatureAction"
                label="Add/Remove Robot Framework Validation Nature"
                menubarPath="additions">
