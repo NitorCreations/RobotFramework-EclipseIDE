@@ -34,9 +34,8 @@ public class RFELine {
         this.arguments = arguments;
     }
 
-    public boolean isKeywordDefinition() {
-        Type type = (Type) info.get(Type.class);
-        return type == Type.KEYWORD_TABLE_KEYWORD_BEGIN;
+    public boolean isType(Type type) {
+        return type == (Type) info.get(Type.class);
     }
 
 }
