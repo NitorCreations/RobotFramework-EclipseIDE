@@ -66,14 +66,26 @@ public class RFELexer {
      *            the file path
      * @param charset
      *            the charset to read the file in
-     * @param markerManager
-     *            for managing markers
      * @throws UnsupportedEncodingException
      * @throws FileNotFoundException
      */
     public RFELexer(File file, String charset) throws UnsupportedEncodingException, FileNotFoundException {
         this.filename = file.getName();
         this.filestream = new InputStreamReader(new FileInputStream(file), charset);
+        this.monitor = new NullProgressMonitor();
+    }
+
+    /**
+     * For unit tests.
+     * 
+     * @param fileContents
+     *            the file contents as a string
+     * @throws UnsupportedEncodingException
+     * @throws FileNotFoundException
+     */
+    public RFELexer(String fileContents) throws UnsupportedEncodingException, FileNotFoundException {
+        this.filename = "<in-memory file>";
+        this.filestream = new StringReader(fileContents);
         this.monitor = new NullProgressMonitor();
     }
 

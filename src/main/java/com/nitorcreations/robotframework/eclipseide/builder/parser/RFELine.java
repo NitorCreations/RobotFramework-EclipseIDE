@@ -39,4 +39,8 @@ public class RFELine {
         return this.type == type;
     }
 
+    @Override
+    public String toString() {
+        return "<#" + lineNo + " " + type + "> " + arguments;
+    }
 }

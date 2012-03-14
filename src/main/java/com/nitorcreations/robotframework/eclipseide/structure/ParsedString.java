@@ -87,7 +87,7 @@ public class ParsedString implements IParsedKeywordString {
 
     @Override
     public String toString() {
-        return '"' + value + '"';
+        return '"' + value + "\" (" + type + ')';
     }
 
     @Override
