@@ -87,6 +87,10 @@ public class ArgumentPreParser {
     private boolean setting_gotFirstArg;
     private WithNameState setting_withNameState;
 
+    private static final int NO_TEMPLATE = -1;
+    private int globalTemplateAtLine;
+    private int localTemplateAtLine;
+
     enum WithNameState {
         NONE, GOT_KEY, GOT_VALUE
     }
@@ -97,6 +101,7 @@ public class ArgumentPreParser {
         this.lines = lines;
         lineIterator = lines.listIterator();
         lastRealType = LineType.IGNORE;
+        globalTemplateAtLine = NO_TEMPLATE;
         prepareNextLine();
     }
 
@@ -137,6 +142,7 @@ public class ArgumentPreParser {
     }
 
     public void parseAll() {
+        lookForGlobalTestTemplate();
         while (lineIterator != null) {
             parseMoreTokens();
         }
@@ -208,6 +214,7 @@ public class ArgumentPreParser {
         case TESTCASE_TABLE_TESTCASE_BEGIN:
         case KEYWORD_TABLE_KEYWORD_BEGIN:
             if (argOff == 0) {
+                lookForLocalTestTemplate();
                 ParsedString newName = line.arguments.get(0);
                 if (!newName.isEmpty()) {
                     boolean isTestCase = type == LineType.TESTCASE_TABLE_TESTCASE_BEGIN;
@@ -529,6 +536,40 @@ public class ArgumentPreParser {
     private void setArgTypesToEol(ArgumentType settingVal) {
         for (int i = argOff; i < argLen; ++i) {
             line.arguments.get(i).setType(settingVal);
+        }
+    }
+
+    private void lookForGlobalTestTemplate() {
+        for (RFELine line : lines) {
+            if (line.isType(LineType.SETTING_TABLE_LINE)) {
+                if (line.arguments.get(0).equals("Test Template")) {
+                    globalTemplateAtLine = line.lineNo;
+                    // continue searching; last hit remains in effect
+                }
+            }
+        }
+    }
+
+    private void lookForLocalTestTemplate() {
+        localTemplateAtLine = NO_TEMPLATE;
+        outer: for (int lineNo = lineIterator.nextIndex() - 1; lineNo < lines.size(); ++lineNo) {
+            RFELine line = lines.get(lineNo);
+            assert line.lineNo - 1 == lineNo;
+            switch (line.type) {
+            case TESTCASE_TABLE_TESTCASE_BEGIN:
+            case TESTCASE_TABLE_TESTCASE_LINE:
+                break;
+            case CONTINUATION_LINE:
+            case COMMENT_LINE:
+                continue;
+            default:
+                // testcase ended, do not look further
+                break outer;
+            }
+            if (line.arguments.size() >= 2 && line.arguments.get(1).equals("[Template]")) {
+                localTemplateAtLine = line.lineNo;
+                // continue searching; last hit remains in effect
+            }
         }
     }
 
