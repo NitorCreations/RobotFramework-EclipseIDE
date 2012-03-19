@@ -15,8 +15,12 @@
  */
 package com.nitorcreations.robotframework.eclipseide.editors;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.TextEditor;
 
 /**
@@ -30,6 +34,8 @@ import org.eclipse.ui.editors.text.TextEditor;
  */
 public class RobotFrameworkTextfileEditor extends TextEditor {
 
+    public static final String EDITOR_ID = RobotFrameworkTextfileEditor.class.getName();
+
     private final ColorManager colorManager;
 
     public RobotFrameworkTextfileEditor() {
@@ -39,9 +45,45 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
     }
 
     @Override
+    protected void doSetInput(IEditorInput input) throws CoreException {
+        handleClosePossiblyOpenDocument();
+        super.doSetInput(input);
+        if (input != null) {
+            handleOpenDocument();
+        }
+    }
+
+    @Override
     public void dispose() {
+        handleClosePossiblyOpenDocument();
         colorManager.dispose();
         super.dispose();
+    }
+
+    private void handleClosePossiblyOpenDocument() {
+        IEditorInput old = getEditorInput();
+        if (old != null) {
+            handleCloseDocument(old);
+        }
+    }
+
+    private void handleOpenDocument() {
+        IDocument document = getEditedDocument();
+        System.out.println("Opened document " + getEditorInput() + " -> " + document);
+        ResourceManager.registerEditor(this);
+    }
+
+    private void handleCloseDocument(IEditorInput old) {
+        System.out.println("Closing document " + old);
+        ResourceManager.unregisterEditor(this);
+    }
+
+    public IDocument getEditedDocument() {
+        return getDocumentProvider().getDocument(getEditorInput());
+    }
+
+    public IFile getEditedFile() {
+        return (IFile) getEditorInput().getAdapter(IFile.class);
     }
 
     @Override
@@ -56,3 +98,5 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
         return lightness < 12800;
     }
 }
+
+// 190312 1720 xxxx

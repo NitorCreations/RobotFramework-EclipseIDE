@@ -17,8 +17,17 @@ package com.nitorcreations.robotframework.eclipseide.editors;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.FileEditorInput;
 
 public final class ResourceManager {
 
@@ -39,6 +48,32 @@ public final class ResourceManager {
             return r;
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private static final Map<IDocument, IFile> EDITORS = Collections.synchronizedMap(new HashMap<IDocument, IFile>());
+
+    public static void registerEditor(RobotFrameworkTextfileEditor editor) {
+        EDITORS.put(editor.getEditedDocument(), editor.getEditedFile());
+    }
+
+    public static void unregisterEditor(RobotFrameworkTextfileEditor editor) {
+        EDITORS.remove(editor.getEditedDocument());
+    }
+
+    public static IFile resolveFileFor(IDocument document) {
+        return EDITORS.get(document);
+    }
+
+    public static RobotFrameworkTextfileEditor openOrReuseEditorFor(IFile file) {
+        try {
+            IWorkbenchPage workbenchPage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+            FileEditorInput editorInput = new FileEditorInput(file);
+            int matchFlags = IWorkbenchPage.MATCH_ID | IWorkbenchPage.MATCH_INPUT;
+            IEditorPart editor = workbenchPage.openEditor(editorInput, RobotFrameworkTextfileEditor.EDITOR_ID, true, matchFlags);
+            return (RobotFrameworkTextfileEditor) editor;
+        } catch (PartInitException e) {
+            throw new RuntimeException("Problem opening robot editor for " + file, e);
         }
     }
 

@@ -34,7 +34,7 @@ public class RFTDocumentProvider extends FileDocumentProvider {
             // if (element instanceof IFileEditorInput) {
             // IFileEditorInput input = (IFileEditorInput) element;
             // IFile file = input.getFile();
-            EditorResolver.addEditorForFile(editor, document);
+            // EditorResolver.addEditorForFile(editor, document);
             // }
         }
         return document;

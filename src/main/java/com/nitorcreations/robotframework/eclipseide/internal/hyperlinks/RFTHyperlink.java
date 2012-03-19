@@ -15,11 +15,13 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
-import com.nitorcreations.robotframework.eclipseide.editors.EditorResolver;
+import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
+import com.nitorcreations.robotframework.eclipseide.editors.RobotFrameworkTextfileEditor;
 
 public class RFTHyperlink implements IHyperlink {
 
@@ -53,7 +55,11 @@ public class RFTHyperlink implements IHyperlink {
 
     @Override
     public void open() {
-        EditorResolver.getEditor(targetDocument).selectAndReveal(targetRegion.getOffset(), targetRegion.getLength());
+        IFile file = ResourceManager.resolveFileFor(targetDocument);
+        RobotFrameworkTextfileEditor editor = ResourceManager.openOrReuseEditorFor(file);
+        if (targetRegion != null) {
+            editor.selectAndReveal(targetRegion.getOffset(), targetRegion.getLength());
+        }
     }
 
 }
