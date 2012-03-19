@@ -25,6 +25,7 @@ Library     OperatingSystem
 ...  bogus
 Library     OperatingSystem  arg
  Resource   resource.txt  no arg allowed
+Variables  lol.py  arg  arg2
 Library     
 ...  OperatingSystem
     # foo
