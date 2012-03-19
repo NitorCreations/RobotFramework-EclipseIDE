@@ -201,7 +201,7 @@ public class TestArgumentPreParser {
         @Test
         public void when_global_template_is_set_then_regular_lines_should_emit_KEYWORD_ARG_only() throws Exception {
             t("*Settings\nTest Template  Log\n*Test cases\nTC1  Hello", TABLE, SETTING_KEY, KEYWORD_CALL, TABLE, NEW_TESTCASE, KEYWORD_ARG);
-            t("*Test cases\nTC1\n  Hello\n*Settings\nTest Template  Log", TABLE, NEW_TESTCASE, KEYWORD_ARG, TABLE, SETTING_KEY, KEYWORD_CALL);
+            t("*Test cases\nTC1\n  Hello\n*Settings\nTest Template  Log", TABLE, NEW_TESTCASE, IGNORED, KEYWORD_ARG, TABLE, SETTING_KEY, KEYWORD_CALL);
         }
 
         @Test

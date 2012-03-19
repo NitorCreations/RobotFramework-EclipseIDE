@@ -250,7 +250,7 @@ public class ArgumentPreParser {
                     prepareNextToken();
                 } else {
                     keywordSequence_keywordCallState = KeywordCallState.UNDETERMINED;
-                    parseKeywordCall();
+                    parseKeywordCall(lastRealType == LineType.TESTCASE_TABLE_TESTCASE_BEGIN || lastRealType == LineType.TESTCASE_TABLE_TESTCASE_LINE);
                 }
                 return;
             }
@@ -258,7 +258,7 @@ public class ArgumentPreParser {
                 if (keywordSequence_isSetting) {
                     parseKeywordSequenceSetting();
                 } else {
-                    parseKeywordCall();
+                    parseKeywordCall(lastRealType == LineType.TESTCASE_TABLE_TESTCASE_BEGIN || lastRealType == LineType.TESTCASE_TABLE_TESTCASE_LINE);
                 }
                 return;
             }
@@ -307,7 +307,7 @@ public class ArgumentPreParser {
                 if (keywordSequence_isSetting) {
                     parseKeywordSequenceSetting();
                 } else {
-                    parseKeywordCall();
+                    parseKeywordCall(lastRealType == LineType.TESTCASE_TABLE_TESTCASE_BEGIN || lastRealType == LineType.TESTCASE_TABLE_TESTCASE_LINE);
                 }
                 return;
             }
@@ -375,7 +375,7 @@ public class ArgumentPreParser {
             throw new RuntimeException();
         }
         case KEYWORD_ARGS: {
-            parseKeywordCall();
+            parseKeywordCall(false);
             return;
         }
         }
@@ -399,7 +399,7 @@ public class ArgumentPreParser {
             return;
         }
         case KEYWORD_ARGS: {
-            parseKeywordCall();
+            parseKeywordCall(false);
             return;
         }
         }
@@ -410,8 +410,9 @@ public class ArgumentPreParser {
      * Before this is called the first time, keywordSequence_keywordCallState
      * must be initialized to either UNDETERMINED, UNDETERMINED_NOINDENT,
      * KEYWORD_NOINDENT, KEYWORD_NOT_FOR_NOINDENT
+     * @param templatesEnabled whether the template flags {@link #globalTemplateAtLine} and {@link #localTemplateAtLine} affect keyword calls during this invocation
      */
-    private void parseKeywordCall() {
+    private void parseKeywordCall(boolean templatesEnabled) {
         if (keywordSequence_keywordCallState.isUndetermined()) {
             keywordSequence_keywordCallState = determineInitialKeywordCallState(keywordSequence_keywordCallState);
         }
@@ -436,7 +437,11 @@ public class ArgumentPreParser {
                     keyword.setType(ArgumentType.FOR_PART);
                     keywordSequence_keywordCallState = KeywordCallState.FOR_ARGS;
                 } else {
-                    keyword.setType(ArgumentType.KEYWORD_CALL);
+                    if (templatesEnabled && (globalTemplateAtLine != NO_TEMPLATE || localTemplateAtLine != NO_TEMPLATE)) {
+                        keyword.setType(ArgumentType.KEYWORD_ARG);
+                    } else {
+                        keyword.setType(ArgumentType.KEYWORD_CALL);
+                    }
                     keywordSequence_keywordCallState = KeywordCallState.ARGS;
                 }
             }
