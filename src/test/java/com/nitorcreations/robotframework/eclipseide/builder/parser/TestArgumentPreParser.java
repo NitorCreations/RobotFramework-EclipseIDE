@@ -199,6 +199,12 @@ public class TestArgumentPreParser {
         }
 
         @Test
+        public void global_template_is_set_but_local_template_cancels_it_should_emit_KEYWORD_CALL() throws Exception {
+            t("*Settings\nTest Template  Log\n*Test cases\nTC1  [Template]  NONE\n  Hello", TABLE, SETTING_KEY, KEYWORD_CALL, TABLE, NEW_TESTCASE, SETTING_KEY, KEYWORD_CALL, IGNORED, KEYWORD_CALL);
+            t("*Test cases\nTC1  [Template]  NONE\n  Hello\n*Settings\nTest Template  Log", TABLE, NEW_TESTCASE, SETTING_KEY, KEYWORD_CALL, IGNORED, KEYWORD_CALL, TABLE, SETTING_KEY, KEYWORD_CALL);
+        }
+
+        @Test
         public void ignore_broken_line_continuation() throws Exception {
             t("*Test cases\n...  continues", TABLE, IGNORED, IGNORED);
         }
