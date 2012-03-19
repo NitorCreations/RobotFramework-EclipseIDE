@@ -410,7 +410,11 @@ public class ArgumentPreParser {
      * Before this is called the first time, keywordSequence_keywordCallState
      * must be initialized to either UNDETERMINED, UNDETERMINED_NOINDENT,
      * KEYWORD_NOINDENT, KEYWORD_NOT_FOR_NOINDENT
-     * @param templatesEnabled whether the template flags {@link #globalTemplateAtLine} and {@link #localTemplateAtLine} affect keyword calls during this invocation
+     * 
+     * @param templatesEnabled
+     *            whether the template flags {@link #globalTemplateAtLine} and
+     *            {@link #localTemplateAtLine} affect keyword calls during this
+     *            invocation
      */
     private void parseKeywordCall(boolean templatesEnabled) {
         if (keywordSequence_keywordCallState.isUndetermined()) {
@@ -485,8 +489,8 @@ public class ArgumentPreParser {
             return keywordCallState;
         }
 
-        outer: for (int line = lineIterator.nextIndex(); line < lines.size(); ++line) {
-            RFELine nextLine = lines.get(line);
+        outer: for (int lineIdx = lineIterator.nextIndex(); lineIdx < lines.size(); ++lineIdx) {
+            RFELine nextLine = lines.get(lineIdx);
             LineType type = nextLine.type;
             switch (type) {
             case COMMENT_LINE:
@@ -557,9 +561,8 @@ public class ArgumentPreParser {
 
     private void lookForLocalTestTemplate() {
         localTemplateAtLine = NO_TEMPLATE;
-        outer: for (int lineNo = lineIterator.nextIndex() - 1; lineNo < lines.size(); ++lineNo) {
-            RFELine line = lines.get(lineNo);
-            assert line.lineNo - 1 == lineNo;
+        outer: for (int lineIdx = lineIterator.nextIndex() - 1; lineIdx < lines.size(); ++lineIdx) {
+            RFELine line = lines.get(lineIdx);
             switch (line.type) {
             case TESTCASE_TABLE_TESTCASE_BEGIN:
             case TESTCASE_TABLE_TESTCASE_LINE:
