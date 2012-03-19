@@ -155,18 +155,12 @@ public class TestArgumentPreParser {
 
         @Test
         public void resource_setting() throws Exception {
-            t("*Settings\nResource  resource.txt", TABLE, SETTING_KEY, SETTING_FILE);
-            // TODO ignored or arg?
-            // t("*Settings\nResource  resource.txt  foobar", TABLE,
-            // SETTING_KEY, SETTING_FILE, IGNORED);
+            t("*Settings\nResource  resource.txt  ignoredarg", TABLE, SETTING_KEY, SETTING_FILE, IGNORED);
         }
 
         @Test
         public void variables_setting() throws Exception {
-            t("*Settings\nVariables  foo.py", TABLE, SETTING_KEY, SETTING_FILE);
-            // TODO ignored or arg?
-            // t("*Settings\nVariables  foo.py  arg1  arg2", TABLE, SETTING_KEY,
-            // SETTING_FILE, SETTING_FILE_ARG ,SETTING_FILE_ARG);
+            t("*Settings\nVariables  foo.py  arg1  arg2", TABLE, SETTING_KEY, SETTING_FILE, SETTING_FILE_ARG, SETTING_FILE_ARG);
         }
     }
 

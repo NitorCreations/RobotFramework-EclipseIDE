@@ -39,8 +39,8 @@ public class ArgumentPreParser {
 
     static final Map<String, SettingType> settingTypes = new HashMap<String, SettingType>();
     static {
-        settingTypes.put("Resource", SettingType.FILE_ARGS);
-        settingTypes.put("Variables", SettingType.FILE);
+        settingTypes.put("Resource", SettingType.FILE);
+        settingTypes.put("Variables", SettingType.FILE_ARGS);
         settingTypes.put("Library", SettingType.FILE_ARGS);
         settingTypes.put("Suite Setup", SettingType.KEYWORD_ARGS);
         settingTypes.put("Suite Teardown", SettingType.KEYWORD_ARGS);
