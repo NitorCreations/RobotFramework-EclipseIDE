@@ -23,6 +23,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.TextEditor;
 
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
+
 /**
  * https://robotframework.googlecode.com/hg/doc/userguide/
  * RobotFrameworkUserGuide.html?r=2.6.1 http:/
@@ -76,6 +78,7 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
     private void handleCloseDocument(IEditorInput old) {
         System.out.println("Closing document " + old);
         ResourceManager.unregisterEditor(this);
+        RobotFile.erase(getEditedDocument());
     }
 
     public IDocument getEditedDocument() {

@@ -76,6 +76,9 @@ public class RFEBuilder extends IncrementalProjectBuilder {
                 break;
             case IResourceDelta.REMOVED:
                 // handle removed resource
+                if (resource instanceof IFile) {
+                    RobotFile.erase((IFile) resource);
+                }
                 break;
             case IResourceDelta.CHANGED:
                 // handle changed resource

@@ -35,6 +35,10 @@ public class RobotFile {
     static class FileInfo {
         RobotFile onDisk;
         RobotFile inEditor;
+
+        boolean isEmpty() {
+            return onDisk == null && inEditor == null;
+        }
     }
 
     private static final Map<IFile, FileInfo> FILES = Collections.synchronizedMap(new HashMap<IFile, FileInfo>());
@@ -63,6 +67,27 @@ public class RobotFile {
 
     public static RobotFile parse(IFile file, IProgressMonitor monitor) {
         return get(file, false, false, monitor);
+    }
+
+    public static void erase(IFile file) {
+        FileInfo fileInfo = FILES.get(file);
+        if (fileInfo != null) {
+            fileInfo.onDisk = null;
+            if (fileInfo.isEmpty()) {
+                FILES.remove(file);
+            }
+        }
+    }
+
+    public static void erase(IDocument document) {
+        IFile file = ResourceManager.resolveFileFor(document);
+        FileInfo fileInfo = FILES.get(file);
+        if (fileInfo != null) {
+            fileInfo.inEditor = null;
+            if (fileInfo.isEmpty()) {
+                FILES.remove(file);
+            }
+        }
     }
 
     private static RobotFile get(IFile file, boolean useEditorVersion, boolean useCached, IProgressMonitor monitor) {
