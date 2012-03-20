@@ -17,6 +17,7 @@ package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -28,6 +29,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
+import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public abstract class HyperlinkDetector implements IHyperlinkDetector {
@@ -83,7 +85,8 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
                 ParsedString firstArgument = rfeLine.arguments.get(0);
                 if (firstArgument.equals(linkString)) {
                     IRegion targetRegion = new Region(firstArgument.getArgEndCharPos(), 0);
-                    return new IHyperlink[] { new Hyperlink(linkRegion, linkString, targetRegion, document) };
+                    IFile targetFile = ResourceManager.resolveFileFor(document);
+                    return new IHyperlink[] { new Hyperlink(linkRegion, linkString, targetRegion, targetFile) };
                 }
             }
         }

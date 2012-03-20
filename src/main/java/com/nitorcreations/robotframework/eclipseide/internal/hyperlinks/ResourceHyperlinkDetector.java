@@ -15,10 +15,14 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
+import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -39,9 +43,18 @@ public class ResourceHyperlinkDetector extends HyperlinkDetector {
         if (!firstArgument.getValue().equals("Resource")) {
             return null;
         }
-        ParsedString resourceName = rfeLine.arguments.get(1);
-        // TODO: jump to resource
-        return getLinks(document, resourceName, null);
+        ParsedString secondArgument = rfeLine.arguments.get(1);
+        if (argument != secondArgument) {
+            return null;
+        }
+        String linkString = argument.getUnescapedValue();
+        IFile linkFile = ResourceManager.resolveFileFor(document);
+        IFile targetFile = ResourceManager.getRelativeFile(linkFile, linkString);
+        if (!targetFile.exists()) {
+            return null;
+        }
+        IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
+        return new IHyperlink[] { new Hyperlink(linkRegion, linkString, null, targetFile) };
     }
 
 }
