@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
@@ -51,8 +52,45 @@ public class RobotFile {
         return get(document, true);
     }
 
+    public static RobotFile get(IFile file, boolean useEditorVersion) {
+        return get(file, useEditorVersion, true);
+    }
+
     public static RobotFile parse(IDocument document) {
         return get(document, false);
+    }
+
+    public static RobotFile parse(IFile file) {
+        return get(file, false, false);
+    }
+
+    private static RobotFile get(IFile file, boolean useEditorVersion, boolean useCached) {
+        if (useEditorVersion) {
+            IDocument document = ResourceManager.resolveDocumentFor(file);
+            if (document != null) {
+                return get(document, useCached);
+            }
+        }
+        if (!file.exists()) {
+            return null;
+        }
+        FileInfo fileInfo = FILES.get(file);
+        if (useCached && fileInfo != null && fileInfo.onDisk != null) {
+            return fileInfo.onDisk;
+        }
+        RobotFile parsed;
+        try {
+            parsed = parse(new RFELexer(file, new NullProgressMonitor()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        if (fileInfo == null) {
+            fileInfo = new FileInfo();
+            FILES.put(file, fileInfo);
+        }
+        fileInfo.onDisk = parsed;
+        return parsed;
     }
 
     private static RobotFile get(IDocument document, boolean useCached) {

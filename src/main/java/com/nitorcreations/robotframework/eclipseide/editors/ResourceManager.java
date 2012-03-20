@@ -52,18 +52,29 @@ public final class ResourceManager {
         }
     }
 
-    private static final Map<IDocument, IFile> EDITORS = Collections.synchronizedMap(new HashMap<IDocument, IFile>());
+    private static final Map<IDocument, IFile> DOCUMENT_TO_FILE = Collections.synchronizedMap(new HashMap<IDocument, IFile>());
+    private static final Map<IFile, IDocument> FILE_TO_DOCUMENT = Collections.synchronizedMap(new HashMap<IFile, IDocument>());
 
     public static void registerEditor(RobotFrameworkTextfileEditor editor) {
-        EDITORS.put(editor.getEditedDocument(), editor.getEditedFile());
+        IDocument editedDocument = editor.getEditedDocument();
+        IFile editedFile = editor.getEditedFile();
+        assert !DOCUMENT_TO_FILE.containsKey(editedDocument);
+        assert !FILE_TO_DOCUMENT.containsKey(editedFile);
+        DOCUMENT_TO_FILE.put(editedDocument, editedFile);
+        FILE_TO_DOCUMENT.put(editedFile, editedDocument);
     }
 
     public static void unregisterEditor(RobotFrameworkTextfileEditor editor) {
-        EDITORS.remove(editor.getEditedDocument());
+        DOCUMENT_TO_FILE.remove(editor.getEditedDocument());
+        FILE_TO_DOCUMENT.remove(editor.getEditedFile());
     }
 
     public static IFile resolveFileFor(IDocument document) {
-        return EDITORS.get(document);
+        return DOCUMENT_TO_FILE.get(document);
+    }
+
+    public static IDocument resolveDocumentFor(IFile file) {
+        return FILE_TO_DOCUMENT.get(file);
     }
 
     public static IFile getRelativeFile(IFile originalFile, String pathRelativeToOriginalFile) {
