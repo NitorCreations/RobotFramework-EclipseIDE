@@ -19,7 +19,6 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
-import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.ITokenScanner;
@@ -31,6 +30,7 @@ public class RFTPresentationReconciler extends PresentationReconciler {
         DefaultDamagerRepairer dr = new DefaultDamagerRepairer(coloringScanner) {
             @Override
             public IRegion getDamageRegion(ITypedRegion partition, DocumentEvent e, boolean documentPartitioningChanged) {
+                System.out.println("Document " + ResourceManager.resolveFileFor(e.getDocument()) + " region changed: " + e);
                 // force damaging entire document for now; we don't support
                 // partial reparsing just yet
                 return partition;
@@ -38,14 +38,6 @@ public class RFTPresentationReconciler extends PresentationReconciler {
         };
         setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
         setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
-    }
-
-    @Override
-    protected TextPresentation createPresentation(IRegion damage, IDocument document) {
-        System.out.println("createPresentation(damage=" + damage + ");");
-        TextPresentation createPresentation = super.createPresentation(damage, document);
-        System.out.println();
-        return createPresentation;
     }
 
 }
