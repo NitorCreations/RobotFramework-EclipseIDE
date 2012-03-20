@@ -57,7 +57,7 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
         } catch (BadLocationException ex) {
             return null;
         }
-        lines = RobotFile.getLines(document);
+        lines = RobotFile.getLines(document).getLines();
         if (lineNumber >= lines.size()) {
             return null;
         }

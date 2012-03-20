@@ -25,11 +25,21 @@ import org.eclipse.jface.text.IDocument;
 
 public class RobotFile {
 
-    public static List<RFELine> getLines(IDocument document) {
+    private final List<RFELine> lines;
+
+    private RobotFile(List<RFELine> lines) {
+        this.lines = lines;
+    }
+
+    public List<RFELine> getLines() {
+        return lines;
+    }
+
+    public static RobotFile getLines(IDocument document) {
         return getLines(new RFELexer(document));
     }
 
-    public static List<RFELine> getLines(String fileContents) {
+    public static RobotFile getLines(String fileContents) {
         try {
             return getLines(new RFELexer(fileContents));
         } catch (UnsupportedEncodingException e) {
@@ -37,20 +47,20 @@ public class RobotFile {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        return Collections.emptyList();
+        return new RobotFile(Collections.<RFELine> emptyList());
     }
 
-    private static List<RFELine> getLines(RFELexer lexer) {
+    private static RobotFile getLines(RFELexer lexer) {
         try {
             List<RFELine> lines = lexer.lex();
             new RFEPreParser(null, lines).preParse();
             ArgumentPreParser app = new ArgumentPreParser();
             app.setRange(lines);
             app.parseAll();
-            return lines;
+            return new RobotFile(lines);
         } catch (CoreException e) {
             e.printStackTrace();
         }
-        return Collections.emptyList();
+        return new RobotFile(Collections.<RFELine> emptyList());
     }
 }

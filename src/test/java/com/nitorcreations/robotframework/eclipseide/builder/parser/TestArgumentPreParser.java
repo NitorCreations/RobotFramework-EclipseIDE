@@ -247,7 +247,7 @@ public class TestArgumentPreParser {
     }
 
     static void t(String input, ArgumentType... expected) throws Exception {
-        List<RFELine> lines = RobotFile.getLines(input);
+        List<RFELine> lines = RobotFile.getLines(input).getLines();
         int p = 0;
         for (RFELine rfeLine : lines) {
             for (ParsedString arg : rfeLine.arguments) {
