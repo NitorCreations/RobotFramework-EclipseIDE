@@ -15,11 +15,7 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
-import java.util.List;
-
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
@@ -36,12 +32,10 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
 public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
 
     @Override
-    protected IHyperlink[] getLinks(IDocument document, List<RFELine> lines, ParsedString argument, int offset) {
+    protected IHyperlink[] getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset) {
         if (argument.getType() != ArgumentType.KEYWORD_CALL) {
             return null;
         }
-        String linkString = argument.getUnescapedValue();
-        IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        return getLinks(document, lines, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
+        return getLinks(document, argument, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
     }
 }

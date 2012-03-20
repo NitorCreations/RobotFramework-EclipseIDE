@@ -32,6 +32,8 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public abstract class HyperlinkDetector implements IHyperlinkDetector {
 
+    private List<RFELine> lines;
+
     /**
      * This detector assumes generated hyperlinks are static, i.e. the link
      * target is calculated at detection time and not changed even if the code
@@ -55,7 +57,7 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
         } catch (BadLocationException ex) {
             return null;
         }
-        List<RFELine> lines = RobotFile.getLines(document);
+        lines = RobotFile.getLines(document);
         if (lineNumber >= lines.size()) {
             return null;
         }
@@ -64,12 +66,18 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
         if (argument == null) {
             return null;
         }
-        return getLinks(document, lines, argument, offset);
+        return getLinks(document, rfeLine, argument, offset);
     }
 
-    protected abstract IHyperlink[] getLinks(IDocument document, List<RFELine> lines, ParsedString argument, int offset);
+    protected abstract IHyperlink[] getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset);
 
-    protected IHyperlink[] getLinks(IDocument document, List<RFELine> lines, String linkString, IRegion linkRegion, LineType type) {
+    protected IHyperlink[] getLinks(IDocument document, ParsedString argument, LineType type) {
+        String linkString = argument.getUnescapedValue();
+        IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
+        return getLinks(document, linkString, linkRegion, type);
+    }
+
+    protected IHyperlink[] getLinks(IDocument document, String linkString, IRegion linkRegion, LineType type) {
         for (RFELine rfeLine : lines) {
             if (rfeLine.isType(type)) {
                 ParsedString firstArgument = rfeLine.arguments.get(0);

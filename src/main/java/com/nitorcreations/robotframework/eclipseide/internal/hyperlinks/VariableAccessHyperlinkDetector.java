@@ -15,8 +15,6 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
-import java.util.List;
-
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
@@ -37,7 +35,7 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
 
     @Override
-    protected IHyperlink[] getLinks(IDocument document, List<RFELine> lines, ParsedString argument, int offset) {
+    protected IHyperlink[] getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset) {
         // TODO: only check types that can contain variables
         String argumentValue = argument.getValue();
         int start = 0;
@@ -56,7 +54,7 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
                 // pointing at variable access!
                 String linkString = argumentValue.substring(linkOffsetInArgument, linkOffsetInArgument + linkLength);
                 IRegion linkRegion = new Region(argument.getArgCharPos() + linkOffsetInArgument, linkLength);
-                return getLinks(document, lines, linkString, linkRegion, LineType.VARIABLE_TABLE_LINE);
+                return getLinks(document, linkString, linkRegion, LineType.VARIABLE_TABLE_LINE);
             }
             start = linkOffsetInArgument + linkLength;
         }
