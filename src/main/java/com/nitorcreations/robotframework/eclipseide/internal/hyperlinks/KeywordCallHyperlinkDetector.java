@@ -15,11 +15,18 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
+import java.util.List;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
+import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -36,6 +43,50 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
         if (argument.getType() != ArgumentType.KEYWORD_CALL) {
             return null;
         }
-        return getLinks(document, argument, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
+        String linkString = argument.getUnescapedValue();
+        IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
+        IHyperlink[] links = getLinks(document, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
+        if (links != null) {
+            return links;
+        }
+        for (RFELine line : lines) {
+            if (!line.isType(LineType.SETTING_TABLE_LINE)) {
+                continue;
+            }
+            ParsedString firstArgument = line.arguments.get(0);
+            if (firstArgument.getType() != ArgumentType.SETTING_KEY) {
+                continue;
+            }
+            if (!"Resource".equals(firstArgument.getValue())) {
+                continue;
+            }
+            ParsedString secondArgument = line.arguments.get(1);
+            IFile linkFile = ResourceManager.resolveFileFor(document);
+            IFile resourceFile = ResourceManager.getRelativeFile(linkFile, secondArgument.getUnescapedValue());
+            RobotFile robotFile = RobotFile.get(resourceFile, true);
+            if (robotFile == null) {
+                continue;
+            }
+            List<RFELine> linesInResource = robotFile.getLines();
+            IHyperlink[] linksInResource = getLinks(linesInResource, resourceFile, linkString, linkRegion);
+            if (linksInResource != null) {
+                return linksInResource;
+            }
+        }
+        return null;
     }
+
+    private IHyperlink[] getLinks(List<RFELine> targetLines, IFile targetFile, String linkString, IRegion linkRegion) {
+        for (RFELine rfeLine : targetLines) {
+            if (rfeLine.isType(LineType.KEYWORD_TABLE_KEYWORD_BEGIN)) {
+                ParsedString firstArgument = rfeLine.arguments.get(0);
+                if (firstArgument.equals(linkString)) {
+                    IRegion targetRegion = new Region(firstArgument.getArgEndCharPos(), 0);
+                    return new IHyperlink[] { new Hyperlink(linkRegion, linkString, targetRegion, targetFile) };
+                }
+            }
+        }
+        return null;
+    }
+
 }

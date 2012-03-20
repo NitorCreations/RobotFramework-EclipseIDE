@@ -34,7 +34,7 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public abstract class HyperlinkDetector implements IHyperlinkDetector {
 
-    private List<RFELine> lines;
+    protected List<RFELine> lines;
 
     /**
      * This detector assumes generated hyperlinks are static, i.e. the link
@@ -72,12 +72,6 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
     }
 
     protected abstract IHyperlink[] getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset);
-
-    protected IHyperlink[] getLinks(IDocument document, ParsedString argument, LineType type) {
-        String linkString = argument.getUnescapedValue();
-        IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        return getLinks(document, linkString, linkRegion, type);
-    }
 
     protected IHyperlink[] getLinks(IDocument document, String linkString, IRegion linkRegion, LineType type) {
         for (RFELine rfeLine : lines) {
