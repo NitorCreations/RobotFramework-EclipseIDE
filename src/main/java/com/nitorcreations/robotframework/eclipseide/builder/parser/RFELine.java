@@ -18,6 +18,7 @@ package com.nitorcreations.robotframework.eclipseide.builder.parser;
 import java.util.List;
 
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
+import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 public class RFELine {
     public final int lineNo;
@@ -51,5 +52,17 @@ public class RFELine {
             }
         }
         return null;
+    }
+
+    public boolean isResourceSetting() {
+        if (!isType(LineType.SETTING_TABLE_LINE)) {
+            return false;
+        }
+        ParsedString firstArgument = arguments.get(0);
+        if (firstArgument.getType() != ArgumentType.SETTING_KEY) {
+            return false;
+        }
+        return firstArgument.equals("Resource");
+
     }
 }

@@ -15,7 +15,9 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.BadLocationException;
@@ -73,17 +75,43 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
 
     protected abstract IHyperlink[] getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset);
 
-    protected IHyperlink[] getLinks(IDocument document, String linkString, IRegion linkRegion, LineType type) {
-        for (RFELine rfeLine : lines) {
-            if (rfeLine.isType(type)) {
-                ParsedString firstArgument = rfeLine.arguments.get(0);
-                if (firstArgument.equals(linkString)) {
-                    IRegion targetRegion = new Region(firstArgument.getArgEndCharPos(), 0);
-                    IFile targetFile = ResourceManager.resolveFileFor(document);
-                    return new IHyperlink[] { new Hyperlink(linkRegion, linkString, targetRegion, targetFile) };
+    protected IHyperlink[] getLinks(IDocument document, String linkString, IRegion linkRegion, LineType lineType) {
+        System.out.println("getLinks for " + linkString);
+        Set<IFile> unprocessedFiles = new HashSet<IFile>();
+        Set<IFile> processedFiles = new HashSet<IFile>();
+        unprocessedFiles.add(ResourceManager.resolveFileFor(document));
+        while (!unprocessedFiles.isEmpty()) {
+            IFile targetFile = unprocessedFiles.iterator().next();
+            RobotFile robotFile = RobotFile.get(targetFile, true);
+            if (robotFile == null) {
+                return null;
+            }
+            List<RFELine> lines = robotFile.getLines();
+            for (RFELine line : lines) {
+                if (line.isType(lineType)) {
+                    ParsedString firstArgument = line.arguments.get(0);
+                    System.out.println("firstArgument " + firstArgument.getValue());
+                    System.out.println("linkString    " + linkString);
+                    if (firstArgument.equals(linkString)) {
+                        IRegion targetRegion = new Region(firstArgument.getArgEndCharPos(), 0);
+                        return new IHyperlink[] { new Hyperlink(linkRegion, linkString, targetRegion, targetFile) };
+                    }
                 }
             }
+            System.out.println("Not found in " + targetFile);
+            for (RFELine line : lines) {
+                if (line.isResourceSetting()) {
+                    ParsedString secondArgument = line.arguments.get(1);
+                    IFile resourceFile = ResourceManager.getRelativeFile(targetFile, secondArgument.getUnescapedValue());
+                    if (resourceFile.exists() && !processedFiles.contains(resourceFile)) {
+                        unprocessedFiles.add(resourceFile);
+                    }
+                }
+            }
+            processedFiles.add(targetFile);
+            unprocessedFiles.remove(targetFile);
         }
         return null;
     }
+
 }

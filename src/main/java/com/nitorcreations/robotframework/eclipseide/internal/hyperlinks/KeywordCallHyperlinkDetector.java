@@ -15,11 +15,6 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
@@ -27,8 +22,6 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
-import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -47,45 +40,6 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
         }
         String linkString = argument.getUnescapedValue();
         IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        Set<IFile> unprocessedFiles = new HashSet<IFile>();
-        Set<IFile> processedFiles = new HashSet<IFile>();
-        unprocessedFiles.add(ResourceManager.resolveFileFor(document));
-        while (!unprocessedFiles.isEmpty()) {
-            IFile targetFile = unprocessedFiles.iterator().next();
-            RobotFile robotFile = RobotFile.get(targetFile, true);
-            if (robotFile == null) {
-                return null;
-            }
-            List<RFELine> lines = robotFile.getLines();
-            for (RFELine line : lines) {
-                if (line.isType(LineType.KEYWORD_TABLE_KEYWORD_BEGIN)) {
-                    ParsedString firstArgument = line.arguments.get(0);
-                    if (firstArgument.equals(linkString)) {
-                        IRegion targetRegion = new Region(firstArgument.getArgEndCharPos(), 0);
-                        return new IHyperlink[] { new Hyperlink(linkRegion, linkString, targetRegion, targetFile) };
-                    }
-                }
-            }
-            for (RFELine line : lines) {
-                if (!line.isType(LineType.SETTING_TABLE_LINE)) {
-                    continue;
-                }
-                ParsedString firstArgument = line.arguments.get(0);
-                if (firstArgument.getType() != ArgumentType.SETTING_KEY) {
-                    continue;
-                }
-                if (!"Resource".equals(firstArgument.getValue())) {
-                    continue;
-                }
-                ParsedString secondArgument = line.arguments.get(1);
-                IFile resourceFile = ResourceManager.getRelativeFile(targetFile, secondArgument.getUnescapedValue());
-                if (!processedFiles.contains(resourceFile)) {
-                    unprocessedFiles.add(resourceFile);
-                }
-            }
-            processedFiles.add(targetFile);
-            unprocessedFiles.remove(targetFile);
-        }
-        return null;
+        return getLinks(document, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
     }
 }

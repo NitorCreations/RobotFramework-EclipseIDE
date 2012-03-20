@@ -24,7 +24,6 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 /**
  * This hyperlink detector creates hyperlinks for resource references, e.g.
@@ -36,11 +35,7 @@ public class ResourceHyperlinkDetector extends HyperlinkDetector {
 
     @Override
     protected IHyperlink[] getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset) {
-        ParsedString firstArgument = rfeLine.arguments.get(0);
-        if (firstArgument.getType() != ArgumentType.SETTING_KEY) {
-            return null;
-        }
-        if (!firstArgument.getValue().equals("Resource")) {
+        if (!rfeLine.isResourceSetting()) {
             return null;
         }
         ParsedString secondArgument = rfeLine.arguments.get(1);
@@ -56,5 +51,4 @@ public class ResourceHyperlinkDetector extends HyperlinkDetector {
         IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
         return new IHyperlink[] { new Hyperlink(linkRegion, linkString, null, targetFile) };
     }
-
 }
