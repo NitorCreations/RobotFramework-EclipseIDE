@@ -15,6 +15,7 @@
  */
 package com.nitorcreations.robotframework.eclipseide.structure;
 
+import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
 import com.nitorcreations.robotframework.eclipseide.structure.api.IParsedKeywordString;
 
 /**
@@ -108,6 +109,10 @@ public class ParsedString implements IParsedKeywordString {
     public DynamicParsedString splitRegularArgument() {
         // TODO implement
         return new DynamicParsedString(value, argCharPos, null);
+    }
+
+    public String getUnescapedValue() {
+        return RFTArgumentUtils.unescapeArgument(value, 0, value.length());
     }
 
 }

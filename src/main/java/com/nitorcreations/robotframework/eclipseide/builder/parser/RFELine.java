@@ -43,4 +43,13 @@ public class RFELine {
     public String toString() {
         return "<#" + lineNo + " " + type + "> " + arguments;
     }
+
+    public ParsedString getArgumentAt(int offset) {
+        for (ParsedString argument : arguments) {
+            if (offset >= argument.getArgCharPos() && offset <= argument.getArgEndCharPos()) {
+                return argument;
+            }
+        }
+        return null;
+    }
 }

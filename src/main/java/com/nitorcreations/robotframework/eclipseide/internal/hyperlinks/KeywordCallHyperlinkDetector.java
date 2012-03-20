@@ -15,6 +15,9 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
+import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -22,8 +25,13 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
+import com.nitorcreations.robotframework.eclipseide.builder.parser.ArgumentPreParser;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELexer;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
-import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEPreParser;
+import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
+import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 /**
  * This hyperlink detector creates hyperlinks for keyword calls, e.g.
@@ -46,37 +54,34 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
 
         int offset = region.getOffset();
 
-        IRegion lineInfo;
-        String line;
+        int lineNumber;
         try {
-            lineInfo = document.getLineInformationOfOffset(offset);
-            line = document.get(lineInfo.getOffset(), lineInfo.getLength());
+            lineNumber = document.getLineOfOffset(offset);
         } catch (BadLocationException ex) {
             return null;
         }
 
-        int linkOffsetInLine = RFTArgumentUtils.findNextArgumentStart(line, 0);
-        if (linkOffsetInLine == -1) {
-            // testcase & keyword definitions fit into this category
+        List<RFELine> lines;
+        try {
+            RFELexer lexer = new RFELexer(document);
+            lines = lexer.lex();
+            new RFEPreParser(null, lines).preParse();
+            ArgumentPreParser app = new ArgumentPreParser();
+            app.setRange(lines);
+            app.parseAll();
+        } catch (CoreException e) {
+            e.printStackTrace();
             return null;
         }
 
-        if (line.charAt(linkOffsetInLine) == '[') {
-            // it's a Setting
+        RFELine rfeLine = lines.get(lineNumber);
+        ParsedString argument = rfeLine.getArgumentAt(offset);
+        if (argument == null || argument.getType() != ArgumentType.KEYWORD_CALL) {
             return null;
         }
 
-        int linkLength = RFTArgumentUtils.calculateArgumentLength(line, linkOffsetInLine);
-
-        int offsetInLine = offset - lineInfo.getOffset();
-        if (offsetInLine < linkOffsetInLine || offsetInLine >= linkOffsetInLine + linkLength) {
-            // outside
-            return null;
-        }
-
-        String linkString = RFTArgumentUtils.unescapeArgument(line, linkOffsetInLine, linkLength);
-        IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
+        String linkString = argument.getUnescapedValue();
+        IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
         return getLinks(document, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
     }
-
 }
