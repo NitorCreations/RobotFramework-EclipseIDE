@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.text.IDocument;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.util.ParserUtil;
@@ -38,8 +37,8 @@ public class RFEPreParser {
      * 
      * @param document
      */
-    public RFEPreParser(IDocument document, List<RFELine> lines) {
-        this.filename = "<document being edited>";
+    public RFEPreParser(String filename, List<RFELine> lines) {
+        this.filename = filename;
         this.lines = lines;
     }
 

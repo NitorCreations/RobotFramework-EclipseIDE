@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 
+import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 /**
@@ -96,7 +97,7 @@ public class RFELexer {
      * @param document
      */
     public RFELexer(IDocument document) {
-        this.filename = "<document being edited>";
+        this.filename = ResourceManager.resolveFileFor(document).toString();
         this.filestream = new StringReader(document.get());
         this.monitor = new NullProgressMonitor();
     }

@@ -80,7 +80,7 @@ public class RobotFile {
         }
         RobotFile parsed;
         try {
-            parsed = parse(new RFELexer(file, new NullProgressMonitor()));
+            parsed = parse(file.toString(), new RFELexer(file, new NullProgressMonitor()));
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -99,7 +99,7 @@ public class RobotFile {
         if (useCached && fileInfo != null && fileInfo.inEditor != null) {
             return fileInfo.inEditor;
         }
-        RobotFile parsed = parse(new RFELexer(document));
+        RobotFile parsed = parse(file.toString(), new RFELexer(document));
         if (fileInfo == null) {
             fileInfo = new FileInfo();
             FILES.put(file, fileInfo);
@@ -110,7 +110,7 @@ public class RobotFile {
 
     public static RobotFile parse(String fileContents) {
         try {
-            return parse(new RFELexer(fileContents));
+            return parse("<in-memory file>", new RFELexer(fileContents));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
@@ -119,10 +119,10 @@ public class RobotFile {
         return new RobotFile(Collections.<RFELine> emptyList());
     }
 
-    private static RobotFile parse(RFELexer lexer) {
+    private static RobotFile parse(String filename, RFELexer lexer) {
         try {
             List<RFELine> lines = lexer.lex();
-            new RFEPreParser(null, lines).preParse();
+            new RFEPreParser(filename, lines).preParse();
             ArgumentPreParser app = new ArgumentPreParser();
             app.setRange(lines);
             app.parseAll();
