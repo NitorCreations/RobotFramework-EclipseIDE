@@ -19,9 +19,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
+import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.KeywordCallHyperlinkDetector;
@@ -69,6 +76,27 @@ public class RFTSourceViewerConfiguration extends TextSourceViewerConfiguration 
     @Override
     public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
         return new RFTPresentationReconciler(colorManager);
+    }
+
+    @Override
+    public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+        ContentAssistant assistant = new ContentAssistant();
+
+        assistant.enableAutoInsert(true);
+        assistant.enablePrefixCompletion(true);
+        // assistant.setProposalPopupOrientation(IContentAssistant.PROPOSAL_OVERLAY);
+        // assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
+        // assistant.setStatusLineVisible(true);
+
+        assistant.setContentAssistProcessor(new RobotContentAssistant(), IDocument.DEFAULT_CONTENT_TYPE);
+
+        assistant.setInformationControlCreator(new AbstractReusableInformationControlCreator() {
+            @Override
+            protected IInformationControl doCreateInformationControl(Shell parent) {
+                return new DefaultInformationControl(parent, true);
+            }
+        });
+        return assistant;
     }
 
 }
