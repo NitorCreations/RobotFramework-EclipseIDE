@@ -15,7 +15,9 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
@@ -45,48 +47,45 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
         }
         String linkString = argument.getUnescapedValue();
         IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        IHyperlink[] links = getLinks(document, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
-        if (links != null) {
-            return links;
-        }
-        for (RFELine line : lines) {
-            if (!line.isType(LineType.SETTING_TABLE_LINE)) {
-                continue;
-            }
-            ParsedString firstArgument = line.arguments.get(0);
-            if (firstArgument.getType() != ArgumentType.SETTING_KEY) {
-                continue;
-            }
-            if (!"Resource".equals(firstArgument.getValue())) {
-                continue;
-            }
-            ParsedString secondArgument = line.arguments.get(1);
-            IFile linkFile = ResourceManager.resolveFileFor(document);
-            IFile resourceFile = ResourceManager.getRelativeFile(linkFile, secondArgument.getUnescapedValue());
-            RobotFile robotFile = RobotFile.get(resourceFile, true);
+        Set<IFile> unprocessedFiles = new HashSet<IFile>();
+        Set<IFile> processedFiles = new HashSet<IFile>();
+        unprocessedFiles.add(ResourceManager.resolveFileFor(document));
+        while (!unprocessedFiles.isEmpty()) {
+            IFile targetFile = unprocessedFiles.iterator().next();
+            RobotFile robotFile = RobotFile.get(targetFile, true);
             if (robotFile == null) {
-                continue;
+                return null;
             }
-            List<RFELine> linesInResource = robotFile.getLines();
-            IHyperlink[] linksInResource = getLinks(linesInResource, resourceFile, linkString, linkRegion);
-            if (linksInResource != null) {
-                return linksInResource;
-            }
-        }
-        return null;
-    }
-
-    private IHyperlink[] getLinks(List<RFELine> targetLines, IFile targetFile, String linkString, IRegion linkRegion) {
-        for (RFELine rfeLine : targetLines) {
-            if (rfeLine.isType(LineType.KEYWORD_TABLE_KEYWORD_BEGIN)) {
-                ParsedString firstArgument = rfeLine.arguments.get(0);
-                if (firstArgument.equals(linkString)) {
-                    IRegion targetRegion = new Region(firstArgument.getArgEndCharPos(), 0);
-                    return new IHyperlink[] { new Hyperlink(linkRegion, linkString, targetRegion, targetFile) };
+            List<RFELine> lines = robotFile.getLines();
+            for (RFELine line : lines) {
+                if (line.isType(LineType.KEYWORD_TABLE_KEYWORD_BEGIN)) {
+                    ParsedString firstArgument = line.arguments.get(0);
+                    if (firstArgument.equals(linkString)) {
+                        IRegion targetRegion = new Region(firstArgument.getArgEndCharPos(), 0);
+                        return new IHyperlink[] { new Hyperlink(linkRegion, linkString, targetRegion, targetFile) };
+                    }
                 }
             }
+            for (RFELine line : lines) {
+                if (!line.isType(LineType.SETTING_TABLE_LINE)) {
+                    continue;
+                }
+                ParsedString firstArgument = line.arguments.get(0);
+                if (firstArgument.getType() != ArgumentType.SETTING_KEY) {
+                    continue;
+                }
+                if (!"Resource".equals(firstArgument.getValue())) {
+                    continue;
+                }
+                ParsedString secondArgument = line.arguments.get(1);
+                IFile resourceFile = ResourceManager.getRelativeFile(targetFile, secondArgument.getUnescapedValue());
+                if (!processedFiles.contains(resourceFile)) {
+                    unprocessedFiles.add(resourceFile);
+                }
+            }
+            processedFiles.add(targetFile);
+            unprocessedFiles.remove(targetFile);
         }
         return null;
     }
-
 }
