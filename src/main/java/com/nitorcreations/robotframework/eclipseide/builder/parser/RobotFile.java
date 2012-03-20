@@ -15,6 +15,8 @@
  */
 package com.nitorcreations.robotframework.eclipseide.builder.parser;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,8 +26,22 @@ import org.eclipse.jface.text.IDocument;
 public class RobotFile {
 
     public static List<RFELine> getLines(IDocument document) {
+        return getLines(new RFELexer(document));
+    }
+
+    public static List<RFELine> getLines(String fileContents) {
         try {
-            RFELexer lexer = new RFELexer(document);
+            return getLines(new RFELexer(fileContents));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
+
+    private static List<RFELine> getLines(RFELexer lexer) {
+        try {
             List<RFELine> lines = lexer.lex();
             new RFEPreParser(null, lines).preParse();
             ArgumentPreParser app = new ArgumentPreParser();
@@ -34,7 +50,7 @@ public class RobotFile {
             return lines;
         } catch (CoreException e) {
             e.printStackTrace();
-            return Collections.emptyList();
         }
+        return Collections.emptyList();
     }
 }

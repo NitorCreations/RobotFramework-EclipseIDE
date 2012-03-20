@@ -31,14 +31,11 @@ import static com.nitorcreations.robotframework.eclipseide.structure.ParsedStrin
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.VARIABLE_KEY;
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.VARIABLE_VAL;
 
-import java.io.FileNotFoundException;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.AssertionFailedError;
 
-import org.eclipse.core.runtime.CoreException;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -250,7 +247,7 @@ public class TestArgumentPreParser {
     }
 
     static void t(String input, ArgumentType... expected) throws Exception {
-        List<RFELine> lines = parse(input);
+        List<RFELine> lines = RobotFile.getLines(input);
         int p = 0;
         for (RFELine rfeLine : lines) {
             for (ParsedString arg : rfeLine.arguments) {
@@ -268,15 +265,4 @@ public class TestArgumentPreParser {
             throw new ArrayIndexOutOfBoundsException(p);
         }
     }
-
-    private static List<RFELine> parse(String fileContents) throws UnsupportedEncodingException, FileNotFoundException, CoreException {
-        RFELexer lexer = new RFELexer(fileContents);
-        List<RFELine> lines = lexer.lex();
-        new RFEPreParser(null, lines).preParse();
-        ArgumentPreParser app = new ArgumentPreParser();
-        app.setRange(lines);
-        app.parseAll();
-        return lines;
-    }
-
 }
