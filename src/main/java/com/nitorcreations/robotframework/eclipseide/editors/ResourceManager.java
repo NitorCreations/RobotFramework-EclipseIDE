@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -63,6 +64,12 @@ public final class ResourceManager {
 
     public static IFile resolveFileFor(IDocument document) {
         return EDITORS.get(document);
+    }
+
+    public static IFile getRelativeFile(IFile originalFile, String pathRelativeToOriginalFile) {
+        IPath originalFolderPath = originalFile.getParent().getFullPath();
+        IPath newPath = originalFolderPath.append(pathRelativeToOriginalFile);
+        return originalFile.getWorkspace().getRoot().getFile(newPath);
     }
 
     public static RobotFrameworkTextfileEditor openOrReuseEditorFor(IFile file) {
