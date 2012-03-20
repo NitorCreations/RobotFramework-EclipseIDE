@@ -85,7 +85,7 @@ public class RFTColoringScanner implements ITokenScanner {
         prepareTokens();
         // this.document = document;
         tokenQueue.reset();
-        lines = RobotFile.getLines(document).getLines();
+        lines = RobotFile.parse(document).getLines();
         lineIterator = lines.listIterator();
         prepareNextLine();
     }

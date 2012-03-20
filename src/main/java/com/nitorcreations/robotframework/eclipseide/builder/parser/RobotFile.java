@@ -35,13 +35,13 @@ public class RobotFile {
         return lines;
     }
 
-    public static RobotFile getLines(IDocument document) {
-        return getLines(new RFELexer(document));
+    public static RobotFile parse(IDocument document) {
+        return parse(new RFELexer(document));
     }
 
-    public static RobotFile getLines(String fileContents) {
+    public static RobotFile parse(String fileContents) {
         try {
-            return getLines(new RFELexer(fileContents));
+            return parse(new RFELexer(fileContents));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
@@ -50,7 +50,7 @@ public class RobotFile {
         return new RobotFile(Collections.<RFELine> emptyList());
     }
 
-    private static RobotFile getLines(RFELexer lexer) {
+    private static RobotFile parse(RFELexer lexer) {
         try {
             List<RFELine> lines = lexer.lex();
             new RFEPreParser(null, lines).preParse();
