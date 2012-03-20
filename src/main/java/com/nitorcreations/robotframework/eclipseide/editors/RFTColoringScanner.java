@@ -21,17 +21,14 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.rules.Token;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.ArgumentPreParser;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELexer;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEPreParser;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -86,19 +83,11 @@ public class RFTColoringScanner implements ITokenScanner {
     @Override
     public void setRange(IDocument document, int offset, int length) {
         prepareTokens();
-        try {
-            // this.document = document;
-            tokenQueue.reset();
-            lines = new RFELexer(document).lex();
-            new RFEPreParser(document, lines).preParse();
-            ArgumentPreParser argumentPreParser = new ArgumentPreParser();
-            argumentPreParser.setRange(lines);
-            argumentPreParser.parseAll();
-            lineIterator = lines.listIterator();
-            prepareNextLine();
-        } catch (CoreException e) {
-            throw new RuntimeException("Error parsing", e);
-        }
+        // this.document = document;
+        tokenQueue.reset();
+        lines = RobotFile.getLines(document);
+        lineIterator = lines.listIterator();
+        prepareNextLine();
     }
 
     void prepareNextToken() {
