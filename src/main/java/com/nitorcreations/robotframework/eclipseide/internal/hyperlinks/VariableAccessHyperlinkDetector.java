@@ -17,16 +17,13 @@ package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
 import java.util.List;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTVariableUtils;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
@@ -39,43 +36,9 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
  */
 public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
 
-    /**
-     * This detector assumes generated hyperlinks are static, i.e. the link
-     * target is calculated at detection time and not changed even if the code
-     * would update later.
-     */
     @Override
-    public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
-        if (region == null || textViewer == null) {
-            return null;
-        }
-
-        IDocument document = textViewer.getDocument();
-        if (document == null) {
-            return null;
-        }
-
-        int offset = region.getOffset();
-
-        int lineNumber;
-        try {
-            lineNumber = document.getLineOfOffset(offset);
-        } catch (BadLocationException ex) {
-            return null;
-        }
-
-        List<RFELine> lines = RobotFile.getLines(document);
-        if (lines.size() <= lineNumber) {
-            return null;
-        }
-
-        RFELine rfeLine = lines.get(lineNumber);
-        ParsedString argument = rfeLine.getArgumentAt(offset);
+    protected IHyperlink[] getLinks(IDocument document, List<RFELine> lines, ParsedString argument, int offset) {
         // TODO: only check types that can contain variables
-        if (argument == null) {
-            return null;
-        }
-
         String argumentValue = argument.getValue();
         int start = 0;
         while (true) {
@@ -93,10 +56,7 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
                 // pointing at variable access!
                 String linkString = argumentValue.substring(linkOffsetInArgument, linkOffsetInArgument + linkLength);
                 IRegion linkRegion = new Region(argument.getArgCharPos() + linkOffsetInArgument, linkLength);
-                IHyperlink[] links = getLinks(document, linkString, linkRegion, LineType.VARIABLE_TABLE_LINE);
-                if (links != null) {
-                    return links;
-                }
+                return getLinks(document, lines, linkString, linkRegion, LineType.VARIABLE_TABLE_LINE);
             }
             start = linkOffsetInArgument + linkLength;
         }

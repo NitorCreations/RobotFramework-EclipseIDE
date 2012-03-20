@@ -17,16 +17,13 @@ package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
 import java.util.List;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -39,38 +36,12 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
 public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
 
     @Override
-    public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
-        if (region == null || textViewer == null) {
+    protected IHyperlink[] getLinks(IDocument document, List<RFELine> lines, ParsedString argument, int offset) {
+        if (argument.getType() != ArgumentType.KEYWORD_CALL) {
             return null;
         }
-
-        IDocument document = textViewer.getDocument();
-        if (document == null) {
-            return null;
-        }
-
-        int offset = region.getOffset();
-
-        int lineNumber;
-        try {
-            lineNumber = document.getLineOfOffset(offset);
-        } catch (BadLocationException ex) {
-            return null;
-        }
-
-        List<RFELine> lines = RobotFile.getLines(document);
-        if (lines.size() <= lineNumber) {
-            return null;
-        }
-
-        RFELine rfeLine = lines.get(lineNumber);
-        ParsedString argument = rfeLine.getArgumentAt(offset);
-        if (argument == null || argument.getType() != ArgumentType.KEYWORD_CALL) {
-            return null;
-        }
-
         String linkString = argument.getUnescapedValue();
         IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        return getLinks(document, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
+        return getLinks(document, lines, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
     }
 }

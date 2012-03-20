@@ -17,37 +17,68 @@ package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELexer;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEPreParser;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public abstract class HyperlinkDetector implements IHyperlinkDetector {
-    protected IHyperlink[] getLinks(IDocument document, String linkString, IRegion linkRegion, LineType type) {
+
+    /**
+     * This detector assumes generated hyperlinks are static, i.e. the link
+     * target is calculated at detection time and not changed even if the code
+     * would update later.
+     */
+    @Override
+    public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
+        if (region == null || textViewer == null) {
+            return null;
+        }
+
+        IDocument document = textViewer.getDocument();
+        if (document == null) {
+            return null;
+        }
+
+        int offset = region.getOffset();
+        int lineNumber;
         try {
-            List<RFELine> lines = new RFELexer(document).lex();
-            new RFEPreParser(document, lines).preParse();
-            for (RFELine rfeLine : lines) {
-                if (rfeLine.isType(type)) {
-                    ParsedString firstArgument = rfeLine.arguments.get(0);
-                    if (firstArgument.equals(linkString)) {
-                        IRegion targetRegion = new Region(firstArgument.getArgEndCharPos(), 0);
-                        return new IHyperlink[] { new Hyperlink(linkRegion, linkString, targetRegion, document) };
-                    }
+            lineNumber = document.getLineOfOffset(offset);
+        } catch (BadLocationException ex) {
+            return null;
+        }
+        List<RFELine> lines = RobotFile.getLines(document);
+        if (lineNumber >= lines.size()) {
+            return null;
+        }
+        RFELine rfeLine = lines.get(lineNumber);
+        ParsedString argument = rfeLine.getArgumentAt(offset);
+        if (argument == null) {
+            return null;
+        }
+        return getLinks(document, lines, argument, offset);
+    }
+
+    protected abstract IHyperlink[] getLinks(IDocument document, List<RFELine> lines, ParsedString argument, int offset);
+
+    protected IHyperlink[] getLinks(IDocument document, List<RFELine> lines, String linkString, IRegion linkRegion, LineType type) {
+        for (RFELine rfeLine : lines) {
+            if (rfeLine.isType(type)) {
+                ParsedString firstArgument = rfeLine.arguments.get(0);
+                if (firstArgument.equals(linkString)) {
+                    IRegion targetRegion = new Region(firstArgument.getArgEndCharPos(), 0);
+                    return new IHyperlink[] { new Hyperlink(linkRegion, linkString, targetRegion, document) };
                 }
             }
-        } catch (CoreException e) {
-            // ignored
         }
         return null;
     }
-
 }
