@@ -23,14 +23,14 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 import com.nitorcreations.robotframework.eclipseide.editors.RobotFrameworkTextfileEditor;
 
-public class RFTHyperlink implements IHyperlink {
+public class Hyperlink implements IHyperlink {
 
     protected final IRegion linkRegion;
     protected final String linkText;
     private final IRegion targetRegion;
     private final IDocument targetDocument;
 
-    public RFTHyperlink(IRegion linkRegion, String linkText, IRegion targetRegion, IDocument targetDocument) {
+    public Hyperlink(IRegion linkRegion, String linkText, IRegion targetRegion, IDocument targetDocument) {
         this.linkRegion = linkRegion;
         this.linkText = linkText;
         this.targetRegion = targetRegion;

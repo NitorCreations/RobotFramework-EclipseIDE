@@ -31,7 +31,7 @@ import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUt
  * 
  * @author xkr47
  */
-public class RFTKeywordCallHyperlinkDetector extends HyperlinkDetector {
+public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
 
     @Override
     public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {

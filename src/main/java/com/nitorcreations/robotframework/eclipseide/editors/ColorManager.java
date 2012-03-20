@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Display;
 
 public class ColorManager {
 
-    protected Map<IRFTColorConstants, Color> fColorTable = new HashMap<IRFTColorConstants, Color>(10);
+    protected Map<ColorConstants, Color> fColorTable = new HashMap<ColorConstants, Color>(10);
     private boolean isDarkBackground;
 
     public void dispose() {
@@ -33,7 +33,7 @@ public class ColorManager {
             e.next().dispose();
     }
 
-    public Color getColor(IRFTColorConstants irftColor) {
+    public Color getColor(ColorConstants irftColor) {
         if (irftColor == null) {
             return null;
         }

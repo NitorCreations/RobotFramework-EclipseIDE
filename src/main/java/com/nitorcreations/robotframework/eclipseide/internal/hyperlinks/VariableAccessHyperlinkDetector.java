@@ -33,7 +33,7 @@ import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTVariableUt
  * 
  * @author xkr47
  */
-public class RFTVariableAccessHyperlinkDetector extends HyperlinkDetector {
+public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
 
     /**
      * This detector assumes generated hyperlinks are static, i.e. the link

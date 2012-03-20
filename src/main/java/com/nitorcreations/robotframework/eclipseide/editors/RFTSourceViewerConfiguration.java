@@ -24,9 +24,9 @@ import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
-import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.RFTKeywordCallHyperlinkDetector;
-import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.RFTResourceHyperlinkDetector;
-import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.RFTVariableAccessHyperlinkDetector;
+import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.KeywordCallHyperlinkDetector;
+import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.ResourceHyperlinkDetector;
+import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.VariableAccessHyperlinkDetector;
 
 public class RFTSourceViewerConfiguration extends SourceViewerConfiguration {
 
@@ -57,9 +57,9 @@ public class RFTSourceViewerConfiguration extends SourceViewerConfiguration {
     public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
         List<IHyperlinkDetector> detectors = new ArrayList<IHyperlinkDetector>();
         detectors.addAll(Arrays.asList(super.getHyperlinkDetectors(sourceViewer)));
-        detectors.add(new RFTResourceHyperlinkDetector());
-        detectors.add(new RFTKeywordCallHyperlinkDetector());
-        detectors.add(new RFTVariableAccessHyperlinkDetector());
+        detectors.add(new ResourceHyperlinkDetector());
+        detectors.add(new KeywordCallHyperlinkDetector());
+        detectors.add(new VariableAccessHyperlinkDetector());
         return detectors.toArray(new IHyperlinkDetector[detectors.size()]);
     }
 

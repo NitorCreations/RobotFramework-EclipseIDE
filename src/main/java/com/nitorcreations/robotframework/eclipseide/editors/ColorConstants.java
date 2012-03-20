@@ -17,7 +17,7 @@ package com.nitorcreations.robotframework.eclipseide.editors;
 
 import org.eclipse.swt.graphics.RGB;
 
-public enum IRFTColorConstants {
+public enum ColorConstants {
     COMMENT(new RGB(128, 128, 128)), //
     TABLE(new RGB(192, 0, 192)), //
     SETTING(new RGB(0, 192, 0)), //
@@ -44,11 +44,11 @@ public enum IRFTColorConstants {
     private final RGB lightSchemeColor;
     private final RGB darkSchemeColor;
 
-    private IRFTColorConstants(RGB color) {
+    private ColorConstants(RGB color) {
         this(color, color);
     }
 
-    private IRFTColorConstants(RGB lightSchemeColor, RGB darkSchemeColor) {
+    private ColorConstants(RGB lightSchemeColor, RGB darkSchemeColor) {
         this.lightSchemeColor = lightSchemeColor;
         this.darkSchemeColor = darkSchemeColor;
     }

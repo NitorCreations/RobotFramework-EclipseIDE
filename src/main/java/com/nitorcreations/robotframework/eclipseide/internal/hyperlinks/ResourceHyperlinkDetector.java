@@ -31,7 +31,7 @@ import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUt
  * 
  * @author xkr47
  */
-public class RFTResourceHyperlinkDetector implements IHyperlinkDetector {
+public class ResourceHyperlinkDetector implements IHyperlinkDetector {
 
     /**
      * This detector assumes generated hyperlinks are static, i.e. the link
@@ -92,7 +92,7 @@ public class RFTResourceHyperlinkDetector implements IHyperlinkDetector {
         String linkString = RFTArgumentUtils.unescapeArgument(line, linkOffsetInLine, linkLength);
         IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
         IRegion targetRegion = new Region(100, 10);
-        return new IHyperlink[] { new RFTHyperlink(linkRegion, linkString, targetRegion, document) };
+        return new IHyperlink[] { new Hyperlink(linkRegion, linkString, targetRegion, document) };
     }
 
 }

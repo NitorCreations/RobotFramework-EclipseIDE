@@ -110,22 +110,22 @@ public class RFTColoringScanner implements ITokenScanner {
         // TODO dynamically fetched colors
         // TODO consider combining tokVARIABLE_KEY with tokKEYWORD_LVALUE
         // ArgumentType.IGNORED is deliberately left out here
-        argTypeToTokenMap.put(ArgumentType.COMMENT, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.COMMENT))));
-        argTypeToTokenMap.put(ArgumentType.TABLE, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.TABLE))));
-        argTypeToTokenMap.put(ArgumentType.SETTING_KEY, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING))));
-        argTypeToTokenMap.put(ArgumentType.VARIABLE_KEY, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.VARIABLE))));
-        argTypeToTokenMap.put(ArgumentType.NEW_TESTCASE, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.TESTCASE_NEW))));
-        argTypeToTokenMap.put(ArgumentType.NEW_KEYWORD, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD_NEW))));
-        argTypeToTokenMap.put(ArgumentType.SETTING_VAL, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_VALUE))));
-        argTypeToTokenMap.put(ArgumentType.SETTING_FILE, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_FILE))));
-        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_WITH_NAME_KEY, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.DEFAULT))));
-        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_ARG, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_FILE_ARG))));
-        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_WITH_NAME_VALUE, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.SETTING_FILE))));
-        argTypeToTokenMap.put(ArgumentType.VARIABLE_VAL, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.VARIABLE_VALUE))));
-        argTypeToTokenMap.put(ArgumentType.KEYWORD_LVALUE, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD_LVALUE))));
-        argTypeToTokenMap.put(ArgumentType.FOR_PART, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.FOR_PART))));
-        argTypeToTokenMap.put(ArgumentType.KEYWORD_CALL, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD))));
-        argTypeToTokenMap.put(ArgumentType.KEYWORD_ARG, new Token(new TextAttribute(manager.getColor(IRFTColorConstants.KEYWORD_ARG))));
+        argTypeToTokenMap.put(ArgumentType.COMMENT, new Token(new TextAttribute(manager.getColor(ColorConstants.COMMENT))));
+        argTypeToTokenMap.put(ArgumentType.TABLE, new Token(new TextAttribute(manager.getColor(ColorConstants.TABLE))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_KEY, new Token(new TextAttribute(manager.getColor(ColorConstants.SETTING))));
+        argTypeToTokenMap.put(ArgumentType.VARIABLE_KEY, new Token(new TextAttribute(manager.getColor(ColorConstants.VARIABLE))));
+        argTypeToTokenMap.put(ArgumentType.NEW_TESTCASE, new Token(new TextAttribute(manager.getColor(ColorConstants.TESTCASE_NEW))));
+        argTypeToTokenMap.put(ArgumentType.NEW_KEYWORD, new Token(new TextAttribute(manager.getColor(ColorConstants.KEYWORD_NEW))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_VAL, new Token(new TextAttribute(manager.getColor(ColorConstants.SETTING_VALUE))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_FILE, new Token(new TextAttribute(manager.getColor(ColorConstants.SETTING_FILE))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_WITH_NAME_KEY, new Token(new TextAttribute(manager.getColor(ColorConstants.DEFAULT))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_ARG, new Token(new TextAttribute(manager.getColor(ColorConstants.SETTING_FILE_ARG))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_WITH_NAME_VALUE, new Token(new TextAttribute(manager.getColor(ColorConstants.SETTING_FILE))));
+        argTypeToTokenMap.put(ArgumentType.VARIABLE_VAL, new Token(new TextAttribute(manager.getColor(ColorConstants.VARIABLE_VALUE))));
+        argTypeToTokenMap.put(ArgumentType.KEYWORD_LVALUE, new Token(new TextAttribute(manager.getColor(ColorConstants.KEYWORD_LVALUE))));
+        argTypeToTokenMap.put(ArgumentType.FOR_PART, new Token(new TextAttribute(manager.getColor(ColorConstants.FOR_PART))));
+        argTypeToTokenMap.put(ArgumentType.KEYWORD_CALL, new Token(new TextAttribute(manager.getColor(ColorConstants.KEYWORD))));
+        argTypeToTokenMap.put(ArgumentType.KEYWORD_ARG, new Token(new TextAttribute(manager.getColor(ColorConstants.KEYWORD_ARG))));
     }
 
     @Override
