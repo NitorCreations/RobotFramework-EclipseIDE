@@ -124,8 +124,8 @@ public class ArgumentPreParser {
             }
         }
         // next line
-        if (lineIterator.hasNext()) {
-            line = lineIterator.next();
+        line = getNextNonemptyLine();
+        if (line != null) {
             argLen = line.arguments.size();
             lineEndsWithComment = line.arguments.get(argLen - 1).getValue().startsWith("#");
             if (lineEndsWithComment) {
@@ -134,11 +134,20 @@ public class ArgumentPreParser {
         } else {
             lines = null;
             lineIterator = null;
-            line = null;
             argLen = 0;
             lineEndsWithComment = false;
         }
         argOff = 0;
+    }
+
+    private RFELine getNextNonemptyLine() {
+        while (lineIterator.hasNext()) {
+            RFELine line = lineIterator.next();
+            if (!line.arguments.isEmpty()) {
+                return line;
+            }
+        }
+        return null;
     }
 
     public void parseAll() {
@@ -563,6 +572,7 @@ public class ArgumentPreParser {
         localTemplateAtLine = NO_TEMPLATE;
         outer: for (int lineIdx = lineIterator.nextIndex() - 1; lineIdx < lines.size(); ++lineIdx) {
             RFELine line = lines.get(lineIdx);
+            assert line.lineNo - 1 == lineIdx;
             switch (line.type) {
             case TESTCASE_TABLE_TESTCASE_BEGIN:
             case TESTCASE_TABLE_TESTCASE_LINE:

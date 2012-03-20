@@ -70,6 +70,10 @@ public class RFEPreParser {
     private LineType prevLineType = LineType.IGNORE;
 
     private void parseLine(RFELine line) throws CoreException {
+        if (line.arguments.isEmpty()) {
+            line.type = LineType.IGNORE;
+            return;
+        }
         // System.out.println(line.arguments);
         LineType tableType = tryParseTableSwitch(line);
         if (tableType != null) {

@@ -24,6 +24,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -138,9 +139,11 @@ public class RFELexer {
     private void lexLine(String line, int lineNo, int charPos) throws CoreException {
         List<ParsedString> arguments = TxtArgumentSplitter.splitLineIntoArguments(line, charPos);
         if (arguments.isEmpty()) {
+            lexLines.add(new RFELine(lineNo, charPos, Collections.<ParsedString> emptyList()));
             return;
         }
         if (arguments.size() == 1 && arguments.get(0).getValue().isEmpty()) {
+            lexLines.add(new RFELine(lineNo, charPos, Collections.<ParsedString> emptyList()));
             return;
         }
         lexLines.add(new RFELine(lineNo, charPos, arguments));

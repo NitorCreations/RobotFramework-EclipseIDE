@@ -112,16 +112,25 @@ public class RFTColoringScanner implements ITokenScanner {
     void prepareNextLine() {
         assert argOff >= 0;
         assert argOff <= argLen;
-        if (lineIterator.hasNext()) {
-            line = lineIterator.next();
+        line = getNextNonemptyLine();
+        if (line != null) {
             argLen = line.arguments.size();
         } else {
             lines = null;
             lineIterator = null;
-            line = null;
             argLen = 0;
         }
         argOff = 0;
+    }
+
+    private RFELine getNextNonemptyLine() {
+        while (lineIterator.hasNext()) {
+            RFELine line = lineIterator.next();
+            if (!line.arguments.isEmpty()) {
+                return line;
+            }
+        }
+        return null;
     }
 
     @Override
