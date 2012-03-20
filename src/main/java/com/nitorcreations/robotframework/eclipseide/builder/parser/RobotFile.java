@@ -18,12 +18,24 @@ package com.nitorcreations.robotframework.eclipseide.builder.parser;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 
+import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
+
 public class RobotFile {
+
+    static class FileInfo {
+        RobotFile onDisk;
+        RobotFile inEditor;
+    }
+
+    private static final Map<IFile, FileInfo> FILES = Collections.synchronizedMap(new HashMap<IFile, FileInfo>());
 
     private final List<RFELine> lines;
 
@@ -35,8 +47,27 @@ public class RobotFile {
         return lines;
     }
 
+    public static RobotFile get(IDocument document) {
+        return get(document, true);
+    }
+
     public static RobotFile parse(IDocument document) {
-        return parse(new RFELexer(document));
+        return get(document, false);
+    }
+
+    private static RobotFile get(IDocument document, boolean useCached) {
+        IFile file = ResourceManager.resolveFileFor(document);
+        FileInfo fileInfo = FILES.get(file);
+        if (useCached && fileInfo != null && fileInfo.inEditor != null) {
+            return fileInfo.inEditor;
+        }
+        RobotFile parsed = parse(new RFELexer(document));
+        if (fileInfo == null) {
+            fileInfo = new FileInfo();
+            FILES.put(file, fileInfo);
+        }
+        fileInfo.inEditor = parsed;
+        return parsed;
     }
 
     public static RobotFile parse(String fileContents) {
