@@ -17,7 +17,6 @@ package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -25,11 +24,9 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.ArgumentPreParser;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELexer;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEPreParser;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -61,16 +58,8 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
             return null;
         }
 
-        List<RFELine> lines;
-        try {
-            RFELexer lexer = new RFELexer(document);
-            lines = lexer.lex();
-            new RFEPreParser(null, lines).preParse();
-            ArgumentPreParser app = new ArgumentPreParser();
-            app.setRange(lines);
-            app.parseAll();
-        } catch (CoreException e) {
-            e.printStackTrace();
+        List<RFELine> lines = RobotFile.getLines(document);
+        if (lines.size() <= lineNumber) {
             return null;
         }
 

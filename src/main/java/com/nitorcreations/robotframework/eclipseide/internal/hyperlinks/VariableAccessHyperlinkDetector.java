@@ -15,6 +15,8 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
+import java.util.List;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -22,9 +24,11 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
-import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTVariableUtils;
+import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 /**
  * This hyperlink detector creates hyperlinks for variable accesses, e.g.
@@ -53,62 +57,48 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
 
         int offset = region.getOffset();
 
-        IRegion lineInfo;
-        String line;
+        int lineNumber;
         try {
-            lineInfo = document.getLineInformationOfOffset(offset);
-            line = document.get(lineInfo.getOffset(), lineInfo.getLength());
+            lineNumber = document.getLineOfOffset(offset);
         } catch (BadLocationException ex) {
             return null;
         }
 
-        // this is a hack - it doesn't detect properly if [Arguments] is INSIDE
-        // a variable or if [ is
-        // quoted with \[
-        int argumentsIdx = line.indexOf("[Arguments]");
-        if (argumentsIdx != -1) {
-            // strip the rest of the line
-            line = line.substring(0, argumentsIdx);
+        List<RFELine> lines = RobotFile.getLines(document);
+        if (lines.size() <= lineNumber) {
+            return null;
         }
 
-        // TODO do variables work in the SETTINGS table?
-
-        int start = RFTArgumentUtils.findNextArgumentStart(line, 0);
-        if (start == -1) {
-            if (line.startsWith("${") || line.startsWith(" ${")) {
-                start = RFTArgumentUtils.calculateArgumentLength(line, 0);
-            } else {
-                // testcase & keyword definitions fit into this category..
-                // nothing interesting on those
-                // lines
-                return null;
-            }
+        RFELine rfeLine = lines.get(lineNumber);
+        ParsedString argument = rfeLine.getArgumentAt(offset);
+        // TODO: only check types that can contain variables
+        if (argument == null) {
+            return null;
         }
 
-        final int offsetInLine = offset - lineInfo.getOffset();
+        String argumentValue = argument.getValue();
+        int start = 0;
         while (true) {
-            int linkOffsetInLine = RFTVariableUtils.findNextVariableStart(line, start);
-            if (linkOffsetInLine == -1) {
+            int linkOffsetInArgument = RFTVariableUtils.findNextVariableStart(argumentValue, start);
+            if (linkOffsetInArgument == -1) {
                 // after last variable
                 return null;
             }
-            if (offsetInLine < linkOffsetInLine) {
-                // first variable is further down the line, so no more variables
-                // are reachable
+            if (offset < argument.getArgCharPos() + linkOffsetInArgument) {
+                // before next variable
                 return null;
             }
-
-            int linkLength = RFTVariableUtils.calculateVariableLength(line, linkOffsetInLine);
-            if (offsetInLine < linkOffsetInLine + linkLength) {
+            int linkLength = RFTVariableUtils.calculateVariableLength(argumentValue, linkOffsetInArgument);
+            if (offset < argument.getArgCharPos() + linkOffsetInArgument + linkLength) {
                 // pointing at variable access!
-                String linkString = line.substring(linkOffsetInLine, linkOffsetInLine + linkLength);
-                IRegion linkRegion = new Region(lineInfo.getOffset() + linkOffsetInLine, linkLength);
+                String linkString = argumentValue.substring(linkOffsetInArgument, linkOffsetInArgument + linkLength);
+                IRegion linkRegion = new Region(argument.getArgCharPos() + linkOffsetInArgument, linkLength);
                 IHyperlink[] links = getLinks(document, linkString, linkRegion, LineType.VARIABLE_TABLE_LINE);
                 if (links != null) {
                     return links;
                 }
             }
-            start = linkOffsetInLine + linkLength;
+            start = linkOffsetInArgument + linkLength;
         }
     }
 }
