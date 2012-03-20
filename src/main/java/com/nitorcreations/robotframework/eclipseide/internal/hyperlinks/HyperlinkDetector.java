@@ -76,7 +76,6 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
     protected abstract IHyperlink[] getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset);
 
     protected IHyperlink[] getLinks(IDocument document, String linkString, IRegion linkRegion, LineType lineType) {
-        System.out.println("getLinks for " + linkString);
         Set<IFile> unprocessedFiles = new HashSet<IFile>();
         Set<IFile> processedFiles = new HashSet<IFile>();
         unprocessedFiles.add(ResourceManager.resolveFileFor(document));
@@ -90,15 +89,12 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
             for (RFELine line : lines) {
                 if (line.isType(lineType)) {
                     ParsedString firstArgument = line.arguments.get(0);
-                    System.out.println("firstArgument " + firstArgument.getValue());
-                    System.out.println("linkString    " + linkString);
                     if (firstArgument.equals(linkString)) {
                         IRegion targetRegion = new Region(firstArgument.getArgEndCharPos(), 0);
                         return new IHyperlink[] { new Hyperlink(linkRegion, linkString, targetRegion, targetFile) };
                     }
                 }
             }
-            System.out.println("Not found in " + targetFile);
             for (RFELine line : lines) {
                 if (line.isResourceSetting()) {
                     ParsedString secondArgument = line.arguments.get(1);
