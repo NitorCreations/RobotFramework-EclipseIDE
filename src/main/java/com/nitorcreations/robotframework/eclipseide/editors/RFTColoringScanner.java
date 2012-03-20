@@ -38,51 +38,6 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
 // TODO Variable references
 public class RFTColoringScanner implements ITokenScanner {
 
-    enum SettingType {
-        UNKNOWN, STRING, FILE, FILE_ARGS, KEYWORD_ARGS,
-    }
-
-    enum KeywordCallState {
-        UNDETERMINED, UNDETERMINED_NOT_FOR_NOINDENT, UNDETERMINED_GOTVARIABLE, LVALUE_NOINDENT, LVALUE, KEYWORD, KEYWORD_NOT_FOR_NOINDENT, FOR_ARGS, ARGS, ;
-        public boolean isUndetermined() {
-            return name().startsWith("UNDETERMINED");
-        }
-    }
-
-    static final Map<String, SettingType> settingTypes = new HashMap<String, SettingType>();
-    static {
-        settingTypes.put("Resource", SettingType.FILE_ARGS);
-        settingTypes.put("Variables", SettingType.FILE);
-        settingTypes.put("Library", SettingType.FILE_ARGS);
-        settingTypes.put("Suite Setup", SettingType.KEYWORD_ARGS);
-        settingTypes.put("Suite Teardown", SettingType.KEYWORD_ARGS);
-        settingTypes.put("Documentation", SettingType.STRING);
-        settingTypes.put("Metadata", SettingType.STRING);
-        settingTypes.put("Force Tags", SettingType.STRING);
-        settingTypes.put("Default Tags", SettingType.STRING);
-        settingTypes.put("Test Setup", SettingType.KEYWORD_ARGS);
-        settingTypes.put("Test Teardown", SettingType.KEYWORD_ARGS);
-        settingTypes.put("Test Template", SettingType.KEYWORD_ARGS); // or just
-                                                                     // keyword
-                                                                     // ?
-        settingTypes.put("Test Timeout", SettingType.STRING);
-    }
-
-    static final Map<String, SettingType> keywordSequenceSettingTypes = new HashMap<String, SettingType>();
-    static {
-        keywordSequenceSettingTypes.put("[Documentation]", SettingType.STRING);
-        keywordSequenceSettingTypes.put("[Tags]", SettingType.STRING);
-        keywordSequenceSettingTypes.put("[Setup]", SettingType.KEYWORD_ARGS);
-        keywordSequenceSettingTypes.put("[Teardown]", SettingType.KEYWORD_ARGS);
-        keywordSequenceSettingTypes.put("[Template]", SettingType.KEYWORD_ARGS); // or
-                                                                                 // just
-                                                                                 // keyword
-                                                                                 // ?
-        keywordSequenceSettingTypes.put("[Timeout]", SettingType.STRING);
-        keywordSequenceSettingTypes.put("[Arguments]", SettingType.STRING);
-        keywordSequenceSettingTypes.put("[Return]", SettingType.STRING);
-    }
-
     private final ColorManager manager;
     private final TokenQueue tokenQueue = new TokenQueue();
 
@@ -141,9 +96,6 @@ public class RFTColoringScanner implements ITokenScanner {
             argumentPreParser.parseAll();
             lineIterator = lines.listIterator();
             prepareNextLine();
-            // fileContents = new RFEParser(document, lines).parse();
-            // this.fileContentsVariableIt =
-            // fileContents.getVariables().entrySet().iterator();
         } catch (CoreException e) {
             throw new RuntimeException("Error parsing", e);
         }
