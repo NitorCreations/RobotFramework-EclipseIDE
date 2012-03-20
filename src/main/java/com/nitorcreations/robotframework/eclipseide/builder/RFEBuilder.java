@@ -15,8 +15,10 @@
  */
 package com.nitorcreations.robotframework.eclipseide.builder;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -29,13 +31,17 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.nitorcreations.robotframework.eclipseide.Activator;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELexer;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEParser;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 
 public class RFEBuilder extends IncrementalProjectBuilder {
 
-    class ResourceVisitor implements IResourceVisitor {
+    abstract class BaseResourceVisitor {
+        final Set<IFile> visitedFiles = new LinkedHashSet<IFile>();
+    }
+
+    class ResourceVisitor extends BaseResourceVisitor implements IResourceVisitor {
 
         private final IProgressMonitor monitor;
 
@@ -45,14 +51,14 @@ public class RFEBuilder extends IncrementalProjectBuilder {
 
         @Override
         public boolean visit(IResource resource) {
-            build(resource, monitor);
+            parse(visitedFiles, resource, monitor);
             // return true to continue visiting children.
             return true;
         }
 
     }
 
-    class ResourceDeltaVisitor implements IResourceDeltaVisitor {
+    class ResourceDeltaVisitor extends BaseResourceVisitor implements IResourceDeltaVisitor {
 
         private final IProgressMonitor monitor;
 
@@ -66,14 +72,14 @@ public class RFEBuilder extends IncrementalProjectBuilder {
             switch (delta.getKind()) {
             case IResourceDelta.ADDED:
                 // handle added resource
-                build(resource, monitor);
+                parse(visitedFiles, resource, monitor);
                 break;
             case IResourceDelta.REMOVED:
                 // handle removed resource
                 break;
             case IResourceDelta.CHANGED:
                 // handle changed resource
-                build(resource, monitor);
+                parse(visitedFiles, resource, monitor);
                 break;
             }
             // return true to continue visiting children.
@@ -102,11 +108,19 @@ public class RFEBuilder extends IncrementalProjectBuilder {
     }
 
     protected void fullBuild(final IProgressMonitor monitor) throws CoreException {
-        getProject().accept(new ResourceVisitor(monitor));
+        System.out.println("<full-build>");
+        ResourceVisitor visitor = new ResourceVisitor(monitor);
+        getProject().accept(visitor);
+        updateProblems(visitor.visitedFiles, monitor);
+        System.out.println("</full-build>");
     }
 
     protected void incrementalBuild(IResourceDelta delta, IProgressMonitor monitor) throws CoreException {
-        delta.accept(new ResourceDeltaVisitor(monitor));
+        System.out.println("<incremental-build>");
+        ResourceDeltaVisitor visitor = new ResourceDeltaVisitor(monitor);
+        delta.accept(visitor);
+        updateProblems(visitor.visitedFiles, monitor);
+        System.out.println("</incremental-build>");
     }
 
     /**
@@ -118,7 +132,7 @@ public class RFEBuilder extends IncrementalProjectBuilder {
      * @param monitor
      *            progress monitor
      */
-    void build(IResource resource, IProgressMonitor monitor) {
+    void parse(Set<IFile> visitedFiles, IResource resource, IProgressMonitor monitor) {
         if (!(resource instanceof IFile))
             return;
         IFile file = (IFile) resource;
@@ -132,12 +146,26 @@ public class RFEBuilder extends IncrementalProjectBuilder {
         }
         System.out.println("Build resource " + resource);
         try {
-            List<RFELine> lines = new RFELexer(file, monitor).lex();
-            new RFEParser(file, lines, monitor).parse();
+            RobotFile.parse(file, monitor);
         } catch (Exception e1) {
             // new Status(IStatus.WARNING, Activator.PLUGIN_ID,
             // "Internal error", e1)
-            throw new RuntimeException("Validation problem", e1);
+            throw new RuntimeException("Parsing problem", e1);
+        }
+        visitedFiles.add(file);
+    }
+
+    private void updateProblems(Set<IFile> visitedFiles, IProgressMonitor monitor) {
+        System.out.println(" -- updating problems");
+        // TODO recursively add files that include the visited files to the
+        // visited files list
+        for (IFile file : visitedFiles) {
+            try {
+                List<RFELine> lines = RobotFile.get(file, false).getLines();
+                new RFEParser(file, lines, monitor).parse();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

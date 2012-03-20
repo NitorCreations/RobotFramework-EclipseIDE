@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 
@@ -53,18 +54,18 @@ public class RobotFile {
     }
 
     public static RobotFile get(IFile file, boolean useEditorVersion) {
-        return get(file, useEditorVersion, true);
+        return get(file, useEditorVersion, true, new NullProgressMonitor());
     }
 
     public static RobotFile parse(IDocument document) {
         return get(document, false);
     }
 
-    public static RobotFile parse(IFile file) {
-        return get(file, false, false);
+    public static RobotFile parse(IFile file, IProgressMonitor monitor) {
+        return get(file, false, false, monitor);
     }
 
-    private static RobotFile get(IFile file, boolean useEditorVersion, boolean useCached) {
+    private static RobotFile get(IFile file, boolean useEditorVersion, boolean useCached, IProgressMonitor monitor) {
         if (useEditorVersion) {
             IDocument document = ResourceManager.resolveDocumentFor(file);
             if (document != null) {
@@ -80,7 +81,7 @@ public class RobotFile {
         }
         RobotFile parsed;
         try {
-            parsed = parse(file.toString(), new RFELexer(file, new NullProgressMonitor()));
+            parsed = parse(file.toString(), new RFELexer(file, monitor));
         } catch (Exception e) {
             e.printStackTrace();
             return null;
