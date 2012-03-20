@@ -136,8 +136,7 @@ public class RFEParser {
             public void eraseMarkers() {
                 try {
                     file.deleteMarkers(RFEBuilder.MARKER_TYPE, false, IResource.DEPTH_ZERO);
-                } catch (CoreException ce) {
-                }
+                } catch (CoreException ce) {}
             }
         };
     }
@@ -198,6 +197,9 @@ public class RFEParser {
     }
 
     private void parseLine(List<ParsedString> arguments, int lineNo, int charPos) throws CoreException {
+        if (arguments.isEmpty()) {
+            return;
+        }
         System.out.println(arguments);
         State oldState = state;
         state.parse(new ParsedLineInfo(this, arguments, lineNo, charPos));
