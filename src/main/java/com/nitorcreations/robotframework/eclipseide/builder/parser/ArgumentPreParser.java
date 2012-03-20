@@ -90,6 +90,7 @@ public class ArgumentPreParser {
     private static final int NO_TEMPLATE = -1;
     private int globalTemplateAtLine;
     private int localTemplateAtLine;
+    private static final String NO_TEMPLATE_STR = "NONE";
 
     enum WithNameState {
         NONE, GOT_KEY, GOT_VALUE
@@ -450,7 +451,7 @@ public class ArgumentPreParser {
                     keyword.setType(ArgumentType.FOR_PART);
                     keywordSequence_keywordCallState = KeywordCallState.FOR_ARGS;
                 } else {
-                    if (templatesEnabled && (globalTemplateAtLine != NO_TEMPLATE || localTemplateAtLine != NO_TEMPLATE)) {
+                    if (templatesEnabled && isTemplateActive()) {
                         keyword.setType(ArgumentType.KEYWORD_ARG);
                     } else {
                         keyword.setType(ArgumentType.KEYWORD_CALL);
@@ -481,6 +482,32 @@ public class ArgumentPreParser {
         }
         }
         throw new RuntimeException();
+    }
+
+    private boolean isTemplateActive() {
+        if (localTemplateAtLine != NO_TEMPLATE) {
+            RFELine line = lines.get(localTemplateAtLine - 1);
+            if (line.arguments.size() >= 3) {
+                return !line.arguments.get(2).equals(NO_TEMPLATE_STR);
+            }
+            outer: for (int lineIdx = localTemplateAtLine; lineIdx < lines.size(); ++lineIdx) {
+                line = lines.get(lineIdx);
+                switch (line.type) {
+                case IGNORE:
+                case COMMENT_LINE:
+                    continue;
+                case CONTINUATION_LINE:
+                    int argOff = determineContinuationLineArgOff(line);
+                    if (argOff < line.arguments.size()) {
+                        return !line.arguments.get(argOff).equals(NO_TEMPLATE_STR);
+                    }
+                    break;
+                default:
+                    break outer;
+                }
+            }
+        }
+        return globalTemplateAtLine != NO_TEMPLATE;
     }
 
     KeywordCallState determineInitialKeywordCallState(KeywordCallState initialKeywordCallState) {
