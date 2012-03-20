@@ -17,6 +17,8 @@ package com.nitorcreations.robotframework.eclipseide.builder.parser;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -51,6 +53,14 @@ public class RobotFile {
 
     public List<RFELine> getLines() {
         return lines;
+    }
+
+    public static Collection<IFile> getAllFiles() {
+        // TODO we need to restore this list on plugin startup. The parsed
+        // contents need not be restored.
+        synchronized (FILES) {
+            return new ArrayList<IFile>(FILES.keySet());
+        }
     }
 
     public static RobotFile get(IDocument document) {
