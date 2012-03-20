@@ -47,6 +47,7 @@ public class RFENature implements IProjectNature {
         newCommands[newCommands.length - 1] = command;
         desc.setBuildSpec(newCommands);
         project.setDescription(desc, null);
+        System.out.println("Robot Framework builder now active");
     }
 
     @Override
@@ -60,6 +61,8 @@ public class RFENature implements IProjectNature {
                 System.arraycopy(commands, i + 1, newCommands, i, commands.length - i - 1);
                 description.setBuildSpec(newCommands);
                 project.setDescription(description, null);
+                // TODO RFEBuilder.clearAllMarkers();
+                System.out.println("Robot Framework builder removed");
                 return;
             }
         }
