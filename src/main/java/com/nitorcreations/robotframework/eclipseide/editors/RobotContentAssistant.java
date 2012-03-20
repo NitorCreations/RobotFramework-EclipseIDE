@@ -28,6 +28,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
 
     String[] fgProposals = { "test1", "test2" };
 
+    // ctrl-space completion proposals
     @Override
     public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
         ICompletionProposal[] result = new ICompletionProposal[fgProposals.length];
@@ -49,6 +50,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         return result;
     }
 
+    // ctrl-shift-space information popups
     @Override
     public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
         IContextInformation[] result = new IContextInformation[5];
