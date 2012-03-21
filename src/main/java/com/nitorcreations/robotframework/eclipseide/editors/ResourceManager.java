@@ -28,6 +28,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 
 public final class ResourceManager {
@@ -83,12 +84,20 @@ public final class ResourceManager {
         return originalFile.getWorkspace().getRoot().getFile(newPath);
     }
 
-    public static RobotFrameworkTextfileEditor openOrReuseEditorFor(IFile file) {
+    public static RobotFrameworkTextfileEditor openOrReuseEditorFor(IFile file, boolean isRobotFile) {
         try {
             IWorkbenchPage workbenchPage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
             FileEditorInput editorInput = new FileEditorInput(file);
-            int matchFlags = IWorkbenchPage.MATCH_ID | IWorkbenchPage.MATCH_INPUT;
-            IEditorPart editor = workbenchPage.openEditor(editorInput, RobotFrameworkTextfileEditor.EDITOR_ID, true, matchFlags);
+            int matchFlags;
+            String editorId;
+            if (isRobotFile) {
+                matchFlags = IWorkbenchPage.MATCH_INPUT | IWorkbenchPage.MATCH_ID;
+                editorId = RobotFrameworkTextfileEditor.EDITOR_ID;
+            } else {
+                matchFlags = IWorkbenchPage.MATCH_INPUT;
+                editorId = IDE.getEditorDescriptor(file).getId();
+            }
+            IEditorPart editor = workbenchPage.openEditor(editorInput, editorId, true, matchFlags);
             return (RobotFrameworkTextfileEditor) editor;
         } catch (PartInitException e) {
             throw new RuntimeException("Problem opening robot editor for " + file, e);

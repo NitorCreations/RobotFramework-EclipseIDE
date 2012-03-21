@@ -54,7 +54,7 @@ public class Hyperlink implements IHyperlink {
 
     @Override
     public void open() {
-        RobotFrameworkTextfileEditor editor = ResourceManager.openOrReuseEditorFor(targetFile);
+        RobotFrameworkTextfileEditor editor = ResourceManager.openOrReuseEditorFor(targetFile, true);
         if (targetRegion != null) {
             editor.selectAndReveal(targetRegion.getOffset(), targetRegion.getLength());
         }
