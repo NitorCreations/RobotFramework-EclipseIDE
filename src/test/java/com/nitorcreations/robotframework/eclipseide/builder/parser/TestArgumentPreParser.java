@@ -212,6 +212,13 @@ public class TestArgumentPreParser {
             t("*Test cases\nTC1\n  [Documentation]\n  ...  text\n  ...  text2", TABLE, NEW_TESTCASE, IGNORED, SETTING_KEY, IGNORED, IGNORED, SETTING_VAL, IGNORED, IGNORED, SETTING_VAL);
             t("*Test cases\nTC1\n  [Documentation]\n  ...  text\n#comment\n  ...  text2", TABLE, NEW_TESTCASE, IGNORED, SETTING_KEY, IGNORED, IGNORED, SETTING_VAL, COMMENT, IGNORED, IGNORED, SETTING_VAL);
         }
+
+        @Test
+        public void whitespace_treatment() throws Exception {
+            t("*Test cases\n", TABLE);
+            t("*Test cases\n  ", TABLE);
+            t("*Test cases\n  \n", TABLE);
+        }
     }
 
     public static class Keyword_table_parsing {
