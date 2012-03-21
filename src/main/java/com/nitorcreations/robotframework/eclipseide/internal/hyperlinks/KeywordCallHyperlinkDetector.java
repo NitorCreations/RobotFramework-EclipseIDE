@@ -22,6 +22,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
+import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -40,6 +41,18 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
         }
         String linkString = argument.getUnescapedValue();
         IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        return getLinks(document, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
+        IHyperlink[] links = getLinks(document, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
+        if (links == null) {
+            // try without possible BDD prefix
+            String alternateValue = argument.getAlternateValue();
+            if (alternateValue != null) {
+                int origLength = linkString.length();
+                linkString = RFTArgumentUtils.unescapeArgument(alternateValue, 0, alternateValue.length());
+                int lengthDiff = origLength - linkString.length();
+                linkRegion = new Region(argument.getArgCharPos() + lengthDiff, argument.getValue().length() - lengthDiff);
+                links = getLinks(document, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
+            }
+        }
+        return links;
     }
 }
