@@ -28,13 +28,18 @@ public class Hyperlink implements IHyperlink {
     protected final String linkText;
     private final IRegion targetRegion;
     private final IFile targetFile;
+    private final boolean isRobotFile;
 
     public Hyperlink(IRegion linkRegion, String linkText, IRegion targetRegion, IFile targetFile) {
+        this(linkRegion, linkText, targetRegion, targetFile, true);
+    }
+
+    public Hyperlink(IRegion linkRegion, String linkText, IRegion targetRegion, IFile targetFile, boolean isRobotFile) {
         this.linkRegion = linkRegion;
         this.linkText = linkText;
         this.targetRegion = targetRegion;
         this.targetFile = targetFile;
-
+        this.isRobotFile = isRobotFile;
     }
 
     @Override
@@ -54,7 +59,7 @@ public class Hyperlink implements IHyperlink {
 
     @Override
     public void open() {
-        RobotFrameworkTextfileEditor editor = ResourceManager.openOrReuseEditorFor(targetFile, true);
+        RobotFrameworkTextfileEditor editor = ResourceManager.openOrReuseEditorFor(targetFile, isRobotFile);
         if (targetRegion != null) {
             editor.selectAndReveal(targetRegion.getOffset(), targetRegion.getLength());
         }

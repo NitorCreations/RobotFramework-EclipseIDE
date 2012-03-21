@@ -35,7 +35,9 @@ public class ResourceHyperlinkDetector extends HyperlinkDetector {
 
     @Override
     protected IHyperlink[] getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset) {
-        if (!rfeLine.isResourceSetting()) {
+        boolean isResourceSetting = rfeLine.isResourceSetting();
+        boolean isVariableSetting = rfeLine.isVariableSetting();
+        if (!isResourceSetting && !isVariableSetting) {
             return null;
         }
         ParsedString secondArgument = rfeLine.arguments.get(1);
@@ -49,6 +51,6 @@ public class ResourceHyperlinkDetector extends HyperlinkDetector {
             return null;
         }
         IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        return new IHyperlink[] { new Hyperlink(linkRegion, linkString, null, targetFile) };
+        return new IHyperlink[] { new Hyperlink(linkRegion, linkString, null, targetFile, isResourceSetting) };
     }
 }

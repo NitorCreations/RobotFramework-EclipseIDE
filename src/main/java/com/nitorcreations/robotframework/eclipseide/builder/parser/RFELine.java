@@ -65,4 +65,16 @@ public class RFELine {
         return firstArgument.equals("Resource");
 
     }
+
+    public boolean isVariableSetting() {
+        if (!isType(LineType.SETTING_TABLE_LINE)) {
+            return false;
+        }
+        ParsedString firstArgument = arguments.get(0);
+        if (firstArgument.getType() != ArgumentType.SETTING_KEY) {
+            return false;
+        }
+        return firstArgument.equals("Variables");
+
+    }
 }
