@@ -18,7 +18,6 @@ package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
@@ -39,12 +38,13 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
  */
 public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
 
-    private static final class KeywordMatchVisitor implements MatchVisitor {
+    private static final class KeywordMatchVisitor extends BaseMatchVisitor {
         private final IRegion linkRegion;
         private final String linkString;
         private final List<IHyperlink> links;
 
-        private KeywordMatchVisitor(String linkString, IRegion linkRegion, List<IHyperlink> links) {
+        KeywordMatchVisitor(String linkString, IRegion linkRegion, IFile file, List<IHyperlink> links) {
+            super(file);
             this.linkRegion = linkRegion;
             this.linkString = linkString;
             this.links = links;
@@ -55,20 +55,20 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
             KeywordMatchResult matchResult = KeywordInlineArgumentMatcher.match(match.getValue().toLowerCase(), linkString.toLowerCase());
             if (matchResult != KeywordMatchResult.DIFFERENT) {
                 IRegion targetRegion = new Region(match.getArgEndCharPos(), 0);
-                links.add(new Hyperlink(linkRegion, '[' + location.getName() + "] " + match.getValue(), targetRegion, location));
+                links.add(new Hyperlink(linkRegion, getFilePrefix(location) + match.getValue(), targetRegion, location));
             }
             return true;
         }
     }
 
     @Override
-    protected void getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
+    protected void getLinks(IFile file, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
         if (argument.getType() != ArgumentType.KEYWORD_CALL) {
             return;
         }
         String linkString = argument.getUnescapedValue();
         IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        acceptMatches(document, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordMatchVisitor(linkString, linkRegion, links));
+        acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordMatchVisitor(linkString, linkRegion, file, links));
         if (links.isEmpty()) {
             // try without possible BDD prefix
             String alternateValue = argument.getAlternateValue();
@@ -77,7 +77,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
                 linkString = RFTArgumentUtils.unescapeArgument(alternateValue, 0, alternateValue.length());
                 int lengthDiff = origLength - linkString.length();
                 linkRegion = new Region(argument.getArgCharPos() + lengthDiff, argument.getValue().length() - lengthDiff);
-                acceptMatches(document, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordMatchVisitor(linkString, linkRegion, links));
+                acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordMatchVisitor(linkString, linkRegion, file, links));
             }
         }
     }

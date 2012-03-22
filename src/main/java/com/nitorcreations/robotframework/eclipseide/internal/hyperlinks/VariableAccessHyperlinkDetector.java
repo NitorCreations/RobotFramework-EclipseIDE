@@ -18,7 +18,6 @@ package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
@@ -37,12 +36,13 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
  */
 public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
 
-    private static final class VariableMatchVisitor implements MatchVisitor {
+    private static final class VariableMatchVisitor extends BaseMatchVisitor {
         private final IRegion linkRegion;
         private final String linkString;
         private final List<IHyperlink> links;
 
-        private VariableMatchVisitor(String linkString, IRegion linkRegion, List<IHyperlink> links) {
+        VariableMatchVisitor(String linkString, IRegion linkRegion, IFile file, List<IHyperlink> links) {
+            super(file);
             this.linkRegion = linkRegion;
             this.linkString = linkString;
             this.links = links;
@@ -52,14 +52,14 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
         public boolean visitMatch(ParsedString match, IFile location) {
             if (match.getValue().equalsIgnoreCase(linkString)) {
                 IRegion targetRegion = new Region(match.getArgEndCharPos(), 0);
-                links.add(new Hyperlink(linkRegion, '[' + location.getName() + "] " + match.getValue(), targetRegion, location));
+                links.add(new Hyperlink(linkRegion, getFilePrefix(location) + match.getValue(), targetRegion, location));
             }
             return true;
         }
     }
 
     @Override
-    protected void getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
+    protected void getLinks(IFile file, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
         // TODO: only check types that can contain variables
         String argumentValue = argument.getValue();
         int start = 0;
@@ -78,7 +78,7 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
                 // pointing at variable access!
                 String linkString = argumentValue.substring(linkOffsetInArgument, linkOffsetInArgument + linkLength);
                 IRegion linkRegion = new Region(argument.getArgCharPos() + linkOffsetInArgument, linkLength);
-                acceptMatches(document, LineType.VARIABLE_TABLE_LINE, new VariableMatchVisitor(linkString, linkRegion, links));
+                acceptMatches(file, LineType.VARIABLE_TABLE_LINE, new VariableMatchVisitor(linkString, linkRegion, file, links));
                 return;
             }
             start = linkOffsetInArgument + linkLength;

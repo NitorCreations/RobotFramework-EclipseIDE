@@ -70,8 +70,9 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
         if (argument == null) {
             return null;
         }
+        IFile file = ResourceManager.resolveFileFor(document);
         List<IHyperlink> links = new ArrayList<IHyperlink>();
-        getLinks(document, rfeLine, argument, offset, links);
+        getLinks(file, rfeLine, argument, offset, links);
         if (links.isEmpty()) {
             return null;
         }
@@ -80,16 +81,36 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
         return linksArr;
     }
 
-    protected abstract void getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links);
+    protected abstract void getLinks(IFile file, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links);
 
     public interface MatchVisitor {
         boolean visitMatch(ParsedString match, IFile location);
     }
 
-    protected void acceptMatches(IDocument document, LineType lineType, MatchVisitor visitor) {
+    public static abstract class BaseMatchVisitor implements MatchVisitor {
+
+        protected final IFile file;
+
+        public BaseMatchVisitor(IFile file) {
+            this.file = file;
+        }
+
+        protected String getFilePrefix(IFile location) {
+            if (location == file) {
+                return "";
+            }
+            String name = location.getName();
+            if (name.toLowerCase().endsWith(".txt")) {
+                name = name.substring(0, name.length() - 4);
+            }
+            return '[' + name + "] ";
+        }
+    }
+
+    protected void acceptMatches(IFile file, LineType lineType, MatchVisitor visitor) {
         Set<IFile> unprocessedFiles = new HashSet<IFile>();
         Set<IFile> processedFiles = new HashSet<IFile>();
-        unprocessedFiles.add(ResourceManager.resolveFileFor(document));
+        unprocessedFiles.add(file);
         while (!unprocessedFiles.isEmpty()) {
             IFile targetFile = unprocessedFiles.iterator().next();
             RobotFile robotFile = RobotFile.get(targetFile, true);
