@@ -106,7 +106,7 @@ public class TestKeywordInlineArgumentMatcher {
     }
 
     static KeywordMatchResult match(final String a, final String b) {
-        return KeywordInlineArgumentMatcher.match(a, b);
+        return KeywordInlineArgumentMatcher.match(a.replace("*", "${_}"), b.replace("*", "${_}"));
     }
 
 }

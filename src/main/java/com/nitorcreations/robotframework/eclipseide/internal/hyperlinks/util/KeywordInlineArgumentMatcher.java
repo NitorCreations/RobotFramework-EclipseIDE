@@ -26,7 +26,8 @@ public class KeywordInlineArgumentMatcher {
     public static KeywordMatchResult match(String a, String b) {
         a = a.replaceAll("\\$\\{[^}]+\\}", Character.toString(WILDCARD));
         b = b.replaceAll("\\$\\{[^}]+\\}", Character.toString(WILDCARD));
-        // System.out.println(indent + "\"" + a + "\" vs \"" + b + "\"");
+        // System.out.println(indent + "\"" + a.replace(WILDCARD, '*') +
+        // "\" vs \"" + b.replace(WILDCARD, '*') + "\"");
         if (a.equalsIgnoreCase(b)) {
             return a.indexOf(WILDCARD) == -1 ? KeywordMatchResult.EXACT : KeywordMatchResult.WILDCARD;
         }
@@ -39,8 +40,9 @@ public class KeywordInlineArgumentMatcher {
     }
 
     private static boolean match(final String a, final int as, final int ae, final String b, final int bs, final int be) {
-        // System.out.println(indent + "\"" + a.substring(as, ae + 1) +
-        // "\" vs \"" + b.substring(bs, be + 1) + "\"");
+        // System.out.println(indent + "\"" + a.substring(as, ae +
+        // 1).replace(WILDCARD, '*') + "\" vs \"" + b.substring(bs, be +
+        // 1).replace(WILDCARD, '*') + "\"");
         // String old = indent;
         // indent += " |  ";
         boolean res = match3(a, as, ae, b, bs, be);
@@ -49,7 +51,7 @@ public class KeywordInlineArgumentMatcher {
         return res;
     }
 
-    private static final char WILDCARD = '*';
+    private static final char WILDCARD = '\0';
 
     private static boolean match3(final String a, final int as, final int ae, final String b, final int bs, final int be) {
         if (as > ae || bs > be) {
