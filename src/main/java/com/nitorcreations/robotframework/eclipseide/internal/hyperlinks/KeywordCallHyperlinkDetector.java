@@ -55,7 +55,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
             KeywordMatchResult matchResult = KeywordInlineArgumentMatcher.match(match.getValue().toLowerCase(), linkString.toLowerCase());
             if (matchResult != KeywordMatchResult.DIFFERENT) {
                 IRegion targetRegion = new Region(match.getArgEndCharPos(), 0);
-                links.add(new Hyperlink(linkRegion, linkString, targetRegion, location));
+                links.add(new Hyperlink(linkRegion, '[' + location.getName() + "] " + match.getValue(), targetRegion, location));
             }
             return true;
         }
