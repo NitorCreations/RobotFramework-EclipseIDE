@@ -23,14 +23,15 @@ public class KeywordInlineArgumentMatcher {
 
     // private static String indent = "";
 
-    public static KeywordMatchResult match(final String a, final String b) {
+    public static KeywordMatchResult match(String a, String b) {
+        a = a.replaceAll("\\$\\{[^}]+\\}", Character.toString(WILDCARD));
+        b = b.replaceAll("\\$\\{[^}]+\\}", Character.toString(WILDCARD));
         // System.out.println(indent + "\"" + a + "\" vs \"" + b + "\"");
         if (a.equalsIgnoreCase(b)) {
             return a.indexOf(WILDCARD) == -1 ? KeywordMatchResult.EXACT : KeywordMatchResult.WILDCARD;
         }
         // String old = indent;
         // indent += " |  ";
-        // boolean res = match2(a, b);
         boolean res = match3(a, 0, a.length() - 1, b, 0, b.length() - 1);
         // indent = old;
         // System.out.println(indent + " '-> " + res);

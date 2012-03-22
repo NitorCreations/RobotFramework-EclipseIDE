@@ -15,9 +15,9 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
-import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
@@ -25,6 +25,8 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
+import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordInlineArgumentMatcher;
+import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordInlineArgumentMatcher.KeywordMatchResult;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
@@ -37,6 +39,28 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
  */
 public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
 
+    private static final class KeywordMatchVisitor implements MatchVisitor {
+        private final IRegion linkRegion;
+        private final String linkString;
+        private final List<IHyperlink> links;
+
+        private KeywordMatchVisitor(String linkString, IRegion linkRegion, List<IHyperlink> links) {
+            this.linkRegion = linkRegion;
+            this.linkString = linkString;
+            this.links = links;
+        }
+
+        @Override
+        public boolean visitMatch(ParsedString match, IFile location) {
+            KeywordMatchResult matchResult = KeywordInlineArgumentMatcher.match(match.getValue().toLowerCase(), linkString.toLowerCase());
+            if (matchResult != KeywordMatchResult.DIFFERENT) {
+                IRegion targetRegion = new Region(match.getArgEndCharPos(), 0);
+                links.add(new Hyperlink(linkRegion, linkString, targetRegion, location));
+            }
+            return true;
+        }
+    }
+
     @Override
     protected void getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
         if (argument.getType() != ArgumentType.KEYWORD_CALL) {
@@ -44,8 +68,8 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
         }
         String linkString = argument.getUnescapedValue();
         IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        IHyperlink[] linksArr = getLinks(document, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
-        if (linksArr == null) {
+        acceptMatches(document, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordMatchVisitor(linkString, linkRegion, links));
+        if (links.isEmpty()) {
             // try without possible BDD prefix
             String alternateValue = argument.getAlternateValue();
             if (alternateValue != null) {
@@ -53,11 +77,8 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
                 linkString = RFTArgumentUtils.unescapeArgument(alternateValue, 0, alternateValue.length());
                 int lengthDiff = origLength - linkString.length();
                 linkRegion = new Region(argument.getArgCharPos() + lengthDiff, argument.getValue().length() - lengthDiff);
-                linksArr = getLinks(document, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
+                acceptMatches(document, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordMatchVisitor(linkString, linkRegion, links));
             }
-        }
-        if (linksArr != null) {
-            links.addAll(Arrays.asList(linksArr));
         }
     }
 }

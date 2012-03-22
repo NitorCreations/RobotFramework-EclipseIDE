@@ -15,9 +15,9 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
-import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
@@ -36,6 +36,27 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
  * @author xkr47
  */
 public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
+
+    private static final class VariableMatchVisitor implements MatchVisitor {
+        private final IRegion linkRegion;
+        private final String linkString;
+        private final List<IHyperlink> links;
+
+        private VariableMatchVisitor(String linkString, IRegion linkRegion, List<IHyperlink> links) {
+            this.linkRegion = linkRegion;
+            this.linkString = linkString;
+            this.links = links;
+        }
+
+        @Override
+        public boolean visitMatch(ParsedString match, IFile location) {
+            if (match.getValue().equalsIgnoreCase(linkString)) {
+                IRegion targetRegion = new Region(match.getArgEndCharPos(), 0);
+                links.add(new Hyperlink(linkRegion, linkString, targetRegion, location));
+            }
+            return true;
+        }
+    }
 
     @Override
     protected void getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
@@ -57,10 +78,7 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
                 // pointing at variable access!
                 String linkString = argumentValue.substring(linkOffsetInArgument, linkOffsetInArgument + linkLength);
                 IRegion linkRegion = new Region(argument.getArgCharPos() + linkOffsetInArgument, linkLength);
-                IHyperlink[] linksArr = getLinks(document, linkString, linkRegion, LineType.VARIABLE_TABLE_LINE);
-                if (linksArr != null) {
-                    links.addAll(Arrays.asList(linksArr));
-                }
+                acceptMatches(document, LineType.VARIABLE_TABLE_LINE, new VariableMatchVisitor(linkString, linkRegion, links));
                 return;
             }
             start = linkOffsetInArgument + linkLength;

@@ -25,7 +25,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
@@ -83,39 +82,40 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
 
     protected abstract void getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links);
 
-    protected IHyperlink[] getLinks(IDocument document, String linkString, IRegion linkRegion, LineType lineType) {
+    public interface MatchVisitor {
+        boolean visitMatch(ParsedString match, IFile location);
+    }
+
+    protected void acceptMatches(IDocument document, LineType lineType, MatchVisitor visitor) {
         Set<IFile> unprocessedFiles = new HashSet<IFile>();
         Set<IFile> processedFiles = new HashSet<IFile>();
         unprocessedFiles.add(ResourceManager.resolveFileFor(document));
         while (!unprocessedFiles.isEmpty()) {
             IFile targetFile = unprocessedFiles.iterator().next();
             RobotFile robotFile = RobotFile.get(targetFile, true);
-            if (robotFile == null) {
-                return null;
-            }
-            List<RFELine> lines = robotFile.getLines();
-            for (RFELine line : lines) {
-                if (line.isType(lineType)) {
-                    ParsedString firstArgument = line.arguments.get(0);
-                    if (firstArgument.equals(linkString)) {
-                        IRegion targetRegion = new Region(firstArgument.getArgEndCharPos(), 0);
-                        return new IHyperlink[] { new Hyperlink(linkRegion, linkString, targetRegion, targetFile) };
+            if (robotFile != null) {
+                List<RFELine> lines = robotFile.getLines();
+                for (RFELine line : lines) {
+                    if (line.isType(lineType)) {
+                        ParsedString firstArgument = line.arguments.get(0);
+                        if (!visitor.visitMatch(firstArgument, targetFile)) {
+                            return;
+                        }
                     }
                 }
-            }
-            for (RFELine line : lines) {
-                if (line.isResourceSetting()) {
-                    ParsedString secondArgument = line.arguments.get(1);
-                    IFile resourceFile = ResourceManager.getRelativeFile(targetFile, secondArgument.getUnescapedValue());
-                    if (resourceFile.exists() && !processedFiles.contains(resourceFile)) {
-                        unprocessedFiles.add(resourceFile);
+                for (RFELine line : lines) {
+                    if (line.isResourceSetting()) {
+                        ParsedString secondArgument = line.arguments.get(1);
+                        IFile resourceFile = ResourceManager.getRelativeFile(targetFile, secondArgument.getUnescapedValue());
+                        if (resourceFile.exists() && !processedFiles.contains(resourceFile)) {
+                            unprocessedFiles.add(resourceFile);
+                        }
                     }
                 }
             }
             processedFiles.add(targetFile);
             unprocessedFiles.remove(targetFile);
         }
-        return null;
     }
 
 }
