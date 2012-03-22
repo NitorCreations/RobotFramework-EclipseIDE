@@ -15,9 +15,6 @@
  */
 package com.nitorcreations.robotframework.eclipseide.structure;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
 import com.nitorcreations.robotframework.eclipseide.structure.api.IParsedKeywordString;
 
@@ -34,10 +31,6 @@ public class ParsedString implements IParsedKeywordString {
     private final String value;
     private final int argCharPos;
     private ArgumentType type = ArgumentType.IGNORED;
-
-    private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\$\\{[^}]+\\}");
-    private Pattern valueAsKeywordPattern;
-    private boolean checkedForInlineVariables;
 
     public enum ArgumentType {
         IGNORED, COMMENT, TABLE, SETTING_KEY, VARIABLE_KEY, NEW_TESTCASE, NEW_KEYWORD, SETTING_VAL, SETTING_FILE, SETTING_FILE_WITH_NAME_KEY, SETTING_FILE_ARG, SETTING_FILE_WITH_NAME_VALUE, VARIABLE_VAL, KEYWORD_LVALUE, FOR_PART, KEYWORD_CALL, KEYWORD_ARG,
@@ -82,30 +75,6 @@ public class ParsedString implements IParsedKeywordString {
             }
         }
         return null;
-    }
-
-    public boolean matchesKeywordCall(String keywordCall) {
-        if (!checkedForInlineVariables) {
-            Matcher m = VARIABLE_PATTERN.matcher(value);
-            if (m.find()) {
-                StringBuffer valueAsKeywordPatternSb = new StringBuffer();
-                int lastEnd = 0;
-                do {
-                    int start = m.start();
-                    valueAsKeywordPatternSb.append(Pattern.quote(value.substring(lastEnd, start)));
-                    valueAsKeywordPatternSb.append(".*");
-                    lastEnd = m.end();
-                } while (m.find());
-                valueAsKeywordPatternSb.append(Pattern.quote(value.substring(lastEnd)));
-                valueAsKeywordPattern = Pattern.compile(valueAsKeywordPatternSb.toString());
-            }
-            checkedForInlineVariables = true;
-        }
-        if (valueAsKeywordPattern != null) {
-            return valueAsKeywordPattern.matcher(keywordCall).matches();
-        } else {
-            return value.equals(keywordCall);
-        }
     }
 
     public ArgumentType getType() {
