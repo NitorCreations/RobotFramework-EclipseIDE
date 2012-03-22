@@ -15,6 +15,8 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -34,23 +36,23 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 public class ResourceHyperlinkDetector extends HyperlinkDetector {
 
     @Override
-    protected IHyperlink[] getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset) {
+    protected void getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
         boolean isResourceSetting = rfeLine.isResourceSetting();
         boolean isVariableSetting = rfeLine.isVariableSetting();
         if (!isResourceSetting && !isVariableSetting) {
-            return null;
+            return;
         }
         ParsedString secondArgument = rfeLine.arguments.get(1);
         if (argument != secondArgument) {
-            return null;
+            return;
         }
         String linkString = argument.getUnescapedValue();
         IFile linkFile = ResourceManager.resolveFileFor(document);
         IFile targetFile = ResourceManager.getRelativeFile(linkFile, linkString);
         if (!targetFile.exists()) {
-            return null;
+            return;
         }
         IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        return new IHyperlink[] { new Hyperlink(linkRegion, linkString, null, targetFile, isResourceSetting) };
+        links.add(new Hyperlink(linkRegion, linkString, null, targetFile, isResourceSetting));
     }
 }

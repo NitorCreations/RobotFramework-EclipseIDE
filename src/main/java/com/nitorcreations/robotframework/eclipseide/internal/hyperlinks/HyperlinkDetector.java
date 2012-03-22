@@ -15,6 +15,7 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -70,10 +71,17 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
         if (argument == null) {
             return null;
         }
-        return getLinks(document, rfeLine, argument, offset);
+        List<IHyperlink> links = new ArrayList<IHyperlink>();
+        getLinks(document, rfeLine, argument, offset, links);
+        if (links.isEmpty()) {
+            return null;
+        }
+        IHyperlink[] linksArr = new IHyperlink[links.size()];
+        links.toArray(linksArr);
+        return linksArr;
     }
 
-    protected abstract IHyperlink[] getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset);
+    protected abstract void getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links);
 
     protected IHyperlink[] getLinks(IDocument document, String linkString, IRegion linkRegion, LineType lineType) {
         Set<IFile> unprocessedFiles = new HashSet<IFile>();

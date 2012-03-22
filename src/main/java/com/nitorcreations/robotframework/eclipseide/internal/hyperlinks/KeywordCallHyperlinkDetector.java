@@ -15,6 +15,9 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
@@ -35,14 +38,14 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
 public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
 
     @Override
-    protected IHyperlink[] getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset) {
+    protected void getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
         if (argument.getType() != ArgumentType.KEYWORD_CALL) {
-            return null;
+            return;
         }
         String linkString = argument.getUnescapedValue();
         IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        IHyperlink[] links = getLinks(document, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
-        if (links == null) {
+        IHyperlink[] linksArr = getLinks(document, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
+        if (linksArr == null) {
             // try without possible BDD prefix
             String alternateValue = argument.getAlternateValue();
             if (alternateValue != null) {
@@ -50,9 +53,11 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
                 linkString = RFTArgumentUtils.unescapeArgument(alternateValue, 0, alternateValue.length());
                 int lengthDiff = origLength - linkString.length();
                 linkRegion = new Region(argument.getArgCharPos() + lengthDiff, argument.getValue().length() - lengthDiff);
-                links = getLinks(document, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
+                linksArr = getLinks(document, linkString, linkRegion, LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
             }
         }
-        return links;
+        if (linksArr != null) {
+            links.addAll(Arrays.asList(linksArr));
+        }
     }
 }

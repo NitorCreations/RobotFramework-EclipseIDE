@@ -15,6 +15,9 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
@@ -35,7 +38,7 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
 
     @Override
-    protected IHyperlink[] getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset) {
+    protected void getLinks(IDocument document, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
         // TODO: only check types that can contain variables
         String argumentValue = argument.getValue();
         int start = 0;
@@ -43,18 +46,22 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
             int linkOffsetInArgument = RFTVariableUtils.findNextVariableStart(argumentValue, start);
             if (linkOffsetInArgument == -1) {
                 // after last variable
-                return null;
+                return;
             }
             if (offset < argument.getArgCharPos() + linkOffsetInArgument) {
                 // before next variable
-                return null;
+                return;
             }
             int linkLength = RFTVariableUtils.calculateVariableLength(argumentValue, linkOffsetInArgument);
             if (offset < argument.getArgCharPos() + linkOffsetInArgument + linkLength) {
                 // pointing at variable access!
                 String linkString = argumentValue.substring(linkOffsetInArgument, linkOffsetInArgument + linkLength);
                 IRegion linkRegion = new Region(argument.getArgCharPos() + linkOffsetInArgument, linkLength);
-                return getLinks(document, linkString, linkRegion, LineType.VARIABLE_TABLE_LINE);
+                IHyperlink[] linksArr = getLinks(document, linkString, linkRegion, LineType.VARIABLE_TABLE_LINE);
+                if (linksArr != null) {
+                    links.addAll(Arrays.asList(linksArr));
+                }
+                return;
             }
             start = linkOffsetInArgument + linkLength;
         }
