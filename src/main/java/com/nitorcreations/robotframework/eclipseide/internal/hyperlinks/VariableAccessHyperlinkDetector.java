@@ -29,10 +29,11 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 /**
  * This hyperlink detector creates hyperlinks for variable accesses, e.g.
- * "  SomeKeyword ${variable}" --> "${variable}" is linked, but
- * "Some ${arg} testcase" is not, and "  [Arguments] ${foo}" isn't either.
- * 
- * @author xkr47
+ * <ul>
+ * <li><tt>SomeKeyword &nbsp;${variable}</tt> - "${variable}" is linked)</li>
+ * <li><tt>Some ${inlinearg} testcase</tt> - "${inlinearg}" is linked</li>
+ * <li><tt>[Arguments] &nbsp;${foo}</tt> - "${foo}" is linked</li>
+ * </ul>
  */
 public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
 

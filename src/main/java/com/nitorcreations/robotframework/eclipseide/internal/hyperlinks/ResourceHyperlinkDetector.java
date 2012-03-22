@@ -28,9 +28,10 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 /**
  * This hyperlink detector creates hyperlinks for resource references, e.g.
- * "Resource foo.txt" --> "foo.txt" is linked.
- * 
- * @author xkr47
+ * <ul>
+ * <li><tt>Resource foo.txt</tt> - "foo.txt" is linked</li>
+ * <li><tt>Variables &nbsp;foo.py &nbsp;argument</tt> - "foo.py" is linked</li>
+ * </ul>
  */
 public class ResourceHyperlinkDetector extends HyperlinkDetector {
 

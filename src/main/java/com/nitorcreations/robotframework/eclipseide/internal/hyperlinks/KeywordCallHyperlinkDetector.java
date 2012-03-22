@@ -31,10 +31,13 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 /**
- * This hyperlink detector creates hyperlinks for keyword calls, e.g.
- * "  SomeKeyword FooArgument" --> "SomeKeyword" is linked.
- * 
- * @author xkr47
+ * This hyperlink detector creates hyperlinks for keyword calls, e.g. *
+ * <ul>
+ * <li><tt>SomeKeyword &nbsp;${variable}</tt> - "SomeKeyword" is linked)</li>
+ * <li><tt>Some ${inlinearg} testcase</tt> - "Some ${inlinearg} testcase" is
+ * linked</li>
+ * <li><tt>[Arguments] &nbsp;${foo}</tt> - "${foo}" is linked</li>
+ * </ul>
  */
 public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
 
