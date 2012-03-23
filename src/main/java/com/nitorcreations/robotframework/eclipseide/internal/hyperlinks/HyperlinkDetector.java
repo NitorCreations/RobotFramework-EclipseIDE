@@ -76,9 +76,11 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
         if (links.isEmpty()) {
             return null;
         }
-        IHyperlink[] linksArr = new IHyperlink[links.size()];
-        links.toArray(linksArr);
-        return linksArr;
+        if (!canShowMultipleHyperlinks) {
+            return new IHyperlink[] { links.get(0) };
+
+        }
+        return links.toArray(new IHyperlink[links.size()]);
     }
 
     protected abstract void getLinks(IFile file, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links);
