@@ -70,10 +70,11 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         // etc unsupported atm
         int leftPos = findLeftmostKeywordPosition(line, rfeLine);
         int rightPos = findRightmostKeywordPosition(lineInfo, line, rfeLine);
+        int replacePos = rfeLine.arguments.size() >= 2 ? rfeLine.arguments.get(1).getArgCharPos() - lineInfo.getOffset() : leftPos;
         int cursorPos = documentOffset - lineInfo.getOffset();
         // if inside range, return keyword proposals
         if (leftPos <= cursorPos && cursorPos <= rightPos) {
-            return computeKeywordCompletionProposals(viewer, document, documentOffset, rfeLine, leftPos, rightPos);
+            return computeKeywordCompletionProposals(viewer, document, documentOffset, rfeLine, leftPos, rightPos, replacePos);
         }
 
         return null;
@@ -96,12 +97,12 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         return endPos;
     }
 
-    private ICompletionProposal[] computeKeywordCompletionProposals(ITextViewer viewer, IDocument document, int documentOffset, final RFELine rfeLine, final int leftPos, final int rightPos) {
+    private ICompletionProposal[] computeKeywordCompletionProposals(ITextViewer viewer, IDocument document, int documentOffset, final RFELine rfeLine, final int leftPos, final int rightPos, int replacePos) {
         final ParsedString arg1 = rfeLine.arguments.size() >= 2 ? rfeLine.arguments.get(1) : null;
         IFile file = ResourceManager.resolveFileFor(document);
         final List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
         // first find matches that use the whole input as search string
-        DefinitionFinder.acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordCompletionMatchVisitor(file, arg1, leftPos, proposals, rightPos, rfeLine));
+        DefinitionFinder.acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordCompletionMatchVisitor(file, arg1, leftPos, proposals, rightPos, rfeLine, replacePos));
         if (arg1 != null && (proposals.isEmpty() || proposalsContainOnly(proposals, arg1))) {
             proposals.clear();
             int lineOffset = documentOffset - rfeLine.lineCharPos;
@@ -109,13 +110,13 @@ public class RobotContentAssistant implements IContentAssistProcessor {
                 // try again, but only up to cursor
                 int argumentOff = lineOffset - leftPos;
                 ParsedString arg1leftPart = new ParsedString(arg1.getValue().substring(0, argumentOff), arg1.getArgCharPos());
-                DefinitionFinder.acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordCompletionMatchVisitor(file, arg1leftPart, leftPos, proposals, rightPos, rfeLine));
+                DefinitionFinder.acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordCompletionMatchVisitor(file, arg1leftPart, leftPos, proposals, rightPos, rfeLine, replacePos));
             }
             if (proposals.isEmpty() || proposalsContainOnly(proposals, arg1)) {
                 // try again, ignoring user input, i.e. show all possible
                 // keywords
                 proposals.clear();
-                DefinitionFinder.acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordCompletionMatchVisitor(file, null, leftPos, proposals, rightPos, rfeLine));
+                DefinitionFinder.acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordCompletionMatchVisitor(file, null, leftPos, proposals, rightPos, rfeLine, replacePos));
             }
         }
         ICompletionProposal[] proposalsArr = new ICompletionProposal[proposals.size()];
@@ -136,14 +137,16 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         private final List<RobotCompletionProposal> proposals;
         private final int rightPos;
         private final RFELine rfeLine;
+        private final int replacePos;
 
-        KeywordCompletionMatchVisitor(IFile file, ParsedString substring, int leftPos, List<RobotCompletionProposal> proposals, int rightPos, RFELine rfeLine) {
+        KeywordCompletionMatchVisitor(IFile file, ParsedString substring, int leftPos, List<RobotCompletionProposal> proposals, int rightPos, RFELine rfeLine, int replacePos) {
             super(file);
             this.substring = substring;
             this.leftPos = leftPos;
             this.proposals = proposals;
             this.rightPos = rightPos;
             this.rfeLine = rfeLine;
+            this.replacePos = replacePos;
         }
 
         @Override
@@ -164,14 +167,8 @@ public class RobotContentAssistant implements IContentAssistProcessor {
             String informationDisplayString = "You chose: " + match.getValue();
 
             String replacementString = match.getValue();
-            int replacementOffset;
-            int replacementLength;
-            // if (substring != null) {
-            // replacementOffset = substring.getArgCharPos();
-            // } else {
-            replacementOffset = rfeLine.lineCharPos + leftPos;
-            // }
-            replacementLength = rightPos - leftPos;
+            int replacementOffset = rfeLine.lineCharPos + replacePos;
+            int replacementLength = rightPos - leftPos;
             int cursorPosition = replacementString.length();
 
             proposals.add(new RobotCompletionProposal(match, location, replacementString, replacementOffset, replacementLength, cursorPosition, image, displayString, informationDisplayString, additionalProposalInfo));
