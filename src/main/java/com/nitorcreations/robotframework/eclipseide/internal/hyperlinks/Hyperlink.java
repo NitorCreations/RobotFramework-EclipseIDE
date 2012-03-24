@@ -18,9 +18,10 @@ package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
-import com.nitorcreations.robotframework.eclipseide.editors.RobotFrameworkTextfileEditor;
 
 public class Hyperlink implements IHyperlink {
 
@@ -59,9 +60,9 @@ public class Hyperlink implements IHyperlink {
 
     @Override
     public void open() {
-        RobotFrameworkTextfileEditor editor = ResourceManager.openOrReuseEditorFor(targetFile, isRobotFile);
+        IEditorPart editor = ResourceManager.openOrReuseEditorFor(targetFile, isRobotFile);
         if (targetRegion != null) {
-            editor.selectAndReveal(targetRegion.getOffset(), targetRegion.getLength());
+            ((AbstractTextEditor) editor).selectAndReveal(targetRegion.getOffset(), targetRegion.getLength());
         }
     }
 

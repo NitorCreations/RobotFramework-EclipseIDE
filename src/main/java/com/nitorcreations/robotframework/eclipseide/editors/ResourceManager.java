@@ -84,7 +84,7 @@ public final class ResourceManager {
         return originalFile.getWorkspace().getRoot().getFile(newPath);
     }
 
-    public static RobotFrameworkTextfileEditor openOrReuseEditorFor(IFile file, boolean isRobotFile) {
+    public static IEditorPart openOrReuseEditorFor(IFile file, boolean isRobotFile) {
         try {
             IWorkbenchPage workbenchPage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
             FileEditorInput editorInput = new FileEditorInput(file);
@@ -97,8 +97,7 @@ public final class ResourceManager {
                 matchFlags = IWorkbenchPage.MATCH_INPUT;
                 editorId = IDE.getEditorDescriptor(file).getId();
             }
-            IEditorPart editor = workbenchPage.openEditor(editorInput, editorId, true, matchFlags);
-            return (RobotFrameworkTextfileEditor) editor;
+            return workbenchPage.openEditor(editorInput, editorId, true, matchFlags);
         } catch (PartInitException e) {
             throw new RuntimeException("Problem opening robot editor for " + file, e);
         }
