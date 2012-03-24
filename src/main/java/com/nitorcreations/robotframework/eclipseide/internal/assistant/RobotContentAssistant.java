@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nitorcreations.robotframework.eclipseide.editors;
+package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,17 +25,15 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
+import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordInlineArgumentMatcher;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordInlineArgumentMatcher.KeywordMatchResult;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTWhitespace;
@@ -130,83 +128,6 @@ public class RobotContentAssistant implements IContentAssistProcessor {
             return false;
         }
         return proposals.get(0).getMatchKeyword().getValue().equals(arg1.getValue());
-    }
-
-    private static final class RobotCompletionProposal implements ICompletionProposal, ICompletionProposalExtension6 {
-
-        private final ParsedString matchKeyword;
-        private final IFile matchLocation;
-        private final String replacementString;
-        private final int replacementOffset;
-        private final int replacementLength;
-        private final int cursorPosition;
-        private final Image image;
-        private final String displayString;
-        private final String informationDisplayString;
-        private final String additionalProposalInfo;
-
-        public RobotCompletionProposal(ParsedString matchKeyword, IFile matchLocation, String replacementString, int replacementOffset, int replacementLength, int cursorPosition, Image image, String displayString, String informationDisplayString, String additionalProposalInfo) {
-            this.matchKeyword = matchKeyword;
-            this.matchLocation = matchLocation;
-            this.replacementString = replacementString;
-            this.replacementOffset = replacementOffset;
-            this.replacementLength = replacementLength;
-            this.cursorPosition = cursorPosition;
-            this.image = image;
-            this.displayString = displayString;
-            this.informationDisplayString = informationDisplayString;
-            this.additionalProposalInfo = additionalProposalInfo;
-        }
-
-        public ParsedString getMatchKeyword() {
-            return matchKeyword;
-        }
-
-        public IFile getMatchLocation() {
-            return matchLocation;
-        }
-
-        @Override
-        public void apply(IDocument document) {
-            try {
-                document.replace(replacementOffset, replacementLength, replacementString);
-            } catch (BadLocationException x) {
-                // ignore
-            }
-        }
-
-        @Override
-        public Point getSelection(IDocument document) {
-            return new Point(replacementOffset + cursorPosition, 0);
-        }
-
-        @Override
-        public String getAdditionalProposalInfo() {
-            return additionalProposalInfo;
-        }
-
-        @Override
-        public String getDisplayString() {
-            return displayString;
-        }
-
-        @Override
-        public StyledString getStyledDisplayString() {
-            StyledString ss = new StyledString();
-            ss.append(displayString);
-            return ss;
-        }
-
-        @Override
-        public Image getImage() {
-            return image;
-        }
-
-        @Override
-        public IContextInformation getContextInformation() {
-            return new ContextInformation(null, informationDisplayString);
-        }
-
     }
 
     private static final class KeywordCompletionMatchVisitor extends BaseDefinitionMatchVisitor {
