@@ -52,13 +52,13 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
         }
 
         @Override
-        public boolean visitMatch(ParsedString match, IFile location) {
+        public VisitorInterest visitMatch(ParsedString match, IFile location) {
             if (match.getValue().equalsIgnoreCase(linkString)) {
                 IRegion targetRegion = new Region(match.getArgEndCharPos(), 0);
                 links.add(new Hyperlink(linkRegion, getFilePrefix(location) + match.getValue(), targetRegion, location));
-                return true;
+                return VisitorInterest.STOP;
             }
-            return false;
+            return VisitorInterest.CONTINUE;
         }
     }
 

@@ -25,6 +25,7 @@ import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
+import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class DefinitionFinder {
@@ -50,16 +51,17 @@ public class DefinitionFinder {
             RobotFile robotFile = RobotFile.get(targetFile, true);
             if (robotFile != null) {
                 List<RFELine> lines = robotFile.getLines();
-                boolean matchFound = false;
+                VisitorInterest interest = VisitorInterest.CONTINUE;
                 for (RFELine line : lines) {
                     if (line.isType(lineType)) {
                         ParsedString firstArgument = line.arguments.get(0);
-                        if (visitor.visitMatch(firstArgument, targetFile)) {
-                            matchFound = true;
+                        interest = visitor.visitMatch(firstArgument, targetFile);
+                        if (interest == VisitorInterest.STOP) {
+                            return;
                         }
                     }
                 }
-                if (targetFile == file && matchFound) {
+                if (interest == VisitorInterest.CONTINUE_TO_END_OF_CURRENT_FILE) {
                     return;
                 }
                 for (RFELine line : lines) {

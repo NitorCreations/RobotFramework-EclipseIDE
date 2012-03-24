@@ -20,5 +20,11 @@ import org.eclipse.core.resources.IFile;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public interface DefinitionMatchVisitor {
-    boolean visitMatch(ParsedString match, IFile location);
+
+    public enum VisitorInterest {
+        CONTINUE, CONTINUE_TO_END_OF_CURRENT_FILE, STOP
+    }
+
+    VisitorInterest visitMatch(ParsedString match, IFile location);
+
 }

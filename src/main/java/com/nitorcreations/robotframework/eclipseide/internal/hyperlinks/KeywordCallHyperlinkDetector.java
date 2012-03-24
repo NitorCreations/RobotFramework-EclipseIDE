@@ -56,14 +56,14 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
         }
 
         @Override
-        public boolean visitMatch(ParsedString match, IFile location) {
+        public VisitorInterest visitMatch(ParsedString match, IFile location) {
             KeywordMatchResult matchResult = KeywordInlineArgumentMatcher.match(match.getValue().toLowerCase(), linkString.toLowerCase());
             if (matchResult != KeywordMatchResult.DIFFERENT) {
                 IRegion targetRegion = new Region(match.getArgEndCharPos(), 0);
                 links.add(new Hyperlink(linkRegion, getFilePrefix(location) + match.getValue(), targetRegion, location));
-                return true;
+                return location == file ? VisitorInterest.CONTINUE_TO_END_OF_CURRENT_FILE : VisitorInterest.CONTINUE;
             }
-            return false;
+            return VisitorInterest.CONTINUE;
         }
     }
 
