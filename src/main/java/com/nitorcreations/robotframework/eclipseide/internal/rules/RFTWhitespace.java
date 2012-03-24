@@ -21,4 +21,21 @@ public class RFTWhitespace {
         return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
     }
 
+    public static int skipMinimumRobotWhitespace(String line, int startPos) {
+        boolean gotOne = false;
+        int i;
+        for (i = startPos; i < line.length(); ++i) {
+            char ch = line.charAt(i);
+            if (!RFTWhitespace.isWhitespace(ch)) {
+                // I don't think this should ever happen
+                return line.length() + 1;
+            }
+            if (ch == '\t' || gotOne) {
+                return i + 1;
+            }
+            gotOne = true;
+        }
+        return i;
+    }
+
 }

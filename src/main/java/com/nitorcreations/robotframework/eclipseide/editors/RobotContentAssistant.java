@@ -86,7 +86,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         if (!rfeLine.arguments.isEmpty()) {
             startPos = rfeLine.arguments.get(0).getValue().length();
         }
-        startPos = skipMinimumRobotWhitespace(line, startPos);
+        startPos = RFTWhitespace.skipMinimumRobotWhitespace(line, startPos);
         return startPos;
     }
 
@@ -256,23 +256,6 @@ public class RobotContentAssistant implements IContentAssistProcessor {
             proposals.add(new RobotCompletionProposal(match, location, replacementString, replacementOffset, replacementLength, cursorPosition, image, displayString, informationDisplayString, additionalProposalInfo));
             return VisitorInterest.CONTINUE;
         }
-    }
-
-    private static int skipMinimumRobotWhitespace(String line, int startPos) {
-        boolean gotOne = false;
-        int i;
-        for (i = startPos; i < line.length(); ++i) {
-            char ch = line.charAt(i);
-            if (!RFTWhitespace.isWhitespace(ch)) {
-                // I don't think this should ever happen
-                return line.length() + 1;
-            }
-            if (ch == '\t' || gotOne) {
-                return i + 1;
-            }
-            gotOne = true;
-        }
-        return i;
     }
 
     // ctrl-shift-space information popups
