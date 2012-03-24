@@ -68,7 +68,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         // completion proposals make sense
         // TODO this only works for basic keyword calls, [Setup], FOR-indented,
         // etc unsupported atm
-        int leftPos = findLeftmostKeywordPosition(line, rfeLine);
+        int leftPos = findLeftmostKeywordPosition(lineInfo, line, rfeLine);
         int rightPos = findRightmostKeywordPosition(lineInfo, line, rfeLine);
         int replacePos = rfeLine.arguments.size() >= 2 ? rfeLine.arguments.get(1).getArgCharPos() - lineInfo.getOffset() : leftPos;
         int cursorPos = documentOffset - lineInfo.getOffset();
@@ -80,10 +80,10 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         return null;
     }
 
-    int findLeftmostKeywordPosition(String line, RFELine rfeLine) {
+    int findLeftmostKeywordPosition(IRegion lineInfo, String line, RFELine rfeLine) {
         int startPos = 0;
         if (!rfeLine.arguments.isEmpty()) {
-            startPos = rfeLine.arguments.get(0).getValue().length();
+            startPos = rfeLine.arguments.get(0).getArgEndCharPos() - lineInfo.getOffset();
         }
         startPos = RFTWhitespace.skipMinimumRobotWhitespace(line, startPos);
         return startPos;
