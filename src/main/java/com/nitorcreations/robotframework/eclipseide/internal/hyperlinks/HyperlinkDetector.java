@@ -127,7 +127,7 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
                         }
                     }
                 }
-                if (matchFound) {
+                if (targetFile == file && matchFound) {
                     return;
                 }
                 for (RFELine line : lines) {
