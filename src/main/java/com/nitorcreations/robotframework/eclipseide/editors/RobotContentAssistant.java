@@ -23,7 +23,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
@@ -51,6 +50,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
     // ctrl-space completion proposals
     @Override
     public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
+        // find info about current line
         IRegion lineInfo;
         String line;
         int lineNo;
@@ -62,33 +62,23 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         } catch (BadLocationException ex) {
             return null;
         }
+
         List<RFELine> lines = RobotFile.get(document).getLines();
         RFELine rfeLine = lines.get(lineNo);
 
+        // find the cursor location range inside the current line where keyword
+        // completion proposals make sense
+        // TODO this only works for basic keyword calls, [Setup], FOR-indented,
+        // etc unsupported atm
         int leftPos = findLeftmostKeywordPosition(line, rfeLine);
         int rightPos = findRightmostKeywordPosition(lineInfo, line, rfeLine);
         int cursorPos = documentOffset - lineInfo.getOffset();
+        // if inside range, return keyword proposals
         if (leftPos <= cursorPos && cursorPos <= rightPos) {
             return computeKeywordCompletionProposals(viewer, document, documentOffset, rfeLine, leftPos, rightPos);
         }
 
-        ICompletionProposal[] result = new ICompletionProposal[fgProposals.length];
-        for (int i = 0; i < fgProposals.length; i++) {
-            Image image = null;
-            String displayString = "displayString " + fgProposals[i];
-            String additionalProposalInfo = "additionalProposalInfo " + fgProposals[i];
-
-            String informationDisplayString = "informationDisplayString " + fgProposals[i];
-
-            String replacementString = "replacementString " + fgProposals[i];
-            int replacementOffset = documentOffset;
-            int replacementLength = i;
-            int cursorPosition = replacementString.length() - i;
-
-            IContextInformation info = new ContextInformation(null, informationDisplayString);
-            result[i] = new CompletionProposal(replacementString, replacementOffset, replacementLength, cursorPosition, image, displayString, info, additionalProposalInfo);
-        }
-        return result;
+        return null;
     }
 
     int findLeftmostKeywordPosition(String line, RFELine rfeLine) {
@@ -112,6 +102,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         final ParsedString arg1 = rfeLine.arguments.size() >= 2 ? rfeLine.arguments.get(1) : null;
         IFile file = ResourceManager.resolveFileFor(document);
         final List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+        // first find matches that use the whole input as search string
         DefinitionFinder.acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordCompletionMatchVisitor(file, arg1, leftPos, proposals, rightPos, rfeLine));
         if (arg1 != null && (proposals.isEmpty() || proposalsContainOnly(proposals, arg1))) {
             proposals.clear();
@@ -123,7 +114,8 @@ public class RobotContentAssistant implements IContentAssistProcessor {
                 DefinitionFinder.acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordCompletionMatchVisitor(file, arg1leftPart, leftPos, proposals, rightPos, rfeLine));
             }
             if (proposals.isEmpty() || proposalsContainOnly(proposals, arg1)) {
-                // try again, show all keywords
+                // try again, ignoring user input, i.e. show all possible
+                // keywords
                 proposals.clear();
                 DefinitionFinder.acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordCompletionMatchVisitor(file, null, leftPos, proposals, rightPos, rfeLine));
             }
@@ -286,6 +278,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
     // ctrl-shift-space information popups
     @Override
     public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
+        // TODO replace with real implementation
         IContextInformation[] result = new IContextInformation[5];
         for (int i = 0; i < result.length; i++) {
             String contextDisplayString = "contextDisplayString " + i;
@@ -330,6 +323,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
 
     @Override
     public char[] getCompletionProposalAutoActivationCharacters() {
+        // TODO perhaps '$' or '{'? test it to see how it works..
         return null;
     }
 
