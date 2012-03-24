@@ -16,9 +16,7 @@
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.BadLocationException;
@@ -29,7 +27,6 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
@@ -84,65 +81,5 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
     }
 
     protected abstract void getLinks(IFile file, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links);
-
-    public interface MatchVisitor {
-        boolean visitMatch(ParsedString match, IFile location);
-    }
-
-    public static abstract class BaseMatchVisitor implements MatchVisitor {
-
-        protected final IFile file;
-
-        public BaseMatchVisitor(IFile file) {
-            this.file = file;
-        }
-
-        protected String getFilePrefix(IFile location) {
-            if (location == file) {
-                return "";
-            }
-            String name = location.getName();
-            if (name.toLowerCase().endsWith(".txt")) {
-                name = name.substring(0, name.length() - 4);
-            }
-            return '[' + name + "] ";
-        }
-    }
-
-    protected void acceptMatches(IFile file, LineType lineType, MatchVisitor visitor) {
-        Set<IFile> unprocessedFiles = new HashSet<IFile>();
-        Set<IFile> processedFiles = new HashSet<IFile>();
-        unprocessedFiles.add(file);
-        while (!unprocessedFiles.isEmpty()) {
-            IFile targetFile = unprocessedFiles.iterator().next();
-            RobotFile robotFile = RobotFile.get(targetFile, true);
-            if (robotFile != null) {
-                List<RFELine> lines = robotFile.getLines();
-                boolean matchFound = false;
-                for (RFELine line : lines) {
-                    if (line.isType(lineType)) {
-                        ParsedString firstArgument = line.arguments.get(0);
-                        if (visitor.visitMatch(firstArgument, targetFile)) {
-                            matchFound = true;
-                        }
-                    }
-                }
-                if (targetFile == file && matchFound) {
-                    return;
-                }
-                for (RFELine line : lines) {
-                    if (line.isResourceSetting()) {
-                        ParsedString secondArgument = line.arguments.get(1);
-                        IFile resourceFile = ResourceManager.getRelativeFile(targetFile, secondArgument.getUnescapedValue());
-                        if (resourceFile.exists() && !processedFiles.contains(resourceFile)) {
-                            unprocessedFiles.add(resourceFile);
-                        }
-                    }
-                }
-            }
-            processedFiles.add(targetFile);
-            unprocessedFiles.remove(targetFile);
-        }
-    }
 
 }

@@ -25,6 +25,8 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTVariableUtils;
+import com.nitorcreations.robotframework.eclipseide.internal.util.BaseDefinitionMatchVisitor;
+import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionFinder;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 /**
@@ -37,7 +39,7 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
  */
 public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
 
-    private static final class VariableMatchVisitor extends BaseMatchVisitor {
+    private static final class VariableMatchVisitor extends BaseDefinitionMatchVisitor {
         private final IRegion linkRegion;
         private final String linkString;
         private final List<IHyperlink> links;
@@ -80,7 +82,7 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
                 // pointing at variable access!
                 String linkString = argumentValue.substring(linkOffsetInArgument, linkOffsetInArgument + linkLength);
                 IRegion linkRegion = new Region(argument.getArgCharPos() + linkOffsetInArgument, linkLength);
-                acceptMatches(file, LineType.VARIABLE_TABLE_LINE, new VariableMatchVisitor(linkString, linkRegion, file, links));
+                DefinitionFinder.acceptMatches(file, LineType.VARIABLE_TABLE_LINE, new VariableMatchVisitor(linkString, linkRegion, file, links));
                 return;
             }
             start = linkOffsetInArgument + linkLength;

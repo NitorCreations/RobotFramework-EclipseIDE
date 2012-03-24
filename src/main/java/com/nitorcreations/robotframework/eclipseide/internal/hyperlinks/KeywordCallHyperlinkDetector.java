@@ -27,6 +27,8 @@ import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineT
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordInlineArgumentMatcher;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordInlineArgumentMatcher.KeywordMatchResult;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
+import com.nitorcreations.robotframework.eclipseide.internal.util.BaseDefinitionMatchVisitor;
+import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionFinder;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -41,7 +43,7 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
  */
 public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
 
-    private static final class KeywordMatchVisitor extends BaseMatchVisitor {
+    private static final class KeywordMatchVisitor extends BaseDefinitionMatchVisitor {
         private final IRegion linkRegion;
         private final String linkString;
         private final List<IHyperlink> links;
@@ -72,7 +74,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
         }
         String linkString = argument.getUnescapedValue();
         IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordMatchVisitor(linkString, linkRegion, file, links));
+        DefinitionFinder.acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordMatchVisitor(linkString, linkRegion, file, links));
         if (links.isEmpty()) {
             // try without possible BDD prefix
             String alternateValue = argument.getAlternateValue();
@@ -81,7 +83,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
                 linkString = RFTArgumentUtils.unescapeArgument(alternateValue, 0, alternateValue.length());
                 int lengthDiff = origLength - linkString.length();
                 linkRegion = new Region(argument.getArgCharPos() + lengthDiff, argument.getValue().length() - lengthDiff);
-                acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordMatchVisitor(linkString, linkRegion, file, links));
+                DefinitionFinder.acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordMatchVisitor(linkString, linkRegion, file, links));
             }
         }
     }
