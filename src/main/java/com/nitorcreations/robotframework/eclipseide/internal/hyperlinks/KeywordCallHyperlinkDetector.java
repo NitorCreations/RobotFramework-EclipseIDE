@@ -59,8 +59,9 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
             if (matchResult != KeywordMatchResult.DIFFERENT) {
                 IRegion targetRegion = new Region(match.getArgEndCharPos(), 0);
                 links.add(new Hyperlink(linkRegion, getFilePrefix(location) + match.getValue(), targetRegion, location));
+                return true;
             }
-            return true;
+            return false;
         }
     }
 

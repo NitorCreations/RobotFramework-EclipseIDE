@@ -118,13 +118,17 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
             RobotFile robotFile = RobotFile.get(targetFile, true);
             if (robotFile != null) {
                 List<RFELine> lines = robotFile.getLines();
+                boolean matchFound = false;
                 for (RFELine line : lines) {
                     if (line.isType(lineType)) {
                         ParsedString firstArgument = line.arguments.get(0);
-                        if (!visitor.visitMatch(firstArgument, targetFile)) {
-                            return;
+                        if (visitor.visitMatch(firstArgument, targetFile)) {
+                            matchFound = true;
                         }
                     }
+                }
+                if (matchFound) {
+                    return;
                 }
                 for (RFELine line : lines) {
                     if (line.isResourceSetting()) {
