@@ -29,10 +29,14 @@ public abstract class BaseDefinitionMatchVisitor implements DefinitionMatchVisit
         if (location == file) {
             return "";
         }
-        String name = location.getName();
-        if (name.toLowerCase().endsWith(".txt")) {
-            name = name.substring(0, name.length() - 4);
-        }
+        String name = getNameWithoutTxtPostfix(location.getName());
         return '[' + name + "] ";
+    }
+
+    protected String getNameWithoutTxtPostfix(String name) {
+        if (name.toLowerCase().endsWith(".txt")) {
+            return name.substring(0, name.length() - 4);
+        }
+        return name;
     }
 }
