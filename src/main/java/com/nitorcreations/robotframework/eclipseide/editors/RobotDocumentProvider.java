@@ -19,11 +19,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 
-public class RFTDocumentProvider extends FileDocumentProvider {
+public class RobotDocumentProvider extends FileDocumentProvider {
 
     private final RobotFrameworkTextfileEditor editor;
 
-    public RFTDocumentProvider(RobotFrameworkTextfileEditor editor) {
+    public RobotDocumentProvider(RobotFrameworkTextfileEditor editor) {
         this.editor = editor;
     }
 

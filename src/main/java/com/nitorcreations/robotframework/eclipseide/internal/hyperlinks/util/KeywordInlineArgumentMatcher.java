@@ -17,10 +17,6 @@ package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util;
 
 public class KeywordInlineArgumentMatcher {
 
-    public enum KeywordMatchResult {
-        DIFFERENT, WILDCARD, EXACT
-    }
-
     // private static String indent = "";
 
     public static KeywordMatchResult match(String a, String b) {

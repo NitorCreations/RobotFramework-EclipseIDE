@@ -22,11 +22,11 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordInlineArgumentMatcher;
-import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordInlineArgumentMatcher.KeywordMatchResult;
-import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
+import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordMatchResult;
+import com.nitorcreations.robotframework.eclipseide.internal.rules.ArgumentUtils;
 import com.nitorcreations.robotframework.eclipseide.internal.util.BaseDefinitionMatchVisitor;
 import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionFinder;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
@@ -77,7 +77,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
     }
 
     @Override
-    protected void getLinks(IFile file, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
+    protected void getLinks(IFile file, RobotLine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
         if (argument.getType() != ArgumentType.KEYWORD_CALL) {
             return;
         }
@@ -89,7 +89,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
             String alternateValue = argument.getAlternateValue();
             if (alternateValue != null) {
                 int origLength = linkString.length();
-                linkString = RFTArgumentUtils.unescapeArgument(alternateValue, 0, alternateValue.length());
+                linkString = ArgumentUtils.unescapeArgument(alternateValue, 0, alternateValue.length());
                 int lengthDiff = origLength - linkString.length();
                 linkRegion = new Region(argument.getArgCharPos() + lengthDiff, argument.getValue().length() - lengthDiff);
                 DefinitionFinder.acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordMatchVisitor(linkString, linkRegion, file, links));

@@ -19,8 +19,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import com.nitorcreations.robotframework.eclipseide.builder.parser.ParsedLineInfo;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.SeverityConfig;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEParser.ParsedLineInfo;
 import com.nitorcreations.robotframework.eclipseide.structure.DynamicParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.KeywordCall;
 import com.nitorcreations.robotframework.eclipseide.structure.LibraryFile;

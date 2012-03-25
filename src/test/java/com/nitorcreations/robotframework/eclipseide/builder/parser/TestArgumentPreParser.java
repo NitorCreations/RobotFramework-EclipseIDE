@@ -254,14 +254,14 @@ public class TestArgumentPreParser {
     }
 
     static void t(String input, ArgumentType... expected) throws Exception {
-        List<RFELine> lines = RobotFile.parse(input).getLines();
+        List<RobotLine> lines = RobotFile.parse(input).getLines();
         int p = 0;
-        for (RFELine rfeLine : lines) {
+        for (RobotLine rfeLine : lines) {
             for (ParsedString arg : rfeLine.arguments) {
                 if (arg.getType() != expected[p++]) {
                     StringBuilder sb = new StringBuilder();
                     sb.append("Error on line #" + rfeLine.lineNo + ": Expected types ").append(Arrays.toString(expected)).append(" but got:");
-                    for (RFELine rfeLine2 : lines) {
+                    for (RobotLine rfeLine2 : lines) {
                         sb.append('\n').append(rfeLine2);
                     }
                     throw new AssertionFailedError(sb.toString());

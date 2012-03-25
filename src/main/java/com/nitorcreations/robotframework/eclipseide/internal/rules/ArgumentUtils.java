@@ -15,7 +15,7 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.rules;
 
-public final class RFTArgumentUtils {
+public final class ArgumentUtils {
 
     /**
      * Finds the start of the next argument, when scanning from the offset
@@ -33,7 +33,7 @@ public final class RFTArgumentUtils {
      *         keywords are found.
      */
     public static int findNextArgumentStart(String line, int start) {
-        if (start == line.length() || !RFTWhitespace.isWhitespace(line.charAt(start))) {
+        if (start == line.length() || !RobotWhitespace.isWhitespace(line.charAt(start))) {
             return -1;
         }
 
@@ -44,7 +44,7 @@ public final class RFTArgumentUtils {
             // keyword call must be preceded by at least two whitespace when
             // first is
             // not a tab
-            if (start + 1 == line.length() || !RFTWhitespace.isWhitespace(line.charAt(start + 1))) {
+            if (start + 1 == line.length() || !RobotWhitespace.isWhitespace(line.charAt(start + 1))) {
                 return -1;
             }
             start += 2;
@@ -55,7 +55,7 @@ public final class RFTArgumentUtils {
             if (start == line.length()) {
                 return -1;
             }
-            if (!RFTWhitespace.isWhitespace(line.charAt(start))) {
+            if (!RobotWhitespace.isWhitespace(line.charAt(start))) {
                 break;
             }
             ++start;
@@ -81,7 +81,7 @@ public final class RFTArgumentUtils {
     public static int calculateArgumentLength(String line, int start) {
         int end = start;
         outer: while (true) {
-            while (end < line.length() && !RFTWhitespace.isWhitespace(line.charAt(end))) {
+            while (end < line.length() && !RobotWhitespace.isWhitespace(line.charAt(end))) {
                 switch (line.charAt(end)) {
                 case '#':
                     break outer;
@@ -108,7 +108,7 @@ public final class RFTArgumentUtils {
                 // framework trims all keywords)
                 break;
             }
-            if (RFTWhitespace.isWhitespace(line.charAt(end + 1))) {
+            if (RobotWhitespace.isWhitespace(line.charAt(end + 1))) {
                 // at least two successive whitespace
                 break;
             }

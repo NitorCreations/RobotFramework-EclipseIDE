@@ -17,9 +17,9 @@ package com.nitorcreations.robotframework.eclipseide.builder.util;
 
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 
-public class RFTDamagedRegion extends DirtyRegion {
+public class DamagedRegion extends DirtyRegion {
 
-    public RFTDamagedRegion(int offset, int length) {
+    public DamagedRegion(int offset, int length) {
         super(offset, length, null, null);
     }
 

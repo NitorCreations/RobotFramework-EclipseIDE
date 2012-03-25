@@ -15,7 +15,7 @@
  */
 package com.nitorcreations.robotframework.eclipseide.structure;
 
-import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTArgumentUtils;
+import com.nitorcreations.robotframework.eclipseide.internal.rules.ArgumentUtils;
 import com.nitorcreations.robotframework.eclipseide.structure.api.IParsedKeywordString;
 
 /**
@@ -112,7 +112,7 @@ public class ParsedString implements IParsedKeywordString {
     }
 
     public String getUnescapedValue() {
-        return RFTArgumentUtils.unescapeArgument(value, 0, value.length());
+        return ArgumentUtils.unescapeArgument(value, 0, value.length());
     }
 
 }

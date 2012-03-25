@@ -28,16 +28,12 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.eclipse.swt.graphics.Image;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
-import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordInlineArgumentMatcher;
-import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordInlineArgumentMatcher.KeywordMatchResult;
-import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTWhitespace;
-import com.nitorcreations.robotframework.eclipseide.internal.util.BaseDefinitionMatchVisitor;
+import com.nitorcreations.robotframework.eclipseide.internal.rules.RobotWhitespace;
 import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionFinder;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
@@ -61,8 +57,8 @@ public class RobotContentAssistant implements IContentAssistProcessor {
             return null;
         }
 
-        List<RFELine> lines = RobotFile.get(document).getLines();
-        RFELine rfeLine = lines.get(lineNo);
+        List<RobotLine> lines = RobotFile.get(document).getLines();
+        RobotLine rfeLine = lines.get(lineNo);
 
         // find the cursor location range inside the current line where keyword
         // completion proposals make sense
@@ -80,16 +76,16 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         return null;
     }
 
-    int findLeftmostKeywordPosition(IRegion lineInfo, String line, RFELine rfeLine) {
+    int findLeftmostKeywordPosition(IRegion lineInfo, String line, RobotLine rfeLine) {
         int startPos = 0;
         if (!rfeLine.arguments.isEmpty()) {
             startPos = rfeLine.arguments.get(0).getArgEndCharPos() - lineInfo.getOffset();
         }
-        startPos = RFTWhitespace.skipMinimumRobotWhitespace(line, startPos);
+        startPos = RobotWhitespace.skipMinimumRobotWhitespace(line, startPos);
         return startPos;
     }
 
-    int findRightmostKeywordPosition(IRegion lineInfo, String line, RFELine rfeLine) {
+    int findRightmostKeywordPosition(IRegion lineInfo, String line, RobotLine rfeLine) {
         int endPos = line.length();
         if (rfeLine.arguments.size() >= 3) {
             endPos = rfeLine.arguments.get(1).getArgEndCharPos() - lineInfo.getOffset();
@@ -97,7 +93,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         return endPos;
     }
 
-    private ICompletionProposal[] computeKeywordCompletionProposals(ITextViewer viewer, IDocument document, int documentOffset, final RFELine rfeLine, final int leftPos, final int rightPos, int replacePos) {
+    private ICompletionProposal[] computeKeywordCompletionProposals(ITextViewer viewer, IDocument document, int documentOffset, final RobotLine rfeLine, final int leftPos, final int rightPos, int replacePos) {
         final ParsedString arg1 = rfeLine.arguments.size() >= 2 ? rfeLine.arguments.get(1) : null;
         IFile file = ResourceManager.resolveFileFor(document);
         final List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
@@ -129,51 +125,6 @@ public class RobotContentAssistant implements IContentAssistProcessor {
             return false;
         }
         return proposals.get(0).getMatchKeyword().getValue().equals(arg1.getValue());
-    }
-
-    private static final class KeywordCompletionMatchVisitor extends BaseDefinitionMatchVisitor {
-        private final ParsedString substring;
-        private final int leftPos;
-        private final List<RobotCompletionProposal> proposals;
-        private final int rightPos;
-        private final RFELine rfeLine;
-        private final int replacePos;
-
-        KeywordCompletionMatchVisitor(IFile file, ParsedString substring, int leftPos, List<RobotCompletionProposal> proposals, int rightPos, RFELine rfeLine, int replacePos) {
-            super(file);
-            this.substring = substring;
-            this.leftPos = leftPos;
-            this.proposals = proposals;
-            this.rightPos = rightPos;
-            this.rfeLine = rfeLine;
-            this.replacePos = replacePos;
-        }
-
-        @Override
-        public VisitorInterest visitMatch(ParsedString match, IFile location) {
-            if (substring != null) {
-                // TODO this approach makes substring match any keyword with an
-                // inline variable
-                String lookFor = "${_}" + substring.getValue().toLowerCase() + "${_}";
-                if (KeywordMatchResult.DIFFERENT == KeywordInlineArgumentMatcher.match(match.getValue().toLowerCase(), lookFor)) {
-                    // if (!match.getValue().contains(substring.getValue())) {
-                    return VisitorInterest.CONTINUE;
-                }
-            }
-            Image image = null;
-            String displayString = getFilePrefix(location) + match.getValue();
-            String additionalProposalInfo = "I recommend: " + match.getValue();
-
-            String informationDisplayString = "You chose: " + match.getValue();
-
-            String replacementString = match.getValue();
-            int replacementOffset = rfeLine.lineCharPos + replacePos;
-            int replacementLength = rightPos - leftPos;
-            int cursorPosition = replacementString.length();
-
-            proposals.add(new RobotCompletionProposal(match, location, replacementString, replacementOffset, replacementLength, cursorPosition, image, displayString, informationDisplayString, additionalProposalInfo));
-            return VisitorInterest.CONTINUE;
-        }
     }
 
     // ctrl-shift-space information popups

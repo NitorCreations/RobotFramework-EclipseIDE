@@ -38,11 +38,11 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 /**
  * This class splits a robot text files into individual lines, each represented
- * by an instance of {@link RFELine}.
+ * by an instance of {@link RobotLine}.
  */
-public class RFELexer {
+public class Lexer {
 
-    private final List<RFELine> lexLines = new ArrayList<RFELine>();
+    private final List<RobotLine> lexLines = new ArrayList<RobotLine>();
     private final String filename;
     private final Reader filestream;
     private final IProgressMonitor monitor;
@@ -55,7 +55,7 @@ public class RFELexer {
      * @throws UnsupportedEncodingException
      * @throws CoreException
      */
-    public RFELexer(final IFile file, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
+    public Lexer(final IFile file, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
         this.filename = file.toString();
         this.filestream = new InputStreamReader(file.getContents(), file.getCharset());
         this.monitor = monitor == null ? new NullProgressMonitor() : monitor;
@@ -71,7 +71,7 @@ public class RFELexer {
      * @throws UnsupportedEncodingException
      * @throws FileNotFoundException
      */
-    public RFELexer(File file, String charset) throws UnsupportedEncodingException, FileNotFoundException {
+    public Lexer(File file, String charset) throws UnsupportedEncodingException, FileNotFoundException {
         this.filename = file.getName();
         this.filestream = new InputStreamReader(new FileInputStream(file), charset);
         this.monitor = new NullProgressMonitor();
@@ -85,7 +85,7 @@ public class RFELexer {
      * @throws UnsupportedEncodingException
      * @throws FileNotFoundException
      */
-    public RFELexer(String fileContents) throws UnsupportedEncodingException, FileNotFoundException {
+    public Lexer(String fileContents) throws UnsupportedEncodingException, FileNotFoundException {
         this.filename = "<in-memory file>";
         this.filestream = new StringReader(fileContents);
         this.monitor = new NullProgressMonitor();
@@ -96,13 +96,13 @@ public class RFELexer {
      * 
      * @param document
      */
-    public RFELexer(IDocument document) {
+    public Lexer(IDocument document) {
         this.filename = ResourceManager.resolveFileFor(document).toString();
         this.filestream = new StringReader(document.get());
         this.monitor = new NullProgressMonitor();
     }
 
-    public List<RFELine> lex() throws CoreException {
+    public List<RobotLine> lex() throws CoreException {
         try {
             System.out.println("Lexing " + filename);
             CountingLineReader contents = new CountingLineReader(filestream);
@@ -140,14 +140,14 @@ public class RFELexer {
     private void lexLine(String line, int lineNo, int charPos) throws CoreException {
         List<ParsedString> arguments = TxtArgumentSplitter.splitLineIntoArguments(line, charPos);
         if (arguments.isEmpty()) {
-            lexLines.add(new RFELine(lineNo, charPos, Collections.<ParsedString> emptyList()));
+            lexLines.add(new RobotLine(lineNo, charPos, Collections.<ParsedString> emptyList()));
             return;
         }
         if (arguments.size() == 1 && arguments.get(0).getValue().isEmpty()) {
-            lexLines.add(new RFELine(lineNo, charPos, Collections.<ParsedString> emptyList()));
+            lexLines.add(new RobotLine(lineNo, charPos, Collections.<ParsedString> emptyList()));
             return;
         }
-        lexLines.add(new RFELine(lineNo, charPos, arguments));
+        lexLines.add(new RobotLine(lineNo, charPos, arguments));
     }
 
 }

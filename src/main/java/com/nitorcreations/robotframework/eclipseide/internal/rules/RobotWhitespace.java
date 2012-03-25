@@ -15,7 +15,7 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.rules;
 
-public class RFTWhitespace {
+public class RobotWhitespace {
 
     public static boolean isWhitespace(char c) {
         return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
@@ -26,7 +26,7 @@ public class RFTWhitespace {
         int i;
         for (i = startPos; i < line.length(); ++i) {
             char ch = line.charAt(i);
-            if (!RFTWhitespace.isWhitespace(ch)) {
+            if (!RobotWhitespace.isWhitespace(ch)) {
                 // I don't think this should ever happen
                 return line.length() + 1;
             }

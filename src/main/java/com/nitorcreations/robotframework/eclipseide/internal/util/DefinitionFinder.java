@@ -21,8 +21,8 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest;
@@ -50,9 +50,9 @@ public class DefinitionFinder {
             IFile targetFile = unprocessedFiles.iterator().next();
             RobotFile robotFile = RobotFile.get(targetFile, true);
             if (robotFile != null) {
-                List<RFELine> lines = robotFile.getLines();
+                List<RobotLine> lines = robotFile.getLines();
                 VisitorInterest interest = VisitorInterest.CONTINUE;
-                for (RFELine line : lines) {
+                for (RobotLine line : lines) {
                     if (line.isType(lineType)) {
                         ParsedString firstArgument = line.arguments.get(0);
                         interest = visitor.visitMatch(firstArgument, targetFile);
@@ -64,7 +64,7 @@ public class DefinitionFinder {
                 if (interest == VisitorInterest.CONTINUE_TO_END_OF_CURRENT_FILE) {
                     return;
                 }
-                for (RFELine line : lines) {
+                for (RobotLine line : lines) {
                     if (line.isResourceSetting()) {
                         ParsedString secondArgument = line.arguments.get(1);
                         IFile resourceFile = ResourceManager.getRelativeFile(targetFile, secondArgument.getUnescapedValue());

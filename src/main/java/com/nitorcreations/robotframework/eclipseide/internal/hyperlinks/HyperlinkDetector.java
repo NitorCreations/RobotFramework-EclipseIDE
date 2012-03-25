@@ -26,14 +26,14 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public abstract class HyperlinkDetector implements IHyperlinkDetector {
 
-    protected List<RFELine> lines;
+    protected List<RobotLine> lines;
 
     /**
      * This detector assumes generated hyperlinks are static, i.e. the link
@@ -62,7 +62,7 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
         if (lineNumber >= lines.size()) {
             return null;
         }
-        RFELine rfeLine = lines.get(lineNumber);
+        RobotLine rfeLine = lines.get(lineNumber);
         ParsedString argument = rfeLine.getArgumentAt(offset);
         if (argument == null) {
             return null;
@@ -80,6 +80,6 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
         return links.toArray(new IHyperlink[links.size()]);
     }
 
-    protected abstract void getLinks(IFile file, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links);
+    protected abstract void getLinks(IFile file, RobotLine rfeLine, ParsedString argument, int offset, List<IHyperlink> links);
 
 }

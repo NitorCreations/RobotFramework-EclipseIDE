@@ -17,7 +17,7 @@ package com.nitorcreations.robotframework.eclipseide.builder.parser.state;
 
 import org.eclipse.core.runtime.CoreException;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEParser.ParsedLineInfo;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.ParsedLineInfo;
 import com.nitorcreations.robotframework.eclipseide.structure.UserKeywordDefinition;
 
 public class KeywordTableActive extends State {

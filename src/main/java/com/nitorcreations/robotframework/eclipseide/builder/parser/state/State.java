@@ -23,9 +23,9 @@ import java.util.Map;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 
-import com.nitorcreations.robotframework.eclipseide.builder.RFEBuilder;
+import com.nitorcreations.robotframework.eclipseide.builder.RobotBuilder;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.ParsedLineInfo;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.SeverityConfig;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEParser.ParsedLineInfo;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.util.ParserUtil;
 import com.nitorcreations.robotframework.eclipseide.structure.DynamicParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.KeywordCall;
@@ -172,7 +172,7 @@ public abstract class State {
         if (severity == SEVERITY_IGNORE) {
             return;
         }
-        IMarker marker = info.markerManager().createMarker(RFEBuilder.MARKER_TYPE);
+        IMarker marker = info.markerManager().createMarker(RobotBuilder.MARKER_TYPE);
         marker.setAttribute(IMarker.MESSAGE, error);
         marker.setAttribute(IMarker.SEVERITY, severity);
         marker.setAttribute(IMarker.LINE_NUMBER, info.lineNo);

@@ -23,7 +23,7 @@ import com.nitorcreations.robotframework.eclipseide.structure.api.IDynamicParsed
 import com.nitorcreations.robotframework.eclipseide.structure.api.IKeywordCall;
 import com.nitorcreations.robotframework.eclipseide.structure.api.IParsedKeywordString;
 import com.nitorcreations.robotframework.eclipseide.structure.api.IParsedString;
-import com.nitorcreations.robotframework.eclipseide.structure.api.IRFEFileContents;
+import com.nitorcreations.robotframework.eclipseide.structure.api.IRobotFileContents;
 import com.nitorcreations.robotframework.eclipseide.structure.api.ITestCaseDefinition;
 
 public class TestCaseDefinition extends KeywordSequence implements ITestCaseDefinition {
@@ -34,9 +34,9 @@ public class TestCaseDefinition extends KeywordSequence implements ITestCaseDefi
     private IKeywordCall testTeardown;
     private IParsedKeywordString template;
 
-    private final IRFEFileContents fileContents;
+    private final IRobotFileContents fileContents;
 
-    public TestCaseDefinition(IRFEFileContents fileContents) {
+    public TestCaseDefinition(IRobotFileContents fileContents) {
         this.fileContents = fileContents;
     }
 

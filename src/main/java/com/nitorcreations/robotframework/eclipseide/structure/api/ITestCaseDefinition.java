@@ -21,13 +21,13 @@ public interface ITestCaseDefinition extends IKeywordSequence {
 
     /**
      * @return may return the special keyword "NONE" to override suite-default
-     *         tags declared with {@link IRFEFileContents#getDefaultTestTags()}.
+     *         tags declared with {@link IRobotFileContents#getDefaultTestTags()}.
      */
     List<IDynamicParsedString> getDeclaredStaticTags();
 
     /**
-     * Calculated by combining {@link IRFEFileContents#getForcedTestTags()} with
-     * either {@link IRFEFileContents#getDefaultTestTags()} or
+     * Calculated by combining {@link IRobotFileContents#getForcedTestTags()} with
+     * either {@link IRobotFileContents#getDefaultTestTags()} or
      * {@link #getDeclaredStaticTags()}.
      * 
      * Please note that additional tags can be given from the command line, and

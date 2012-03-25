@@ -36,11 +36,11 @@ import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.KeywordC
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.ResourceHyperlinkDetector;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.VariableAccessHyperlinkDetector;
 
-public class RFTSourceViewerConfiguration extends TextSourceViewerConfiguration {
+public class RobotSourceViewerConfiguration extends TextSourceViewerConfiguration {
 
     private final ColorManager colorManager;
 
-    public RFTSourceViewerConfiguration(ColorManager colorManager) {
+    public RobotSourceViewerConfiguration(ColorManager colorManager) {
         this.colorManager = colorManager;
 
     }
@@ -76,7 +76,7 @@ public class RFTSourceViewerConfiguration extends TextSourceViewerConfiguration 
      */
     @Override
     public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
-        return new RFTPresentationReconciler(colorManager);
+        return new RobotPresentationReconciler(colorManager);
     }
 
     @Override

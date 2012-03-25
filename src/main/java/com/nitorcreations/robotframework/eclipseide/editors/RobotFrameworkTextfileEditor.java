@@ -42,8 +42,8 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
 
     public RobotFrameworkTextfileEditor() {
         colorManager = new ColorManager();
-        setSourceViewerConfiguration(new RFTSourceViewerConfiguration(colorManager));
-        setDocumentProvider(new RFTDocumentProvider(this));
+        setSourceViewerConfiguration(new RobotSourceViewerConfiguration(colorManager));
+        setDocumentProvider(new RobotDocumentProvider(this));
     }
 
     @Override

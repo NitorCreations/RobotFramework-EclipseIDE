@@ -22,9 +22,9 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
-import com.nitorcreations.robotframework.eclipseide.internal.rules.RFTVariableUtils;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
+import com.nitorcreations.robotframework.eclipseide.internal.rules.VariableUtils;
 import com.nitorcreations.robotframework.eclipseide.internal.util.BaseDefinitionMatchVisitor;
 import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionFinder;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
@@ -63,12 +63,12 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
     }
 
     @Override
-    protected void getLinks(IFile file, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
+    protected void getLinks(IFile file, RobotLine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
         // TODO: only check types that can contain variables
         String argumentValue = argument.getValue();
         int start = 0;
         while (true) {
-            int linkOffsetInArgument = RFTVariableUtils.findNextVariableStart(argumentValue, start);
+            int linkOffsetInArgument = VariableUtils.findNextVariableStart(argumentValue, start);
             if (linkOffsetInArgument == -1) {
                 // after last variable
                 return;
@@ -77,7 +77,7 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
                 // before next variable
                 return;
             }
-            int linkLength = RFTVariableUtils.calculateVariableLength(argumentValue, linkOffsetInArgument);
+            int linkLength = VariableUtils.calculateVariableLength(argumentValue, linkOffsetInArgument);
             if (offset < argument.getArgCharPos() + linkOffsetInArgument + linkLength) {
                 // pointing at variable access!
                 String linkString = argumentValue.substring(linkOffsetInArgument, linkOffsetInArgument + linkLength);

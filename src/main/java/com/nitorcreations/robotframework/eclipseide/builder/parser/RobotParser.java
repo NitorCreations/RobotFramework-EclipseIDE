@@ -18,43 +18,41 @@ package com.nitorcreations.robotframework.eclipseide.builder.parser;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 
-import com.nitorcreations.robotframework.eclipseide.builder.RFEBuilder;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.state.Ignore;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.state.State;
+import com.nitorcreations.robotframework.eclipseide.builder.util.FileMarkerManager;
+import com.nitorcreations.robotframework.eclipseide.builder.util.MarkerManager;
 import com.nitorcreations.robotframework.eclipseide.builder.util.NullMarkerManager;
 import com.nitorcreations.robotframework.eclipseide.structure.KeywordSequence;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
-import com.nitorcreations.robotframework.eclipseide.structure.RFEFileContents;
+import com.nitorcreations.robotframework.eclipseide.structure.RobotFileContents;
 import com.nitorcreations.robotframework.eclipseide.structure.api.IDynamicParsedString;
-import com.nitorcreations.robotframework.eclipseide.structure.api.IRFEFileContents;
+import com.nitorcreations.robotframework.eclipseide.structure.api.IRobotFileContents;
 
 /* TODO support the line continuation sequence "..." TODO support lists @{foo}, access @{foo}[0]
  * TODO support environment variables %{foo} TODO support builtin variables, section 2.5.4 TODO
  * since Robot Framework 2.6, support "number" variables ${123} ${0xFFF} ${0o777} ${0b111} TODO
  * since Robot Framework 2.5.5, all setting names can optionally include a colon at the end, for
  * example "Documentation:" */
-public class RFEParser {
+public class RobotParser {
 
     private final String filename;
     private final IProgressMonitor monitor;
     private final MarkerManager markerManager;
 
     private State state = Ignore.STATE;
-    final RFEFileContents fc = new RFEFileContents();
+    final RobotFileContents fc = new RobotFileContents();
     KeywordSequence testcaseOrKeywordBeingParsed;
     List<? extends IDynamicParsedString> listToContinue;
-    private List<RFELine> lexLines;
+    private final List<RobotLine> lexLines;
 
     public void setState(State newState, KeywordSequence testcaseOrKeywordBeingParsed) {
         state = newState;
@@ -70,50 +68,6 @@ public class RFEParser {
         listToContinue = null;
     }
 
-    public static interface MarkerManager {
-        /**
-         * @see IResource#createMarker(String)
-         */
-        public IMarker createMarker(String type) throws CoreException;
-
-        public void eraseMarkers();
-    }
-
-    public static class ParsedLineInfo {
-        final RFEParser parser;
-        public final List<ParsedString> arguments;
-        public final int lineNo;
-        public final int lineCharPos;
-
-        public ParsedLineInfo(RFEParser parser, List<ParsedString> arguments, int lineNo, int charPos) {
-            this.parser = parser;
-            this.arguments = Collections.unmodifiableList(arguments);
-            this.lineNo = lineNo;
-            this.lineCharPos = charPos;
-        }
-
-        public RFEFileContents fc() {
-            return parser.fc;
-        }
-
-        public void setState(State state, KeywordSequence testcaseOrKeywordBeingParsed) {
-            parser.setState(state, testcaseOrKeywordBeingParsed);
-        }
-
-        public void clearContinuationList() {
-            parser.clearContinuationList();
-        }
-
-        public void setContinuationList(List<? extends IDynamicParsedString> listToContinue) {
-            parser.setContinuationList(listToContinue);
-        }
-
-        public MarkerManager markerManager() {
-            return parser.markerManager;
-        }
-
-    }
-
     /**
      * For files being "compiled" from disk.
      * 
@@ -122,23 +76,11 @@ public class RFEParser {
      * @throws UnsupportedEncodingException
      * @throws CoreException
      */
-    public RFEParser(final IFile file, List<RFELine> lexLines, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
+    public RobotParser(final IFile file, List<RobotLine> lexLines, IProgressMonitor monitor) throws UnsupportedEncodingException, CoreException {
         this.filename = file.toString();
         this.lexLines = lexLines;
         this.monitor = monitor == null ? new NullProgressMonitor() : monitor;
-        this.markerManager = new MarkerManager() {
-            @Override
-            public IMarker createMarker(String type) throws CoreException {
-                return file.createMarker(type);
-            }
-
-            @Override
-            public void eraseMarkers() {
-                try {
-                    file.deleteMarkers(RFEBuilder.MARKER_TYPE, false, IResource.DEPTH_ZERO);
-                } catch (CoreException ce) {}
-            }
-        };
+        this.markerManager = new FileMarkerManager(file);
     }
 
     /**
@@ -153,7 +95,7 @@ public class RFEParser {
      * @throws UnsupportedEncodingException
      * @throws FileNotFoundException
      */
-    public RFEParser(File file, List<RFELine> lexLines, MarkerManager markerManager) throws UnsupportedEncodingException, FileNotFoundException {
+    public RobotParser(File file, List<RobotLine> lexLines, MarkerManager markerManager) throws UnsupportedEncodingException, FileNotFoundException {
         this.filename = file.getName();
         this.lexLines = lexLines;
         this.monitor = new NullProgressMonitor();
@@ -165,18 +107,18 @@ public class RFEParser {
      * 
      * @param document
      */
-    public RFEParser(IDocument document, List<RFELine> lexLines) {
+    public RobotParser(IDocument document, List<RobotLine> lexLines) {
         this.filename = "<document being edited>";
         this.lexLines = lexLines;
         this.monitor = new NullProgressMonitor();
         this.markerManager = new NullMarkerManager();
     }
 
-    public IRFEFileContents parse() throws CoreException {
+    public IRobotFileContents parse() throws CoreException {
         try {
             System.out.println("Parsing " + filename);
             markerManager.eraseMarkers();
-            for (RFELine line : lexLines) {
+            for (RobotLine line : lexLines) {
                 if (monitor.isCanceled()) {
                     return null;
                 }
@@ -206,6 +148,10 @@ public class RFEParser {
         if (oldState != state) {
             System.out.println("State " + oldState + " -> " + state);
         }
+    }
+
+    public MarkerManager getMarkerManager() {
+        return markerManager;
     }
 
 }

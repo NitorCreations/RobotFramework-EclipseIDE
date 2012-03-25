@@ -15,7 +15,6 @@
  */
 package com.nitorcreations.robotframework.eclipseide.builder;
 
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,72 +23,16 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IResourceDeltaVisitor;
-import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.nitorcreations.robotframework.eclipseide.Activator;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEParser;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotParser;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 
-public class RFEBuilder extends IncrementalProjectBuilder {
-
-    abstract class BaseResourceVisitor {
-        final Set<IFile> visitedFiles = new LinkedHashSet<IFile>();
-    }
-
-    class ResourceVisitor extends BaseResourceVisitor implements IResourceVisitor {
-
-        private final IProgressMonitor monitor;
-
-        public ResourceVisitor(IProgressMonitor monitor) {
-            this.monitor = monitor;
-        }
-
-        @Override
-        public boolean visit(IResource resource) {
-            parse(visitedFiles, resource, monitor);
-            // return true to continue visiting children.
-            return true;
-        }
-
-    }
-
-    class ResourceDeltaVisitor extends BaseResourceVisitor implements IResourceDeltaVisitor {
-
-        private final IProgressMonitor monitor;
-
-        public ResourceDeltaVisitor(IProgressMonitor monitor) {
-            this.monitor = monitor;
-        }
-
-        @Override
-        public boolean visit(IResourceDelta delta) throws CoreException {
-            IResource resource = delta.getResource();
-            switch (delta.getKind()) {
-            case IResourceDelta.ADDED:
-                // handle added resource
-                parse(visitedFiles, resource, monitor);
-                break;
-            case IResourceDelta.REMOVED:
-                // handle removed resource
-                if (resource instanceof IFile) {
-                    RobotFile.erase((IFile) resource);
-                }
-                break;
-            case IResourceDelta.CHANGED:
-                // handle changed resource
-                parse(visitedFiles, resource, monitor);
-                break;
-            }
-            // return true to continue visiting children.
-            return true;
-        }
-
-    }
+public class RobotBuilder extends IncrementalProjectBuilder {
 
     public static final String BUILDER_ID = Activator.PLUGIN_ID + ".rfeBuilder";
 
@@ -112,7 +55,7 @@ public class RFEBuilder extends IncrementalProjectBuilder {
 
     protected void fullBuild(final IProgressMonitor monitor) throws CoreException {
         System.out.println("<full-build>");
-        ResourceVisitor visitor = new ResourceVisitor(monitor);
+        ResourceVisitor visitor = new ResourceVisitor(this, monitor);
         getProject().accept(visitor);
         updateProblems(visitor.visitedFiles, monitor);
         System.out.println("</full-build>");
@@ -120,7 +63,7 @@ public class RFEBuilder extends IncrementalProjectBuilder {
 
     protected void incrementalBuild(IResourceDelta delta, IProgressMonitor monitor) throws CoreException {
         System.out.println("<incremental-build>");
-        ResourceDeltaVisitor visitor = new ResourceDeltaVisitor(monitor);
+        ResourceDeltaVisitor visitor = new ResourceDeltaVisitor(this, monitor);
         delta.accept(visitor);
         updateProblems(visitor.visitedFiles, monitor);
         System.out.println("</incremental-build>");
@@ -141,7 +84,7 @@ public class RFEBuilder extends IncrementalProjectBuilder {
         IFile file = (IFile) resource;
         if (!file.getName().endsWith(".txt") || file.getProjectRelativePath().toPortableString().startsWith("target/")) {
             try {
-                file.deleteMarkers(RFEBuilder.MARKER_TYPE, false, IResource.DEPTH_ZERO);
+                file.deleteMarkers(RobotBuilder.MARKER_TYPE, false, IResource.DEPTH_ZERO);
             } catch (CoreException e) {
                 // ignore
             }
@@ -164,8 +107,8 @@ public class RFEBuilder extends IncrementalProjectBuilder {
         // visited files list
         for (IFile file : visitedFiles) {
             try {
-                List<RFELine> lines = RobotFile.get(file, false).getLines();
-                new RFEParser(file, lines, monitor).parse();
+                List<RobotLine> lines = RobotFile.get(file, false).getLines();
+                new RobotParser(file, lines, monitor).parse();
             } catch (Exception e) {
                 e.printStackTrace();
             }

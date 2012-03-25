@@ -16,7 +16,6 @@
 package com.nitorcreations.robotframework.eclipseide.editors;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -27,27 +26,28 @@ import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.rules.Token;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
+import com.nitorcreations.robotframework.eclipseide.editors.util.TokenQueue;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 // TODO Variable references
-public class RFTColoringScanner implements ITokenScanner {
+public class ColoringScanner implements ITokenScanner {
 
     private final ColorManager manager;
     private final TokenQueue tokenQueue = new TokenQueue();
 
     // private IDocument document;
-    private List<RFELine> lines;
-    private ListIterator<RFELine> lineIterator;
-    private RFELine line;
+    private List<RobotLine> lines;
+    private ListIterator<RobotLine> lineIterator;
+    private RobotLine line;
     private int argOff;
     private int argLen;
 
     // private RFELine lastParsedLine;
 
-    public RFTColoringScanner(ColorManager colorManager) {
+    public ColoringScanner(ColorManager colorManager) {
         this.manager = colorManager;
         // IToken tokARGUMENT = new Token(new
         // TextAttribute(manager.getColor(IRFTColorConstants.ARGUMENT)));
@@ -112,9 +112,9 @@ public class RFTColoringScanner implements ITokenScanner {
         argOff = 0;
     }
 
-    private RFELine getNextNonemptyLine() {
+    private RobotLine getNextNonemptyLine() {
         while (lineIterator.hasNext()) {
-            RFELine line = lineIterator.next();
+            RobotLine line = lineIterator.next();
             if (!line.arguments.isEmpty()) {
                 return line;
             }
@@ -160,71 +160,6 @@ public class RFTColoringScanner implements ITokenScanner {
             tokenQueue.add(arg, token);
         }
         prepareNextToken();
-    }
-
-    static class TokenQueue {
-        private static class PendingToken {
-            final IToken token;
-            final int len;
-
-            public PendingToken(IToken token, int len) {
-                assert token != null;
-                this.token = token;
-                this.len = len;
-            }
-        }
-
-        private final List<PendingToken> pendingTokens = new LinkedList<PendingToken>();
-        private int nextTokenStart = 0;
-        private int curTokenOff, curTokenLen;
-
-        public void reset() {
-            nextTokenStart = 0;
-            assert pendingTokens.isEmpty();
-            pendingTokens.clear();
-            curTokenOff = curTokenLen = 0;
-        }
-
-        public IToken take() {
-            PendingToken removed = pendingTokens.remove(0);
-            curTokenOff += curTokenLen;
-            curTokenLen = removed.len;
-            assert removed.token != null;
-            return removed.token;
-        }
-
-        public void addEof() {
-            addToken(0, Token.EOF);
-        }
-
-        public boolean hasPending() {
-            return !pendingTokens.isEmpty();
-        }
-
-        public void add(ParsedString arg, IToken token) {
-            add(arg.getArgCharPos(), arg.getArgEndCharPos(), token);
-        }
-
-        public void add(int off, int eoff, IToken token) {
-            if (off > nextTokenStart) {
-                addToken(off - nextTokenStart, Token.UNDEFINED);
-            }
-            addToken(eoff - off, token);
-            nextTokenStart = eoff;
-        }
-
-        private void addToken(int len, IToken token) {
-            pendingTokens.add(new PendingToken(token, len));
-        }
-
-        public int getLastTakenTokenOffset() {
-            return curTokenOff;
-        }
-
-        public int getLastTakenTokenLength() {
-            return curTokenLen;
-        }
-
     }
 
     @Override

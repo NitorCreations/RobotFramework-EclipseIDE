@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -71,9 +70,9 @@ public class ArgumentPreParser {
         keywordSequenceSettingTypes.put("[Return]", SettingType.STRING);
     }
 
-    private List<RFELine> lines;
-    private ListIterator<RFELine> lineIterator;
-    private RFELine line;
+    private List<RobotLine> lines;
+    private ListIterator<RobotLine> lineIterator;
+    private RobotLine line;
     private int argOff;
     private int argLen;
     private boolean lineEndsWithComment;
@@ -98,7 +97,7 @@ public class ArgumentPreParser {
 
     public ArgumentPreParser() {}
 
-    public void setRange(List<RFELine> lines) {
+    public void setRange(List<RobotLine> lines) {
         this.lines = lines;
         lineIterator = lines.listIterator();
         lastRealType = LineType.IGNORE;
@@ -141,9 +140,9 @@ public class ArgumentPreParser {
         argOff = 0;
     }
 
-    private RFELine getNextNonemptyLine() {
+    private RobotLine getNextNonemptyLine() {
         while (lineIterator.hasNext()) {
-            RFELine line = lineIterator.next();
+            RobotLine line = lineIterator.next();
             if (!line.arguments.isEmpty()) {
                 return line;
             }
@@ -330,8 +329,8 @@ public class ArgumentPreParser {
         }
     }
 
-    int determineContinuationLineArgOff(RFELine theLine) {
-        return theLine.arguments.get(0).getValue().equals(RFEPreParser.CONTINUATION_STR) ? 1 : 2;
+    int determineContinuationLineArgOff(RobotLine theLine) {
+        return theLine.arguments.get(0).getValue().equals(PreParser.CONTINUATION_STR) ? 1 : 2;
     }
 
     private void parseSettingArgs() {
@@ -486,7 +485,7 @@ public class ArgumentPreParser {
 
     private boolean isTemplateActive() {
         if (localTemplateAtLine != NO_TEMPLATE) {
-            RFELine line = lines.get(localTemplateAtLine - 1);
+            RobotLine line = lines.get(localTemplateAtLine - 1);
             if (line.arguments.size() >= 3) {
                 return !line.arguments.get(2).equals(NO_TEMPLATE_STR);
             }
@@ -526,7 +525,7 @@ public class ArgumentPreParser {
         }
 
         outer: for (int lineIdx = lineIterator.nextIndex(); lineIdx < lines.size(); ++lineIdx) {
-            RFELine nextLine = lines.get(lineIdx);
+            RobotLine nextLine = lines.get(lineIdx);
             LineType type = nextLine.type;
             switch (type) {
             case COMMENT_LINE:
@@ -547,7 +546,7 @@ public class ArgumentPreParser {
         return initialKeywordCallState == KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT ? KeywordCallState.KEYWORD_NOT_FOR_NOINDENT : KeywordCallState.KEYWORD;
     }
 
-    private KeywordCallState scanLine(KeywordCallState initialKeywordCallState, RFELine scanLine, int scanOff) {
+    private KeywordCallState scanLine(KeywordCallState initialKeywordCallState, RobotLine scanLine, int scanOff) {
         assert initialKeywordCallState.isUndetermined();
         for (; scanOff < scanLine.arguments.size(); ++scanOff) {
             ParsedString parsedString = scanLine.arguments.get(scanOff);
@@ -585,7 +584,7 @@ public class ArgumentPreParser {
     }
 
     private void lookForGlobalTestTemplate() {
-        for (RFELine line : lines) {
+        for (RobotLine line : lines) {
             if (line.isType(LineType.SETTING_TABLE_LINE)) {
                 if (line.arguments.get(0).equals("Test Template")) {
                     globalTemplateAtLine = line.lineNo;
@@ -598,7 +597,7 @@ public class ArgumentPreParser {
     private void lookForLocalTestTemplate() {
         localTemplateAtLine = NO_TEMPLATE;
         outer: for (int lineIdx = lineIterator.nextIndex() - 1; lineIdx < lines.size(); ++lineIdx) {
-            RFELine line = lines.get(lineIdx);
+            RobotLine line = lines.get(lineIdx);
             assert line.lineNo - 1 == lineIdx;
             switch (line.type) {
             case TESTCASE_TABLE_TESTCASE_BEGIN:

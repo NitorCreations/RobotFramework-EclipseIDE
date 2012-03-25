@@ -23,10 +23,10 @@ import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.ITokenScanner;
 
-public class RFTPresentationReconciler extends PresentationReconciler {
+public class RobotPresentationReconciler extends PresentationReconciler {
 
-    public RFTPresentationReconciler(ColorManager colorManager) {
-        ITokenScanner coloringScanner = new RFTColoringScanner(colorManager);
+    public RobotPresentationReconciler(ColorManager colorManager) {
+        ITokenScanner coloringScanner = new ColoringScanner(colorManager);
         DefaultDamagerRepairer dr = new DefaultDamagerRepairer(coloringScanner) {
             @Override
             public IRegion getDamageRegion(ITypedRegion partition, DocumentEvent e, boolean documentPartitioningChanged) {

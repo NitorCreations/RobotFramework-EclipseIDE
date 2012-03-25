@@ -15,7 +15,7 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.rules;
 
-public final class RFTVariableUtils {
+public final class VariableUtils {
 
     /**
      * Finds the start of the next variable, when scanning from the offset

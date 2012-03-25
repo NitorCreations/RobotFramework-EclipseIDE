@@ -21,8 +21,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFEParser.MarkerManager;
-
 public class NullMarkerManager implements MarkerManager {
 
     @Override
@@ -36,8 +34,7 @@ public class NullMarkerManager implements MarkerManager {
             }
 
             @Override
-            public void delete() throws CoreException {
-            }
+            public void delete() throws CoreException {}
 
             @Override
             public boolean exists() {
@@ -100,30 +97,24 @@ public class NullMarkerManager implements MarkerManager {
             }
 
             @Override
-            public void setAttribute(String attributeName, int value) throws CoreException {
-            }
+            public void setAttribute(String attributeName, int value) throws CoreException {}
 
             @Override
-            public void setAttribute(String attributeName, Object value) throws CoreException {
-            }
+            public void setAttribute(String attributeName, Object value) throws CoreException {}
 
             @Override
-            public void setAttribute(String attributeName, boolean value) throws CoreException {
-            }
+            public void setAttribute(String attributeName, boolean value) throws CoreException {}
 
             @Override
-            public void setAttributes(String[] attributeNames, Object[] values) throws CoreException {
-            }
+            public void setAttributes(String[] attributeNames, Object[] values) throws CoreException {}
 
             @Override
-            public void setAttributes(Map<String, ? extends Object> attributes) throws CoreException {
-            }
+            public void setAttributes(Map<String, ? extends Object> attributes) throws CoreException {}
 
         };
     }
 
     @Override
-    public void eraseMarkers() {
-    }
+    public void eraseMarkers() {}
 
 }

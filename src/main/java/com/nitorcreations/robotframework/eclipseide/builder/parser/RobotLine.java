@@ -20,17 +20,13 @@ import java.util.List;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
-public class RFELine {
+public class RobotLine {
     public final int lineNo;
     public final int lineCharPos;
     public final List<ParsedString> arguments;
     public LineType type;
 
-    public enum LineType {
-        IGNORE, IGNORE_TABLE, SETTING_TABLE_BEGIN, SETTING_TABLE_LINE, VARIABLE_TABLE_BEGIN, VARIABLE_TABLE_LINE, TESTCASE_TABLE_BEGIN, TESTCASE_TABLE_IGNORE, TESTCASE_TABLE_TESTCASE_BEGIN, TESTCASE_TABLE_TESTCASE_LINE, KEYWORD_TABLE_BEGIN, KEYWORD_TABLE_IGNORE, KEYWORD_TABLE_KEYWORD_BEGIN, KEYWORD_TABLE_KEYWORD_LINE, CONTINUATION_LINE, COMMENT_LINE,
-    }
-
-    public RFELine(int lineNo, int lineCharPos, List<ParsedString> arguments) {
+    public RobotLine(int lineNo, int lineCharPos, List<ParsedString> arguments) {
         this.lineNo = lineNo;
         this.lineCharPos = lineCharPos;
         this.arguments = arguments;

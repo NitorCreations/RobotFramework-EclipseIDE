@@ -22,7 +22,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
@@ -36,7 +36,7 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 public class ResourceHyperlinkDetector extends HyperlinkDetector {
 
     @Override
-    protected void getLinks(IFile file, RFELine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
+    protected void getLinks(IFile file, RobotLine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
         boolean isResourceSetting = rfeLine.isResourceSetting();
         boolean isVariableSetting = rfeLine.isVariableSetting();
         if (!isResourceSetting && !isVariableSetting) {

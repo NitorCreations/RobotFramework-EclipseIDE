@@ -21,23 +21,38 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RFELine.LineType;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.util.ParserUtil;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 // TODO case sensitivity
-public class RFEPreParser {
+public class PreParser {
 
     public static final String CONTINUATION_STR = "...";
     private final String filename;
-    private final List<RFELine> lines;
+    private final List<RobotLine> lines;
+    private LineType prevLineType = LineType.IGNORE;
+    private static final Map<String, LineType> tableNameToType = new HashMap<String, LineType>();
+
+    static {
+        tableNameToType.put("setting", LineType.SETTING_TABLE_BEGIN);
+        tableNameToType.put("settings", LineType.SETTING_TABLE_BEGIN);
+        tableNameToType.put("metadata", LineType.SETTING_TABLE_BEGIN);
+        tableNameToType.put("variable", LineType.VARIABLE_TABLE_BEGIN);
+        tableNameToType.put("variables", LineType.VARIABLE_TABLE_BEGIN);
+        tableNameToType.put("testcase", LineType.TESTCASE_TABLE_BEGIN);
+        tableNameToType.put("testcases", LineType.TESTCASE_TABLE_BEGIN);
+        tableNameToType.put("keyword", LineType.KEYWORD_TABLE_BEGIN);
+        tableNameToType.put("keywords", LineType.KEYWORD_TABLE_BEGIN);
+        tableNameToType.put("userkeyword", LineType.KEYWORD_TABLE_BEGIN);
+        tableNameToType.put("userkeywords", LineType.KEYWORD_TABLE_BEGIN);
+    }
 
     /**
      * For documents being edited.
      * 
      * @param document
      */
-    public RFEPreParser(String filename, List<RFELine> lines) {
+    public PreParser(String filename, List<RobotLine> lines) {
         this.filename = filename;
         this.lines = lines;
     }
@@ -45,7 +60,7 @@ public class RFEPreParser {
     public void preParse() throws CoreException {
         try {
             System.out.println("Preparsing " + filename);
-            for (RFELine line : lines) {
+            for (RobotLine line : lines) {
                 try {
                     parseLine(line);
                 } catch (CoreException e) {
@@ -66,9 +81,7 @@ public class RFEPreParser {
     // TESTCASE_TABLE_ACTIVE, KEYWORD_TABLE_INITIAL, KEYWORD_TABLE_ACTIVE,
     // }
 
-    private LineType prevLineType = LineType.IGNORE;
-
-    private void parseLine(RFELine line) throws CoreException {
+    private void parseLine(RobotLine line) throws CoreException {
         if (line.arguments.isEmpty()) {
             line.type = LineType.IGNORE;
             return;
@@ -99,7 +112,7 @@ public class RFEPreParser {
         prevLineType = lineType;
     }
 
-    private LineType tryParseTableSwitch(RFELine line) throws CoreException {
+    private LineType tryParseTableSwitch(RobotLine line) throws CoreException {
         ParsedString tableArgument = line.arguments.get(0);
         if (!tableArgument.getValue().startsWith("*")) {
             return null;
@@ -112,23 +125,7 @@ public class RFEPreParser {
         return curType;
     }
 
-    private static final Map<String, LineType> tableNameToType = new HashMap<String, LineType>();
-
-    static {
-        tableNameToType.put("setting", LineType.SETTING_TABLE_BEGIN);
-        tableNameToType.put("settings", LineType.SETTING_TABLE_BEGIN);
-        tableNameToType.put("metadata", LineType.SETTING_TABLE_BEGIN);
-        tableNameToType.put("variable", LineType.VARIABLE_TABLE_BEGIN);
-        tableNameToType.put("variables", LineType.VARIABLE_TABLE_BEGIN);
-        tableNameToType.put("testcase", LineType.TESTCASE_TABLE_BEGIN);
-        tableNameToType.put("testcases", LineType.TESTCASE_TABLE_BEGIN);
-        tableNameToType.put("keyword", LineType.KEYWORD_TABLE_BEGIN);
-        tableNameToType.put("keywords", LineType.KEYWORD_TABLE_BEGIN);
-        tableNameToType.put("userkeyword", LineType.KEYWORD_TABLE_BEGIN);
-        tableNameToType.put("userkeywords", LineType.KEYWORD_TABLE_BEGIN);
-    }
-
-    private boolean tryParseContinuationLine(RFELine line) throws CoreException {
+    private boolean tryParseContinuationLine(RobotLine line) throws CoreException {
         ParsedString arg = line.arguments.get(0);
         if (!arg.getValue().equals(CONTINUATION_STR)) {
             // first column not continuation, try second-column continuation

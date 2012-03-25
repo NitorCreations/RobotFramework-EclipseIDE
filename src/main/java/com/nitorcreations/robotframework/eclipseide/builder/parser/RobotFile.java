@@ -34,24 +34,15 @@ import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 
 public class RobotFile {
 
-    static class FileInfo {
-        RobotFile onDisk;
-        RobotFile inEditor;
-
-        boolean isEmpty() {
-            return onDisk == null && inEditor == null;
-        }
-    }
-
     private static final Map<IFile, FileInfo> FILES = Collections.synchronizedMap(new HashMap<IFile, FileInfo>());
 
-    private final List<RFELine> lines;
+    private final List<RobotLine> lines;
 
-    private RobotFile(List<RFELine> lines) {
+    private RobotFile(List<RobotLine> lines) {
         this.lines = lines;
     }
 
-    public List<RFELine> getLines() {
+    public List<RobotLine> getLines() {
         return lines;
     }
 
@@ -116,7 +107,7 @@ public class RobotFile {
         }
         RobotFile parsed;
         try {
-            parsed = parse(file.toString(), new RFELexer(file, monitor));
+            parsed = parse(file.toString(), new Lexer(file, monitor));
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -135,7 +126,7 @@ public class RobotFile {
         if (useCached && fileInfo != null && fileInfo.inEditor != null) {
             return fileInfo.inEditor;
         }
-        RobotFile parsed = parse(file.toString(), new RFELexer(document));
+        RobotFile parsed = parse(file.toString(), new Lexer(document));
         if (fileInfo == null) {
             fileInfo = new FileInfo();
             FILES.put(file, fileInfo);
@@ -146,19 +137,19 @@ public class RobotFile {
 
     public static RobotFile parse(String fileContents) {
         try {
-            return parse("<in-memory file>", new RFELexer(fileContents));
+            return parse("<in-memory file>", new Lexer(fileContents));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        return new RobotFile(Collections.<RFELine> emptyList());
+        return new RobotFile(Collections.<RobotLine> emptyList());
     }
 
-    private static RobotFile parse(String filename, RFELexer lexer) {
+    private static RobotFile parse(String filename, Lexer lexer) {
         try {
-            List<RFELine> lines = lexer.lex();
-            new RFEPreParser(filename, lines).preParse();
+            List<RobotLine> lines = lexer.lex();
+            new PreParser(filename, lines).preParse();
             ArgumentPreParser app = new ArgumentPreParser();
             app.setRange(lines);
             app.parseAll();
@@ -166,6 +157,6 @@ public class RobotFile {
         } catch (CoreException e) {
             e.printStackTrace();
         }
-        return new RobotFile(Collections.<RFELine> emptyList());
+        return new RobotFile(Collections.<RobotLine> emptyList());
     }
 }

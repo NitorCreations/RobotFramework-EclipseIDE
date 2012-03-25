@@ -32,7 +32,7 @@
             callOnEmptyDelta="false"
             hasNature="true">
          <run
-               class="com.nitorcreations.robotframework.eclipseide.builder.RFEBuilder">
+               class="com.nitorcreations.robotframework.eclipseide.builder.RobotBuilder">
          </run>
       </builder>
    </extension>
@@ -42,7 +42,7 @@
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="com.nitorcreations.robotframework.eclipseide.builder.RFENature">
+               class="com.nitorcreations.robotframework.eclipseide.builder.RobotNature">
          </run>
       </runtime>
       <builder

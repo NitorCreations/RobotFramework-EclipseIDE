@@ -23,7 +23,7 @@ import java.util.Map;
  * 
  * @author xkr47
  */
-public interface IRFEFileContents {
+public interface IRobotFileContents {
 
     // TODO check the IParsedString:s in all interfaces, could some of them be
     // dynamic ?
