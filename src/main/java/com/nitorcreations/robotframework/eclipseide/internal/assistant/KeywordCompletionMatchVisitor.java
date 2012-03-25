@@ -31,24 +31,23 @@ public class KeywordCompletionMatchVisitor extends BaseDefinitionMatchVisitor {
     private final int leftPos;
     private final List<RobotCompletionProposal> proposals;
     private final int rightPos;
-    private final RobotLine rfeLine;
+    private final RobotLine robotLine;
     private final int replacePos;
 
-    KeywordCompletionMatchVisitor(IFile file, ParsedString substring, int leftPos, List<RobotCompletionProposal> proposals, int rightPos, RobotLine rfeLine, int replacePos) {
+    KeywordCompletionMatchVisitor(IFile file, ParsedString substring, int leftPos, List<RobotCompletionProposal> proposals, int rightPos, RobotLine robotLine, int replacePos) {
         super(file);
         this.substring = substring;
         this.leftPos = leftPos;
         this.proposals = proposals;
         this.rightPos = rightPos;
-        this.rfeLine = rfeLine;
+        this.robotLine = robotLine;
         this.replacePos = replacePos;
     }
 
     @Override
     public VisitorInterest visitMatch(ParsedString match, IFile location) {
         if (substring != null) {
-            // TODO this approach makes substring match any keyword with an
-            // inline variable
+            // TODO this approach makes substring match any keyword with an inline variable
             String lookFor = "${_}" + substring.getValue().toLowerCase() + "${_}";
             if (KeywordMatchResult.DIFFERENT == KeywordInlineArgumentMatcher.match(match.getValue().toLowerCase(), lookFor)) {
                 // if (!match.getValue().contains(substring.getValue())) {
@@ -58,14 +57,11 @@ public class KeywordCompletionMatchVisitor extends BaseDefinitionMatchVisitor {
         Image image = null;
         String displayString = getFilePrefix(location) + match.getValue();
         String additionalProposalInfo = "I recommend: " + match.getValue();
-
         String informationDisplayString = "You chose: " + match.getValue();
-
         String replacementString = match.getValue();
-        int replacementOffset = rfeLine.lineCharPos + replacePos;
+        int replacementOffset = robotLine.lineCharPos + replacePos;
         int replacementLength = rightPos - leftPos;
         int cursorPosition = replacementString.length();
-
         proposals.add(new RobotCompletionProposal(match, location, replacementString, replacementOffset, replacementLength, cursorPosition, image, displayString, informationDisplayString, additionalProposalInfo));
         return VisitorInterest.CONTINUE;
     }
