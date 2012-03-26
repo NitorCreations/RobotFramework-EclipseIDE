@@ -56,7 +56,10 @@ public class CountingLineReader {
             sb.delete(0, lf + 1);
             charsConsumed += lf + 1;
         }
-        return ret;
+        if (ret == null) {
+            return null;
+        }
+        return ret.replace("\r", "");
     }
 
     private boolean fill() throws IOException {
