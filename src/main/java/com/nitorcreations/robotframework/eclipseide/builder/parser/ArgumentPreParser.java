@@ -416,14 +416,12 @@ public class ArgumentPreParser {
     }
 
     /**
-     * Before this is called the first time, keywordSequence_keywordCallState
-     * must be initialized to either UNDETERMINED, UNDETERMINED_NOINDENT,
-     * KEYWORD_NOINDENT, KEYWORD_NOT_FOR_NOINDENT
+     * Before this is called the first time, keywordSequence_keywordCallState must be initialized to either
+     * UNDETERMINED, UNDETERMINED_NOINDENT, KEYWORD_NOINDENT, KEYWORD_NOT_FOR_NOINDENT
      * 
      * @param templatesEnabled
-     *            whether the template flags {@link #globalTemplateAtLine} and
-     *            {@link #localTemplateAtLine} affect keyword calls during this
-     *            invocation
+     *            whether the template flags {@link #globalTemplateAtLine} and {@link #localTemplateAtLine} affect
+     *            keyword calls during this invocation
      */
     private void parseKeywordCall(boolean templatesEnabled) {
         if (keywordSequence_keywordCallState.isUndetermined()) {
@@ -511,13 +509,10 @@ public class ArgumentPreParser {
 
     KeywordCallState determineInitialKeywordCallState(KeywordCallState initialKeywordCallState) {
         /*
-         * in this particular case, we need to do lookahead to see if we have
-         * zero or more direct variable references, followed by a variable
-         * reference suffixed with an equal sign. If this is the case, those
-         * variables will be considered as lvalues and the following argument as
-         * a keyword.
+         * in this particular case, we need to do lookahead to see if we have zero or more direct variable references,
+         * followed by a variable reference suffixed with an equal sign. If this is the case, those variables will be
+         * considered as lvalues and the following argument as a keyword.
          */
-        // TODO if template then go directly to ARGS state
 
         KeywordCallState keywordCallState = scanLine(initialKeywordCallState, line, argOff);
         if (!keywordCallState.isUndetermined()) {
