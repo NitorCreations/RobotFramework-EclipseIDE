@@ -20,25 +20,16 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
-public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
+public class VariableCompletionMatchVisitorProvider extends CompletionMatchVisitorProvider {
 
-    public VariableCompletionMatchVisitor(IFile file, ParsedString argument, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
-        super(file, argument, proposals, replacementRegion);
+    public VariableCompletionMatchVisitorProvider(IFile file, IRegion replacementRegion) {
+        super(file, replacementRegion);
     }
 
     @Override
-    public VisitorInterest visitMatch(ParsedString match, IFile location) {
-        if (match.getUnescapedValue().toLowerCase().contains(substring.getUnescapedValue().toLowerCase())) {
-            addProposal(match, location);
-        }
-        return VisitorInterest.CONTINUE;
-    }
-
-    @Override
-    public LineType getWantedLineType() {
-        return LineType.VARIABLE_TABLE_LINE;
+    public CompletionMatchVisitor get(ParsedString argument, List<RobotCompletionProposal> proposals) {
+        return new VariableCompletionMatchVisitor(file, argument, proposals, replacementRegion);
     }
 }

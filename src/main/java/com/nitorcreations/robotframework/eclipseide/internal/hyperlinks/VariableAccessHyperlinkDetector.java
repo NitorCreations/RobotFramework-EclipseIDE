@@ -60,6 +60,11 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
             }
             return VisitorInterest.CONTINUE;
         }
+
+        @Override
+        public LineType getWantedLineType() {
+            return LineType.VARIABLE_TABLE_LINE;
+        }
     }
 
     @Override
@@ -82,7 +87,7 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
                 // pointing at variable access!
                 String linkString = argumentValue.substring(linkOffsetInArgument, linkOffsetInArgument + linkLength);
                 IRegion linkRegion = new Region(argument.getArgCharPos() + linkOffsetInArgument, linkLength);
-                DefinitionFinder.acceptMatches(file, LineType.VARIABLE_TABLE_LINE, new VariableMatchVisitor(linkString, linkRegion, file, links));
+                DefinitionFinder.acceptMatches(file, new VariableMatchVisitor(linkString, linkRegion, file, links));
                 return;
             }
             start = linkOffsetInArgument + linkLength;

@@ -17,6 +17,7 @@ package com.nitorcreations.robotframework.eclipseide.internal.util;
 
 import org.eclipse.core.resources.IFile;
 
+import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public interface DefinitionMatchVisitor {
@@ -27,4 +28,5 @@ public interface DefinitionMatchVisitor {
 
     VisitorInterest visitMatch(ParsedString match, IFile location);
 
+    LineType getWantedLineType();
 }

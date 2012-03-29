@@ -20,14 +20,15 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 
+import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordInlineArgumentMatcher;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordMatchResult;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
 
-    public KeywordCompletionMatchVisitor(IFile file, ParsedString substring, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
-        super(file, substring, proposals, replacementRegion);
+    public KeywordCompletionMatchVisitor(IFile file, ParsedString argument, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
+        super(file, argument, proposals, replacementRegion);
     }
 
     @Override
@@ -42,5 +43,10 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
         }
         addProposal(match, location);
         return VisitorInterest.CONTINUE;
+    }
+
+    @Override
+    public LineType getWantedLineType() {
+        return LineType.KEYWORD_TABLE_KEYWORD_BEGIN;
     }
 }

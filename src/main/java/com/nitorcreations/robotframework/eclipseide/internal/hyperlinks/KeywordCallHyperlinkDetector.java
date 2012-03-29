@@ -36,8 +36,7 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
  * This hyperlink detector creates hyperlinks for keyword calls, e.g. *
  * <ul>
  * <li><tt>SomeKeyword &nbsp;${variable}</tt> - "SomeKeyword" is linked)</li>
- * <li><tt>Some ${inlinearg} testcase</tt> - "Some ${inlinearg} testcase" is
- * linked</li>
+ * <li><tt>Some ${inlinearg} testcase</tt> - "Some ${inlinearg} testcase" is linked</li>
  * <li><tt>[Arguments] &nbsp;${foo}</tt> - "${foo}" is linked</li>
  * </ul>
  */
@@ -74,6 +73,11 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
             }
             return linkString.toLowerCase();
         }
+
+        @Override
+        public LineType getWantedLineType() {
+            return LineType.KEYWORD_TABLE_KEYWORD_BEGIN;
+        }
     }
 
     @Override
@@ -83,7 +87,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
         }
         String linkString = argument.getUnescapedValue();
         IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        DefinitionFinder.acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordMatchVisitor(linkString, linkRegion, file, links));
+        DefinitionFinder.acceptMatches(file, new KeywordMatchVisitor(linkString, linkRegion, file, links));
         if (links.isEmpty()) {
             // try without possible BDD prefix
             String alternateValue = argument.getAlternateValue();
@@ -92,7 +96,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
                 linkString = ArgumentUtils.unescapeArgument(alternateValue, 0, alternateValue.length());
                 int lengthDiff = origLength - linkString.length();
                 linkRegion = new Region(argument.getArgCharPos() + lengthDiff, argument.getValue().length() - lengthDiff);
-                DefinitionFinder.acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordMatchVisitor(linkString, linkRegion, file, links));
+                DefinitionFinder.acceptMatches(file, new KeywordMatchVisitor(linkString, linkRegion, file, links));
             }
         }
     }

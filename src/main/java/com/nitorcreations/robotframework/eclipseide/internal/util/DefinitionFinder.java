@@ -21,9 +21,8 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
@@ -31,18 +30,15 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 public class DefinitionFinder {
 
     /**
-     * This iterates the given resource file and recursively included resource
-     * files to locate definitions of keywords and global variables. It passes
-     * the matches to the given {@link DefinitionMatchVisitor} instance.
+     * This iterates the given resource file and recursively included resource files to locate definitions of keywords
+     * and global variables. It passes the matches to the given {@link DefinitionMatchVisitor} instance.
      * 
      * @param file
      *            the starting file
-     * @param lineType
-     *            the type of line to look for
      * @param visitor
      *            the visitor of the matches found
      */
-    public static void acceptMatches(IFile file, LineType lineType, DefinitionMatchVisitor visitor) {
+    public static void acceptMatches(IFile file, DefinitionMatchVisitor visitor) {
         Set<IFile> unprocessedFiles = new HashSet<IFile>();
         Set<IFile> processedFiles = new HashSet<IFile>();
         unprocessedFiles.add(file);
@@ -53,7 +49,7 @@ public class DefinitionFinder {
                 List<RobotLine> lines = robotFile.getLines();
                 VisitorInterest interest = VisitorInterest.CONTINUE;
                 for (RobotLine line : lines) {
-                    if (line.isType(lineType)) {
+                    if (line.isType(visitor.getWantedLineType())) {
                         ParsedString firstArgument = line.arguments.get(0);
                         interest = visitor.visitMatch(firstArgument, targetFile);
                         if (interest == VisitorInterest.STOP) {

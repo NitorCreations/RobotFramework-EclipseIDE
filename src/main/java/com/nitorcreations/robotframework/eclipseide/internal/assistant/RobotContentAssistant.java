@@ -30,7 +30,6 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
@@ -60,6 +59,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         List<RobotLine> lines = RobotFile.get(document).getLines();
         RobotLine robotLine = lines.get(lineNo);
         ParsedString argument = robotLine.getArgumentAt(documentOffset);
+        IFile file = ResourceManager.resolveFileFor(document);
 
         if (argument.getType() == ArgumentType.KEYWORD_CALL) {
             // find the cursor location range inside the current line where keyword
@@ -73,12 +73,16 @@ public class RobotContentAssistant implements IContentAssistProcessor {
             // if inside range, return keyword proposals
             if (leftPos <= cursorPos && cursorPos <= rightPos) {
                 argument = robotLine.arguments.size() >= 2 ? robotLine.arguments.get(1) : null;
-                return computeCompletionProposals(viewer, document, documentOffset, robotLine, argument, leftPos, rightPos, replacePos);
+                IRegion replacementRegion = new Region(robotLine.lineCharPos + replacePos, rightPos - leftPos);
+                KeywordCompletionMatchVisitorProvider visitorProvider = new KeywordCompletionMatchVisitorProvider(file, replacementRegion);
+                return computeCompletionProposals(file, documentOffset, robotLine.lineCharPos, argument, leftPos, rightPos, visitorProvider);
             }
         } else if (argument.getUnescapedValue().startsWith("$")) {
             int leftPos = argument.getArgCharPos() - lineInfo.getOffset();
             int rightPos = argument.getArgEndCharPos() - lineInfo.getOffset();
-            return computeCompletionProposals(viewer, document, documentOffset, robotLine, argument, leftPos, rightPos, leftPos);
+            IRegion replacementRegion = new Region(robotLine.lineCharPos + leftPos, rightPos - leftPos);
+            VariableCompletionMatchVisitorProvider visitorProvider = new VariableCompletionMatchVisitorProvider(file, replacementRegion);
+            return computeCompletionProposals(file, documentOffset, robotLine.lineCharPos, argument, leftPos, rightPos, visitorProvider);
         }
         return null;
     }
@@ -98,36 +102,26 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         return line.length();
     }
 
-    private ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, IDocument document, int documentOffset, final RobotLine robotLine, ParsedString argument, final int leftPos, final int rightPos, int replacePos) {
-        IFile file = ResourceManager.resolveFileFor(document);
+    private ICompletionProposal[] computeCompletionProposals(IFile file, int documentOffset, int lineCharPos, ParsedString argument, final int leftPos, final int rightPos, CompletionMatchVisitorProvider visitorProvider) {
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
         // first find matches that use the whole input as search string
-        findMatches(robotLine, leftPos, rightPos, replacePos, argument, file, proposals);
+        DefinitionFinder.acceptMatches(file, visitorProvider.get(argument, proposals));
         if (argument != null && proposalsIsEmptyOrContainsOnly(proposals, argument)) {
             proposals.clear();
-            int lineOffset = documentOffset - robotLine.lineCharPos;
+            int lineOffset = documentOffset - lineCharPos;
             if (leftPos < lineOffset && lineOffset < rightPos) {
                 // try again, but only up to cursor
                 int argumentOff = lineOffset - leftPos;
                 ParsedString argumentleftPart = new ParsedString(argument.getValue().substring(0, argumentOff), argument.getArgCharPos());
-                findMatches(robotLine, leftPos, rightPos, replacePos, argumentleftPart, file, proposals);
+                DefinitionFinder.acceptMatches(file, visitorProvider.get(argumentleftPart, proposals));
             }
             if (proposalsIsEmptyOrContainsOnly(proposals, argument)) {
                 // try again, ignoring user input, i.e. show all possible keywords
                 proposals.clear();
-                findMatches(robotLine, leftPos, rightPos, replacePos, null, file, proposals);
+                DefinitionFinder.acceptMatches(file, visitorProvider.get(null, proposals));
             }
         }
         return proposals.toArray(new ICompletionProposal[proposals.size()]);
-    }
-
-    private void findMatches(final RobotLine robotLine, final int leftPos, final int rightPos, int replacePos, final ParsedString argument, IFile file, final List<RobotCompletionProposal> proposals) {
-        IRegion replacementRegion = new Region(robotLine.lineCharPos + replacePos, rightPos - leftPos);
-        if (argument.getUnescapedValue().startsWith("$")) {
-            DefinitionFinder.acceptMatches(file, LineType.VARIABLE_TABLE_LINE, new VariableCompletionMatchVisitor(file, argument, proposals, replacementRegion));
-        } else {
-            DefinitionFinder.acceptMatches(file, LineType.KEYWORD_TABLE_KEYWORD_BEGIN, new KeywordCompletionMatchVisitor(file, argument, proposals, replacementRegion));
-        }
     }
 
     private boolean proposalsIsEmptyOrContainsOnly(List<RobotCompletionProposal> proposals, ParsedString argument) {
