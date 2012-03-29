@@ -18,6 +18,7 @@ package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
@@ -30,23 +31,21 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 class RobotCompletionProposal implements ICompletionProposal, ICompletionProposalExtension6 {
 
-    private final ParsedString matchKeyword;
+    private final ParsedString matchArgument;
     private final IFile matchLocation;
     private final String replacementString;
-    private final int replacementOffset;
-    private final int replacementLength;
+    private final IRegion replacementRegion;
     private final int cursorPosition;
     private final Image image;
     private final String displayString;
     private final String informationDisplayString;
     private final String additionalProposalInfo;
 
-    public RobotCompletionProposal(ParsedString matchKeyword, IFile matchLocation, String replacementString, int replacementOffset, int replacementLength, int cursorPosition, Image image, String displayString, String informationDisplayString, String additionalProposalInfo) {
-        this.matchKeyword = matchKeyword;
+    public RobotCompletionProposal(ParsedString matchArgument, IFile matchLocation, String replacementString, IRegion replacementRegion, int cursorPosition, Image image, String displayString, String informationDisplayString, String additionalProposalInfo) {
+        this.matchArgument = matchArgument;
         this.matchLocation = matchLocation;
         this.replacementString = replacementString;
-        this.replacementOffset = replacementOffset;
-        this.replacementLength = replacementLength;
+        this.replacementRegion = replacementRegion;
         this.cursorPosition = cursorPosition;
         this.image = image;
         this.displayString = displayString;
@@ -54,8 +53,8 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
         this.additionalProposalInfo = additionalProposalInfo;
     }
 
-    public ParsedString getMatchKeyword() {
-        return matchKeyword;
+    public ParsedString getMatchArgument() {
+        return matchArgument;
     }
 
     public IFile getMatchLocation() {
@@ -65,7 +64,7 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
     @Override
     public void apply(IDocument document) {
         try {
-            document.replace(replacementOffset, replacementLength, replacementString);
+            document.replace(replacementRegion.getOffset(), replacementRegion.getLength(), replacementString);
         } catch (BadLocationException x) {
             // ignore
         }
@@ -73,7 +72,7 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
 
     @Override
     public Point getSelection(IDocument document) {
-        return new Point(replacementOffset + cursorPosition, 0);
+        return new Point(replacementRegion.getOffset() + cursorPosition, 0);
     }
 
     @Override
