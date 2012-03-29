@@ -60,8 +60,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         RobotLine robotLine = lines.get(lineNo);
         ParsedString argument = robotLine.getArgumentAt(documentOffset);
         IFile file = ResourceManager.resolveFileFor(document);
-
-        if (argument.getType() == ArgumentType.KEYWORD_CALL) {
+        if (argument == null || argument.getType() == ArgumentType.KEYWORD_CALL) {
             // find the cursor location range inside the current line where keyword
             // completion proposals make sense
             // TODO this only works for basic keyword calls, [Setup], FOR-indented,
@@ -77,7 +76,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
                 KeywordCompletionMatchVisitorProvider visitorProvider = new KeywordCompletionMatchVisitorProvider(file, replacementRegion);
                 return computeCompletionProposals(file, documentOffset, robotLine.lineCharPos, argument, leftPos, rightPos, visitorProvider);
             }
-        } else if (argument.getUnescapedValue().startsWith("$")) {
+        } else if (startsWithVariableCharacter(argument)) {
             int leftPos = argument.getArgCharPos() - lineInfo.getOffset();
             int rightPos = argument.getArgEndCharPos() - lineInfo.getOffset();
             IRegion replacementRegion = new Region(robotLine.lineCharPos + leftPos, rightPos - leftPos);
@@ -85,6 +84,14 @@ public class RobotContentAssistant implements IContentAssistProcessor {
             return computeCompletionProposals(file, documentOffset, robotLine.lineCharPos, argument, leftPos, rightPos, visitorProvider);
         }
         return null;
+    }
+
+    private boolean startsWithVariableCharacter(ParsedString argument) {
+        if (argument == null) {
+            return false;
+        }
+        String value = argument.getUnescapedValue();
+        return value.startsWith("$") || value.startsWith("@");
     }
 
     int findLeftmostKeywordPosition(IRegion lineInfo, String line, RobotLine robotLine) {
