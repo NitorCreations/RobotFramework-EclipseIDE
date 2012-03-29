@@ -179,8 +179,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
 
     @Override
     public char[] getCompletionProposalAutoActivationCharacters() {
-        // TODO perhaps '$' or '{'? test it to see how it works..
-        return null;
+        return new char[] { '$', '@' };
     }
 
     @Override

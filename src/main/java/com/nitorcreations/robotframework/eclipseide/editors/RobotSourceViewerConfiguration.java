@@ -85,6 +85,10 @@ public class RobotSourceViewerConfiguration extends TextSourceViewerConfiguratio
 
         assistant.enableAutoInsert(true);
         assistant.enablePrefixCompletion(true);
+
+        // this enables RobotContentAssistant.getCompletionProposalAutoActivationCharacters()
+        assistant.enableAutoActivation(true);
+
         // assistant.setProposalPopupOrientation(IContentAssistant.PROPOSAL_OVERLAY);
         // assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
         // assistant.setStatusLineVisible(true);
