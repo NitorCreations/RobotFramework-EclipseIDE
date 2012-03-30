@@ -155,14 +155,10 @@ public class RobotContentAssistant implements IContentAssistProcessor {
     public IContextInformationValidator getContextInformationValidator() {
         return new IContextInformationValidator() {
 
-            private IContextInformation info;
-            private ITextViewer viewer;
             private int offset;
 
             @Override
             public void install(IContextInformation info, ITextViewer viewer, int offset) {
-                this.info = info;
-                this.viewer = viewer;
                 this.offset = offset;
             }
 
@@ -178,9 +174,8 @@ public class RobotContentAssistant implements IContentAssistProcessor {
                 // if the previous IContextInformation is not closed before the
                 // next is shown, it is temporarily hidden until the next one is
                 // closed. This might confuse the user.
-                return true;
+                return this.offset == offset;
             }
-
         };
     }
 
