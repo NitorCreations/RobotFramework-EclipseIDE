@@ -15,13 +15,14 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
+import static com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordInlineArgumentMatcher.match;
+
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
-import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordInlineArgumentMatcher;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordMatchResult;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
@@ -34,15 +35,37 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
     @Override
     public VisitorInterest visitMatch(ParsedString match, IFile location) {
         if (substring != null) {
-            // TODO this approach makes substring match any keyword with an inline variable
-            String lookFor = "${_}" + substring.getValue().toLowerCase() + "${_}";
-            if (KeywordMatchResult.DIFFERENT == KeywordInlineArgumentMatcher.match(match.getValue().toLowerCase(), lookFor)) {
-                // if (!match.getValue().contains(substring.getValue())) {
-                return VisitorInterest.CONTINUE;
+            String substringValue = substring.getValue().toLowerCase();
+            String matchValue = match.getValue().toLowerCase();
+            if (KeywordMatchResult.DIFFERENT == match(matchValue, lookFor(substringValue))) {
+                if (!prefixesMatch(substringValue, location)) {
+                    return VisitorInterest.CONTINUE;
+                }
+                if (KeywordMatchResult.DIFFERENT == match(matchValue, lookFor(valueWithoutPrefix(substringValue)))) {
+                    return VisitorInterest.CONTINUE;
+                }
             }
         }
         addProposal(match, location);
         return VisitorInterest.CONTINUE;
+    }
+
+    private String valueWithoutPrefix(String value) {
+        return value.substring(value.indexOf('.') + 1);
+    }
+
+    private boolean prefixesMatch(String substringValue, IFile location) {
+        int indexOfDot = substringValue.indexOf('.');
+        if (indexOfDot == -1) {
+            return false;
+        }
+        String substringPrefix = substringValue.substring(0, indexOfDot + 1);
+        return location.getName().startsWith(substringPrefix);
+    }
+
+    private String lookFor(String value) {
+        // TODO this approach makes substring match any keyword with an inline variable
+        return "${_}" + value + "${_}";
     }
 
     @Override
