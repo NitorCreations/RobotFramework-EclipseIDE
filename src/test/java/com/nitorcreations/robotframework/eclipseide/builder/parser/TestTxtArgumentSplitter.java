@@ -26,78 +26,81 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.TxtArgumentSplitter;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 @RunWith(Parameterized.class)
 public class TestTxtArgumentSplitter {
 
-  private final String input;
-  private final String[] expected;
+    private final String input;
+    private final String[] expected;
 
-  static List<ParsedString> s(String line) {
-    return s(line, 0);
-  }
-
-  static List<ParsedString> s(String line, int charPos) {
-    return TxtArgumentSplitter.splitLineIntoArguments(line, charPos);
-  }
-
-  static void a(String line, String... expectedArguments) {
-    final int off = 27;
-    List<ParsedString> l = s(line, off);
-    assertArgumentCount(l, expectedArguments);
-    for (int i = 0; i < expectedArguments.length; ++i) {
-      String expected = expectedArguments[i];
-      ParsedString actual = l.get(i);
-      Assert.assertEquals("Argument", expected, actual.getValue());
-      Assert.assertEquals("argCharPos", line.indexOf(expected) + off, actual.getArgCharPos());
-      Assert.assertEquals("argEndCharPos", actual.getArgEndCharPos(), actual.getArgCharPos() + actual.getValue().length());
+    static List<ParsedString> s(String line) {
+        return s(line, 0);
     }
-  }
 
-  static void assertArgumentCount(List<ParsedString> l, String... expectedArguments) {
-    Assert.assertEquals("Wrong argument count for line, expected " + Arrays.toString(expectedArguments) + ", got " + l + "; count", expectedArguments.length,
-                        l.size());
-  }
+    static List<ParsedString> s(String line, int charPos) {
+        return TxtArgumentSplitter.splitLineIntoArguments(line, charPos);
+    }
 
-  public TestTxtArgumentSplitter(String input, String... expected) {
-    this.input = input;
-    this.expected = expected;
-  }
+    static void a(String line, String... expectedArguments) {
+        final int off = 27;
+        List<ParsedString> l = s(line, off);
+        assertArgumentCount(l, expectedArguments);
+        for (int i = 0; i < expectedArguments.length; ++i) {
+            String expected = expectedArguments[i];
+            ParsedString actual = l.get(i);
+            Assert.assertEquals("Argument", expected, actual.getValue());
+            Assert.assertEquals("argCharPos", line.indexOf(expected) + off, actual.getArgCharPos());
+            Assert.assertEquals("argEndCharPos", actual.getArgEndCharPos(), actual.getArgCharPos() + actual.getValue().length());
+        }
+    }
 
-  @Test
-  public void test() throws Exception {
-    a(input, expected);
-  }
+    static void assertArgumentCount(List<ParsedString> l, String... expectedArguments) {
+        Assert.assertEquals("Wrong argument count for line, expected " + Arrays.toString(expectedArguments) + ", got " + l + "; count", expectedArguments.length, l.size());
+    }
 
-  @Parameters
-  public static List<Object[]> createTests() {
-    List<Object[]> args = new ArrayList<Object[]>();
-    add(args, "Hello world", "Hello world");
-    add(args, " Hello world", "Hello world");
-    add(args, "  Hello world", "", "Hello world");
-    add(args, "    Hello world", "", "Hello world");
-    add(args, "\tHello world", "", "Hello world");
+    public TestTxtArgumentSplitter(String input, String... expected) {
+        this.input = input;
+        this.expected = expected;
+    }
 
-    add(args, "\\  Hello world", "\\", "Hello world");
-    add(args, "  \\  Hello world", "", "\\", "Hello world");
+    @Test
+    public void test() throws Exception {
+        a(input, expected);
+    }
 
-    add(args, "#lol", "#lol");
-    add(args, "   #lol", "", "#lol");
-    add(args, "Hello world   #lol", "Hello world", "#lol");
-    add(args, "  Hello world   #lol", "", "Hello world", "#lol");
+    @Parameters
+    public static List<Object[]> createTests() {
+        List<Object[]> args = new ArrayList<Object[]>();
+        add(args, "Hello world", "Hello world");
+        add(args, " Hello world", "Hello world");
+        add(args, "  Hello world", "", "Hello world");
+        add(args, "    Hello world", "", "Hello world");
+        add(args, "\tHello world", "", "Hello world");
 
-    add(args, "  Hello world #lol", "", "Hello world #lol");
-    add(args, "  Hello world #lol  #lol2", "", "Hello world #lol", "#lol2");
+        add(args, "\\  Hello world", "\\", "Hello world");
+        add(args, "  \\  Hello world", "", "\\", "Hello world");
 
-    add(args, "#lol this is", "#lol this is");
-    add(args, "#lol this   is", "#lol this   is");
-    add(args, "  Hello world   #lol   this", "", "Hello world", "#lol   this");
-    return args;
-  }
+        add(args, "#lol", "#lol");
+        add(args, "   #lol", "", "#lol");
+        add(args, "Hello world   #lol", "Hello world", "#lol");
+        add(args, "  Hello world   #lol", "", "Hello world", "#lol");
 
-  private static void add(List<Object[]> args, String input, String... expected) {
-    args.add(new Object[] { input, expected });
-  }
+        add(args, "  Hello world #lol", "", "Hello world #lol");
+        add(args, "  Hello world #lol  #lol2", "", "Hello world #lol", "#lol2");
+
+        add(args, "#lol this is", "#lol this is");
+        add(args, "#lol this   is", "#lol this   is");
+        add(args, "  Hello world   #lol   this", "", "Hello world", "#lol   this");
+
+        // whitespace
+        add(args, "");
+        add(args, "  ");
+        add(args, "  Keyword  ", "", "Keyword");
+        return args;
+    }
+
+    private static void add(List<Object[]> args, String input, String... expected) {
+        args.add(new Object[] { input, expected });
+    }
 }
