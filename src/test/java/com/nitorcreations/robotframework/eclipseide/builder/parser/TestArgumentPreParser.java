@@ -30,6 +30,8 @@ import static com.nitorcreations.robotframework.eclipseide.structure.ParsedStrin
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.TABLE;
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.VARIABLE_KEY;
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.VARIABLE_VAL;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.fail;
 
 import java.util.Arrays;
 import java.util.List;
@@ -255,21 +257,30 @@ public class TestArgumentPreParser {
 
     static void t(String input, ArgumentType... expected) throws Exception {
         List<RobotLine> lines = RobotFile.parse(input).getLines();
-        int p = 0;
-        for (RobotLine rfeLine : lines) {
-            for (ParsedString arg : rfeLine.arguments) {
-                if (arg.getType() != expected[p++]) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Error on line #" + rfeLine.lineNo + ": Expected types ").append(Arrays.toString(expected)).append(" but got:");
-                    for (RobotLine rfeLine2 : lines) {
-                        sb.append('\n').append(rfeLine2);
+        RobotLine lastRfeLine = null;
+        try {
+            int p = 0;
+            for (RobotLine rfeLine : lines) {
+                lastRfeLine = rfeLine;
+                for (ParsedString arg : rfeLine.arguments) {
+                    if (p == expected.length) {
+                        fail("Got more arguments than expected, first extra argument: " + arg);
                     }
-                    throw new AssertionFailedError(sb.toString());
+                    assertEquals("Argument type mismatch for argument " + arg, expected[p++], arg.getType());
                 }
             }
-        }
-        if (p != expected.length) {
-            throw new ArrayIndexOutOfBoundsException(p);
+            if (p != expected.length) {
+                fail("Got less arguments than expected, first missing argument: " + expected[p]);
+            }
+        } catch (Throwable e) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Error on line #" + (lastRfeLine != null ? lastRfeLine.lineNo : -1) + ": Expected types ").append(Arrays.toString(expected)).append(" but got:");
+            for (RobotLine rfeLine2 : lines) {
+                sb.append('\n').append(rfeLine2);
+            }
+            AssertionFailedError afe = new AssertionFailedError(sb.toString());
+            afe.initCause(e);
+            throw afe;
         }
     }
 }
