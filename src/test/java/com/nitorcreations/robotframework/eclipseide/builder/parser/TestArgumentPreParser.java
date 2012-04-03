@@ -33,6 +33,7 @@ import static com.nitorcreations.robotframework.eclipseide.structure.ParsedStrin
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -255,8 +256,111 @@ public class TestArgumentPreParser {
         }
     }
 
-    static void t(String input, ArgumentType... expected) throws Exception {
+    static List<RobotLine> s(String input, ArgumentType... expected) throws AssertionFailedError {
         List<RobotLine> lines = RobotFile.parse(input).getLines();
+        // System.out.println("------------------------------\n" + input + "\n----------------\n" + lines);
+        assertCorrectLines(lines, expected);
+        return lines;
+    }
+
+    static void t(String input, ArgumentType... expected) throws Exception {
+        List<RobotLine> lines = s(input, expected);
+        tRecurse(lines);
+    }
+
+    private static void tRecurse(List<RobotLine> lines) throws AssertionFailedError {
+        try {
+            for (int i = 0; i < lines.size(); i++) {
+                RobotLine robotLine = lines.get(i);
+                final int nArgs = robotLine.arguments.size();
+                final int contInd = determineContinuationIndex(lines, i);
+                int arg = 1;
+                if (nArgs > 0 && robotLine.arguments.get(0).getType() == ArgumentType.IGNORED) {
+                    arg = 2;
+                }
+                for (; arg < nArgs; ++arg) {
+                    if (robotLine.arguments.get(arg).getType() == ArgumentType.IGNORED) {
+                        continue;
+                    }
+                    RobotLine line1a = splice(robotLine, arg, nArgs - arg);
+                    RobotLine line1b = splice(robotLine, arg - 1, nArgs - arg + 1, new ParsedString(robotLine.arguments.get(arg - 1).getValue() + "  ", 0).setType(robotLine.arguments.get(arg - 1).getType()));
+                    // RobotLine line1b = splice(robotLine, arg, nArgs - arg, new ParsedString("",
+                    // 0).setType(robotLine.arguments.get(arg).getType()));
+                    RobotLine line2 = contInd == 1 ? splice(robotLine, 0, arg, new ParsedString("...", 0)) : splice(robotLine, 0, arg, new ParsedString("", 0), new ParsedString("...", 0));
+                    List<RobotLine> lines2a = splice(lines, robotLine, line1a, line2);
+                    List<RobotLine> lines2b = splice(lines, robotLine, line1b, line2);
+                    t2(lines2a);
+                    t2(lines2b);
+                    // TODO recursively test multi-split cases
+                }
+            }
+        } catch (Throwable t) {
+            throw wrapError(lines, new StringBuilder("Original spec:"), t);
+        }
+    }
+
+    private static void t2(List<RobotLine> inputLines) {
+        List<ArgumentType> expected = new ArrayList<ArgumentType>();
+        StringBuilder input = new StringBuilder();
+        for (RobotLine line : inputLines) {
+            boolean firstArg = true;
+            for (ParsedString arg : line.arguments) {
+                expected.add(arg.getType());
+                if (firstArg) {
+                    firstArg = false;
+                } else {
+                    input.append("  ");
+                }
+                input.append(arg.getValue());
+            }
+            input.append('\n');
+        }
+        ArgumentType[] expectedArr = new ArgumentType[expected.size()];
+        expected.toArray(expectedArr);
+
+        String newInput = input.toString();
+        List<RobotLine> parsedLines = RobotFile.parse(newInput).getLines();
+        // System.out.println("------------------------------\n" + newInput + "\n----------------\n" + parsedLines);
+        assertCorrectLines(parsedLines, expectedArr);
+    }
+
+    private static List<RobotLine> splice(List<RobotLine> lines, RobotLine oldLine, RobotLine... newLine) {
+        List<RobotLine> lines2 = new ArrayList<RobotLine>(lines);
+        int pos = lines2.indexOf(oldLine);
+        lines2.remove(pos);
+        lines2.addAll(pos, Arrays.asList(newLine));
+        return lines2;
+    }
+
+    private static RobotLine splice(RobotLine oldLine, int pos, int removeCount, ParsedString... newArgs) {
+        RobotLine newLine = new RobotLine(oldLine.lineNo, oldLine.lineCharPos, new ArrayList<ParsedString>(oldLine.arguments));
+        newLine.type = oldLine.type;
+        for (int i = 0; i < removeCount; ++i) {
+            newLine.arguments.remove(pos);
+        }
+        newLine.arguments.addAll(pos, Arrays.asList(newArgs));
+        return newLine;
+    }
+
+    private static int determineContinuationIndex(List<RobotLine> lines, int i) {
+        for (; i >= 0; --i) {
+            RobotLine robotLine = lines.get(i);
+            switch (robotLine.type) {
+            case CONTINUATION_LINE:
+                continue;
+            case KEYWORD_TABLE_KEYWORD_BEGIN:
+            case KEYWORD_TABLE_KEYWORD_LINE:
+            case TESTCASE_TABLE_TESTCASE_BEGIN:
+            case TESTCASE_TABLE_TESTCASE_LINE:
+                return 2;
+            default:
+                return 1;
+            }
+        }
+        return 1;
+    }
+
+    private static void assertCorrectLines(List<RobotLine> lines, ArgumentType... expected) throws AssertionFailedError {
         RobotLine lastRfeLine = null;
         try {
             int p = 0;
@@ -273,14 +377,23 @@ public class TestArgumentPreParser {
                 fail("Got less arguments than expected, first missing argument: " + expected[p]);
             }
         } catch (Throwable e) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Error on line #" + (lastRfeLine != null ? lastRfeLine.lineNo : -1) + ": Expected types ").append(Arrays.toString(expected)).append(" but got:");
-            for (RobotLine rfeLine2 : lines) {
-                sb.append('\n').append(rfeLine2);
-            }
-            AssertionFailedError afe = new AssertionFailedError(sb.toString());
-            afe.initCause(e);
-            throw afe;
+            throw wrapErrorOnLine(lines, lastRfeLine, e, expected);
         }
+    }
+
+    private static AssertionFailedError wrapErrorOnLine(List<RobotLine> lines, RobotLine lastRfeLine, Throwable e, ArgumentType... expected) {
+        StringBuilder descr = new StringBuilder();
+        descr.append("Error on line #").append(lastRfeLine != null ? lastRfeLine.lineNo : -1);
+        descr.append(": Expected types ").append(Arrays.toString(expected)).append(" but got:");
+        return wrapError(lines, descr, e);
+    }
+
+    private static AssertionFailedError wrapError(List<RobotLine> lines, StringBuilder descr, Throwable e) {
+        for (RobotLine rfeLine2 : lines) {
+            descr.append('\n').append(rfeLine2);
+        }
+        AssertionFailedError afe = new AssertionFailedError(descr.toString());
+        afe.initCause(e);
+        return afe;
     }
 }

@@ -19,8 +19,7 @@ import com.nitorcreations.robotframework.eclipseide.internal.rules.ArgumentUtils
 import com.nitorcreations.robotframework.eclipseide.structure.api.IParsedKeywordString;
 
 /**
- * An immutable implementation of all the I*String interfaces in the
- * ...builder.info package.
+ * An immutable implementation of all the I*String interfaces in the ...builder.info package.
  * 
  * @author xkr47
  */
@@ -81,9 +80,10 @@ public class ParsedString implements IParsedKeywordString {
         return type;
     }
 
-    public void setType(ArgumentType type) {
+    public ParsedString setType(ArgumentType type) {
         assert type != null;
         this.type = type;
+        return this;
     }
 
     @Override
