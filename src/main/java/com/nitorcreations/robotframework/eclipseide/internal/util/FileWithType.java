@@ -16,6 +16,7 @@
 package com.nitorcreations.robotframework.eclipseide.internal.util;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 
 public class FileWithType {
     public enum Type {
@@ -25,6 +26,7 @@ public class FileWithType {
     private final Type type;
     private final IFile file;
     private final String name;
+    private final IProject project;
 
     public FileWithType(FileWithType.Type type, IFile file) {
         if (type == null || file == null) {
@@ -33,15 +35,17 @@ public class FileWithType {
         this.type = type;
         this.file = file;
         this.name = file.getName();
+        this.project = file.getProject();
     }
 
-    public FileWithType(FileWithType.Type type, String name) {
+    public FileWithType(FileWithType.Type type, String name, IProject project) {
         if (type == null || name == null) {
             throw new NullPointerException();
         }
         this.type = type;
         this.file = null;
         this.name = name;
+        this.project = project;
     }
 
     public Type getType() {
@@ -54,6 +58,10 @@ public class FileWithType {
 
     public String getName() {
         return name;
+    }
+
+    public IProject getProject() {
+        return project;
     }
 
     public boolean isRobotFile() {

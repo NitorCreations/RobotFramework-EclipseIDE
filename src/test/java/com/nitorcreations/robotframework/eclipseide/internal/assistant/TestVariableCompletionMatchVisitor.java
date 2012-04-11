@@ -31,7 +31,7 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class TestVariableCompletionMatchVisitor {
     private static final ParsedString PROPOSAL = new ParsedString("${foo}", 0);
-    private static final FileWithType DUMMY_LOCATION = new FileWithType(Type.LIBRARY, "TestLibrary");
+    private static final FileWithType DUMMY_LOCATION = new FileWithType(Type.LIBRARY, "TestLibrary", null);
 
     @Test
     public void testVisitMatchAddsProposalIfMatchIsFound() throws Exception {

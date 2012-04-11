@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.IndexFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
@@ -96,7 +97,7 @@ public class DefinitionFinder {
                 } else if (line.isVariableSetting()) {
                     processLinkableFile(unprocessedFiles, processedFiles, currentFile, line, Type.VARIABLE);
                 } else if (line.isLibrarySetting()) {
-                    processUnlinkableFile(unprocessedFiles, processedFiles, line, Type.LIBRARY);
+                    processUnlinkableFile(unprocessedFiles, processedFiles, line, Type.LIBRARY, currentFileWithType.getProject());
                 }
             }
         }
@@ -112,9 +113,9 @@ public class DefinitionFinder {
         }
     }
 
-    private static void processUnlinkableFile(Set<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, RobotLine line, Type type) {
+    private static void processUnlinkableFile(Set<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, RobotLine line, Type type, IProject project) {
         ParsedString secondArgument = line.arguments.get(1);
-        FileWithType fileWithType = new FileWithType(type, secondArgument.getValue());
+        FileWithType fileWithType = new FileWithType(type, secondArgument.getValue(), project);
         if (!secondArgument.isEmpty()) {
             addIfNew(unprocessedFiles, processedFiles, fileWithType);
         }
