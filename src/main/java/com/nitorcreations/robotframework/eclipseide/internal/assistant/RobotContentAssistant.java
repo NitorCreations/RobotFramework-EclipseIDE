@@ -24,7 +24,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -141,14 +140,15 @@ public class RobotContentAssistant implements IContentAssistProcessor {
     // ctrl-shift-space information popups
     @Override
     public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
-        // TODO replace with real implementation
-        IContextInformation[] result = new IContextInformation[5];
-        for (int i = 0; i < result.length; i++) {
-            String contextDisplayString = "contextDisplayString " + i;
-            String informationDisplayString = "informationDisplayString " + i;
-            result[i] = new ContextInformation(contextDisplayString, informationDisplayString);
-        }
-        return result;
+        return null;
+        // TODO example code below
+        // IContextInformation[] result = new IContextInformation[5];
+        // for (int i = 0; i < result.length; i++) {
+        // String contextDisplayString = "contextDisplayString " + i;
+        // String informationDisplayString = "informationDisplayString " + i;
+        // result[i] = new ContextInformation(contextDisplayString, informationDisplayString);
+        // }
+        // return result;
     }
 
     @Override
