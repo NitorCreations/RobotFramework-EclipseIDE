@@ -15,8 +15,6 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.util;
 
-import org.eclipse.core.resources.IFile;
-
 import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
@@ -26,7 +24,13 @@ public interface DefinitionMatchVisitor {
         CONTINUE, CONTINUE_TO_END_OF_CURRENT_FILE, STOP
     }
 
-    VisitorInterest visitMatch(ParsedString proposal, IFile proposalLocation);
+    /**
+     * @param proposal
+     *            the proposal
+     * @param proposalLocation
+     *            where proposal is located - null if the proposal is located in a variable file or a library
+     */
+    VisitorInterest visitMatch(ParsedString proposal, FileWithType proposalLocation);
 
     LineType getWantedLineType();
 }

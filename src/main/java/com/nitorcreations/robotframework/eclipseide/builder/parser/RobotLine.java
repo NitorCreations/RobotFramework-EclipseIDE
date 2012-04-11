@@ -71,6 +71,17 @@ public class RobotLine {
             return false;
         }
         return firstArgument.getValue().equals("Variables");
-
     }
+
+    public boolean isLibrarySetting() {
+        if (!isType(LineType.SETTING_TABLE_LINE)) {
+            return false;
+        }
+        ParsedString firstArgument = arguments.get(0);
+        if (firstArgument.getType() != ArgumentType.SETTING_KEY) {
+            return false;
+        }
+        return firstArgument.getValue().equals("Library");
+    }
+
 }

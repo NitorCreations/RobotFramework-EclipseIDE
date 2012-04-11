@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
+import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
@@ -30,7 +31,7 @@ public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
     }
 
     @Override
-    public VisitorInterest visitMatch(ParsedString proposal, IFile proposalLocation) {
+    public VisitorInterest visitMatch(ParsedString proposal, FileWithType proposalLocation) {
         if (userInput == null || proposal.getUnescapedValue().toLowerCase().contains(userInput.getUnescapedValue().toLowerCase())) {
             addProposal(proposal, proposalLocation);
         }

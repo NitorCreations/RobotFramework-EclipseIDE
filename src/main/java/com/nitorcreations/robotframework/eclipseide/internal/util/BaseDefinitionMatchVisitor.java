@@ -25,8 +25,8 @@ public abstract class BaseDefinitionMatchVisitor implements DefinitionMatchVisit
         this.file = file;
     }
 
-    protected String getFilePrefix(IFile location) {
-        if (location == file) {
+    protected String getFilePrefix(FileWithType location) {
+        if (location.getFile() == file) {
             return "";
         }
         String name = getNameWithoutTxtPostfix(location.getName());

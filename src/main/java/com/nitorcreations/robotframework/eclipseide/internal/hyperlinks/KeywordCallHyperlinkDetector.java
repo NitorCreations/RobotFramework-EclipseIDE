@@ -29,6 +29,7 @@ import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.Key
 import com.nitorcreations.robotframework.eclipseide.internal.rules.ArgumentUtils;
 import com.nitorcreations.robotframework.eclipseide.internal.util.BaseDefinitionMatchVisitor;
 import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionFinder;
+import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -55,7 +56,10 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
         }
 
         @Override
-        public VisitorInterest visitMatch(ParsedString match, IFile location) {
+        public VisitorInterest visitMatch(ParsedString match, FileWithType location) {
+            if (location.getFile() == null) {
+                return VisitorInterest.CONTINUE;
+            }
             String matchString = getMatchStringInFile(location, linkString);
             KeywordMatchResult matchResult = KeywordInlineArgumentMatcher.match(match.getValue().toLowerCase(), matchString);
             if (matchResult != KeywordMatchResult.DIFFERENT) {
@@ -66,7 +70,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
             return VisitorInterest.CONTINUE;
         }
 
-        private String getMatchStringInFile(IFile location, String linkString) {
+        private String getMatchStringInFile(FileWithType location, String linkString) {
             String filePrefix = getNameWithoutTxtPostfix(location.getName()) + ".";
             if (linkString.startsWith(filePrefix)) {
                 return linkString.substring(filePrefix.length()).toLowerCase();

@@ -24,6 +24,7 @@ import org.eclipse.jface.text.IRegion;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordMatchResult;
+import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
@@ -33,7 +34,7 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
     }
 
     @Override
-    public VisitorInterest visitMatch(ParsedString proposal, IFile proposalLocation) {
+    public VisitorInterest visitMatch(ParsedString proposal, FileWithType proposalLocation) {
         if (userInput != null) {
             String userInputString = userInput.getValue().toLowerCase();
             String proposalString = proposal.getValue().toLowerCase();
@@ -54,7 +55,7 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
         return value.substring(value.indexOf('.') + 1);
     }
 
-    private boolean prefixesMatch(String userInputString, IFile proposalLocation) {
+    private boolean prefixesMatch(String userInputString, FileWithType proposalLocation) {
         int indexOfDot = userInputString.indexOf('.');
         if (indexOfDot == -1) {
             return false;

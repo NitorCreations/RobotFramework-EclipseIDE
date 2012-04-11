@@ -22,6 +22,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.swt.graphics.Image;
 
 import com.nitorcreations.robotframework.eclipseide.internal.util.BaseDefinitionMatchVisitor;
+import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public abstract class CompletionMatchVisitor extends BaseDefinitionMatchVisitor {
@@ -36,7 +37,7 @@ public abstract class CompletionMatchVisitor extends BaseDefinitionMatchVisitor 
         this.replacementRegion = replacementRegion;
     }
 
-    protected void addProposal(ParsedString proposal, IFile proposalLocation) {
+    protected void addProposal(ParsedString proposal, FileWithType proposalLocation) {
         Image image = null;
         String displayString = getFilePrefix(proposalLocation) + proposal.getValue();
         String additionalProposalInfo = "I recommend: " + proposal.getValue();

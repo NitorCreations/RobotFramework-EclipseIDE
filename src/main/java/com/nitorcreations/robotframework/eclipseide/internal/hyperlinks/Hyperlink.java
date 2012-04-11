@@ -22,6 +22,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
+import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 
 public class Hyperlink implements IHyperlink {
 
@@ -31,16 +32,18 @@ public class Hyperlink implements IHyperlink {
     private final IFile targetFile;
     private final boolean isRobotFile;
 
-    public Hyperlink(IRegion linkRegion, String linkText, IRegion targetRegion, IFile targetFile) {
-        this(linkRegion, linkText, targetRegion, targetFile, true);
-    }
-
-    public Hyperlink(IRegion linkRegion, String linkText, IRegion targetRegion, IFile targetFile, boolean isRobotFile) {
+    public Hyperlink(IRegion linkRegion, String linkText, IRegion targetRegion, FileWithType targetFileWithType) {
+        if (targetFileWithType == null) {
+            throw new IllegalArgumentException("targetFileWithType can't be null");
+        }
+        if (targetFileWithType.getFile() == null) {
+            throw new IllegalArgumentException("targetFileWithType.getFile() can't be null");
+        }
         this.linkRegion = linkRegion;
         this.linkText = linkText;
         this.targetRegion = targetRegion;
-        this.targetFile = targetFile;
-        this.isRobotFile = isRobotFile;
+        this.targetFile = targetFileWithType.getFile();
+        this.isRobotFile = targetFileWithType.isRobotFile();
     }
 
     @Override

@@ -15,7 +15,6 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -27,12 +26,13 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
+import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 class RobotCompletionProposal implements ICompletionProposal, ICompletionProposalExtension6 {
 
     private final ParsedString matchArgument;
-    private final IFile matchLocation;
+    private final FileWithType matchLocation;
     private final String replacementString;
     private final IRegion replacementRegion;
     private final int cursorPosition;
@@ -41,9 +41,9 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
     private final String informationDisplayString;
     private final String additionalProposalInfo;
 
-    public RobotCompletionProposal(ParsedString matchArgument, IFile matchLocation, String replacementString, IRegion replacementRegion, int cursorPosition, Image image, String displayString, String informationDisplayString, String additionalProposalInfo) {
+    public RobotCompletionProposal(ParsedString matchArgument, FileWithType proposalLocation, String replacementString, IRegion replacementRegion, int cursorPosition, Image image, String displayString, String informationDisplayString, String additionalProposalInfo) {
         this.matchArgument = matchArgument;
-        this.matchLocation = matchLocation;
+        this.matchLocation = proposalLocation;
         this.replacementString = replacementString;
         this.replacementRegion = replacementRegion;
         this.cursorPosition = cursorPosition;
@@ -53,11 +53,11 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
         this.additionalProposalInfo = additionalProposalInfo;
     }
 
-    public ParsedString getMatchArgument() {
+    ParsedString getMatchArgument() {
         return matchArgument;
     }
 
-    public IFile getMatchLocation() {
+    FileWithType getMatchLocation() {
         return matchLocation;
     }
 

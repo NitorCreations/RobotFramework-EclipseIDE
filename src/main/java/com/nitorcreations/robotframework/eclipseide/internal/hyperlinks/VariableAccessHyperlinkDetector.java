@@ -27,6 +27,7 @@ import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.internal.rules.VariableUtils;
 import com.nitorcreations.robotframework.eclipseide.internal.util.BaseDefinitionMatchVisitor;
 import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionFinder;
+import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 /**
@@ -52,7 +53,10 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
         }
 
         @Override
-        public VisitorInterest visitMatch(ParsedString match, IFile location) {
+        public VisitorInterest visitMatch(ParsedString match, FileWithType location) {
+            if (location.getFile() == null) {
+                return VisitorInterest.CONTINUE;
+            }
             if (match.getValue().equalsIgnoreCase(linkString)) {
                 IRegion targetRegion = new Region(match.getArgEndCharPos(), 0);
                 links.add(new Hyperlink(linkRegion, getFilePrefix(location) + match.getValue(), targetRegion, location));
