@@ -71,7 +71,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
         }
 
         private String getMatchStringInFile(FileWithType location, String linkString) {
-            String filePrefix = getNameWithoutTxtPostfix(location.getName()) + ".";
+            String filePrefix = location.getName() + ".";
             if (linkString.startsWith(filePrefix)) {
                 return linkString.substring(filePrefix.length()).toLowerCase();
             }

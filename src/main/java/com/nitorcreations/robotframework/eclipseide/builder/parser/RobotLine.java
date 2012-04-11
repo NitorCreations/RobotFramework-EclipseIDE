@@ -51,37 +51,29 @@ public class RobotLine {
     }
 
     public boolean isResourceSetting() {
-        if (!isType(LineType.SETTING_TABLE_LINE)) {
-            return false;
-        }
-        ParsedString firstArgument = arguments.get(0);
-        if (firstArgument.getType() != ArgumentType.SETTING_KEY) {
-            return false;
-        }
-        return firstArgument.getValue().equals("Resource");
-
+        return isSettingFor("Resource");
     }
 
     public boolean isVariableSetting() {
-        if (!isType(LineType.SETTING_TABLE_LINE)) {
-            return false;
-        }
-        ParsedString firstArgument = arguments.get(0);
-        if (firstArgument.getType() != ArgumentType.SETTING_KEY) {
-            return false;
-        }
-        return firstArgument.getValue().equals("Variables");
+        return isSettingFor("Variables");
     }
 
     public boolean isLibrarySetting() {
+        return isSettingFor("Library");
+    }
+
+    private boolean isSettingFor(String setting) {
         if (!isType(LineType.SETTING_TABLE_LINE)) {
+            return false;
+        }
+        if (arguments.size() < 2) {
             return false;
         }
         ParsedString firstArgument = arguments.get(0);
         if (firstArgument.getType() != ArgumentType.SETTING_KEY) {
             return false;
         }
-        return firstArgument.getValue().equals("Library");
+        return firstArgument.getValue().equals(setting);
     }
 
 }

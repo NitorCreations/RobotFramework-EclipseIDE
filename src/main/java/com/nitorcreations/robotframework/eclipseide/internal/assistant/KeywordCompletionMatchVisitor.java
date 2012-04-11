@@ -15,15 +15,12 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
-import static com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordInlineArgumentMatcher.match;
-
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
-import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.util.KeywordMatchResult;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
@@ -35,24 +32,33 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
 
     @Override
     public VisitorInterest visitMatch(ParsedString proposal, FileWithType proposalLocation) {
-        if (userInput != null) {
+        if (userInput == null) {
+            addProposal(proposal, proposalLocation);
+        } else {
             String userInputString = userInput.getValue().toLowerCase();
             String proposalString = proposal.getValue().toLowerCase();
-            if (KeywordMatchResult.DIFFERENT == match(proposalString, lookFor(userInputString))) {
-                if (!prefixesMatch(userInputString, proposalLocation)) {
-                    return VisitorInterest.CONTINUE;
-                }
-                if (KeywordMatchResult.DIFFERENT == match(proposalString, lookFor(valueWithoutPrefix(userInputString)))) {
-                    return VisitorInterest.CONTINUE;
-                }
+            if (proposalString.contains(userInputString) || matchesWithoutPrefix(userInputString, proposalString, proposalLocation)) {
+                addProposal(proposal, proposalLocation);
             }
+            // if (KeywordMatchResult.DIFFERENT == match(proposalString, lookFor(userInputString))) {
+            // if (!prefixesMatch(userInputString, proposalLocation)) {
+            // return VisitorInterest.CONTINUE;
+            // }
+            // if (KeywordMatchResult.DIFFERENT == match(proposalString, lookFor(valueWithoutPrefix(userInputString))))
+            // {
+            // return VisitorInterest.CONTINUE;
+            // }
+            // }
         }
-        addProposal(proposal, proposalLocation);
         return VisitorInterest.CONTINUE;
     }
 
-    private String valueWithoutPrefix(String value) {
-        return value.substring(value.indexOf('.') + 1);
+    private boolean matchesWithoutPrefix(String userInputString, String proposalString, FileWithType proposalLocation) {
+        if (!prefixesMatch(userInputString, proposalLocation)) {
+            return false;
+        }
+        String valueWithoutPrefix = userInputString.substring(userInputString.indexOf('.') + 1);
+        return proposalString.contains(valueWithoutPrefix);
     }
 
     private boolean prefixesMatch(String userInputString, FileWithType proposalLocation) {
@@ -60,14 +66,14 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
         if (indexOfDot == -1) {
             return false;
         }
-        String userInputPrefix = userInputString.substring(0, indexOfDot + 1);
-        return proposalLocation.getName().startsWith(userInputPrefix);
+        String userInputPrefix = userInputString.substring(0, indexOfDot);
+        return proposalLocation.getName().equals(userInputPrefix);
     }
 
-    private String lookFor(String value) {
-        // TODO this approach makes substring match any keyword with an inline variable
-        return "${_}" + value + "${_}";
-    }
+    // private String lookFor(String value) {
+    // // TODO this approach makes substring match any keyword with an inline variable
+    // return "${_}" + value + "${_}";
+    // }
 
     @Override
     public LineType getWantedLineType() {
