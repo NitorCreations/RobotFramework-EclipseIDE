@@ -34,7 +34,7 @@ public class FileWithType {
         }
         this.type = type;
         this.file = file;
-        this.name = getNameWithoutPostfix(file.getName());
+        this.name = getNameWithoutExtension(file.getName());
         this.project = file.getProject();
     }
 
@@ -48,7 +48,7 @@ public class FileWithType {
         this.project = project;
     }
 
-    private String getNameWithoutPostfix(String name) {
+    private String getNameWithoutExtension(String name) {
         int dotLocation = name.indexOf(".");
         if (dotLocation == -1) {
             return name;
