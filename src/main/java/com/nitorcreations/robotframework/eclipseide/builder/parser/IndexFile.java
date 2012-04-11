@@ -15,8 +15,19 @@
  */
 package com.nitorcreations.robotframework.eclipseide.builder.parser;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 
@@ -25,9 +36,9 @@ public class IndexFile {
     public static List<String> getVariables(FileWithType fileWithType) {
         switch (fileWithType.getType()) {
             case VARIABLE:
-                return Collections.singletonList("${KALA}");
+                return getVariableFileVariables(fileWithType.getFile());
             case LIBRARY:
-                return Collections.singletonList("${SIKA}");
+                return getLibraryVariables(fileWithType);
         }
         return Collections.emptyList();
     }
@@ -35,9 +46,96 @@ public class IndexFile {
     public static List<String> getKeywords(FileWithType fileWithType) {
         switch (fileWithType.getType()) {
             case LIBRARY:
-                return Collections.singletonList("SikaKeyword");
+                return getLibraryKeywords(fileWithType);
         }
         return Collections.emptyList();
+    }
+
+    private static List<String> getVariableFileVariables(IFile file) {
+        IFile indexFile = getIndexFileForVariableFile(file);
+        return getMatches(indexFile, true);
+    }
+
+    private static List<String> getLibraryVariables(FileWithType fileWithType) {
+        IFile indexFile = getIndexFileForLibrary(fileWithType);
+        return getMatches(indexFile, true);
+    }
+
+    private static List<String> getLibraryKeywords(FileWithType fileWithType) {
+        IFile indexFile = getIndexFileForLibrary(fileWithType);
+        return getMatches(indexFile, false);
+    }
+
+    private static IFile getIndexFileForVariableFile(IFile file) {
+        IPath filePath = file.getFullPath();
+        IPath indexFilePath = filePath.addFileExtension("index");
+        IFile indexFile = file.getWorkspace().getRoot().getFile(indexFilePath);
+        return indexFile;
+    }
+
+    private static IFile getIndexFileForLibrary(FileWithType fileWithType) {
+        IProject project = fileWithType.getProject();
+        IPath projectPath = project.getFullPath();
+        IPath indexFilePath = projectPath.append("robot-indices/" + fileWithType.getName() + ".index");
+        IFile indexFile = project.getWorkspace().getRoot().getFile(indexFilePath);
+        return indexFile;
+    }
+
+    private static List<String> getMatches(IFile indexFile, boolean wantVariables) {
+        if (indexFile == null || !indexFile.exists()) {
+            return Collections.emptyList();
+        }
+        List<String> contents = load(indexFile);
+        filter(contents, wantVariables);
+        return contents;
+    }
+
+    private static List<String> load(IFile indexFile) {
+        InputStream stream = null;
+        try {
+            stream = indexFile.getContents();
+            Reader r = new InputStreamReader(stream, "UTF-8");
+            BufferedReader br = new BufferedReader(r);
+            List<String> lines = new ArrayList<String>();
+            String line;
+            while (null != (line = br.readLine())) {
+                lines.add(line);
+            }
+            return lines;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+        }
+    }
+
+    private static void filter(List<String> contents, boolean wantVariables) {
+        Iterator<String> it = contents.iterator();
+        while (it.hasNext()) {
+            String l = it.next();
+            if (l.isEmpty()) {
+                continue;
+            }
+            boolean isVariable = false;
+            switch (l.charAt(0)) {
+                case '#':
+                    continue;
+                case '$':
+                case '@':
+                    isVariable = true;
+                    break;
+            }
+            if (isVariable != wantVariables) {
+                it.remove();
+            }
+        }
     }
 
 }
