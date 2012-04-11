@@ -19,6 +19,7 @@ import static com.nitorcreations.robotframework.eclipseide.internal.util.Definit
 import static com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest.CONTINUE_TO_END_OF_CURRENT_FILE;
 import static com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest.STOP;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,7 +48,7 @@ public class DefinitionFinder {
      *            the visitor of the matches found
      */
     public static void acceptMatches(IFile file, DefinitionMatchVisitor visitor) {
-        Set<FileWithType> unprocessedFiles = new HashSet<FileWithType>();
+        List<FileWithType> unprocessedFiles = new ArrayList<FileWithType>();
         Set<FileWithType> processedFiles = new HashSet<FileWithType>();
         unprocessedFiles.add(new FileWithType(Type.RESOURCE, file));
         while (!unprocessedFiles.isEmpty()) {
@@ -72,7 +73,7 @@ public class DefinitionFinder {
         }
     }
 
-    private static VisitorInterest acceptResourceFile(FileWithType currentFileWithType, DefinitionMatchVisitor visitor, Set<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles) {
+    private static VisitorInterest acceptResourceFile(FileWithType currentFileWithType, DefinitionMatchVisitor visitor, List<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles) {
         IFile currentFile = currentFileWithType.getFile();
         RobotFile currentRobotFile = RobotFile.get(currentFile, true);
         List<RobotLine> lines;
@@ -104,7 +105,7 @@ public class DefinitionFinder {
         return interest;
     }
 
-    private static void processLinkableFile(Set<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, IFile currentFile, RobotLine line, Type type) {
+    private static void processLinkableFile(List<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, IFile currentFile, RobotLine line, Type type) {
         ParsedString secondArgument = line.arguments.get(1);
         IFile resourceFile = ResourceManager.getRelativeFile(currentFile, secondArgument.getUnescapedValue());
         FileWithType fileWithType = new FileWithType(type, resourceFile);
@@ -113,7 +114,7 @@ public class DefinitionFinder {
         }
     }
 
-    private static void processUnlinkableFile(Set<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, RobotLine line, Type type, IProject project) {
+    private static void processUnlinkableFile(List<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, RobotLine line, Type type, IProject project) {
         ParsedString secondArgument = line.arguments.get(1);
         FileWithType fileWithType = new FileWithType(type, secondArgument.getValue(), project);
         if (!secondArgument.isEmpty()) {
@@ -121,7 +122,7 @@ public class DefinitionFinder {
         }
     }
 
-    private static void addIfNew(Set<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, FileWithType fileWithType) {
+    private static void addIfNew(List<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, FileWithType fileWithType) {
         if (!processedFiles.contains(fileWithType)) {
             unprocessedFiles.add(fileWithType);
         }
