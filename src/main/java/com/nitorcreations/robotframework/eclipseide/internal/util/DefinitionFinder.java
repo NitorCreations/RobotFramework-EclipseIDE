@@ -51,6 +51,7 @@ public class DefinitionFinder {
         List<FileWithType> unprocessedFiles = new ArrayList<FileWithType>();
         Set<FileWithType> processedFiles = new HashSet<FileWithType>();
         unprocessedFiles.add(new FileWithType(Type.RESOURCE, file));
+        unprocessedFiles.add(new FileWithType(Type.LIBRARY, "BuiltIn", file.getProject()));
         while (!unprocessedFiles.isEmpty()) {
             FileWithType currentFileWithType = unprocessedFiles.iterator().next();
             VisitorInterest interest;
