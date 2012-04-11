@@ -59,6 +59,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         RobotLine robotLine = lines.get(lineNo);
         ParsedString argument = robotLine.getArgumentAt(documentOffset);
         IFile file = ResourceManager.resolveFileFor(document);
+        List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
         if (argument == null || argument.getType() == ArgumentType.KEYWORD_CALL) {
             // find the cursor location range inside the current line where keyword
             // completion proposals make sense
@@ -73,24 +74,20 @@ public class RobotContentAssistant implements IContentAssistProcessor {
                 argument = robotLine.arguments.size() >= 2 ? robotLine.arguments.get(1) : null;
                 IRegion replacementRegion = new Region(robotLine.lineCharPos + replacePos, rightPos - leftPos);
                 KeywordCompletionMatchVisitorProvider visitorProvider = new KeywordCompletionMatchVisitorProvider(file, replacementRegion);
-                return computeCompletionProposals(file, documentOffset, robotLine.lineCharPos, argument, leftPos, rightPos, visitorProvider);
+                proposals.addAll(computeCompletionProposals(file, documentOffset, robotLine.lineCharPos, argument, leftPos, rightPos, visitorProvider));
             }
-        } else if (startsWithVariableCharacter(argument)) {
+        }
+        if (argument != null) {
             int leftPos = argument.getArgCharPos() - lineInfo.getOffset();
             int rightPos = argument.getArgEndCharPos() - lineInfo.getOffset();
             IRegion replacementRegion = new Region(robotLine.lineCharPos + leftPos, rightPos - leftPos);
             VariableCompletionMatchVisitorProvider visitorProvider = new VariableCompletionMatchVisitorProvider(file, replacementRegion);
-            return computeCompletionProposals(file, documentOffset, robotLine.lineCharPos, argument, leftPos, rightPos, visitorProvider);
+            proposals.addAll(computeCompletionProposals(file, documentOffset, robotLine.lineCharPos, argument, leftPos, rightPos, visitorProvider));
         }
-        return null;
-    }
-
-    private boolean startsWithVariableCharacter(ParsedString argument) {
-        if (argument == null) {
-            return false;
+        if (proposals.isEmpty()) {
+            return null;
         }
-        String value = argument.getUnescapedValue();
-        return value.startsWith("$") || value.startsWith("@");
+        return proposals.toArray(new ICompletionProposal[proposals.size()]);
     }
 
     int findLeftmostKeywordPosition(IRegion lineInfo, String line, RobotLine robotLine) {
@@ -108,7 +105,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         return line.length();
     }
 
-    private ICompletionProposal[] computeCompletionProposals(IFile file, int documentOffset, int lineCharPos, ParsedString argument, final int leftPos, final int rightPos, CompletionMatchVisitorProvider visitorProvider) {
+    private List<RobotCompletionProposal> computeCompletionProposals(IFile file, int documentOffset, int lineCharPos, ParsedString argument, final int leftPos, final int rightPos, CompletionMatchVisitorProvider visitorProvider) {
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
         // first find matches that use the whole input as search string
         DefinitionFinder.acceptMatches(file, visitorProvider.get(argument, proposals));
@@ -127,7 +124,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
                 DefinitionFinder.acceptMatches(file, visitorProvider.get(null, proposals));
             }
         }
-        return proposals.toArray(new ICompletionProposal[proposals.size()]);
+        return proposals;
     }
 
     private boolean proposalsIsEmptyOrContainsOnly(List<RobotCompletionProposal> proposals, ParsedString argument) {
