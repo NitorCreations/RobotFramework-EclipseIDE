@@ -58,7 +58,7 @@ public class RobotLine {
         if (firstArgument.getType() != ArgumentType.SETTING_KEY) {
             return false;
         }
-        return firstArgument.equals("Resource");
+        return firstArgument.getValue().equals("Resource");
 
     }
 
@@ -70,7 +70,7 @@ public class RobotLine {
         if (firstArgument.getType() != ArgumentType.SETTING_KEY) {
             return false;
         }
-        return firstArgument.equals("Variables");
+        return firstArgument.getValue().equals("Variables");
 
     }
 }

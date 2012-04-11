@@ -587,7 +587,7 @@ public class ArgumentPreParser {
     private void lookForGlobalTestTemplate() {
         for (RobotLine line : lines) {
             if (line.isType(LineType.SETTING_TABLE_LINE)) {
-                if (line.arguments.get(0).equals("Test Template")) {
+                if (line.arguments.get(0).getValue().equals("Test Template")) {
                     globalTemplateAtLine = line.lineNo;
                     // continue searching; last hit remains in effect
                 }
@@ -614,7 +614,7 @@ public class ArgumentPreParser {
                 // testcase ended, do not look further
                 break outer;
             }
-            if (line.arguments.size() > settingKeyPos && line.arguments.get(settingKeyPos).equals("[Template]")) {
+            if (line.arguments.size() > settingKeyPos && line.arguments.get(settingKeyPos).getValue().equals("[Template]")) {
                 localTemplateAtLine = line.lineNo;
                 localTemplateAtColumn = settingKeyPos;
                 // continue searching; last hit remains in effect
