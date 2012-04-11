@@ -85,6 +85,7 @@ public class ArgumentPreParser {
     private SettingType setting_type;
     private boolean setting_gotFirstArg;
     private WithNameState setting_withNameState;
+    private boolean keyword_parsed;
 
     private static final int NO_TEMPLATE = -1;
     private int globalTemplateAtLine;
@@ -223,6 +224,7 @@ public class ArgumentPreParser {
         case TESTCASE_TABLE_TESTCASE_BEGIN:
         case KEYWORD_TABLE_KEYWORD_BEGIN:
             if (argOff == 0) {
+                keyword_parsed = false;
                 lookForLocalTestTemplate();
                 ParsedString newName = line.arguments.get(0);
                 if (!newName.isEmpty()) {
@@ -237,41 +239,13 @@ public class ArgumentPreParser {
 
         case TESTCASE_TABLE_TESTCASE_LINE:
         case KEYWORD_TABLE_KEYWORD_LINE: {
-            switch (argOff) {
-            case 0: {
+            if (argOff == 0) {
+                keyword_parsed = false;
                 prepareNextToken();
                 return;
             }
-            case 1: {
-                ParsedString keywordOrSetting = line.arguments.get(1);
-                keywordSequence_isSetting = keywordOrSetting.getValue().startsWith("[");
-                if (keywordSequence_isSetting) {
-                    keywordSequence_keywordCallState = KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT; // TODO
-                                                                                                       // possibly
-                                                                                                       // should
-                                                                                                       // be
-                                                                                                       // KEYWORD_NOT_FOR_NOINDENT
-                    keywordSequence_settingType = keywordSequenceSettingTypes.get(keywordOrSetting.getValue());
-                    if (keywordSequence_settingType == null) {
-                        keywordSequence_settingType = SettingType.UNKNOWN;
-                    }
-                    keywordOrSetting.setType(ArgumentType.SETTING_KEY);
-                    prepareNextToken();
-                } else {
-                    keywordSequence_keywordCallState = KeywordCallState.UNDETERMINED;
-                    parseKeywordCall(lastRealType == LineType.TESTCASE_TABLE_TESTCASE_BEGIN || lastRealType == LineType.TESTCASE_TABLE_TESTCASE_LINE);
-                }
-                return;
-            }
-            default: {
-                if (keywordSequence_isSetting) {
-                    parseKeywordSequenceSetting();
-                } else {
-                    parseKeywordCall(lastRealType == LineType.TESTCASE_TABLE_TESTCASE_BEGIN || lastRealType == LineType.TESTCASE_TABLE_TESTCASE_LINE);
-                }
-                return;
-            }
-            }
+            parseKeywordAndArgs();
+            break;
         }
         case CONTINUATION_LINE: {
             if (argOff == 0) {
@@ -313,11 +287,7 @@ public class ArgumentPreParser {
             case TESTCASE_TABLE_TESTCASE_LINE:
             case KEYWORD_TABLE_KEYWORD_BEGIN:
             case KEYWORD_TABLE_KEYWORD_LINE: {
-                if (keywordSequence_isSetting) {
-                    parseKeywordSequenceSetting();
-                } else {
-                    parseKeywordCall(lastRealType == LineType.TESTCASE_TABLE_TESTCASE_BEGIN || lastRealType == LineType.TESTCASE_TABLE_TESTCASE_LINE);
-                }
+                parseKeywordAndArgs();
                 return;
             }
             default: {
@@ -329,8 +299,41 @@ public class ArgumentPreParser {
         }
     }
 
+    private void parseKeywordAndArgs() {
+        if (!keyword_parsed) {
+            keyword_parsed = true;
+            ParsedString keywordOrSetting = line.arguments.get(argOff);
+            keywordSequence_isSetting = keywordOrSetting.getValue().startsWith("[");
+            if (keywordSequence_isSetting) {
+                keywordSequence_keywordCallState = KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT; // TODO
+                                                                                                   // possibly
+                                                                                                   // should
+                                                                                                   // be
+                                                                                                   // KEYWORD_NOT_FOR_NOINDENT
+                keywordSequence_settingType = keywordSequenceSettingTypes.get(keywordOrSetting.getValue());
+                if (keywordSequence_settingType == null) {
+                    keywordSequence_settingType = SettingType.UNKNOWN;
+                }
+                keywordOrSetting.setType(ArgumentType.SETTING_KEY);
+                prepareNextToken();
+            } else {
+                keywordSequence_keywordCallState = KeywordCallState.UNDETERMINED;
+                parseKeywordCall(lastRealType == LineType.TESTCASE_TABLE_TESTCASE_BEGIN || lastRealType == LineType.TESTCASE_TABLE_TESTCASE_LINE);
+            }
+        } else {
+            if (keywordSequence_isSetting) {
+                parseKeywordSequenceSetting();
+            } else {
+                parseKeywordCall(lastRealType == LineType.TESTCASE_TABLE_TESTCASE_BEGIN || lastRealType == LineType.TESTCASE_TABLE_TESTCASE_LINE);
+            }
+        }
+    }
+
     int determineContinuationLineArgOff(RobotLine theLine) {
-        return theLine.arguments.get(0).getValue().equals(PreParser.CONTINUATION_STR) ? 1 : 2;
+        List<ParsedString> arguments = theLine.arguments;
+        ParsedString parsedString = arguments.get(0);
+        String value = parsedString.getValue();
+        return value.equals(PreParser.CONTINUATION_STR) ? 1 : 2;
     }
 
     private void parseSettingArgs() {
