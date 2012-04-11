@@ -90,6 +90,7 @@ public class ArgumentPreParser {
     private static final int NO_TEMPLATE = -1;
     private int globalTemplateAtLine;
     private int localTemplateAtLine;
+    private int localTemplateAtColumn;
     private static final String NONE_STR = "NONE";
 
     enum WithNameState {
@@ -329,7 +330,7 @@ public class ArgumentPreParser {
         }
     }
 
-    int determineContinuationLineArgOff(RobotLine theLine) {
+    static int determineContinuationLineArgOff(RobotLine theLine) {
         List<ParsedString> arguments = theLine.arguments;
         ParsedString parsedString = arguments.get(0);
         String value = parsedString.getValue();
@@ -489,8 +490,8 @@ public class ArgumentPreParser {
     private boolean isTemplateActive() {
         if (localTemplateAtLine != NO_TEMPLATE) {
             RobotLine line = lines.get(localTemplateAtLine - 1);
-            if (line.arguments.size() >= 3) {
-                return !NONE_STR.equals(line.arguments.get(2).getValue());
+            if (line.arguments.size() > localTemplateAtColumn + 1) {
+                return !NONE_STR.equals(line.arguments.get(localTemplateAtColumn + 1).getValue());
             }
             outer: for (int lineIdx = localTemplateAtLine; lineIdx < lines.size(); ++lineIdx) {
                 line = lines.get(lineIdx);
@@ -599,19 +600,23 @@ public class ArgumentPreParser {
         outer: for (int lineIdx = lineIterator.nextIndex() - 1; lineIdx < lines.size(); ++lineIdx) {
             RobotLine line = lines.get(lineIdx);
             assert line.lineNo - 1 == lineIdx;
+            int settingKeyPos = 1;
             switch (line.type) {
             case TESTCASE_TABLE_TESTCASE_BEGIN:
             case TESTCASE_TABLE_TESTCASE_LINE:
                 break;
             case CONTINUATION_LINE:
+                settingKeyPos = determineContinuationLineArgOff(line);
+                break;
             case COMMENT_LINE:
                 continue;
             default:
                 // testcase ended, do not look further
                 break outer;
             }
-            if (line.arguments.size() >= 2 && line.arguments.get(1).equals("[Template]")) {
+            if (line.arguments.size() > settingKeyPos && line.arguments.get(settingKeyPos).equals("[Template]")) {
                 localTemplateAtLine = line.lineNo;
+                localTemplateAtColumn = settingKeyPos;
                 // continue searching; last hit remains in effect
             }
         }
