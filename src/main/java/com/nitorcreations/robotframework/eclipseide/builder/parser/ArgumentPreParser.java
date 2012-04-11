@@ -90,7 +90,7 @@ public class ArgumentPreParser {
     private static final int NO_TEMPLATE = -1;
     private int globalTemplateAtLine;
     private int localTemplateAtLine;
-    private static final String NO_TEMPLATE_STR = "NONE";
+    private static final String NONE_STR = "NONE";
 
     enum WithNameState {
         NONE, GOT_KEY, GOT_VALUE
@@ -453,6 +453,8 @@ public class ArgumentPreParser {
                 } else {
                     if (templatesEnabled && isTemplateActive()) {
                         keyword.setType(ArgumentType.KEYWORD_ARG);
+                    } else if (NONE_STR.equals(keyword.getValue())) {
+                        keyword.setType(ArgumentType.SETTING_VAL);
                     } else {
                         keyword.setType(ArgumentType.KEYWORD_CALL);
                     }
@@ -488,7 +490,7 @@ public class ArgumentPreParser {
         if (localTemplateAtLine != NO_TEMPLATE) {
             RobotLine line = lines.get(localTemplateAtLine - 1);
             if (line.arguments.size() >= 3) {
-                return !line.arguments.get(2).equals(NO_TEMPLATE_STR);
+                return !NONE_STR.equals(line.arguments.get(2).getValue());
             }
             outer: for (int lineIdx = localTemplateAtLine; lineIdx < lines.size(); ++lineIdx) {
                 line = lines.get(lineIdx);
@@ -499,7 +501,7 @@ public class ArgumentPreParser {
                 case CONTINUATION_LINE:
                     int argOff = determineContinuationLineArgOff(line);
                     if (argOff < line.arguments.size()) {
-                        return !line.arguments.get(argOff).equals(NO_TEMPLATE_STR);
+                        return !NONE_STR.equals(line.arguments.get(argOff).getValue());
                     }
                     break;
                 default:
