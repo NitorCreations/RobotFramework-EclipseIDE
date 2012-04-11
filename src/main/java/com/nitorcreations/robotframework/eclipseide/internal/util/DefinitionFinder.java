@@ -19,7 +19,7 @@ import static com.nitorcreations.robotframework.eclipseide.internal.util.Definit
 import static com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest.CONTINUE_TO_END_OF_CURRENT_FILE;
 import static com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest.STOP;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,7 +32,6 @@ import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest;
-import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType.Type;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -48,12 +47,23 @@ public class DefinitionFinder {
      *            the visitor of the matches found
      */
     public static void acceptMatches(IFile file, DefinitionMatchVisitor visitor) {
-        List<FileWithType> unprocessedFiles = new ArrayList<FileWithType>();
+        PriorityDeque<FileWithType> unprocessedFiles = new LinkedPriorityDeque<FileWithType>(3, new Prioritizer<FileWithType>() {
+            @Override
+            public int prioritize(FileWithType fileWithType) {
+                return fileWithType.getType() == FileType.LIBRARY ? 1 : 0;
+            }
+        });
+        // first add builtin variables so they are processed first
+        unprocessedFiles.add(0, new FileWithType(FileType.BUILTIN_VARIABLE, "BuiltIn", file.getProject()));
+        unprocessedFiles.add(0, new FileWithType(FileType.RESOURCE, file));
+        // add the builtin keywords last
+        unprocessedFiles.add(2, new FileWithType(FileType.LIBRARY, "BuiltIn", file.getProject()));
+
         Set<FileWithType> processedFiles = new HashSet<FileWithType>();
-        unprocessedFiles.add(new FileWithType(Type.RESOURCE, file));
-        unprocessedFiles.add(new FileWithType(Type.LIBRARY, "BuiltIn", file.getProject()));
         while (!unprocessedFiles.isEmpty()) {
-            FileWithType currentFileWithType = unprocessedFiles.iterator().next();
+            FileWithType currentFileWithType = unprocessedFiles.removeFirst();
+            processedFiles.add(currentFileWithType);
+
             VisitorInterest interest;
             switch (currentFileWithType.getType()) {
                 case RESOURCE:
@@ -61,6 +71,7 @@ public class DefinitionFinder {
                     break;
                 case LIBRARY:
                 case VARIABLE:
+                case BUILTIN_VARIABLE:
                     interest = acceptVariableOrLibraryFile(currentFileWithType, visitor);
                     break;
                 default:
@@ -69,12 +80,10 @@ public class DefinitionFinder {
             if (interest == CONTINUE_TO_END_OF_CURRENT_FILE) {
                 return;
             }
-            processedFiles.add(currentFileWithType);
-            unprocessedFiles.remove(currentFileWithType);
         }
     }
 
-    private static VisitorInterest acceptResourceFile(FileWithType currentFileWithType, DefinitionMatchVisitor visitor, List<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles) {
+    private static VisitorInterest acceptResourceFile(FileWithType currentFileWithType, DefinitionMatchVisitor visitor, Collection<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles) {
         IFile currentFile = currentFileWithType.getFile();
         RobotFile currentRobotFile = RobotFile.get(currentFile, true);
         List<RobotLine> lines;
@@ -95,18 +104,18 @@ public class DefinitionFinder {
         if (interest != CONTINUE_TO_END_OF_CURRENT_FILE) {
             for (RobotLine line : lines) {
                 if (line.isResourceSetting()) {
-                    processLinkableFile(unprocessedFiles, processedFiles, currentFile, line, Type.RESOURCE);
+                    processLinkableFile(unprocessedFiles, processedFiles, currentFile, line, FileType.RESOURCE);
                 } else if (line.isVariableSetting()) {
-                    processLinkableFile(unprocessedFiles, processedFiles, currentFile, line, Type.VARIABLE);
+                    processLinkableFile(unprocessedFiles, processedFiles, currentFile, line, FileType.VARIABLE);
                 } else if (line.isLibrarySetting()) {
-                    processUnlinkableFile(unprocessedFiles, processedFiles, line, Type.LIBRARY, currentFileWithType.getProject());
+                    processUnlinkableFile(unprocessedFiles, processedFiles, line, FileType.LIBRARY, currentFileWithType.getProject());
                 }
             }
         }
         return interest;
     }
 
-    private static void processLinkableFile(List<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, IFile currentFile, RobotLine line, Type type) {
+    private static void processLinkableFile(Collection<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, IFile currentFile, RobotLine line, FileType type) {
         ParsedString secondArgument = line.arguments.get(1);
         IFile resourceFile = ResourceManager.getRelativeFile(currentFile, secondArgument.getUnescapedValue());
         FileWithType fileWithType = new FileWithType(type, resourceFile);
@@ -115,7 +124,7 @@ public class DefinitionFinder {
         }
     }
 
-    private static void processUnlinkableFile(List<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, RobotLine line, Type type, IProject project) {
+    private static void processUnlinkableFile(Collection<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, RobotLine line, FileType type, IProject project) {
         ParsedString secondArgument = line.arguments.get(1);
         FileWithType fileWithType = new FileWithType(type, secondArgument.getValue(), project);
         if (!secondArgument.isEmpty()) {
@@ -123,7 +132,7 @@ public class DefinitionFinder {
         }
     }
 
-    private static void addIfNew(List<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, FileWithType fileWithType) {
+    private static void addIfNew(Collection<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, FileWithType fileWithType) {
         if (!processedFiles.contains(fileWithType)) {
             unprocessedFiles.add(fileWithType);
         }

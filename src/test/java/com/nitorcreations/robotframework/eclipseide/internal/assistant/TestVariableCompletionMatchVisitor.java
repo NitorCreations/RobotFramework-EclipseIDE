@@ -25,13 +25,13 @@ import org.eclipse.jface.text.Region;
 import org.junit.Test;
 
 import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest;
+import com.nitorcreations.robotframework.eclipseide.internal.util.FileType;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
-import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType.Type;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class TestVariableCompletionMatchVisitor {
     private static final ParsedString PROPOSAL = new ParsedString("${foo}", 0);
-    private static final FileWithType DUMMY_LOCATION = new FileWithType(Type.LIBRARY, "TestLibrary", null);
+    private static final FileWithType DUMMY_LOCATION = new FileWithType(FileType.LIBRARY, "TestLibrary", null);
 
     @Test
     public void testVisitMatchAddsProposalIfMatchIsFound() throws Exception {

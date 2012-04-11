@@ -19,16 +19,12 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 
 public class FileWithType {
-    public enum Type {
-        RESOURCE, LIBRARY, VARIABLE
-    }
-
-    private final Type type;
+    private final FileType type;
     private final IFile file;
     private final String name;
     private final IProject project;
 
-    public FileWithType(FileWithType.Type type, IFile file) {
+    public FileWithType(FileType type, IFile file) {
         if (type == null || file == null) {
             throw new NullPointerException();
         }
@@ -38,7 +34,7 @@ public class FileWithType {
         this.project = file.getProject();
     }
 
-    public FileWithType(FileWithType.Type type, String name, IProject project) {
+    public FileWithType(FileType type, String name, IProject project) {
         if (type == null || name == null) {
             throw new NullPointerException();
         }
@@ -56,7 +52,7 @@ public class FileWithType {
         return name.substring(0, dotLocation);
     }
 
-    public Type getType() {
+    public FileType getType() {
         return type;
     }
 
@@ -73,7 +69,7 @@ public class FileWithType {
     }
 
     public boolean isRobotFile() {
-        return type == Type.RESOURCE;
+        return type == FileType.RESOURCE;
     }
 
     @Override

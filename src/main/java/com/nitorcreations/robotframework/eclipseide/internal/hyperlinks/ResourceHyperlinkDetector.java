@@ -24,8 +24,8 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
+import com.nitorcreations.robotframework.eclipseide.internal.util.FileType;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
-import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType.Type;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 /**
@@ -54,7 +54,7 @@ public class ResourceHyperlinkDetector extends HyperlinkDetector {
             return;
         }
         IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        Type targetType = isResourceSetting ? Type.RESOURCE : Type.VARIABLE;
+        FileType targetType = isResourceSetting ? FileType.RESOURCE : FileType.VARIABLE;
         FileWithType targetFileWithType = new FileWithType(targetType, targetFile);
         links.add(new Hyperlink(linkRegion, linkString, null, targetFileWithType));
     }

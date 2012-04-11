@@ -37,8 +37,8 @@ public class IndexFile {
         switch (fileWithType.getType()) {
             case VARIABLE:
                 return getVariableFileVariables(fileWithType.getFile());
-            case LIBRARY:
-                return getLibraryVariables(fileWithType);
+            case BUILTIN_VARIABLE:
+                return getBuiltinVariables(fileWithType);
         }
         return Collections.emptyList();
     }
@@ -56,7 +56,7 @@ public class IndexFile {
         return getMatches(indexFile, true);
     }
 
-    private static List<String> getLibraryVariables(FileWithType fileWithType) {
+    private static List<String> getBuiltinVariables(FileWithType fileWithType) {
         IFile indexFile = getIndexFileForLibrary(fileWithType);
         return getMatches(indexFile, true);
     }
