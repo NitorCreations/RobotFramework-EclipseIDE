@@ -25,24 +25,24 @@ import com.nitorcreations.robotframework.eclipseide.internal.util.BaseDefinition
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public abstract class CompletionMatchVisitor extends BaseDefinitionMatchVisitor {
-    protected final ParsedString substring;
+    protected final ParsedString userInput;
     private final List<RobotCompletionProposal> proposals;
     private final IRegion replacementRegion;
 
-    public CompletionMatchVisitor(IFile file, ParsedString substring, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
+    public CompletionMatchVisitor(IFile file, ParsedString userInput, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
         super(file);
-        this.substring = substring;
+        this.userInput = userInput;
         this.proposals = proposals;
         this.replacementRegion = replacementRegion;
     }
 
-    protected void addProposal(ParsedString match, IFile location) {
+    protected void addProposal(ParsedString proposal, IFile proposalLocation) {
         Image image = null;
-        String displayString = getFilePrefix(location) + match.getValue();
-        String additionalProposalInfo = "I recommend: " + match.getValue();
-        String informationDisplayString = "You chose: " + match.getValue();
-        String replacementString = match.getValue();
+        String displayString = getFilePrefix(proposalLocation) + proposal.getValue();
+        String additionalProposalInfo = "I recommend: " + proposal.getValue();
+        String informationDisplayString = "You chose: " + proposal.getValue();
+        String replacementString = proposal.getValue();
         int cursorPosition = replacementString.length();
-        proposals.add(new RobotCompletionProposal(match, location, replacementString, replacementRegion, cursorPosition, image, displayString, informationDisplayString, additionalProposalInfo));
+        proposals.add(new RobotCompletionProposal(proposal, proposalLocation, replacementString, replacementRegion, cursorPosition, image, displayString, informationDisplayString, additionalProposalInfo));
     }
 }

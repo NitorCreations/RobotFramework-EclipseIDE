@@ -43,15 +43,15 @@ public class DefinitionFinder {
         Set<IFile> processedFiles = new HashSet<IFile>();
         unprocessedFiles.add(file);
         while (!unprocessedFiles.isEmpty()) {
-            IFile targetFile = unprocessedFiles.iterator().next();
-            RobotFile robotFile = RobotFile.get(targetFile, true);
-            if (robotFile != null) {
-                List<RobotLine> lines = robotFile.getLines();
+            IFile currentFile = unprocessedFiles.iterator().next();
+            RobotFile currentRobotFile = RobotFile.get(currentFile, true);
+            if (currentRobotFile != null) {
+                List<RobotLine> lines = currentRobotFile.getLines();
                 VisitorInterest interest = VisitorInterest.CONTINUE;
                 for (RobotLine line : lines) {
                     if (line.isType(visitor.getWantedLineType())) {
-                        ParsedString firstArgument = line.arguments.get(0);
-                        interest = visitor.visitMatch(firstArgument, targetFile);
+                        ParsedString proposal = line.arguments.get(0);
+                        interest = visitor.visitMatch(proposal, currentFile);
                         if (interest == VisitorInterest.STOP) {
                             return;
                         }
@@ -63,15 +63,15 @@ public class DefinitionFinder {
                 for (RobotLine line : lines) {
                     if (line.isResourceSetting()) {
                         ParsedString secondArgument = line.arguments.get(1);
-                        IFile resourceFile = ResourceManager.getRelativeFile(targetFile, secondArgument.getUnescapedValue());
+                        IFile resourceFile = ResourceManager.getRelativeFile(currentFile, secondArgument.getUnescapedValue());
                         if (resourceFile.exists() && !processedFiles.contains(resourceFile)) {
                             unprocessedFiles.add(resourceFile);
                         }
                     }
                 }
             }
-            processedFiles.add(targetFile);
-            unprocessedFiles.remove(targetFile);
+            processedFiles.add(currentFile);
+            unprocessedFiles.remove(currentFile);
         }
     }
 

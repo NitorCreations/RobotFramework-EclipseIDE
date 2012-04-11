@@ -25,14 +25,14 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
 
-    public VariableCompletionMatchVisitor(IFile file, ParsedString argument, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
-        super(file, argument, proposals, replacementRegion);
+    public VariableCompletionMatchVisitor(IFile file, ParsedString userInput, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
+        super(file, userInput, proposals, replacementRegion);
     }
 
     @Override
-    public VisitorInterest visitMatch(ParsedString match, IFile location) {
-        if (substring == null || match.getUnescapedValue().toLowerCase().contains(substring.getUnescapedValue().toLowerCase())) {
-            addProposal(match, location);
+    public VisitorInterest visitMatch(ParsedString proposal, IFile proposalLocation) {
+        if (userInput == null || proposal.getUnescapedValue().toLowerCase().contains(userInput.getUnescapedValue().toLowerCase())) {
+            addProposal(proposal, proposalLocation);
         }
         return VisitorInterest.CONTINUE;
     }

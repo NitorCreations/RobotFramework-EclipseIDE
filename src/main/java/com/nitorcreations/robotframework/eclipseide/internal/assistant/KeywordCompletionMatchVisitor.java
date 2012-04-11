@@ -33,20 +33,20 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
     }
 
     @Override
-    public VisitorInterest visitMatch(ParsedString match, IFile location) {
-        if (substring != null) {
-            String substringValue = substring.getValue().toLowerCase();
-            String matchValue = match.getValue().toLowerCase();
-            if (KeywordMatchResult.DIFFERENT == match(matchValue, lookFor(substringValue))) {
-                if (!prefixesMatch(substringValue, location)) {
+    public VisitorInterest visitMatch(ParsedString proposal, IFile proposalLocation) {
+        if (userInput != null) {
+            String userInputString = userInput.getValue().toLowerCase();
+            String proposalString = proposal.getValue().toLowerCase();
+            if (KeywordMatchResult.DIFFERENT == match(proposalString, lookFor(userInputString))) {
+                if (!prefixesMatch(userInputString, proposalLocation)) {
                     return VisitorInterest.CONTINUE;
                 }
-                if (KeywordMatchResult.DIFFERENT == match(matchValue, lookFor(valueWithoutPrefix(substringValue)))) {
+                if (KeywordMatchResult.DIFFERENT == match(proposalString, lookFor(valueWithoutPrefix(userInputString)))) {
                     return VisitorInterest.CONTINUE;
                 }
             }
         }
-        addProposal(match, location);
+        addProposal(proposal, proposalLocation);
         return VisitorInterest.CONTINUE;
     }
 
@@ -54,13 +54,13 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
         return value.substring(value.indexOf('.') + 1);
     }
 
-    private boolean prefixesMatch(String substringValue, IFile location) {
-        int indexOfDot = substringValue.indexOf('.');
+    private boolean prefixesMatch(String userInputString, IFile proposalLocation) {
+        int indexOfDot = userInputString.indexOf('.');
         if (indexOfDot == -1) {
             return false;
         }
-        String substringPrefix = substringValue.substring(0, indexOfDot + 1);
-        return location.getName().startsWith(substringPrefix);
+        String userInputPrefix = userInputString.substring(0, indexOfDot + 1);
+        return proposalLocation.getName().startsWith(userInputPrefix);
     }
 
     private String lookFor(String value) {

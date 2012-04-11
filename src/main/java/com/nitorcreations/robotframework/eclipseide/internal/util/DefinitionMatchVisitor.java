@@ -26,7 +26,7 @@ public interface DefinitionMatchVisitor {
         CONTINUE, CONTINUE_TO_END_OF_CURRENT_FILE, STOP
     }
 
-    VisitorInterest visitMatch(ParsedString match, IFile location);
+    VisitorInterest visitMatch(ParsedString proposal, IFile proposalLocation);
 
     LineType getWantedLineType();
 }
