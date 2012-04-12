@@ -16,6 +16,7 @@
 package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -56,7 +57,12 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         }
 
         List<RobotLine> lines = RobotFile.get(document).getLines();
-        RobotLine robotLine = lines.get(lineNo);
+        RobotLine robotLine;
+        if (lineNo < lines.size()) {
+            robotLine = lines.get(lineNo);
+        } else {
+            robotLine = new RobotLine(lineNo, documentOffset, Collections.<ParsedString> emptyList());
+        }
         ParsedString argument = robotLine.getArgumentAt(documentOffset);
         IFile file = ResourceManager.resolveFileFor(document);
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
