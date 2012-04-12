@@ -93,7 +93,7 @@ public class IndexFile {
     private static List<String> load(IFile indexFile) {
         InputStream stream = null;
         try {
-            stream = indexFile.getContents();
+            stream = indexFile.getContents(true);
             Reader r = new InputStreamReader(stream, "UTF-8");
             @SuppressWarnings("resource")
             BufferedReader br = new BufferedReader(r);
