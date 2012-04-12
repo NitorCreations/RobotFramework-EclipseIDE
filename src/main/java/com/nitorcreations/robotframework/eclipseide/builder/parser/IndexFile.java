@@ -82,7 +82,11 @@ public class IndexFile {
     }
 
     private static List<String> getMatches(IFile indexFile, boolean wantVariables) {
-        if (indexFile == null || !indexFile.exists()) {
+        if (indexFile == null) {
+            return Collections.emptyList();
+        }
+        if (!indexFile.exists()) {
+            System.out.println("Warning: index file " + indexFile + " not found, not able to do proper error checking / hyperlinking / code completion");
             return Collections.emptyList();
         }
         List<String> contents = load(indexFile);
