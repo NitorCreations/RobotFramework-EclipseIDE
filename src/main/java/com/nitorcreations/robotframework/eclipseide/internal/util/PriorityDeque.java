@@ -42,4 +42,14 @@ public interface PriorityDeque<T> extends Deque<T> {
 
     int getNumberOfPriorityLevels();
 
+    /**
+     * @return -1 if empty, lowest priority level otherwise
+     */
+    int peekLowestPriority();
+
+    /**
+     * @return -1 if empty, highest priority level otherwise
+     */
+    int peekHighestPriority();
+
 }

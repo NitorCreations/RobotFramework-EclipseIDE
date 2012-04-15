@@ -156,6 +156,28 @@ public class LinkedPriorityDeque<T> extends AbstractQueue<T> implements Priority
         return queues.length;
     }
 
+    @Override
+    public int peekLowestPriority() {
+        for (int i = 0; i < queues.length; ++i) {
+            Deque<T> queue = queues[i];
+            if (!queue.isEmpty()) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public int peekHighestPriority() {
+        for (int i = queues.length - 1; i >= 0; --i) {
+            Deque<T> queue = queues[i];
+            if (!queue.isEmpty()) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     // --------------------------------------
 
     @Override

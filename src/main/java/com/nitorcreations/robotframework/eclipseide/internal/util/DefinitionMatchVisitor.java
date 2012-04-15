@@ -21,7 +21,7 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 public interface DefinitionMatchVisitor {
 
     public enum VisitorInterest {
-        CONTINUE, CONTINUE_TO_END_OF_CURRENT_FILE, STOP
+        CONTINUE, CONTINUE_TO_END_OF_CURRENT_PRIORITY_LEVEL, CONTINUE_TO_END_OF_CURRENT_FILE, STOP
     }
 
     /**

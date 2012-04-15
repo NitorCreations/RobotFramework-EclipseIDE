@@ -17,6 +17,7 @@ package com.nitorcreations.robotframework.eclipseide.internal.util;
 
 import static com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest.CONTINUE;
 import static com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest.CONTINUE_TO_END_OF_CURRENT_FILE;
+import static com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest.CONTINUE_TO_END_OF_CURRENT_PRIORITY_LEVEL;
 import static com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest.STOP;
 
 import java.util.Collection;
@@ -47,19 +48,23 @@ public class DefinitionFinder {
      *            the visitor of the matches found
      */
     public static void acceptMatches(IFile file, DefinitionMatchVisitor visitor) {
-        PriorityDeque<FileWithType> unprocessedFiles = new LinkedPriorityDeque<FileWithType>(3, new Prioritizer<FileWithType>() {
+        /*
+         * Priority level 0: built-in variables. Priority level 1: definitions from the local file. Priority level 2:
+         * definitions from included resource and variable files, recursively. Priority level 3: explicitly loaded
+         * libraries. Priority level 4: built-in library.
+         */
+        PriorityDeque<FileWithType> unprocessedFiles = new LinkedPriorityDeque<FileWithType>(5, new Prioritizer<FileWithType>() {
             @Override
             public int prioritize(FileWithType fileWithType) {
-                return fileWithType.getType() == FileType.LIBRARY ? 1 : 0;
+                return fileWithType.getType() == FileType.LIBRARY ? 3 : 2;
             }
         });
-        // first add builtin variables so they are processed first
         unprocessedFiles.add(0, new FileWithType(FileType.BUILTIN_VARIABLE, "BuiltIn", file.getProject()));
-        unprocessedFiles.add(0, new FileWithType(FileType.RESOURCE, file));
-        // add the builtin keywords last
-        unprocessedFiles.add(2, new FileWithType(FileType.LIBRARY, "BuiltIn", file.getProject()));
+        unprocessedFiles.add(1, new FileWithType(FileType.RESOURCE, file));
+        unprocessedFiles.add(4, new FileWithType(FileType.LIBRARY, "BuiltIn", file.getProject()));
 
         Set<FileWithType> processedFiles = new HashSet<FileWithType>();
+        int currentPriorityLevel = 0;
         while (!unprocessedFiles.isEmpty()) {
             FileWithType currentFileWithType = unprocessedFiles.removeFirst();
             processedFiles.add(currentFileWithType);
@@ -80,6 +85,11 @@ public class DefinitionFinder {
             if (interest == CONTINUE_TO_END_OF_CURRENT_FILE) {
                 return;
             }
+            int nextPriorityLevel = unprocessedFiles.peekLowestPriority();
+            if (interest == CONTINUE_TO_END_OF_CURRENT_PRIORITY_LEVEL && nextPriorityLevel != currentPriorityLevel) {
+                return;
+            }
+            currentPriorityLevel = nextPriorityLevel;
         }
     }
 
