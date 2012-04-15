@@ -39,10 +39,10 @@ public abstract class CompletionMatchVisitor extends BaseDefinitionMatchVisitor 
 
     protected void addProposal(ParsedString proposal, FileWithType proposalLocation) {
         Image image = null;
-        String displayString = getFilePrefix(proposalLocation) + proposal.getValue();
-        String additionalProposalInfo = "I recommend: " + proposal.getValue();
-        String informationDisplayString = "You chose: " + proposal.getValue();
-        String replacementString = proposal.getValue();
+        String displayString = getDisplayString(proposal, proposalLocation);
+        String replacementString = getReplacementString(proposal, proposalLocation);
+        String additionalProposalInfo = "I recommend: " + replacementString;
+        String informationDisplayString = "You chose: " + replacementString;
         int cursorPosition = replacementString.length();
         proposals.add(new RobotCompletionProposal(proposal, proposalLocation, replacementString, replacementRegion, cursorPosition, image, displayString, informationDisplayString, additionalProposalInfo));
     }

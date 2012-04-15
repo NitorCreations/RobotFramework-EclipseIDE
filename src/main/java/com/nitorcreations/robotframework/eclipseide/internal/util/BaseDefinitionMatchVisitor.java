@@ -17,6 +17,8 @@ package com.nitorcreations.robotframework.eclipseide.internal.util;
 
 import org.eclipse.core.resources.IFile;
 
+import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
+
 public abstract class BaseDefinitionMatchVisitor implements DefinitionMatchVisitor {
 
     protected final IFile file;
@@ -25,11 +27,17 @@ public abstract class BaseDefinitionMatchVisitor implements DefinitionMatchVisit
         this.file = file;
     }
 
-    protected String getFilePrefix(FileWithType location) {
-        if (location.getFile() == file) {
-            return "";
+    protected String getDisplayString(ParsedString proposal, FileWithType proposalLocation) {
+        if (proposalLocation.getFile() == file) {
+            return proposal.getValue();
         }
-        return '[' + location.getName() + "] ";
+        return '[' + proposalLocation.getName() + "] " + proposal.getValue();
     }
 
+    protected String getReplacementString(ParsedString proposal, FileWithType proposalLocation) {
+        if (proposalLocation.getFile() == file) {
+            return proposal.getValue();
+        }
+        return proposalLocation.getName() + "." + proposal.getValue();
+    }
 }
