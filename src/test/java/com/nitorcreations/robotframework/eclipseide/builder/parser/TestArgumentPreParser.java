@@ -258,25 +258,43 @@ public class TestArgumentPreParser {
 
     static List<RobotLine> s(String input, ArgumentType... expected) throws AssertionFailedError {
         List<RobotLine> lines = RobotFile.parse(input).getLines();
+        // for (int i = 0; i < 5; ++i) {
+        // System.out.println();
+        // }
         // System.out.println("------------------------------\n" + input + "\n----------------\n" + lines);
         assertCorrectLines(lines, expected);
         return lines;
     }
 
+    static int c, ct, n;
+
     static void t(String input, ArgumentType... expected) throws Exception {
+        c = 1;
         List<RobotLine> lines = s(input, expected);
         tRecurse(lines);
+        ct += c;
+        ++n;
+        System.out.println(c + " mutations, " + ct + " total, " + (ct / (double) n) + " average");
     }
 
     private static void tRecurse(List<RobotLine> lines) throws AssertionFailedError {
+        tRecurse(lines, 0, 0);
+    }
+
+    private static void tRecurse(List<RobotLine> lines, int startLine, int startArg) throws AssertionFailedError {
+        ++c;
         try {
-            for (int i = 0; i < lines.size(); i++) {
+            for (int i = startLine; i < lines.size(); i++) {
                 RobotLine robotLine = lines.get(i);
                 final int nArgs = robotLine.arguments.size();
                 final int contInd = determineContinuationIndex(lines, i);
                 int arg = 1;
                 if (nArgs > 0 && robotLine.arguments.get(0).getType() == ArgumentType.IGNORED) {
                     arg = 2;
+                }
+                if (startArg > 0) {
+                    arg = Math.max(arg, startArg);
+                    startArg = 0;
                 }
                 for (; arg < nArgs; ++arg) {
                     if (robotLine.arguments.get(arg).getType() == ArgumentType.IGNORED) {
@@ -290,7 +308,9 @@ public class TestArgumentPreParser {
                     List<RobotLine> lines2a = splice(lines, robotLine, line1a, line2);
                     List<RobotLine> lines2b = splice(lines, robotLine, line1b, line2);
                     t2(lines2a);
+                    tRecurse(lines2a, i + 1, contInd + 1);
                     t2(lines2b);
+                    tRecurse(lines2b, i + 1, contInd + 1);
                     // TODO recursively test multi-split cases
                 }
             }
@@ -320,6 +340,7 @@ public class TestArgumentPreParser {
 
         String newInput = input.toString();
         List<RobotLine> parsedLines = RobotFile.parse(newInput).getLines();
+        // System.out.println();
         // System.out.println("------------------------------\n" + newInput + "\n----------------\n" + parsedLines);
         assertCorrectLines(parsedLines, expectedArr);
     }
@@ -346,15 +367,15 @@ public class TestArgumentPreParser {
         for (; i >= 0; --i) {
             RobotLine robotLine = lines.get(i);
             switch (robotLine.type) {
-            case CONTINUATION_LINE:
-                continue;
-            case KEYWORD_TABLE_KEYWORD_BEGIN:
-            case KEYWORD_TABLE_KEYWORD_LINE:
-            case TESTCASE_TABLE_TESTCASE_BEGIN:
-            case TESTCASE_TABLE_TESTCASE_LINE:
-                return 2;
-            default:
-                return 1;
+                case CONTINUATION_LINE:
+                    continue;
+                case KEYWORD_TABLE_KEYWORD_BEGIN:
+                case KEYWORD_TABLE_KEYWORD_LINE:
+                case TESTCASE_TABLE_TESTCASE_BEGIN:
+                case TESTCASE_TABLE_TESTCASE_LINE:
+                    return 2;
+                default:
+                    return 1;
             }
         }
         return 1;
