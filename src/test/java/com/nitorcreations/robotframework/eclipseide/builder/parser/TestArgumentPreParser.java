@@ -311,7 +311,6 @@ public class TestArgumentPreParser {
                     tRecurse(lines2a, i + 1, contInd + 1);
                     t2(lines2b);
                     tRecurse(lines2b, i + 1, contInd + 1);
-                    // TODO recursively test multi-split cases
                 }
             }
         } catch (Throwable t) {
