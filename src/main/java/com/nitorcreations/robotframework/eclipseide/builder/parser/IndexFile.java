@@ -95,6 +95,7 @@ public class IndexFile {
         try {
             stream = indexFile.getContents();
             Reader r = new InputStreamReader(stream, "UTF-8");
+            @SuppressWarnings("resource")
             BufferedReader br = new BufferedReader(r);
             List<String> lines = new ArrayList<String>();
             String line;
