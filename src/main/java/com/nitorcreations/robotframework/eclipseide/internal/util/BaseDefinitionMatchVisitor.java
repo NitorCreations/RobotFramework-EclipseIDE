@@ -33,11 +33,4 @@ public abstract class BaseDefinitionMatchVisitor implements DefinitionMatchVisit
         }
         return '[' + proposalLocation.getName() + "] " + proposal.getValue();
     }
-
-    protected String getReplacementString(ParsedString proposal, FileWithType proposalLocation) {
-        if (proposalLocation.getFile() == file) {
-            return proposal.getValue();
-        }
-        return proposalLocation.getName() + "." + proposal.getValue();
-    }
 }

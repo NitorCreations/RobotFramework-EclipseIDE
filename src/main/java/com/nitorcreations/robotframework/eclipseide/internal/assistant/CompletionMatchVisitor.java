@@ -46,4 +46,6 @@ public abstract class CompletionMatchVisitor extends BaseDefinitionMatchVisitor 
         int cursorPosition = replacementString.length();
         proposals.add(new RobotCompletionProposal(proposal, proposalLocation, replacementString, replacementRegion, cursorPosition, image, displayString, informationDisplayString, additionalProposalInfo));
     }
+
+    protected abstract String getReplacementString(ParsedString proposal, FileWithType proposalLocation);
 }

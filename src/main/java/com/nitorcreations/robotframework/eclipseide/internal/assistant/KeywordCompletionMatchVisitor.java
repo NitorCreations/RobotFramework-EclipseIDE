@@ -79,4 +79,11 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
     public LineType getWantedLineType() {
         return LineType.KEYWORD_TABLE_KEYWORD_BEGIN;
     }
+
+    protected String getReplacementString(ParsedString proposal, FileWithType proposalLocation) {
+        if (proposalLocation.getFile() == file) {
+            return proposal.getValue();
+        }
+        return proposalLocation.getName() + "." + proposal.getValue();
+    }
 }

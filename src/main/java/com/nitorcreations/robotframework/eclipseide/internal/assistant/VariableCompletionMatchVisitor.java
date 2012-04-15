@@ -42,4 +42,9 @@ public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
     public LineType getWantedLineType() {
         return LineType.VARIABLE_TABLE_LINE;
     }
+
+    @Override
+    protected String getReplacementString(ParsedString proposal, FileWithType proposalLocation) {
+        return proposal.getValue();
+    }
 }
