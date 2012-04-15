@@ -17,7 +17,6 @@ package com.nitorcreations.robotframework.eclipseide.internal.util;
 
 import static com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest.CONTINUE;
 import static com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest.CONTINUE_TO_END_OF_CURRENT_FILE;
-import static com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest.CONTINUE_TO_END_OF_CURRENT_PRIORITY_LEVEL;
 import static com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest.STOP;
 
 import java.util.Collection;
@@ -82,12 +81,16 @@ public class DefinitionFinder {
                 default:
                     throw new RuntimeException("Unhandled " + currentFileWithType);
             }
-            if (interest == CONTINUE_TO_END_OF_CURRENT_FILE) {
-                return;
-            }
             int nextPriorityLevel = unprocessedFiles.peekLowestPriority();
-            if (interest == CONTINUE_TO_END_OF_CURRENT_PRIORITY_LEVEL && nextPriorityLevel != currentPriorityLevel) {
-                return;
+            switch (interest) {
+                case STOP:
+                case CONTINUE_TO_END_OF_CURRENT_FILE:
+                    return;
+                case CONTINUE_TO_END_OF_CURRENT_PRIORITY_LEVEL:
+                    if (nextPriorityLevel != currentPriorityLevel) {
+                        return;
+                    }
+                    break;
             }
             currentPriorityLevel = nextPriorityLevel;
         }
