@@ -21,15 +21,14 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.editors.text.TextEditor;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 
 /**
- * https://robotframework.googlecode.com/hg/doc/userguide/
- * RobotFrameworkUserGuide.html?r=2.6.1 http:/
- * /help.eclipse.org/helios/index.jsp
- * ?topic=/org.eclipse.platform.doc.isv/reference/api/org/ eclipse
+ * https://robotframework.googlecode.com/hg/doc/userguide/ RobotFrameworkUserGuide.html?r=2.6.1 http:/
+ * /help.eclipse.org/helios/index.jsp ?topic=/org.eclipse.platform.doc.isv/reference/api/org/ eclipse
  * /jface/text/source/package-summary.html
  * 
  * @author xkr47
@@ -43,7 +42,7 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
     public RobotFrameworkTextfileEditor() {
         colorManager = new ColorManager();
         setSourceViewerConfiguration(new RobotSourceViewerConfiguration(colorManager));
-        setDocumentProvider(new RobotDocumentProvider(this));
+        setDocumentProvider(new FileDocumentProvider());
     }
 
     @Override
