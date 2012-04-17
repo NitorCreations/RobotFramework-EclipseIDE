@@ -33,20 +33,17 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
 
     private final ParsedString matchArgument;
     private final FileWithType matchLocation;
-    private final String replacementString;
     private final IRegion replacementRegion;
-    private final int cursorPosition;
     private final Image image;
     private final String displayString;
     private final String informationDisplayString;
     private final String additionalProposalInfo;
+    private boolean prefixRequired = false;
 
-    public RobotCompletionProposal(ParsedString matchArgument, FileWithType proposalLocation, String replacementString, IRegion replacementRegion, int cursorPosition, Image image, String displayString, String informationDisplayString, String additionalProposalInfo) {
+    public RobotCompletionProposal(ParsedString matchArgument, FileWithType proposalLocation, IRegion replacementRegion, Image image, String displayString, String informationDisplayString, String additionalProposalInfo) {
         this.matchArgument = matchArgument;
         this.matchLocation = proposalLocation;
-        this.replacementString = replacementString;
         this.replacementRegion = replacementRegion;
-        this.cursorPosition = cursorPosition;
         this.image = image;
         this.displayString = displayString;
         this.informationDisplayString = informationDisplayString;
@@ -64,15 +61,22 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
     @Override
     public void apply(IDocument document) {
         try {
-            document.replace(replacementRegion.getOffset(), replacementRegion.getLength(), replacementString);
+            document.replace(replacementRegion.getOffset(), replacementRegion.getLength(), getReplacementString());
         } catch (BadLocationException x) {
             // ignore
         }
     }
 
+    private String getReplacementString() {
+        if (prefixRequired) {
+            return matchLocation.getName() + "." + matchArgument.getValue();
+        }
+        return matchArgument.getValue();
+    }
+
     @Override
     public Point getSelection(IDocument document) {
-        return new Point(replacementRegion.getOffset() + cursorPosition, 0);
+        return new Point(replacementRegion.getOffset() + getReplacementString().length(), 0);
     }
 
     @Override
@@ -103,4 +107,7 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
         return new ContextInformation(null, informationDisplayString);
     }
 
+    public void setPrefixRequired() {
+        prefixRequired = true;
+    }
 }

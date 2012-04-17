@@ -28,7 +28,7 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public abstract class CompletionMatchVisitor extends BaseDefinitionMatchVisitor {
     protected final ParsedString userInput;
-    private final List<RobotCompletionProposal> proposals;
+    protected final List<RobotCompletionProposal> proposals;
     private final IRegion replacementRegion;
     protected final HashSet<String> addedProposals = new HashSet<String>();
 
@@ -42,13 +42,10 @@ public abstract class CompletionMatchVisitor extends BaseDefinitionMatchVisitor 
     protected void addProposal(ParsedString proposal, FileWithType proposalLocation) {
         Image image = null;
         String displayString = getDisplayString(proposal, proposalLocation);
-        String replacementString = getReplacementString(proposal, proposalLocation);
+        String replacementString = proposal.getValue();
         String additionalProposalInfo = "I recommend: " + replacementString;
         String informationDisplayString = "You chose: " + replacementString;
-        int cursorPosition = replacementString.length();
-        proposals.add(new RobotCompletionProposal(proposal, proposalLocation, replacementString, replacementRegion, cursorPosition, image, displayString, informationDisplayString, additionalProposalInfo));
+        proposals.add(new RobotCompletionProposal(proposal, proposalLocation, replacementRegion, image, displayString, informationDisplayString, additionalProposalInfo));
         addedProposals.add(proposal.getValue().toLowerCase());
     }
-
-    protected abstract String getReplacementString(ParsedString proposal, FileWithType proposalLocation);
 }

@@ -53,6 +53,27 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
         return VisitorInterest.CONTINUE;
     }
 
+    @Override
+    protected void addProposal(ParsedString proposal, FileWithType proposalLocation) {
+        String proposalString = proposal.getValue().toLowerCase();
+        boolean proposalExisted = addedProposals.contains(proposalString);
+        super.addProposal(proposal, proposalLocation);
+        if (proposalExisted) {
+            for (RobotCompletionProposal robotCompletionProposal : proposals) {
+                setPrefixRequiredIfNeeded(proposalString, robotCompletionProposal);
+            }
+        }
+    }
+
+    private void setPrefixRequiredIfNeeded(String proposalString, RobotCompletionProposal robotCompletionProposal) {
+        if (file == robotCompletionProposal.getMatchLocation().getFile()) {
+            return;
+        }
+        if (robotCompletionProposal.getMatchArgument().getValue().toLowerCase().equals(proposalString)) {
+            robotCompletionProposal.setPrefixRequired();
+        }
+    }
+
     private boolean matchesWithoutPrefix(String userInputString, String proposalString, FileWithType proposalLocation) {
         if (!prefixesMatch(userInputString, proposalLocation)) {
             return false;
@@ -78,13 +99,5 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
     @Override
     public LineType getWantedLineType() {
         return LineType.KEYWORD_TABLE_KEYWORD_BEGIN;
-    }
-
-    @Override
-    protected String getReplacementString(ParsedString proposal, FileWithType proposalLocation) {
-        if (proposalLocation.getFile() != file && addedProposals.contains(proposal.getValue().toLowerCase())) {
-            return proposalLocation.getName() + "." + proposal.getValue();
-        }
-        return proposal.getValue();
     }
 }
