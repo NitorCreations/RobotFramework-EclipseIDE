@@ -82,7 +82,7 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
 
     @Override
     protected String getReplacementString(ParsedString proposal, FileWithType proposalLocation) {
-        if (proposalLocation.getFile() != file && addedProposals.contains(proposal.getValue())) {
+        if (proposalLocation.getFile() != file && addedProposals.contains(proposal.getValue().toLowerCase())) {
             return proposalLocation.getName() + "." + proposal.getValue();
         }
         return proposal.getValue();

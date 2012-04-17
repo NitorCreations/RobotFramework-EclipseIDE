@@ -33,7 +33,7 @@ public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
     @Override
     public VisitorInterest visitMatch(ParsedString proposal, FileWithType proposalLocation) {
         if (userInput == null || proposal.getUnescapedValue().toLowerCase().contains(userInput.getUnescapedValue().toLowerCase())) {
-            if (!addedProposals.contains(proposal.getValue())) {
+            if (!addedProposals.contains(proposal.getValue().toLowerCase())) {
                 addProposal(proposal, proposalLocation);
             }
         }
