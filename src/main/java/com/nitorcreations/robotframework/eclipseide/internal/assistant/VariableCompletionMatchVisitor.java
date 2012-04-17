@@ -15,7 +15,6 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
-import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -26,11 +25,9 @@ import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
-    private final HashSet<String> addedProposals = new HashSet<String>();
 
     public VariableCompletionMatchVisitor(IFile file, ParsedString userInput, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
         super(file, userInput, proposals, replacementRegion);
-
     }
 
     @Override
@@ -38,7 +35,6 @@ public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
         if (userInput == null || proposal.getUnescapedValue().toLowerCase().contains(userInput.getUnescapedValue().toLowerCase())) {
             if (!addedProposals.contains(proposal.getValue())) {
                 addProposal(proposal, proposalLocation);
-                addedProposals.add(proposal.getValue());
             }
         }
         return VisitorInterest.CONTINUE;

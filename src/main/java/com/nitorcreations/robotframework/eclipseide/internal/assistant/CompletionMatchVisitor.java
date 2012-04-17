@@ -15,6 +15,7 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -29,6 +30,7 @@ public abstract class CompletionMatchVisitor extends BaseDefinitionMatchVisitor 
     protected final ParsedString userInput;
     private final List<RobotCompletionProposal> proposals;
     private final IRegion replacementRegion;
+    protected final HashSet<String> addedProposals = new HashSet<String>();
 
     public CompletionMatchVisitor(IFile file, ParsedString userInput, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
         super(file);
@@ -45,6 +47,7 @@ public abstract class CompletionMatchVisitor extends BaseDefinitionMatchVisitor 
         String informationDisplayString = "You chose: " + replacementString;
         int cursorPosition = replacementString.length();
         proposals.add(new RobotCompletionProposal(proposal, proposalLocation, replacementString, replacementRegion, cursorPosition, image, displayString, informationDisplayString, additionalProposalInfo));
+        addedProposals.add(proposal.getValue());
     }
 
     protected abstract String getReplacementString(ParsedString proposal, FileWithType proposalLocation);

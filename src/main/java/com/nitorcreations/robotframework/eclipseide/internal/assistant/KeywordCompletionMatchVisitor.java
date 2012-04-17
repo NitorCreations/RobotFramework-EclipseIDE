@@ -80,10 +80,11 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
         return LineType.KEYWORD_TABLE_KEYWORD_BEGIN;
     }
 
+    @Override
     protected String getReplacementString(ParsedString proposal, FileWithType proposalLocation) {
-        if (proposalLocation.getFile() == file) {
-            return proposal.getValue();
+        if (proposalLocation.getFile() != file && addedProposals.contains(proposal.getValue())) {
+            return proposalLocation.getName() + "." + proposal.getValue();
         }
-        return proposalLocation.getName() + "." + proposal.getValue();
+        return proposal.getValue();
     }
 }
