@@ -79,9 +79,9 @@ public final class ResourceManager {
     }
 
     public static IFile getRelativeFile(IFile originalFile, String pathRelativeToOriginalFile) {
-        IPath originalFolderPath = originalFile.getParent().getFullPath();
+        IPath originalFolderPath = originalFile.getParent().getLocation();
         IPath newPath = originalFolderPath.append(pathRelativeToOriginalFile);
-        return originalFile.getWorkspace().getRoot().getFile(newPath);
+        return originalFile.getWorkspace().getRoot().getFileForLocation(newPath);
     }
 
     public static IEditorPart openOrReuseEditorFor(IFile file, boolean isRobotFile) {
