@@ -168,135 +168,135 @@ public class ArgumentPreParser {
             lastRealType = type;
         }
         switch (type) {
-        case IGNORE_TABLE:
-        case SETTING_TABLE_BEGIN:
-        case VARIABLE_TABLE_BEGIN:
-        case TESTCASE_TABLE_BEGIN:
-        case KEYWORD_TABLE_BEGIN: {
-            assert argOff == 0;
-            ParsedString table = line.arguments.get(0);
-            table.setType(ArgumentType.TABLE);
-            prepareNextLine();
-            return;
-        }
-        case SETTING_TABLE_LINE: {
-            switch (argOff) {
-            case 0: {
-                ParsedString setting = line.arguments.get(0);
-                setting.setType(ArgumentType.SETTING_KEY);
-                setting_type = settingTypes.get(setting.getValue());
-                if (setting_type == null) {
-                    setting_type = SettingType.UNKNOWN;
-                }
-                setting_gotFirstArg = false;
-                keywordSequence_keywordCallState = KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT; // TODO
-                                                                                                   // possibly
-                                                                                                   // should
-                                                                                                   // be
-                                                                                                   // KEYWORD_NOT_FOR_NOINDENT
-                prepareNextToken();
-                return;
-            }
-            default: {
-                parseSettingArgs();
-                return;
-            }
-            }
-        }
-        case VARIABLE_TABLE_LINE: {
-            switch (argOff) {
-            case 0:
-                ParsedString variable = line.arguments.get(0);
-                variable.setType(ArgumentType.VARIABLE_KEY);
-                prepareNextToken();
-                return;
-            default:
-                parseVariableArgs();
-                return;
-            }
-        }
-        case COMMENT_LINE: // prepareNextLine handles the comments
-        case IGNORE:
-        case TESTCASE_TABLE_IGNORE:
-        case KEYWORD_TABLE_IGNORE: {
-            prepareNextLine();
-            return;
-        }
-        case TESTCASE_TABLE_TESTCASE_BEGIN:
-        case KEYWORD_TABLE_KEYWORD_BEGIN:
-            if (argOff == 0) {
-                keyword_parsed = false;
-                lookForLocalTestTemplate();
-                ParsedString newName = line.arguments.get(0);
-                if (!newName.isEmpty()) {
-                    boolean isTestCase = type == LineType.TESTCASE_TABLE_TESTCASE_BEGIN;
-                    newName.setType(isTestCase ? ArgumentType.NEW_TESTCASE : ArgumentType.NEW_KEYWORD);
-                }
-                prepareNextToken();
-                return;
-            }
-
-            // FALL THROUGH
-
-        case TESTCASE_TABLE_TESTCASE_LINE:
-        case KEYWORD_TABLE_KEYWORD_LINE: {
-            if (argOff == 0) {
-                keyword_parsed = false;
-                prepareNextToken();
-                return;
-            }
-            parseKeywordAndArgs();
-            break;
-        }
-        case CONTINUATION_LINE: {
-            if (argOff == 0) {
-                argOff = determineContinuationLineArgOff(line);
-                if (argOff >= argLen) {
-                    prepareNextLine();
-                    return;
-                }
-            }
-            switch (lastRealType) {
-            case COMMENT_LINE:
-            case CONTINUATION_LINE:
-                throw new RuntimeException();
-            case IGNORE:
-            case TESTCASE_TABLE_IGNORE:
-            case KEYWORD_TABLE_IGNORE: {
-                // continue ignoring
-                prepareNextLine();
-                return;
-            }
             case IGNORE_TABLE:
             case SETTING_TABLE_BEGIN:
             case VARIABLE_TABLE_BEGIN:
             case TESTCASE_TABLE_BEGIN:
             case KEYWORD_TABLE_BEGIN: {
-                // all arguments ignored
+                assert argOff == 0;
+                ParsedString table = line.arguments.get(0);
+                table.setType(ArgumentType.TABLE);
                 prepareNextLine();
                 return;
             }
             case SETTING_TABLE_LINE: {
-                parseSettingArgs();
-                return;
+                switch (argOff) {
+                    case 0: {
+                        ParsedString setting = line.arguments.get(0);
+                        setting.setType(ArgumentType.SETTING_KEY);
+                        setting_type = settingTypes.get(setting.getValue());
+                        if (setting_type == null) {
+                            setting_type = SettingType.UNKNOWN;
+                        }
+                        setting_gotFirstArg = false;
+                        keywordSequence_keywordCallState = KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT; // TODO
+                                                                                                           // possibly
+                                                                                                           // should
+                                                                                                           // be
+                                                                                                           // KEYWORD_NOT_FOR_NOINDENT
+                        prepareNextToken();
+                        return;
+                    }
+                    default: {
+                        parseSettingArgs();
+                        return;
+                    }
+                }
             }
             case VARIABLE_TABLE_LINE: {
-                parseVariableArgs();
-                return;
+                switch (argOff) {
+                    case 0:
+                        ParsedString variable = line.arguments.get(0);
+                        variable.setType(ArgumentType.VARIABLE_KEY);
+                        prepareNextToken();
+                        return;
+                    default:
+                        parseVariableArgs();
+                        return;
+                }
             }
-            case TESTCASE_TABLE_TESTCASE_BEGIN:
-            case TESTCASE_TABLE_TESTCASE_LINE:
-            case KEYWORD_TABLE_KEYWORD_BEGIN:
-            case KEYWORD_TABLE_KEYWORD_LINE: {
-                parseKeywordAndArgs();
-                return;
-            }
-            default: {
+            case COMMENT_LINE: // prepareNextLine handles the comments
+            case IGNORE:
+            case TESTCASE_TABLE_IGNORE:
+            case KEYWORD_TABLE_IGNORE: {
                 prepareNextLine();
                 return;
             }
+            case TESTCASE_TABLE_TESTCASE_BEGIN:
+            case KEYWORD_TABLE_KEYWORD_BEGIN:
+                if (argOff == 0) {
+                    keyword_parsed = false;
+                    lookForLocalTestTemplate();
+                    ParsedString newName = line.arguments.get(0);
+                    if (!newName.isEmpty()) {
+                        boolean isTestCase = type == LineType.TESTCASE_TABLE_TESTCASE_BEGIN;
+                        newName.setType(isTestCase ? ArgumentType.NEW_TESTCASE : ArgumentType.NEW_KEYWORD);
+                    }
+                    prepareNextToken();
+                    return;
+                }
+
+                // FALL THROUGH
+
+            case TESTCASE_TABLE_TESTCASE_LINE:
+            case KEYWORD_TABLE_KEYWORD_LINE: {
+                if (argOff == 0) {
+                    keyword_parsed = false;
+                    prepareNextToken();
+                    return;
+                }
+                parseKeywordAndArgs();
+                break;
             }
-        }
+            case CONTINUATION_LINE: {
+                if (argOff == 0) {
+                    argOff = determineContinuationLineArgOff(line);
+                    if (argOff >= argLen) {
+                        prepareNextLine();
+                        return;
+                    }
+                }
+                switch (lastRealType) {
+                    case COMMENT_LINE:
+                    case CONTINUATION_LINE:
+                        throw new RuntimeException();
+                    case IGNORE:
+                    case TESTCASE_TABLE_IGNORE:
+                    case KEYWORD_TABLE_IGNORE: {
+                        // continue ignoring
+                        prepareNextLine();
+                        return;
+                    }
+                    case IGNORE_TABLE:
+                    case SETTING_TABLE_BEGIN:
+                    case VARIABLE_TABLE_BEGIN:
+                    case TESTCASE_TABLE_BEGIN:
+                    case KEYWORD_TABLE_BEGIN: {
+                        // all arguments ignored
+                        prepareNextLine();
+                        return;
+                    }
+                    case SETTING_TABLE_LINE: {
+                        parseSettingArgs();
+                        return;
+                    }
+                    case VARIABLE_TABLE_LINE: {
+                        parseVariableArgs();
+                        return;
+                    }
+                    case TESTCASE_TABLE_TESTCASE_BEGIN:
+                    case TESTCASE_TABLE_TESTCASE_LINE:
+                    case KEYWORD_TABLE_KEYWORD_BEGIN:
+                    case KEYWORD_TABLE_KEYWORD_LINE: {
+                        parseKeywordAndArgs();
+                        return;
+                    }
+                    default: {
+                        prepareNextLine();
+                        return;
+                    }
+                }
+            }
         }
     }
 
@@ -339,58 +339,58 @@ public class ArgumentPreParser {
 
     private void parseSettingArgs() {
         switch (setting_type) {
-        case UNKNOWN: {
-            prepareNextLine();
-            return;
-        }
-        case STRING: {
-            setArgTypesToEol(ArgumentType.SETTING_VAL);
-            prepareNextLine();
-            return;
-        }
-        case FILE: {
-            ParsedString file = line.arguments.get(argOff);
-            file.setType(ArgumentType.SETTING_FILE);
-            prepareNextLine();
-            return;
-        }
-        case FILE_ARGS: {
-            if (!setting_gotFirstArg) {
+            case UNKNOWN: {
+                prepareNextLine();
+                return;
+            }
+            case STRING: {
+                setArgTypesToEol(ArgumentType.SETTING_VAL);
+                prepareNextLine();
+                return;
+            }
+            case FILE: {
                 ParsedString file = line.arguments.get(argOff);
                 file.setType(ArgumentType.SETTING_FILE);
-                prepareNextToken();
-                setting_gotFirstArg = true;
-                setting_withNameState = WithNameState.NONE;
+                prepareNextLine();
                 return;
-            } else {
-                switch (setting_withNameState) {
-                case NONE:
-                    ParsedString arg = line.arguments.get(argOff);
-                    if (arg.getValue().equals("WITH NAME")) {
-                        setting_withNameState = WithNameState.GOT_KEY;
-                        arg.setType(ArgumentType.SETTING_FILE_WITH_NAME_KEY);
-                    } else {
-                        arg.setType(ArgumentType.SETTING_FILE_ARG);
-                    }
-                    prepareNextToken();
-                    return;
-                case GOT_KEY:
-                    ParsedString name = line.arguments.get(argOff);
-                    name.setType(ArgumentType.SETTING_FILE_WITH_NAME_VALUE);
-                    setting_withNameState = WithNameState.GOT_VALUE;
-                    prepareNextLine();
-                    return;
-                case GOT_VALUE:
-                    prepareNextLine();
-                    return;
-                }
             }
-            throw new RuntimeException();
-        }
-        case KEYWORD_ARGS: {
-            parseKeywordCall(false);
-            return;
-        }
+            case FILE_ARGS: {
+                if (!setting_gotFirstArg) {
+                    ParsedString file = line.arguments.get(argOff);
+                    file.setType(ArgumentType.SETTING_FILE);
+                    prepareNextToken();
+                    setting_gotFirstArg = true;
+                    setting_withNameState = WithNameState.NONE;
+                    return;
+                } else {
+                    switch (setting_withNameState) {
+                        case NONE:
+                            ParsedString arg = line.arguments.get(argOff);
+                            if (arg.getValue().equals("WITH NAME")) {
+                                setting_withNameState = WithNameState.GOT_KEY;
+                                arg.setType(ArgumentType.SETTING_FILE_WITH_NAME_KEY);
+                            } else {
+                                arg.setType(ArgumentType.SETTING_FILE_ARG);
+                            }
+                            prepareNextToken();
+                            return;
+                        case GOT_KEY:
+                            ParsedString name = line.arguments.get(argOff);
+                            name.setType(ArgumentType.SETTING_FILE_WITH_NAME_VALUE);
+                            setting_withNameState = WithNameState.GOT_VALUE;
+                            prepareNextLine();
+                            return;
+                        case GOT_VALUE:
+                            prepareNextLine();
+                            return;
+                    }
+                }
+                throw new RuntimeException();
+            }
+            case KEYWORD_ARGS: {
+                parseKeywordCall(false);
+                return;
+            }
         }
         throw new RuntimeException();
     }
@@ -402,19 +402,19 @@ public class ArgumentPreParser {
 
     private void parseKeywordSequenceSetting() {
         switch (keywordSequence_settingType) {
-        case UNKNOWN: {
-            prepareNextLine();
-            return;
-        }
-        case STRING: {
-            setArgTypesToEol(ArgumentType.SETTING_VAL);
-            prepareNextLine();
-            return;
-        }
-        case KEYWORD_ARGS: {
-            parseKeywordCall(false);
-            return;
-        }
+            case UNKNOWN: {
+                prepareNextLine();
+                return;
+            }
+            case STRING: {
+                setArgTypesToEol(ArgumentType.SETTING_VAL);
+                prepareNextLine();
+                return;
+            }
+            case KEYWORD_ARGS: {
+                parseKeywordCall(false);
+                return;
+            }
         }
         throw new RuntimeException();
     }
@@ -432,57 +432,57 @@ public class ArgumentPreParser {
             keywordSequence_keywordCallState = determineInitialKeywordCallState(keywordSequence_keywordCallState);
         }
         switch (keywordSequence_keywordCallState) {
-        case LVALUE_NOINDENT:
-        case LVALUE: {
-            ParsedString variable = line.arguments.get(argOff);
-            if (!variable.isEmpty() || keywordSequence_keywordCallState == KeywordCallState.LVALUE_NOINDENT) {
-                variable.setType(ArgumentType.KEYWORD_LVALUE);
-                if (variable.getValue().endsWith("=")) {
-                    keywordSequence_keywordCallState = KeywordCallState.KEYWORD_NOT_FOR_NOINDENT;
-                }
-            }
-            prepareNextToken();
-            return;
-        }
-        case KEYWORD_NOT_FOR_NOINDENT:
-        case KEYWORD: {
-            ParsedString keyword = line.arguments.get(argOff);
-            if (!keyword.isEmpty() || keywordSequence_keywordCallState == KeywordCallState.KEYWORD_NOT_FOR_NOINDENT) {
-                if (keyword.getValue().equals(":FOR") && keywordSequence_keywordCallState != KeywordCallState.KEYWORD_NOT_FOR_NOINDENT) {
-                    keyword.setType(ArgumentType.FOR_PART);
-                    keywordSequence_keywordCallState = KeywordCallState.FOR_ARGS;
-                } else {
-                    if (templatesEnabled && isTemplateActive()) {
-                        keyword.setType(ArgumentType.KEYWORD_ARG);
-                    } else if (NONE_STR.equals(keyword.getValue())) {
-                        keyword.setType(ArgumentType.SETTING_VAL);
-                    } else {
-                        keyword.setType(ArgumentType.KEYWORD_CALL);
+            case LVALUE_NOINDENT:
+            case LVALUE: {
+                ParsedString variable = line.arguments.get(argOff);
+                if (!variable.isEmpty() || keywordSequence_keywordCallState == KeywordCallState.LVALUE_NOINDENT) {
+                    variable.setType(ArgumentType.KEYWORD_LVALUE);
+                    if (variable.getValue().endsWith("=")) {
+                        keywordSequence_keywordCallState = KeywordCallState.KEYWORD_NOT_FOR_NOINDENT;
                     }
-                    keywordSequence_keywordCallState = KeywordCallState.ARGS;
                 }
-            }
-            prepareNextToken();
-            return;
-        }
-        case FOR_ARGS: {
-            ParsedString arg = line.arguments.get(argOff);
-            String argVal = arg.getValue();
-            if (argVal.equals("IN") || argVal.equals("IN RANGE")) {
-                arg.setType(ArgumentType.FOR_PART);
-                keywordSequence_keywordCallState = KeywordCallState.ARGS;
                 prepareNextToken();
                 return;
             }
-            arg.setType(ArgumentType.KEYWORD_LVALUE);
-            prepareNextToken();
-            return;
-        }
-        case ARGS: {
-            setArgTypesToEol(ArgumentType.KEYWORD_ARG);
-            prepareNextLine();
-            return;
-        }
+            case KEYWORD_NOT_FOR_NOINDENT:
+            case KEYWORD: {
+                ParsedString keyword = line.arguments.get(argOff);
+                if (!keyword.isEmpty() || keywordSequence_keywordCallState == KeywordCallState.KEYWORD_NOT_FOR_NOINDENT) {
+                    if (keyword.getValue().equals(":FOR") && keywordSequence_keywordCallState != KeywordCallState.KEYWORD_NOT_FOR_NOINDENT) {
+                        keyword.setType(ArgumentType.FOR_PART);
+                        keywordSequence_keywordCallState = KeywordCallState.FOR_ARGS;
+                    } else {
+                        if (templatesEnabled && isTemplateActive()) {
+                            keyword.setType(ArgumentType.KEYWORD_ARG);
+                        } else if (NONE_STR.equals(keyword.getValue())) {
+                            keyword.setType(ArgumentType.SETTING_VAL);
+                        } else {
+                            keyword.setType(ArgumentType.KEYWORD_CALL);
+                        }
+                        keywordSequence_keywordCallState = KeywordCallState.ARGS;
+                    }
+                }
+                prepareNextToken();
+                return;
+            }
+            case FOR_ARGS: {
+                ParsedString arg = line.arguments.get(argOff);
+                String argVal = arg.getValue();
+                if (argVal.equals("IN") || argVal.equals("IN RANGE")) {
+                    arg.setType(ArgumentType.FOR_PART);
+                    keywordSequence_keywordCallState = KeywordCallState.ARGS;
+                    prepareNextToken();
+                    return;
+                }
+                arg.setType(ArgumentType.KEYWORD_LVALUE);
+                prepareNextToken();
+                return;
+            }
+            case ARGS: {
+                setArgTypesToEol(ArgumentType.KEYWORD_ARG);
+                prepareNextLine();
+                return;
+            }
         }
         throw new RuntimeException();
     }
@@ -496,17 +496,17 @@ public class ArgumentPreParser {
             outer: for (int lineIdx = localTemplateAtLine; lineIdx < lines.size(); ++lineIdx) {
                 line = lines.get(lineIdx);
                 switch (line.type) {
-                case IGNORE:
-                case COMMENT_LINE:
-                    continue;
-                case CONTINUATION_LINE:
-                    int argOff = determineContinuationLineArgOff(line);
-                    if (argOff < line.arguments.size()) {
-                        return !NONE_STR.equals(line.arguments.get(argOff).getValue());
-                    }
-                    break;
-                default:
-                    break outer;
+                    case IGNORE:
+                    case COMMENT_LINE:
+                        continue;
+                    case CONTINUATION_LINE:
+                        int argOff = determineContinuationLineArgOff(line);
+                        if (argOff < line.arguments.size()) {
+                            return !NONE_STR.equals(line.arguments.get(argOff).getValue());
+                        }
+                        break;
+                    default:
+                        break outer;
                 }
             }
         }
@@ -529,18 +529,18 @@ public class ArgumentPreParser {
             RobotLine nextLine = lines.get(lineIdx);
             LineType type = nextLine.type;
             switch (type) {
-            case COMMENT_LINE:
-                continue;
-            case CONTINUATION_LINE: {
-                int nextLineArgOff = determineContinuationLineArgOff(nextLine);
-                keywordCallState = scanLine(keywordCallState, nextLine, nextLineArgOff);
-                if (!keywordCallState.isUndetermined()) {
-                    return keywordCallState;
+                case COMMENT_LINE:
+                    continue;
+                case CONTINUATION_LINE: {
+                    int nextLineArgOff = determineContinuationLineArgOff(nextLine);
+                    keywordCallState = scanLine(keywordCallState, nextLine, nextLineArgOff);
+                    if (!keywordCallState.isUndetermined()) {
+                        return keywordCallState;
+                    }
+                    break;
                 }
-                break;
-            }
-            default:
-                break outer;
+                default:
+                    break outer;
             }
         }
         // no equal sign found so..
@@ -562,14 +562,14 @@ public class ArgumentPreParser {
             }
             String arg = parsedString.getValue();
             switch (arg.charAt(0)) {
-            case '$':
-            case '@':
-                // TODO ensure it's a proper lvalue
-                initialKeywordCallState = KeywordCallState.UNDETERMINED_GOTVARIABLE;
-                break;
-            default:
-                // non-variable and no prior lvalue indication, so..
-                return initialKeywordCallState == KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT ? KeywordCallState.KEYWORD_NOT_FOR_NOINDENT : KeywordCallState.KEYWORD;
+                case '$':
+                case '@':
+                    // TODO ensure it's a proper lvalue
+                    initialKeywordCallState = KeywordCallState.UNDETERMINED_GOTVARIABLE;
+                    break;
+                default:
+                    // non-variable and no prior lvalue indication, so..
+                    return initialKeywordCallState == KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT ? KeywordCallState.KEYWORD_NOT_FOR_NOINDENT : KeywordCallState.KEYWORD;
             }
             if (arg.endsWith("=")) {
                 return initialKeywordCallState == KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT ? KeywordCallState.LVALUE_NOINDENT : KeywordCallState.LVALUE;
@@ -602,17 +602,17 @@ public class ArgumentPreParser {
             assert line.lineNo - 1 == lineIdx;
             int settingKeyPos = 1;
             switch (line.type) {
-            case TESTCASE_TABLE_TESTCASE_BEGIN:
-            case TESTCASE_TABLE_TESTCASE_LINE:
-                break;
-            case CONTINUATION_LINE:
-                settingKeyPos = determineContinuationLineArgOff(line);
-                break;
-            case COMMENT_LINE:
-                continue;
-            default:
-                // testcase ended, do not look further
-                break outer;
+                case TESTCASE_TABLE_TESTCASE_BEGIN:
+                case TESTCASE_TABLE_TESTCASE_LINE:
+                    break;
+                case CONTINUATION_LINE:
+                    settingKeyPos = determineContinuationLineArgOff(line);
+                    break;
+                case COMMENT_LINE:
+                    continue;
+                default:
+                    // testcase ended, do not look further
+                    break outer;
             }
             if (line.arguments.size() > settingKeyPos && line.arguments.get(settingKeyPos).getValue().equals("[Template]")) {
                 localTemplateAtLine = line.lineNo;
