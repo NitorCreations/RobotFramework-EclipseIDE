@@ -182,8 +182,12 @@ For x in list
     \  \  Say hello to  ${item}
     \  \  ${foo}  ${bar} =  Say goodbye to  ${item}
 
-Repeat it
-    Repeat  5  Echo LOL
+Recursive keywords
+    Run Keyword  Log  Hello
+    Run Keyword If  1 < 2  Log  Hello
+    Run Keyword  Run Keyword If  1 < 2  Run Keyword If  2 < 3  Run Keyword And Continue On Failure  Log  Awesome  Awesome  Awesome  Awesome  Awesome
+    Repeat Keyword  5  Echo  LOL
+    Wait Until Keyword Succeeds  2 min  5 sec  Log  Epic success
 
 My Keyword is the ${foo} greatest
     # Not-allowed tags:

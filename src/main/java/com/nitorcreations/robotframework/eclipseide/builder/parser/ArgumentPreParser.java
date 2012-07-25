@@ -30,7 +30,7 @@ public class ArgumentPreParser {
     }
 
     enum KeywordCallState {
-        UNDETERMINED, UNDETERMINED_NOT_FOR_NOINDENT, UNDETERMINED_GOTVARIABLE, LVALUE_NOINDENT, LVALUE, KEYWORD, KEYWORD_NOT_FOR_NOINDENT, FOR_ARGS, ARGS, ;
+        UNDETERMINED, UNDETERMINED_NOT_FOR_NOINDENT, UNDETERMINED_GOTVARIABLE, LVALUE_NOINDENT, LVALUE, KEYWORD, KEYWORD_NOT_FOR_NOINDENT, FOR_VARS, FOR_ARGS, KEYWORD_ARGS, ;
         public boolean isUndetermined() {
             return name().startsWith("UNDETERMINED");
         }
@@ -81,6 +81,10 @@ public class ArgumentPreParser {
     private boolean keywordSequence_isSetting;
     private SettingType keywordSequence_settingType;
     private KeywordCallState keywordSequence_keywordCallState;
+    private int keywordSequence_currentArgPos; // 1 is first argument
+    private static final int KEYWORD_ARG_POS_NONE = -1;
+    private static final int KEYWORD_ARG_POS_ALL = -2;
+    private int keywordSequence_keywordArgPos; // which argument number is a keyword - see above for special valus
 
     private SettingType setting_type;
     private boolean setting_gotFirstArg;
@@ -450,27 +454,32 @@ public class ArgumentPreParser {
                 if (!keyword.isEmpty() || keywordSequence_keywordCallState == KeywordCallState.KEYWORD_NOT_FOR_NOINDENT) {
                     if (keyword.getValue().equals(":FOR") && keywordSequence_keywordCallState != KeywordCallState.KEYWORD_NOT_FOR_NOINDENT) {
                         keyword.setType(ArgumentType.FOR_PART);
-                        keywordSequence_keywordCallState = KeywordCallState.FOR_ARGS;
+                        keywordSequence_keywordCallState = KeywordCallState.FOR_VARS;
                     } else {
                         if (templatesEnabled && isTemplateActive()) {
                             keyword.setType(ArgumentType.KEYWORD_ARG);
+                            // TODO support "Run Keyword If" etc as template keyword
+                            keywordSequence_keywordArgPos = KEYWORD_ARG_POS_NONE;
                         } else if (NONE_STR.equals(keyword.getValue())) {
+                            // TODO verify what is this branch about
                             keyword.setType(ArgumentType.SETTING_VAL);
+                            keywordSequence_keywordArgPos = KEYWORD_ARG_POS_NONE;
                         } else {
                             keyword.setType(ArgumentType.KEYWORD_CALL);
+                            setUpKeywordArgPos(keyword);
                         }
-                        keywordSequence_keywordCallState = KeywordCallState.ARGS;
+                        keywordSequence_keywordCallState = KeywordCallState.KEYWORD_ARGS;
                     }
                 }
                 prepareNextToken();
                 return;
             }
-            case FOR_ARGS: {
+            case FOR_VARS: {
                 ParsedString arg = line.arguments.get(argOff);
                 String argVal = arg.getValue();
                 if (argVal.equals("IN") || argVal.equals("IN RANGE")) {
                     arg.setType(ArgumentType.FOR_PART);
-                    keywordSequence_keywordCallState = KeywordCallState.ARGS;
+                    keywordSequence_keywordCallState = KeywordCallState.FOR_ARGS;
                     prepareNextToken();
                     return;
                 }
@@ -478,13 +487,64 @@ public class ArgumentPreParser {
                 prepareNextToken();
                 return;
             }
-            case ARGS: {
+            case FOR_ARGS: {
                 setArgTypesToEol(ArgumentType.KEYWORD_ARG);
                 prepareNextLine();
                 return;
             }
+            case KEYWORD_ARGS: {
+                ParsedString arg = line.arguments.get(argOff);
+                boolean isKeyword;
+                switch (keywordSequence_keywordArgPos) {
+                    case KEYWORD_ARG_POS_NONE:
+                        isKeyword = false;
+                        break;
+                    case KEYWORD_ARG_POS_ALL:
+                        isKeyword = true;
+                        break;
+                    default:
+                        isKeyword = keywordSequence_currentArgPos++ == keywordSequence_keywordArgPos;
+                        if (isKeyword) {
+                            setUpKeywordArgPos(arg);
+                        }
+                        break;
+                }
+                if (isKeyword) {
+                    arg.setType(ArgumentType.KEYWORD_CALL);
+                } else {
+                    arg.setType(ArgumentType.KEYWORD_ARG);
+                }
+                prepareNextToken();
+                return;
+            }
         }
         throw new RuntimeException();
+    }
+
+    private void setUpKeywordArgPos(ParsedString keyword) {
+        keywordSequence_keywordArgPos = KEYWORD_ARG_POS_NONE;
+        if (keyword.getValue().startsWith("Run Keyword")) {
+            String suffix = keyword.getValue().substring(3 + 1 + 7);
+            if (suffix.isEmpty() || suffix.equals(" And Continue On Failure") || suffix.equals(" And Ignore Error") //
+                    || suffix.equals(" If All Critical Tests Passed") || suffix.equals(" If All Tests Passed") //
+                    || suffix.equals(" If Any Critical Tests Failed") || suffix.equals(" If Any Tests Failed") //
+                    || suffix.equals(" If Test Failed") || suffix.equals(" If Test Passed") //
+                    || suffix.equals(" If Timeout Occurred")) {
+                keywordSequence_currentArgPos = 1;
+                keywordSequence_keywordArgPos = 1;
+            } else if (suffix.equals(" And Expect Error") || suffix.equals(" If") || suffix.equals(" Unless")) {
+                keywordSequence_currentArgPos = 1;
+                keywordSequence_keywordArgPos = 2;
+            } else if (suffix.equals("s")) {
+                keywordSequence_keywordArgPos = KEYWORD_ARG_POS_ALL;
+            }
+        } else if (keyword.getValue().equals("Repeat Keyword")) {
+            keywordSequence_currentArgPos = 1;
+            keywordSequence_keywordArgPos = 2;
+        } else if (keyword.getValue().equals("Wait Until Keyword Succeeds")) {
+            keywordSequence_currentArgPos = 1;
+            keywordSequence_keywordArgPos = 3;
+        }
     }
 
     private boolean isTemplateActive() {
