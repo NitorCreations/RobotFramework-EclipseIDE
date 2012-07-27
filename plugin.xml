@@ -66,5 +66,32 @@
          </action>
       </objectContribution>
    </extension>
-
+   <!--
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            label="%JavaApplicationShortcut.label"
+            icon="icons/full/etool16/java_app.png"
+            helpContextId="org.eclipse.jdt.debug.ui.shortcut_local_java_application"
+            modes="run, debug"
+            class="org.eclipse.jdt.internal.debug.ui.launcher.JavaApplicationLaunchShortcut"
+            id="org.eclipse.jdt.debug.ui.localJavaShortcut">
+         <contextualLaunch>
+           <enablement>
+             <with variable="selection">
+               <count value="1"/>
+               <iterate>
+                 <or>
+                   <test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
+                   <test property="org.eclipse.debug.ui.matchesPattern" value="*.class"/>
+                   <instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+                 </or>
+                 <test property="org.eclipse.jdt.debug.ui.hasMainType"/>
+               </iterate>
+             </with>
+           </enablement>
+  		 </contextualLaunch>
+      </shortcut>
+    </extension>
+-->
 </plugin>
