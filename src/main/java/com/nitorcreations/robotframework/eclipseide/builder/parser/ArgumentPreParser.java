@@ -510,7 +510,7 @@ public class ArgumentPreParser {
                         break;
                 }
                 if (isKeyword) {
-                    arg.setType(ArgumentType.KEYWORD_CALL);
+                    arg.setType(ArgumentType.KEYWORD_CALL_DYNAMIC);
                 } else {
                     arg.setType(ArgumentType.KEYWORD_ARG);
                 }

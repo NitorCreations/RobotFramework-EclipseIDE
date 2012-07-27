@@ -86,7 +86,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
 
     @Override
     protected void getLinks(IFile file, RobotLine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
-        if (argument.getType() != ArgumentType.KEYWORD_CALL) {
+        if (argument.getType() != ArgumentType.KEYWORD_CALL && argument.getType() != ArgumentType.KEYWORD_CALL_DYNAMIC) {
             return;
         }
         String linkString = argument.getUnescapedValue();

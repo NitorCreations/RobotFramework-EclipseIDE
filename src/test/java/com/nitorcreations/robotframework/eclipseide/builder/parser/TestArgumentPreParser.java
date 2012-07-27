@@ -19,6 +19,7 @@ import static com.nitorcreations.robotframework.eclipseide.structure.ParsedStrin
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.IGNORED;
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.KEYWORD_ARG;
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.KEYWORD_CALL;
+import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.KEYWORD_CALL_DYNAMIC;
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.NEW_KEYWORD;
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.NEW_TESTCASE;
 import static com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType.SETTING_FILE;
@@ -253,6 +254,18 @@ public class TestArgumentPreParser {
             t("*Keywords\nKW1\n  Keyword\n  ...  argument", TABLE, NEW_KEYWORD, IGNORED, KEYWORD_CALL, IGNORED, IGNORED, KEYWORD_ARG);
             t("*Keywords\nKW1\n  [Arguments]\n  ...  arg1\n  ...  arg2", TABLE, NEW_KEYWORD, IGNORED, SETTING_KEY, IGNORED, IGNORED, SETTING_VAL, IGNORED, IGNORED, SETTING_VAL);
             t("*Keywords\nKW1\n  [Arguments]\n  #comment\n  ...  arg1\n  ...  arg2", TABLE, NEW_KEYWORD, IGNORED, SETTING_KEY, IGNORED, COMMENT, IGNORED, IGNORED, SETTING_VAL, IGNORED, IGNORED, SETTING_VAL);
+        }
+
+        @Test
+        public void recursive_keyword_calls() throws Exception {
+            t("*Keywords\nKW1\n  Run Keyword  Test", TABLE, NEW_KEYWORD, IGNORED, KEYWORD_CALL, KEYWORD_CALL_DYNAMIC);
+            t("*Keywords\nKW1\n  Run Keyword If  1 < 2  Run Keyword  Log  Hello", TABLE, NEW_KEYWORD, IGNORED, KEYWORD_CALL, KEYWORD_ARG, KEYWORD_CALL_DYNAMIC, KEYWORD_CALL_DYNAMIC, KEYWORD_ARG);
+        }
+
+        @Test
+        public void recursive_keyword_calls_by_template() throws Exception {
+            t("*Keywords\nKW1\n  [Template]  Run Keyword\n  Test", TABLE, NEW_KEYWORD, IGNORED, SETTING_KEY, KEYWORD_CALL, IGNORED, KEYWORD_CALL_DYNAMIC);
+            t("*Settings\nTest Template  Run Keyword\n*Keywords\nKW1\n  Test", TABLE, SETTING_KEY, KEYWORD_CALL, TABLE, NEW_KEYWORD, IGNORED, KEYWORD_CALL_DYNAMIC);
         }
     }
 

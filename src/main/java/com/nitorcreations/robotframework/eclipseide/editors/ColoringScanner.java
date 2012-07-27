@@ -77,6 +77,7 @@ public class ColoringScanner implements ITokenScanner {
         argTypeToTokenMap.put(ArgumentType.KEYWORD_LVALUE, new Token(new TextAttribute(manager.getColor(ColorConstants.KEYWORD_LVALUE))));
         argTypeToTokenMap.put(ArgumentType.FOR_PART, new Token(new TextAttribute(manager.getColor(ColorConstants.FOR_PART))));
         argTypeToTokenMap.put(ArgumentType.KEYWORD_CALL, new Token(new TextAttribute(manager.getColor(ColorConstants.KEYWORD))));
+        argTypeToTokenMap.put(ArgumentType.KEYWORD_CALL_DYNAMIC, new Token(new TextAttribute(manager.getColor(ColorConstants.KEYWORD))));
         argTypeToTokenMap.put(ArgumentType.KEYWORD_ARG, new Token(new TextAttribute(manager.getColor(ColorConstants.KEYWORD_ARG))));
     }
 

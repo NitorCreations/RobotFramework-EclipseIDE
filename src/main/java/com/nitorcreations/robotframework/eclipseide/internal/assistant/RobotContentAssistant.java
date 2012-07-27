@@ -66,7 +66,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         ParsedString argument = robotLine.getArgumentAt(documentOffset);
         IFile file = ResourceManager.resolveFileFor(document);
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
-        if (argument == null || argument.getType() == ArgumentType.KEYWORD_CALL) {
+        if (argument == null || argument.getType() == ArgumentType.KEYWORD_CALL || argument.getType() == ArgumentType.KEYWORD_CALL_DYNAMIC) {
             // find the cursor location range inside the current line where keyword
             // completion proposals make sense
             // TODO this only works for basic keyword calls, [Setup], FOR-indented,
