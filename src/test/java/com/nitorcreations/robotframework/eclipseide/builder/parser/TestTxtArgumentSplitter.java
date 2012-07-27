@@ -15,24 +15,24 @@
  */
 package com.nitorcreations.robotframework.eclipseide.builder.parser;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
-@RunWith(Parameterized.class)
+@RunWith(Enclosed.class)
 public class TestTxtArgumentSplitter {
-
-    private final String input;
-    private final String[] expected;
 
     static List<ParsedString> s(String line) {
         return s(line, 0);
@@ -42,65 +42,127 @@ public class TestTxtArgumentSplitter {
         return TxtArgumentSplitter.splitLineIntoArguments(line, charPos);
     }
 
-    static void a(String line, String... expectedArguments) {
-        final int off = 27;
-        List<ParsedString> l = s(line, off);
-        assertArgumentCount(l, expectedArguments);
-        for (int i = 0; i < expectedArguments.length; ++i) {
-            String expected = expectedArguments[i];
-            ParsedString actual = l.get(i);
-            Assert.assertEquals("Argument", expected, actual.getValue());
-            Assert.assertEquals("argCharPos", line.indexOf(expected) + off, actual.getArgCharPos());
-            Assert.assertEquals("argEndCharPos", actual.getArgEndCharPos(), actual.getArgCharPos() + actual.getValue().length());
+    static ParsedString single(String line) {
+        List<ParsedString> l = s(line);
+        assertEquals("Should parse to single argument only", 1, l.size());
+        return l.get(0);
+    }
+
+    static ParsedString firstOfTwo(String line) {
+        List<ParsedString> l = s(line);
+        assertEquals("Should parse to two arguments", 2, l.size());
+        return l.get(0);
+    }
+
+    @RunWith(Parameterized.class)
+    public static class Basic_tests {
+
+        private final String input;
+        private final String[] expected;
+
+        static void a(String line, String... expectedArguments) {
+            final int off = 27;
+            List<ParsedString> l = s(line, off);
+            assertArgumentCount(l, expectedArguments);
+            for (int i = 0; i < expectedArguments.length; ++i) {
+                String expected = expectedArguments[i];
+                ParsedString actual = l.get(i);
+                assertEquals("Argument", expected, actual.getValue());
+                assertEquals("argCharPos", line.indexOf(expected) + off, actual.getArgCharPos());
+                assertEquals("argEndCharPos", actual.getArgEndCharPos(), actual.getArgCharPos() + actual.getValue().length());
+            }
+        }
+
+        static void assertArgumentCount(List<ParsedString> l, String... expectedArguments) {
+            assertEquals("Wrong argument count for line, expected " + Arrays.toString(expectedArguments) + ", got " + l + "; count", expectedArguments.length, l.size());
+        }
+
+        public Basic_tests(String input, String... expected) {
+            this.input = input;
+            this.expected = expected;
+        }
+
+        @Test
+        public void test() throws Exception {
+            a(input, expected);
+        }
+
+        @Parameters
+        public static List<Object[]> createTests() {
+            List<Object[]> args = new ArrayList<Object[]>();
+            add(args, "Hello world", "Hello world");
+            add(args, " Hello world", "Hello world");
+            add(args, "  Hello world", "", "Hello world");
+            add(args, "    Hello world", "", "Hello world");
+            add(args, "\tHello world", "", "Hello world");
+
+            add(args, "\\  Hello world", "\\", "Hello world");
+            add(args, "  \\  Hello world", "", "\\", "Hello world");
+
+            add(args, "#lol", "#lol");
+            add(args, "   #lol", "", "#lol");
+            add(args, "Hello world   #lol", "Hello world", "#lol");
+            add(args, "  Hello world   #lol", "", "Hello world", "#lol");
+
+            add(args, "  Hello world #lol", "", "Hello world #lol");
+            add(args, "  Hello world #lol  #lol2", "", "Hello world #lol", "#lol2");
+
+            add(args, "#lol this is", "#lol this is");
+            add(args, "#lol this   is", "#lol this   is");
+            add(args, "  Hello world   #lol   this", "", "Hello world", "#lol   this");
+
+            // whitespace
+            add(args, "");
+            add(args, "  ");
+            add(args, "  Keyword  ", "", "Keyword");
+            return args;
+        }
+
+        private static void add(List<Object[]> args, String input, String... expected) {
+            args.add(new Object[] { input, expected });
         }
     }
 
-    static void assertArgumentCount(List<ParsedString> l, String... expectedArguments) {
-        Assert.assertEquals("Wrong argument count for line, expected " + Arrays.toString(expectedArguments) + ", got " + l + "; count", expectedArguments.length, l.size());
+    public static class Special_cases {
+        @Test
+        public void arg_at_eol_does_not_extend() {
+            assertFalse(single("Hello").hasSpaceAfter());
+        }
+
+        @Test
+        public void single_space_before_eol_extends() {
+            assertTrue(single("Hello ").hasSpaceAfter());
+        }
+
+        @Test
+        public void double_space_before_eol_extends() {
+            assertTrue(single("Hello  ").hasSpaceAfter());
+        }
+
+        @Test
+        public void single_tab_before_eol_does_not_extend() {
+            assertFalse(single("Hello\t").hasSpaceAfter());
+        }
+
+        @Test
+        public void double_tab_before_eol_does_not_extend() {
+            assertFalse(single("Hello\t\t").hasSpaceAfter());
+        }
+
+        @Test
+        public void double_space_between_args_extends() {
+            assertTrue(firstOfTwo("Hello  World").hasSpaceAfter());
+        }
+
+        @Test
+        public void single_tab_between_args_does_not_extend() {
+            assertFalse(firstOfTwo("Hello\tWorld").hasSpaceAfter());
+        }
+
+        @Test
+        public void double_tab_between_args_does_not_extend() {
+            assertFalse(firstOfTwo("Hello\t\tWorld").hasSpaceAfter());
+        }
     }
 
-    public TestTxtArgumentSplitter(String input, String... expected) {
-        this.input = input;
-        this.expected = expected;
-    }
-
-    @Test
-    public void test() throws Exception {
-        a(input, expected);
-    }
-
-    @Parameters
-    public static List<Object[]> createTests() {
-        List<Object[]> args = new ArrayList<Object[]>();
-        add(args, "Hello world", "Hello world");
-        add(args, " Hello world", "Hello world");
-        add(args, "  Hello world", "", "Hello world");
-        add(args, "    Hello world", "", "Hello world");
-        add(args, "\tHello world", "", "Hello world");
-
-        add(args, "\\  Hello world", "\\", "Hello world");
-        add(args, "  \\  Hello world", "", "\\", "Hello world");
-
-        add(args, "#lol", "#lol");
-        add(args, "   #lol", "", "#lol");
-        add(args, "Hello world   #lol", "Hello world", "#lol");
-        add(args, "  Hello world   #lol", "", "Hello world", "#lol");
-
-        add(args, "  Hello world #lol", "", "Hello world #lol");
-        add(args, "  Hello world #lol  #lol2", "", "Hello world #lol", "#lol2");
-
-        add(args, "#lol this is", "#lol this is");
-        add(args, "#lol this   is", "#lol this   is");
-        add(args, "  Hello world   #lol   this", "", "Hello world", "#lol   this");
-
-        // whitespace
-        add(args, "");
-        add(args, "  ");
-        add(args, "  Keyword  ", "", "Keyword");
-        return args;
-    }
-
-    private static void add(List<Object[]> args, String input, String... expected) {
-        args.add(new Object[] { input, expected });
-    }
 }

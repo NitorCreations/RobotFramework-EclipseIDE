@@ -30,6 +30,7 @@ public class ParsedString implements IParsedKeywordString {
     private final String value;
     private final int argCharPos;
     private ArgumentType type = ArgumentType.IGNORED;
+    private boolean hasSpaceAfter;
 
     public enum ArgumentType {
         IGNORED, COMMENT, TABLE, SETTING_KEY, VARIABLE_KEY, NEW_TESTCASE, NEW_KEYWORD, SETTING_VAL, SETTING_FILE, SETTING_FILE_WITH_NAME_KEY, SETTING_FILE_ARG, SETTING_FILE_WITH_NAME_VALUE, VARIABLE_VAL, KEYWORD_LVALUE, FOR_PART, KEYWORD_CALL, KEYWORD_CALL_DYNAMIC, KEYWORD_ARG,
@@ -63,6 +64,11 @@ public class ParsedString implements IParsedKeywordString {
     @Override
     public int getArgEndCharPos() {
         return argCharPos + value.length();
+    }
+
+    // if argument is followed by a space, this extends the endCharPos to include that space
+    public int getExtendedArgEndCharPos() {
+        return getArgEndCharPos() + (hasSpaceAfter ? 1 : 0);
     }
 
     @Override
@@ -101,6 +107,7 @@ public class ParsedString implements IParsedKeywordString {
         final int prime = 31;
         int result = 1;
         result = prime * result + argCharPos;
+        result = prime * result + (hasSpaceAfter ? 1231 : 1237);
         result = prime * result + ((type == null) ? 0 : type.hashCode());
         result = prime * result + ((value == null) ? 0 : value.hashCode());
         return result;
@@ -116,6 +123,8 @@ public class ParsedString implements IParsedKeywordString {
             return false;
         ParsedString other = (ParsedString) obj;
         if (argCharPos != other.argCharPos)
+            return false;
+        if (hasSpaceAfter != other.hasSpaceAfter)
             return false;
         if (type != other.type)
             return false;
@@ -134,6 +143,14 @@ public class ParsedString implements IParsedKeywordString {
 
     public String getUnescapedValue() {
         return ArgumentUtils.unescapeArgument(value, 0, value.length());
+    }
+
+    public void setHasSpaceAfter(boolean hasSpaceAfter) {
+        this.hasSpaceAfter = hasSpaceAfter;
+    }
+
+    public boolean hasSpaceAfter() {
+        return hasSpaceAfter;
     }
 
 }

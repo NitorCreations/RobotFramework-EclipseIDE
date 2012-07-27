@@ -28,8 +28,8 @@ public class TxtArgumentSplitter {
     private static final Pattern SEPARATOR_RE = Pattern.compile("(?:\t| [ \t])[ \t]*");
 
     /**
-     * Splits a line from a robot TXT file into arguments. Only supports the
-     * tab-or-multiple-whitespace separator right now.
+     * Splits a line from a robot TXT file into arguments. Only supports the tab-or-multiple-whitespace separator right
+     * now.
      * 
      * @param line
      * @param charPos
@@ -37,6 +37,7 @@ public class TxtArgumentSplitter {
      * @return
      */
     static List<ParsedString> splitLineIntoArguments(String line, int charPos) {
+        String origLine = line;
         // remove trailing empty cells and whitespace
         line = rtrim(line);
         if (line == null) {
@@ -54,12 +55,16 @@ public class TxtArgumentSplitter {
             int nextStart = !isLastArgument ? m.start() : line.length();
             if (lastEnd == 0 && nextStart > 0 && line.charAt(0) == ' ') {
                 /*
-                 * spec says all arguments are trimmed - this is the only case
-                 * when additional trimming is needed.
+                 * spec says all arguments are trimmed - this is the only case when additional trimming is needed.
                  */
                 ++lastEnd;
             }
-            arguments.add(new ParsedString(line.substring(lastEnd, nextStart), charPos + lastEnd));
+            ParsedString parsedString = new ParsedString(line.substring(lastEnd, nextStart), charPos + lastEnd);
+            int nextLen = (!isLastArgument ? m.end() : origLine.length()) - nextStart;
+            if (nextLen >= 1 && origLine.charAt(nextStart) == ' ') {
+                parsedString.setHasSpaceAfter(true);
+            }
+            arguments.add(parsedString);
             if (isLastArgument) {
                 // last argument
                 break;
@@ -73,11 +78,11 @@ public class TxtArgumentSplitter {
         int epos = line.length() - 1;
         while (epos >= 0) {
             switch (line.charAt(epos)) {
-            case ' ':
-            case '\t':
-                break;
-            default:
-                return line.substring(0, epos + 1);
+                case ' ':
+                case '\t':
+                    break;
+                default:
+                    return line.substring(0, epos + 1);
             }
             --epos;
         }
