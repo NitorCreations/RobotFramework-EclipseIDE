@@ -33,10 +33,8 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
-import com.nitorcreations.robotframework.eclipseide.internal.rules.RobotWhitespace;
 import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionFinder;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 public class RobotContentAssistant implements IContentAssistProcessor {
 
@@ -44,14 +42,10 @@ public class RobotContentAssistant implements IContentAssistProcessor {
     @Override
     public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
         // find info about current line
-        IRegion lineInfo;
-        String line;
         int lineNo;
         IDocument document = viewer.getDocument();
         try {
-            lineInfo = document.getLineInformationOfOffset(documentOffset);
             lineNo = document.getLineOfOffset(documentOffset);
-            line = document.get(lineInfo.getOffset(), lineInfo.getLength());
         } catch (BadLocationException ex) {
             return null;
         }
@@ -64,29 +58,37 @@ public class RobotContentAssistant implements IContentAssistProcessor {
             robotLine = new RobotLine(lineNo, documentOffset, Collections.<ParsedString> emptyList());
         }
         ParsedString argument = robotLine.getArgumentAt(documentOffset);
+        if (argument == null) {
+            argument = synthesizeArgument(document, documentOffset, lineNo);
+        }
+
         IFile file = ResourceManager.resolveFileFor(document);
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
-        if (argument == null || argument.getType() == ArgumentType.KEYWORD_CALL || argument.getType() == ArgumentType.KEYWORD_CALL_DYNAMIC) {
-            // find the cursor location range inside the current line where keyword
-            // completion proposals make sense
-            // TODO this only works for basic keyword calls, [Setup], FOR-indented,
-            // etc unsupported atm
-            int leftPos = findLeftmostKeywordPosition(lineInfo, line, robotLine);
-            int rightPos = findRightmostKeywordPosition(lineInfo, line, robotLine);
-            int replacePos = robotLine.arguments.size() >= 2 ? robotLine.arguments.get(1).getArgCharPos() - lineInfo.getOffset() : leftPos;
-            int cursorPos = documentOffset - lineInfo.getOffset();
-            // if inside range, return keyword proposals
-            if (leftPos <= cursorPos && cursorPos <= rightPos) {
-                argument = robotLine.arguments.size() >= 2 ? robotLine.arguments.get(1) : null;
-                IRegion replacementRegion = new Region(robotLine.lineCharPos + replacePos, rightPos - leftPos);
-                KeywordCompletionMatchVisitorProvider visitorProvider = new KeywordCompletionMatchVisitorProvider(file, replacementRegion);
-                proposals.addAll(computeCompletionProposals(file, documentOffset, argument, visitorProvider));
-            }
+        boolean allowKeywords = false;
+        boolean allowVariables = false;
+        switch (argument.getType()) {
+            case KEYWORD_CALL:
+                allowKeywords = true;
+                break;
+            case KEYWORD_CALL_DYNAMIC:
+                allowKeywords = true;
+                allowVariables = true;
+                break;
+            case KEYWORD_ARG:
+            case SETTING_FILE_ARG:
+            case SETTING_VAL:
+            case SETTING_FILE: // TODO verify
+            case VARIABLE_VAL: // TODO only suggest local variables
+                allowVariables = true;
+                break;
         }
-        if (argument != null) {
-            int leftPos = argument.getArgCharPos() - lineInfo.getOffset();
-            int rightPos = argument.getArgEndCharPos() - lineInfo.getOffset();
-            IRegion replacementRegion = new Region(robotLine.lineCharPos + leftPos, rightPos - leftPos);
+        if (allowKeywords) {
+            IRegion replacementRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
+            KeywordCompletionMatchVisitorProvider visitorProvider = new KeywordCompletionMatchVisitorProvider(file, replacementRegion);
+            proposals.addAll(computeCompletionProposals(file, documentOffset, argument, visitorProvider));
+        }
+        if (allowVariables) {
+            IRegion replacementRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
             VariableCompletionMatchVisitorProvider visitorProvider = new VariableCompletionMatchVisitorProvider(file, replacementRegion);
             proposals.addAll(computeCompletionProposals(file, documentOffset, argument, visitorProvider));
         }
@@ -96,19 +98,34 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         return proposals.toArray(new ICompletionProposal[proposals.size()]);
     }
 
-    int findLeftmostKeywordPosition(IRegion lineInfo, String line, RobotLine robotLine) {
-        int startPos = 0;
-        if (!robotLine.arguments.isEmpty()) {
-            startPos = robotLine.arguments.get(0).getArgEndCharPos() - lineInfo.getOffset();
+    private ParsedString synthesizeArgument(IDocument document, int documentOffset, int lineNo) {
+        String documentText = document.get();
+        // insert synthetic text at current position, and wrap with tabs to make sure it's treated as a separate
+        // argument
+        // TODO skip pre/post-tab if beginning/end of line
+        StringBuilder newText = new StringBuilder(documentText.length() + 3);
+        newText.append(documentText, 0, documentOffset);
+        int syntheticDocumentOffset = documentOffset;
+        if (documentOffset > 0 && !isCrLf(documentText.charAt(documentOffset - 1))) {
+            newText.append('\t');
+            ++syntheticDocumentOffset;
         }
-        return RobotWhitespace.skipMinimumRobotWhitespace(line, startPos);
+        newText.append('x'); // synthetic argument
+        if (documentOffset < documentText.length() && !isCrLf(documentText.charAt(documentOffset))) {
+            newText.append('\t');
+        }
+        newText.append(documentText, documentOffset, documentText.length());
+        List<RobotLine> lines = RobotFile.parse(newText.toString()).getLines();
+        RobotLine robotLine = lines.get(lineNo);
+        ParsedString synthesizedArgument = robotLine.getArgumentAt(syntheticDocumentOffset);
+        assert synthesizedArgument != null;
+        ParsedString argument = new ParsedString("", documentOffset);
+        argument.copyTypeVariablesFrom(synthesizedArgument);
+        return argument;
     }
 
-    int findRightmostKeywordPosition(IRegion lineInfo, String line, RobotLine robotLine) {
-        if (robotLine.arguments.size() >= 3) {
-            return robotLine.arguments.get(1).getArgEndCharPos() - lineInfo.getOffset();
-        }
-        return line.length();
+    private static boolean isCrLf(char ch) {
+        return ch == '\n' || ch == '\r';
     }
 
     private List<RobotCompletionProposal> computeCompletionProposals(IFile file, int documentOffset, ParsedString argument, CompletionMatchVisitorProvider visitorProvider) {

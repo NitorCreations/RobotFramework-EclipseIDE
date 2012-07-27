@@ -43,7 +43,7 @@ public class RobotLine {
 
     public ParsedString getArgumentAt(int offset) {
         for (ParsedString argument : arguments) {
-            if (offset >= argument.getArgCharPos() && offset <= argument.getArgEndCharPos()) {
+            if (offset >= argument.getArgCharPos() && offset <= argument.getExtendedArgEndCharPos()) {
                 return argument;
             }
         }

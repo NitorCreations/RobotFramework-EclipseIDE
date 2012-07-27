@@ -153,4 +153,8 @@ public class ParsedString implements IParsedKeywordString {
         return hasSpaceAfter;
     }
 
+    public void copyTypeVariablesFrom(ParsedString source) {
+        setType(source.getType());
+    }
+
 }
