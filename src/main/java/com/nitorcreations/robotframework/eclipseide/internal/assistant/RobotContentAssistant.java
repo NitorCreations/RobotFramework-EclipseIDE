@@ -35,6 +35,7 @@ import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
 import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionFinder;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
+import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 public class RobotContentAssistant implements IContentAssistProcessor {
 
@@ -105,34 +106,32 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         return proposals.toArray(new ICompletionProposal[proposals.size()]);
     }
 
+    /**
+     * Since there is no argument for the current cursor position (otherwise this method wouldn't have been called),
+     * figure out which argument it would be by fake-inserting a dummy character at that position. After parsing the
+     * file with the dummy character included, grab the argument that now resolves for the cursor position. Then undo
+     * the added dummy character from that argument and return the resulting argument, which is possibly empty, but
+     * which has a suitable {@link ArgumentType} assigned to it. This type thus indicates what type the argument would
+     * be should the user choose to use any of the content assist suggestions, and lets us decide what content assist
+     * suggestions to show in the first place.
+     * 
+     * @return the synthesized argument
+     */
     private ParsedString synthesizeArgument(IDocument document, int documentOffset, int lineNo) {
         String documentText = document.get();
-        // insert synthetic text at current position, and wrap with tabs to make sure it's treated as a separate
-        // argument
-        // TODO skip pre/post-tab if beginning/end of line
         StringBuilder newText = new StringBuilder(documentText.length() + 3);
         newText.append(documentText, 0, documentOffset);
-        int syntheticDocumentOffset = documentOffset;
-        if (documentOffset > 0 && !isCrLf(documentText.charAt(documentOffset - 1))) {
-            newText.append('\t');
-            ++syntheticDocumentOffset;
-        }
-        newText.append('x'); // synthetic argument
-        if (documentOffset < documentText.length() && !isCrLf(documentText.charAt(documentOffset))) {
-            newText.append('\t');
-        }
+        newText.append('x'); // dummy character
         newText.append(documentText, documentOffset, documentText.length());
         List<RobotLine> lines = RobotFile.parse(newText.toString()).getLines();
         RobotLine robotLine = lines.get(lineNo);
-        ParsedString synthesizedArgument = robotLine.getArgumentAt(syntheticDocumentOffset);
+        ParsedString synthesizedArgument = robotLine.getArgumentAt(documentOffset);
         assert synthesizedArgument != null;
-        ParsedString argument = new ParsedString("", documentOffset);
-        argument.copyTypeVariablesFrom(synthesizedArgument);
-        return argument;
-    }
-
-    private static boolean isCrLf(char ch) {
-        return ch == '\n' || ch == '\r';
+        assert synthesizedArgument.getArgCharPos() == documentOffset;
+        String synthesizedArgumentWithoutDummyCharacter = synthesizedArgument.getValue().substring(1);
+        ParsedString actualArgument = new ParsedString(synthesizedArgumentWithoutDummyCharacter, documentOffset);
+        actualArgument.copyTypeVariablesFrom(synthesizedArgument);
+        return actualArgument;
     }
 
     private List<RobotCompletionProposal> computeCompletionProposals(IFile file, int documentOffset, ParsedString argument, CompletionMatchVisitorProvider visitorProvider) {
