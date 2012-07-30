@@ -90,7 +90,14 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         if (allowVariables) {
             IRegion replacementRegion = VariableReplacementRegionCalculator.calculate(argument, documentOffset);
             VariableCompletionMatchVisitorProvider visitorProvider = new VariableCompletionMatchVisitorProvider(file, replacementRegion);
-            proposals.addAll(computeCompletionProposals(file, documentOffset, argument, visitorProvider));
+            List<RobotCompletionProposal> variableProposals = computeCompletionProposals(file, documentOffset, argument, visitorProvider);
+            if (replacementRegion.getLength() > 0) {
+                // the cursor is positioned for replacing a variable, so put the variable proposals first
+                proposals.addAll(0, variableProposals);
+            } else {
+                // default positioning of proposals
+                proposals.addAll(variableProposals);
+            }
         }
         if (proposals.isEmpty()) {
             return null;
