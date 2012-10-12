@@ -16,3 +16,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.nitorcreations.robotframework.eclipseide,
  com.nitorcreations.robotframework.eclipseide.editors,
  com.nitorcreations.robotframework.eclipseide.internal.rules;x-internal:=true
+Bundle-Vendor: Nitor Creations Oy
