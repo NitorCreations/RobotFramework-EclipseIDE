@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Woo!
+# This file tests/demonstrates many of the syntax coloring features of the robot editor.
+# Some syntax errors are deliberate, but some may be accidental. Please refer to documentation as needed.
 
 ***Settings*** # lol
 ...  bogus but ignored
