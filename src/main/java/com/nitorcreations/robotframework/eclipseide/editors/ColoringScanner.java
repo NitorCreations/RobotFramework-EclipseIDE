@@ -29,6 +29,7 @@ import org.eclipse.jface.text.rules.Token;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.util.TokenQueue;
+import com.nitorcreations.robotframework.eclipseide.preferences.PreferenceConstants;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -62,23 +63,23 @@ public class ColoringScanner implements ITokenScanner {
         // TODO dynamically fetched colors
         // TODO consider combining tokVARIABLE_KEY with tokKEYWORD_LVALUE
         // ArgumentType.IGNORED is deliberately left out here
-        argTypeToTokenMap.put(ArgumentType.COMMENT, new Token(new TextAttribute(manager.getColor(ColorConstants.COMMENT))));
-        argTypeToTokenMap.put(ArgumentType.TABLE, new Token(new TextAttribute(manager.getColor(ColorConstants.TABLE))));
-        argTypeToTokenMap.put(ArgumentType.SETTING_KEY, new Token(new TextAttribute(manager.getColor(ColorConstants.SETTING))));
-        argTypeToTokenMap.put(ArgumentType.VARIABLE_KEY, new Token(new TextAttribute(manager.getColor(ColorConstants.VARIABLE))));
-        argTypeToTokenMap.put(ArgumentType.NEW_TESTCASE, new Token(new TextAttribute(manager.getColor(ColorConstants.TESTCASE_NEW))));
-        argTypeToTokenMap.put(ArgumentType.NEW_KEYWORD, new Token(new TextAttribute(manager.getColor(ColorConstants.KEYWORD_NEW))));
-        argTypeToTokenMap.put(ArgumentType.SETTING_VAL, new Token(new TextAttribute(manager.getColor(ColorConstants.SETTING_VALUE))));
-        argTypeToTokenMap.put(ArgumentType.SETTING_FILE, new Token(new TextAttribute(manager.getColor(ColorConstants.SETTING_FILE))));
-        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_WITH_NAME_KEY, new Token(new TextAttribute(manager.getColor(ColorConstants.DEFAULT))));
-        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_ARG, new Token(new TextAttribute(manager.getColor(ColorConstants.SETTING_FILE_ARG))));
-        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_WITH_NAME_VALUE, new Token(new TextAttribute(manager.getColor(ColorConstants.SETTING_FILE))));
-        argTypeToTokenMap.put(ArgumentType.VARIABLE_VAL, new Token(new TextAttribute(manager.getColor(ColorConstants.VARIABLE_VALUE))));
-        argTypeToTokenMap.put(ArgumentType.KEYWORD_LVALUE, new Token(new TextAttribute(manager.getColor(ColorConstants.KEYWORD_LVALUE))));
-        argTypeToTokenMap.put(ArgumentType.FOR_PART, new Token(new TextAttribute(manager.getColor(ColorConstants.FOR_PART))));
-        argTypeToTokenMap.put(ArgumentType.KEYWORD_CALL, new Token(new TextAttribute(manager.getColor(ColorConstants.KEYWORD))));
-        argTypeToTokenMap.put(ArgumentType.KEYWORD_CALL_DYNAMIC, new Token(new TextAttribute(manager.getColor(ColorConstants.KEYWORD))));
-        argTypeToTokenMap.put(ArgumentType.KEYWORD_ARG, new Token(new TextAttribute(manager.getColor(ColorConstants.KEYWORD_ARG))));
+        argTypeToTokenMap.put(ArgumentType.COMMENT, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_COMMENT))));
+        argTypeToTokenMap.put(ArgumentType.TABLE, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_TABLE))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_KEY, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_SETTING))));
+        argTypeToTokenMap.put(ArgumentType.VARIABLE_KEY, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_VARIABLE))));
+        argTypeToTokenMap.put(ArgumentType.NEW_TESTCASE, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_TESTCASE_NEW))));
+        argTypeToTokenMap.put(ArgumentType.NEW_KEYWORD, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_KEYWORD_NEW))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_VAL, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_SETTING_VALUE))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_FILE, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_SETTING_FILE))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_WITH_NAME_KEY, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_DEFAULT))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_ARG, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_SETTING_FILE_ARG))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_WITH_NAME_VALUE, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_SETTING_FILE))));
+        argTypeToTokenMap.put(ArgumentType.VARIABLE_VAL, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_VARIABLE_VALUE))));
+        argTypeToTokenMap.put(ArgumentType.KEYWORD_LVALUE, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_KEYWORD_LVALUE))));
+        argTypeToTokenMap.put(ArgumentType.FOR_PART, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_FOR_PART))));
+        argTypeToTokenMap.put(ArgumentType.KEYWORD_CALL, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_KEYWORD))));
+        argTypeToTokenMap.put(ArgumentType.KEYWORD_CALL_DYNAMIC, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_KEYWORD))));
+        argTypeToTokenMap.put(ArgumentType.KEYWORD_ARG, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_KEYWORD_ARG))));
     }
 
     @Override
