@@ -16,8 +16,10 @@
 package com.nitorcreations.robotframework.eclipseide.editors;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -30,6 +32,7 @@ import com.nitorcreations.robotframework.eclipseide.Activator;
 
 public class ColorManager {
 
+    protected Set<String> colorPreferences = new HashSet<String>();
     protected Map<RGB, Color> fColorTable = new HashMap<RGB, Color>(10);
     private boolean listenerRegistered;
 
@@ -41,6 +44,7 @@ public class ColorManager {
     }
 
     public Color getColor(String preferenceId) {
+        colorPreferences.add(preferenceId);
         IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
         if (!listenerRegistered) {
             preferenceStore.addPropertyChangeListener(new IPropertyChangeListener() {
@@ -64,5 +68,9 @@ public class ColorManager {
 
     public void setDarkBackgroundScheme(boolean isDarkBackground) {
         // nothing anymore
+    }
+
+    public boolean isColorPreference(String preferenceId) {
+        return colorPreferences.contains(preferenceId);
     }
 }
