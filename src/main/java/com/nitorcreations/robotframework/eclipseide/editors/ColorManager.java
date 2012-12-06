@@ -66,10 +66,6 @@ public class ColorManager {
         return color;
     }
 
-    public void setDarkBackgroundScheme(boolean isDarkBackground) {
-        // nothing anymore
-    }
-
     public boolean isColorPreference(String preferenceId) {
         return colorPreferences.contains(preferenceId);
     }

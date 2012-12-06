@@ -19,9 +19,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.editors.text.TextEditor;
@@ -90,18 +88,6 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
 
     public IFile getEditedFile() {
         return (IFile) getEditorInput().getAdapter(IFile.class);
-    }
-
-    @Override
-    protected void initializeViewerColors(ISourceViewer viewer) {
-        super.initializeViewerColors(viewer);
-        colorManager.setDarkBackgroundScheme(isDarkBackground(viewer));
-    }
-
-    private boolean isDarkBackground(ISourceViewer viewer) {
-        Color background = viewer.getTextWidget().getBackground();
-        int lightness = background.getBlue() * 11 + background.getGreen() * 59 + background.getRed() * 30;
-        return lightness < 12800;
     }
 
     @Override
