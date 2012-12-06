@@ -48,16 +48,16 @@ public class ColorPreferencePage extends FieldEditorPreferencePage implements IW
         addField(new ColorFieldEditor(PreferenceConstants.P_TABLE, "Table declaration", getFieldEditorParent()));
         addField(new ColorFieldEditor(PreferenceConstants.P_SETTING, "Setting name", getFieldEditorParent()));
         addField(new ColorFieldEditor(PreferenceConstants.P_SETTING_VALUE, "Setting value, string", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_SETTING_FILE, "Setting value, filename", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_SETTING_FILE_ARG, "Setting value, argument for library/variables", getFieldEditorParent()));
+        addField(new ColorFieldEditor(PreferenceConstants.P_SETTING_FILE, "Setting value, filename/library", getFieldEditorParent()));
+        addField(new ColorFieldEditor(PreferenceConstants.P_SETTING_FILE_ARG, "Setting value, argument for library", getFieldEditorParent()));
         addField(new ColorFieldEditor(PreferenceConstants.P_SETTING_FILE_WITH_NAME, "'WITH NAME' in library imports", getFieldEditorParent()));
         addField(new ColorFieldEditor(PreferenceConstants.P_VARIABLE, "Variable definition: name", getFieldEditorParent()));
         addField(new ColorFieldEditor(PreferenceConstants.P_VARIABLE_VALUE, "Variable definition: value", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_TESTCASE_NEW, "Test case declaration", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_KEYWORD_NEW, "Keyword declaration", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_KEYWORD_LVALUE, "Keyword return value variable assignment", getFieldEditorParent()));
+        addField(new ColorFieldEditor(PreferenceConstants.P_TESTCASE_NEW, "Test case definition", getFieldEditorParent()));
+        addField(new ColorFieldEditor(PreferenceConstants.P_KEYWORD_NEW, "Keyword definition", getFieldEditorParent()));
+        addField(new ColorFieldEditor(PreferenceConstants.P_KEYWORD_LVALUE, "Assignment of keyword return values to variables", getFieldEditorParent()));
         addField(new ColorFieldEditor(PreferenceConstants.P_KEYWORD, "Keyword call", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_KEYWORD_ARG, "Keyword argument", getFieldEditorParent()));
+        addField(new ColorFieldEditor(PreferenceConstants.P_KEYWORD_ARG, "Keyword call argument", getFieldEditorParent()));
         addField(new ColorFieldEditor(PreferenceConstants.P_FOR_PART, "FOR loop constructs", getFieldEditorParent()));
     }
 
