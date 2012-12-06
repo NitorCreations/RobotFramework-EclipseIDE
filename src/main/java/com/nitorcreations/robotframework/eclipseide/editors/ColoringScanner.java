@@ -71,7 +71,7 @@ public class ColoringScanner implements ITokenScanner {
         argTypeToTokenMap.put(ArgumentType.NEW_KEYWORD, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_KEYWORD_NEW))));
         argTypeToTokenMap.put(ArgumentType.SETTING_VAL, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_SETTING_VALUE))));
         argTypeToTokenMap.put(ArgumentType.SETTING_FILE, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_SETTING_FILE))));
-        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_WITH_NAME_KEY, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_DEFAULT))));
+        argTypeToTokenMap.put(ArgumentType.SETTING_FILE_WITH_NAME_KEY, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_SETTING_FILE_WITH_NAME))));
         argTypeToTokenMap.put(ArgumentType.SETTING_FILE_ARG, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_SETTING_FILE_ARG))));
         argTypeToTokenMap.put(ArgumentType.SETTING_FILE_WITH_NAME_VALUE, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_SETTING_FILE))));
         argTypeToTokenMap.put(ArgumentType.VARIABLE_VAL, new Token(new TextAttribute(manager.getColor(PreferenceConstants.P_VARIABLE_VALUE))));

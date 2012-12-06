@@ -50,6 +50,7 @@ public class ColorPreferencePage extends FieldEditorPreferencePage implements IW
         addField(new ColorFieldEditor(PreferenceConstants.P_SETTING_VALUE, "Setting value, string", getFieldEditorParent()));
         addField(new ColorFieldEditor(PreferenceConstants.P_SETTING_FILE, "Setting value, filename", getFieldEditorParent()));
         addField(new ColorFieldEditor(PreferenceConstants.P_SETTING_FILE_ARG, "Setting value, argument for library/variables", getFieldEditorParent()));
+        addField(new ColorFieldEditor(PreferenceConstants.P_SETTING_FILE_WITH_NAME, "'WITH NAME' in library imports", getFieldEditorParent()));
         addField(new ColorFieldEditor(PreferenceConstants.P_VARIABLE, "Variable definition: name", getFieldEditorParent()));
         addField(new ColorFieldEditor(PreferenceConstants.P_VARIABLE_VALUE, "Variable definition: value", getFieldEditorParent()));
         addField(new ColorFieldEditor(PreferenceConstants.P_TESTCASE_NEW, "Test case declaration", getFieldEditorParent()));
@@ -58,15 +59,6 @@ public class ColorPreferencePage extends FieldEditorPreferencePage implements IW
         addField(new ColorFieldEditor(PreferenceConstants.P_KEYWORD, "Keyword call", getFieldEditorParent()));
         addField(new ColorFieldEditor(PreferenceConstants.P_KEYWORD_ARG, "Keyword argument", getFieldEditorParent()));
         addField(new ColorFieldEditor(PreferenceConstants.P_FOR_PART, "FOR loop constructs", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_DEFAULT, "DEFAULT", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_UNKNOWN, "UNKNOWN", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_FIELD_BG, "FIELD_BG", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_FG, "FG", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_BG, "BG", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_FG_SELECTION, "Selection foreground", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_BG_SELECTION, "Selection background", getFieldEditorParent()));
-        // addField(new ColorFieldEditor(PreferenceConstants.P_ARGUMENT_SEPARATOR, "ARGUMENT_SEPARATOR",
-        // getFieldEditorParent()));
     }
 
     @Override

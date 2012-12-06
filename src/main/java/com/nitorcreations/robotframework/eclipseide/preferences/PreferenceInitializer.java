@@ -43,6 +43,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         store.setDefault(PreferenceConstants.P_SETTING_VALUE, "0,255,0");
         store.setDefault(PreferenceConstants.P_SETTING_FILE, "0,0,0"); // new RGB(255, 255, 255)
         store.setDefault(PreferenceConstants.P_SETTING_FILE_ARG, "0,255,64");
+        store.setDefault(PreferenceConstants.P_SETTING_FILE_WITH_NAME, "192,192,192");
         store.setDefault(PreferenceConstants.P_VARIABLE, "0,170,180");
         store.setDefault(PreferenceConstants.P_VARIABLE_VALUE, "140,152,162"); // new RGB(180, 192, 202)
         store.setDefault(PreferenceConstants.P_TESTCASE_NEW, "222,0,0");
@@ -51,14 +52,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         store.setDefault(PreferenceConstants.P_KEYWORD, "255,180,0");
         store.setDefault(PreferenceConstants.P_KEYWORD_ARG, "255,100,0");
         store.setDefault(PreferenceConstants.P_FOR_PART, "0,255,255");
-        store.setDefault(PreferenceConstants.P_DEFAULT, "192,192,192");
-        store.setDefault(PreferenceConstants.P_UNKNOWN, "255,140,0");
-        store.setDefault(PreferenceConstants.P_FIELD_BG, "8,16,24");
-        store.setDefault(PreferenceConstants.P_FG, "210,210,210");
-        store.setDefault(PreferenceConstants.P_BG, "16,32,48");
-        store.setDefault(PreferenceConstants.P_FG_SELECTION, "255,255,255");
-        store.setDefault(PreferenceConstants.P_BG_SELECTION, "56,83,104");
-        // store.setDefault(PreferenceConstants.P_ARGUMENT_SEPARATOR, "16,32,48");
     }
 
 }
