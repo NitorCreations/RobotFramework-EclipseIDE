@@ -78,7 +78,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
             case KEYWORD_ARG:
             case SETTING_FILE_ARG:
             case SETTING_VAL:
-            case SETTING_FILE: // TODO verify
+            case SETTING_FILE:
             case VARIABLE_VAL: // TODO only suggest local variables
                 allowVariables = true;
                 break;
