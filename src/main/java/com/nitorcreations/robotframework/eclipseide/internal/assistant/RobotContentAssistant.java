@@ -22,9 +22,7 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -33,11 +31,16 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
-import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionFinder;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 public class RobotContentAssistant implements IContentAssistProcessor {
+
+    private final IProposalGenerator proposalGenerator;
+
+    public RobotContentAssistant(IProposalGenerator proposalGenerator) {
+        this.proposalGenerator = proposalGenerator;
+    }
 
     // ctrl-space completion proposals
     @Override
@@ -84,21 +87,10 @@ public class RobotContentAssistant implements IContentAssistProcessor {
                 break;
         }
         if (allowKeywords) {
-            IRegion replacementRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-            KeywordCompletionMatchVisitorProvider visitorProvider = new KeywordCompletionMatchVisitorProvider(file, replacementRegion);
-            proposals.addAll(computeCompletionProposals(file, documentOffset, argument, visitorProvider));
+            proposalGenerator.addKeywordProposals(file, argument, documentOffset, proposals);
         }
         if (allowVariables) {
-            IRegion replacementRegion = VariableReplacementRegionCalculator.calculate(argument, documentOffset);
-            VariableCompletionMatchVisitorProvider visitorProvider = new VariableCompletionMatchVisitorProvider(file, replacementRegion);
-            List<RobotCompletionProposal> variableProposals = computeCompletionProposals(file, documentOffset, argument, visitorProvider);
-            if (replacementRegion.getLength() > 0) {
-                // the cursor is positioned for replacing a variable, so put the variable proposals first
-                proposals.addAll(0, variableProposals);
-            } else {
-                // default positioning of proposals
-                proposals.addAll(variableProposals);
-            }
+            proposalGenerator.addVariableProposals(file, argument, documentOffset, proposals);
         }
         if (proposals.isEmpty()) {
             return null;
@@ -132,36 +124,6 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         ParsedString actualArgument = new ParsedString(synthesizedArgumentWithoutDummyCharacter, documentOffset);
         actualArgument.copyTypeVariablesFrom(synthesizedArgument);
         return actualArgument;
-    }
-
-    private List<RobotCompletionProposal> computeCompletionProposals(IFile file, int documentOffset, ParsedString argument, CompletionMatchVisitorProvider visitorProvider) {
-        System.out.println("RobotContentAssistant.computeCompletionProposals() " + documentOffset + " " + argument);
-        List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
-        // first find matches that use the whole input as search string
-        DefinitionFinder.acceptMatches(file, visitorProvider.get(argument, proposals));
-        if (argument != null && proposalsIsEmptyOrContainsOnly(proposals, argument)) {
-            proposals.clear();
-            // int lineOffset = documentOffset - lineCharPos;
-            if (argument.getArgCharPos() < documentOffset && documentOffset < argument.getArgEndCharPos()) {
-                // try again, but only up to cursor
-                int argumentOff = documentOffset - argument.getArgCharPos();
-                ParsedString argumentleftPart = new ParsedString(argument.getValue().substring(0, argumentOff), argument.getArgCharPos());
-                DefinitionFinder.acceptMatches(file, visitorProvider.get(argumentleftPart, proposals));
-            }
-            if (proposalsIsEmptyOrContainsOnly(proposals, argument)) {
-                // try again, ignoring user input, i.e. show all possible keywords
-                proposals.clear();
-                DefinitionFinder.acceptMatches(file, visitorProvider.get(null, proposals));
-            }
-        }
-        return proposals;
-    }
-
-    private boolean proposalsIsEmptyOrContainsOnly(List<RobotCompletionProposal> proposals, ParsedString argument) {
-        if (proposals.size() != 1) {
-            return proposals.isEmpty();
-        }
-        return proposals.get(0).getMatchArgument().getValue().equals(argument.getValue());
     }
 
     // ctrl-shift-space information popups
