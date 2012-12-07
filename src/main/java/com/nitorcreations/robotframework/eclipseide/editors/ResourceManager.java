@@ -17,11 +17,14 @@ package com.nitorcreations.robotframework.eclipseide.editors;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorPart;
@@ -81,7 +84,46 @@ public final class ResourceManager {
     public static IFile getRelativeFile(IFile originalFile, String pathRelativeToOriginalFile) {
         IPath originalFolderPath = originalFile.getParent().getLocation();
         IPath newPath = originalFolderPath.append(pathRelativeToOriginalFile);
-        return originalFile.getWorkspace().getRoot().getFileForLocation(newPath);
+        IWorkspaceRoot root = originalFile.getWorkspace().getRoot();
+        return getBestFileForLocation(root, newPath);
+    }
+
+    /**
+     * When using nested Maven projects with M2E, it seems M2E does not properly indicate files belonging to subprojects
+     * as filtered from the parent project. As a result, if we called {@link IWorkspaceRoot#getFileForLocation(IPath)}
+     * to resolve the location of a resource, it would typically return a IFile referring to the file through the parent
+     * project instead of the expected subproject. This would then end up opening files in Eclipse appearing to belong
+     * to the "wrong" project (when "Link with editor" is active) when following a hyperlink.
+     * <p>
+     * To work around this, we instead fetch ALL possible IFile references for the given path and try to pick the best
+     * one using heuristics.
+     * <p>
+     * Should M2E start filtering files in the expected way, we could switch back to
+     * {@link IWorkspaceRoot#getFileForLocation()} after most users can be assumed to have updated their M2E to a
+     * sufficiently new version.
+     */
+    private static IFile getBestFileForLocation(IWorkspaceRoot root, IPath path) {
+        URI pathUri = uriForPath(path);
+        // The heuristics for picking the best match is currently the one with the shortest project-relative path. This
+        // may fail (i.e. pick the wrong alternative) if modules are not strictly below each other in the file system.
+        IFile bestFile = null;
+        int bestSegments = Integer.MAX_VALUE;
+        for (IFile file : root.findFilesForLocationURI(pathUri)) {
+            int segments = file.getProjectRelativePath().segmentCount();
+            if (segments < bestSegments) {
+                bestFile = file;
+                bestSegments = segments;
+            }
+        }
+        return bestFile;
+    }
+
+    private static URI uriForPath(IPath path) {
+        try {
+            return new URI("file", null, path.toString(), null);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static IEditorPart openOrReuseEditorFor(IFile file, boolean isRobotFile) {
