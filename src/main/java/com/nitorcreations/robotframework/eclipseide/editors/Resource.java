@@ -59,7 +59,7 @@ public class Resource {
             return new ResourceLocation(this, line);
         }
         for (File f : includedResources) {
-            Resource r = ResourceManager.getResource(f);
+            Resource r = ResourceManagerProvider.get().getResource(f);
             if (r == null) {
                 continue;
             }
@@ -77,7 +77,7 @@ public class Resource {
             return new ResourceLocation(this, line);
         }
         for (File f : includedResources) {
-            Resource r = ResourceManager.getResource(f);
+            Resource r = ResourceManagerProvider.get().getResource(f);
             if (r == null) {
                 continue;
             }

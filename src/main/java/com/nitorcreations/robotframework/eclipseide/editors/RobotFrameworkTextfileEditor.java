@@ -73,12 +73,12 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
     private void handleOpenDocument() {
         IDocument document = getEditedDocument();
         System.out.println("Opened document " + getEditorInput() + " -> " + document);
-        ResourceManager.registerEditor(this);
+        ResourceManagerProvider.get().registerEditor(this);
     }
 
     private void handleCloseDocument(IEditorInput old) {
         System.out.println("Closing document " + old);
-        ResourceManager.unregisterEditor(this);
+        ResourceManagerProvider.get().unregisterEditor(this);
         RobotFile.erase(getEditedDocument());
     }
 

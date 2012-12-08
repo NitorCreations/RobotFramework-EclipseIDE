@@ -30,7 +30,7 @@ public class RobotPresentationReconciler extends PresentationReconciler {
         DefaultDamagerRepairer dr = new DefaultDamagerRepairer(coloringScanner) {
             @Override
             public IRegion getDamageRegion(ITypedRegion partition, DocumentEvent e, boolean documentPartitioningChanged) {
-                System.out.println("Document " + ResourceManager.resolveFileFor(e.getDocument()) + " region changed: " + e);
+                System.out.println("Document " + ResourceManagerProvider.get().resolveFileFor(e.getDocument()) + " region changed: " + e);
                 // force damaging entire document for now; we don't support
                 // partial reparsing just yet
                 return partition;

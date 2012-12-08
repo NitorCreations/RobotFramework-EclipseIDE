@@ -26,9 +26,9 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
-import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
+import com.nitorcreations.robotframework.eclipseide.editors.ResourceManagerProvider;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public abstract class HyperlinkDetector implements IHyperlinkDetector {
@@ -36,9 +36,8 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
     protected List<RobotLine> lines;
 
     /**
-     * This detector assumes generated hyperlinks are static, i.e. the link
-     * target is calculated at detection time and not changed even if the code
-     * would update later.
+     * This detector assumes generated hyperlinks are static, i.e. the link target is calculated at detection time and
+     * not changed even if the code would update later.
      */
     @Override
     public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
@@ -67,7 +66,7 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
         if (argument == null) {
             return null;
         }
-        IFile file = ResourceManager.resolveFileFor(document);
+        IFile file = ResourceManagerProvider.get().resolveFileFor(document);
         List<IHyperlink> links = new ArrayList<IHyperlink>();
         getLinks(file, rfeLine, argument, offset, links);
         if (links.isEmpty()) {

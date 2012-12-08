@@ -23,7 +23,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
-import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
+import com.nitorcreations.robotframework.eclipseide.editors.ResourceManagerProvider;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileType;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
@@ -49,7 +49,7 @@ public class ResourceHyperlinkDetector extends HyperlinkDetector {
             return;
         }
         String linkString = argument.getUnescapedValue();
-        IFile targetFile = ResourceManager.getRelativeFile(file, linkString);
+        IFile targetFile = ResourceManagerProvider.get().getRelativeFile(file, linkString);
         if (!targetFile.exists()) {
             return;
         }

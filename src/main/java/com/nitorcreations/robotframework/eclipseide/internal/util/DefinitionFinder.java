@@ -30,7 +30,7 @@ import org.eclipse.core.resources.IProject;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.IndexFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
-import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
+import com.nitorcreations.robotframework.eclipseide.editors.ResourceManagerProvider;
 import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
@@ -130,7 +130,7 @@ public class DefinitionFinder {
 
     private static void processLinkableFile(Collection<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, IFile currentFile, RobotLine line, FileType type) {
         ParsedString secondArgument = line.arguments.get(1);
-        IFile resourceFile = ResourceManager.getRelativeFile(currentFile, secondArgument.getUnescapedValue());
+        IFile resourceFile = ResourceManagerProvider.get().getRelativeFile(currentFile, secondArgument.getUnescapedValue());
         FileWithType fileWithType = new FileWithType(type, resourceFile);
         if (resourceFile.exists()) {
             addIfNew(unprocessedFiles, processedFiles, fileWithType);

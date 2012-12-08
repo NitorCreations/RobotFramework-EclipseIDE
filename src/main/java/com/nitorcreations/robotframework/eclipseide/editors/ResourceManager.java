@@ -34,11 +34,12 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 
-public final class ResourceManager {
+final class ResourceManager implements IResourceManager {
 
-    private static final Map<File, Resource> resources = new HashMap<File, Resource>();
+    private final Map<File, Resource> resources = new HashMap<File, Resource>();
 
-    public static Resource getResource(File path) {
+    @Override
+    public Resource getResource(File path) {
         try {
             Resource r;
             synchronized (ResourceManager.class) {
@@ -56,10 +57,11 @@ public final class ResourceManager {
         }
     }
 
-    private static final Map<IDocument, IFile> DOCUMENT_TO_FILE = Collections.synchronizedMap(new HashMap<IDocument, IFile>());
-    private static final Map<IFile, IDocument> FILE_TO_DOCUMENT = Collections.synchronizedMap(new HashMap<IFile, IDocument>());
+    private final Map<IDocument, IFile> DOCUMENT_TO_FILE = Collections.synchronizedMap(new HashMap<IDocument, IFile>());
+    private final Map<IFile, IDocument> FILE_TO_DOCUMENT = Collections.synchronizedMap(new HashMap<IFile, IDocument>());
 
-    public static void registerEditor(RobotFrameworkTextfileEditor editor) {
+    @Override
+    public void registerEditor(RobotFrameworkTextfileEditor editor) {
         IDocument editedDocument = editor.getEditedDocument();
         IFile editedFile = editor.getEditedFile();
         assert !DOCUMENT_TO_FILE.containsKey(editedDocument);
@@ -68,20 +70,24 @@ public final class ResourceManager {
         FILE_TO_DOCUMENT.put(editedFile, editedDocument);
     }
 
-    public static void unregisterEditor(RobotFrameworkTextfileEditor editor) {
+    @Override
+    public void unregisterEditor(RobotFrameworkTextfileEditor editor) {
         DOCUMENT_TO_FILE.remove(editor.getEditedDocument());
         FILE_TO_DOCUMENT.remove(editor.getEditedFile());
     }
 
-    public static IFile resolveFileFor(IDocument document) {
+    @Override
+    public IFile resolveFileFor(IDocument document) {
         return DOCUMENT_TO_FILE.get(document);
     }
 
-    public static IDocument resolveDocumentFor(IFile file) {
+    @Override
+    public IDocument resolveDocumentFor(IFile file) {
         return FILE_TO_DOCUMENT.get(file);
     }
 
-    public static IFile getRelativeFile(IFile originalFile, String pathRelativeToOriginalFile) {
+    @Override
+    public IFile getRelativeFile(IFile originalFile, String pathRelativeToOriginalFile) {
         IPath originalFolderPath = originalFile.getParent().getLocation();
         IPath newPath = originalFolderPath.append(pathRelativeToOriginalFile);
         IWorkspaceRoot root = originalFile.getWorkspace().getRoot();
@@ -102,7 +108,7 @@ public final class ResourceManager {
      * {@link IWorkspaceRoot#getFileForLocation()} after most users can be assumed to have updated their M2E to a
      * sufficiently new version.
      */
-    private static IFile getBestFileForLocation(IWorkspaceRoot root, IPath path) {
+    private IFile getBestFileForLocation(IWorkspaceRoot root, IPath path) {
         URI pathUri = uriForPath(path);
         // The heuristics for picking the best match is currently the one with the shortest project-relative path. This
         // may fail (i.e. pick the wrong alternative) if modules are not strictly below each other in the file system.
@@ -118,7 +124,7 @@ public final class ResourceManager {
         return bestFile;
     }
 
-    private static URI uriForPath(IPath path) {
+    private URI uriForPath(IPath path) {
         try {
             return new URI("file", null, path.toString(), null);
         } catch (URISyntaxException e) {
@@ -126,7 +132,8 @@ public final class ResourceManager {
         }
     }
 
-    public static IEditorPart openOrReuseEditorFor(IFile file, boolean isRobotFile) {
+    @Override
+    public IEditorPart openOrReuseEditorFor(IFile file, boolean isRobotFile) {
         try {
             IWorkbenchPage workbenchPage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
             FileEditorInput editorInput = new FileEditorInput(file);
