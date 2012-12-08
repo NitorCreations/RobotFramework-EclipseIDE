@@ -30,7 +30,7 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
-import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
+import com.nitorcreations.robotframework.eclipseide.editors.ResourceManagerProvider;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -66,7 +66,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
             argument = synthesizeArgument(document, documentOffset, lineNo);
         }
 
-        IFile file = ResourceManager.resolveFileFor(document);
+        IFile file = ResourceManagerProvider.get().resolveFileFor(document);
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
         boolean allowKeywords = false;
         boolean allowVariables = false;

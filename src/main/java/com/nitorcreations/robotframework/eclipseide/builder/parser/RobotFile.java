@@ -30,7 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 
-import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
+import com.nitorcreations.robotframework.eclipseide.editors.ResourceManagerProvider;
 
 public class RobotFile {
 
@@ -81,7 +81,7 @@ public class RobotFile {
     }
 
     public static void erase(IDocument document) {
-        IFile file = ResourceManager.resolveFileFor(document);
+        IFile file = ResourceManagerProvider.get().resolveFileFor(document);
         FileInfo fileInfo = FILES.get(file);
         if (fileInfo != null) {
             fileInfo.inEditor = null;
@@ -93,7 +93,7 @@ public class RobotFile {
 
     private static RobotFile get(IFile file, boolean useEditorVersion, boolean useCached, IProgressMonitor monitor) {
         if (useEditorVersion) {
-            IDocument document = ResourceManager.resolveDocumentFor(file);
+            IDocument document = ResourceManagerProvider.get().resolveDocumentFor(file);
             if (document != null) {
                 return get(document, useCached);
             }
@@ -121,7 +121,7 @@ public class RobotFile {
     }
 
     private static RobotFile get(IDocument document, boolean useCached) {
-        IFile file = ResourceManager.resolveFileFor(document);
+        IFile file = ResourceManagerProvider.get().resolveFileFor(document);
         FileInfo fileInfo = FILES.get(file);
         if (useCached && fileInfo != null && fileInfo.inEditor != null) {
             return fileInfo.inEditor;

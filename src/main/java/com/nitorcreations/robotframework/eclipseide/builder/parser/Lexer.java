@@ -33,12 +33,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 
-import com.nitorcreations.robotframework.eclipseide.editors.ResourceManager;
+import com.nitorcreations.robotframework.eclipseide.editors.ResourceManagerProvider;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 /**
- * This class splits a robot text files into individual lines, each represented
- * by an instance of {@link RobotLine}.
+ * This class splits a robot text files into individual lines, each represented by an instance of {@link RobotLine}.
  */
 public class Lexer {
 
@@ -97,7 +96,7 @@ public class Lexer {
      * @param document
      */
     public Lexer(IDocument document) {
-        this.filename = ResourceManager.resolveFileFor(document).toString();
+        this.filename = ResourceManagerProvider.get().resolveFileFor(document).toString();
         this.filestream = new StringReader(document.get());
         this.monitor = new NullProgressMonitor();
     }
