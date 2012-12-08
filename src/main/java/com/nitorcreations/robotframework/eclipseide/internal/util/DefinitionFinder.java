@@ -62,16 +62,16 @@ public class DefinitionFinder {
         unprocessedFiles.add(1, new FileWithType(FileType.RESOURCE, file));
         unprocessedFiles.add(4, new FileWithType(FileType.LIBRARY, "BuiltIn", file.getProject()));
 
-        Set<FileWithType> processedFiles = new HashSet<FileWithType>();
+        Set<FileWithType> allFiles = new HashSet<FileWithType>();
+        allFiles.addAll(unprocessedFiles);
         int currentPriorityLevel = 0;
         while (!unprocessedFiles.isEmpty()) {
             FileWithType currentFileWithType = unprocessedFiles.removeFirst();
-            processedFiles.add(currentFileWithType);
 
             VisitorInterest interest;
             switch (currentFileWithType.getType()) {
                 case RESOURCE:
-                    interest = acceptResourceFile(currentFileWithType, visitor, unprocessedFiles, processedFiles);
+                    interest = acceptResourceFile(currentFileWithType, visitor, unprocessedFiles, allFiles);
                     break;
                 case LIBRARY:
                 case VARIABLE:
@@ -96,7 +96,7 @@ public class DefinitionFinder {
         }
     }
 
-    private static VisitorInterest acceptResourceFile(FileWithType currentFileWithType, DefinitionMatchVisitor visitor, Collection<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles) {
+    private static VisitorInterest acceptResourceFile(FileWithType currentFileWithType, DefinitionMatchVisitor visitor, Collection<FileWithType> unprocessedFiles, Set<FileWithType> allFiles) {
         IFile currentFile = currentFileWithType.getFile();
         RobotFile currentRobotFile = RobotFile.get(currentFile, true);
         List<RobotLine> lines;
@@ -117,36 +117,36 @@ public class DefinitionFinder {
         if (interest != CONTINUE_TO_END_OF_CURRENT_FILE) {
             for (RobotLine line : lines) {
                 if (line.isResourceSetting()) {
-                    processLinkableFile(unprocessedFiles, processedFiles, currentFile, line, FileType.RESOURCE);
+                    processLinkableFile(unprocessedFiles, allFiles, currentFile, line, FileType.RESOURCE);
                 } else if (line.isVariableSetting()) {
-                    processLinkableFile(unprocessedFiles, processedFiles, currentFile, line, FileType.VARIABLE);
+                    processLinkableFile(unprocessedFiles, allFiles, currentFile, line, FileType.VARIABLE);
                 } else if (line.isLibrarySetting()) {
-                    processUnlinkableFile(unprocessedFiles, processedFiles, line, FileType.LIBRARY, currentFileWithType.getProject());
+                    processUnlinkableFile(unprocessedFiles, allFiles, line, FileType.LIBRARY, currentFileWithType.getProject());
                 }
             }
         }
         return interest;
     }
 
-    private static void processLinkableFile(Collection<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, IFile currentFile, RobotLine line, FileType type) {
+    private static void processLinkableFile(Collection<FileWithType> unprocessedFiles, Set<FileWithType> allFiles, IFile currentFile, RobotLine line, FileType type) {
         ParsedString secondArgument = line.arguments.get(1);
         IFile resourceFile = ResourceManagerProvider.get().getRelativeFile(currentFile, secondArgument.getUnescapedValue());
         FileWithType fileWithType = new FileWithType(type, resourceFile);
         if (resourceFile.exists()) {
-            addIfNew(unprocessedFiles, processedFiles, fileWithType);
+            addIfNew(unprocessedFiles, allFiles, fileWithType);
         }
     }
 
-    private static void processUnlinkableFile(Collection<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, RobotLine line, FileType type, IProject project) {
+    private static void processUnlinkableFile(Collection<FileWithType> unprocessedFiles, Set<FileWithType> allFiles, RobotLine line, FileType type, IProject project) {
         ParsedString secondArgument = line.arguments.get(1);
         FileWithType fileWithType = new FileWithType(type, secondArgument.getValue(), project);
         if (!secondArgument.isEmpty()) {
-            addIfNew(unprocessedFiles, processedFiles, fileWithType);
+            addIfNew(unprocessedFiles, allFiles, fileWithType);
         }
     }
 
-    private static void addIfNew(Collection<FileWithType> unprocessedFiles, Set<FileWithType> processedFiles, FileWithType fileWithType) {
-        if (!processedFiles.contains(fileWithType)) {
+    private static void addIfNew(Collection<FileWithType> unprocessedFiles, Set<FileWithType> allFiles, FileWithType fileWithType) {
+        if (allFiles.add(fileWithType)) {
             unprocessedFiles.add(fileWithType);
         }
     }
