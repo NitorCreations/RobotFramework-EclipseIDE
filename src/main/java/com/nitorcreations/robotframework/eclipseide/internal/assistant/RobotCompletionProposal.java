@@ -110,4 +110,10 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
     public void setPrefixRequired() {
         prefixRequired = true;
     }
+
+    @Override
+    public String toString() {
+        return "RobotCompletionProposal [displayString=" + displayString + ", prefixRequired=" + prefixRequired + ", additionalProposalInfo=" + additionalProposalInfo + ", informationDisplayString=" + informationDisplayString + ", matchArgument=" + matchArgument + ", matchLocation=" + matchLocation + ", replacementRegion=" + replacementRegion + ", image=" + image + "]\n";
+    }
+
 }
