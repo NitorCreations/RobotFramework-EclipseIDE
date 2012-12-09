@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
@@ -99,5 +100,10 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
     @Override
     public LineType getWantedLineType() {
         return LineType.KEYWORD_TABLE_KEYWORD_BEGIN;
+    }
+
+    @Override
+    public boolean visitImport(IFile sourceFile, RobotLine line) {
+        return true;
     }
 }

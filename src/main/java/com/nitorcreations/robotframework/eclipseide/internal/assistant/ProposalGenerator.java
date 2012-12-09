@@ -34,9 +34,9 @@ public class ProposalGenerator implements IProposalGenerator {
     }
 
     @Override
-    public void addVariableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposal> proposals, boolean allowOnlyLocalVariables) {
+    public void addVariableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposal> proposals, int maxVariableCharPos, int maxSettingCharPos) {
         IRegion replacementRegion = VariableReplacementRegionCalculator.calculate(argument, documentOffset);
-        VariableCompletionMatchVisitorProvider visitorProvider = new VariableCompletionMatchVisitorProvider(file, replacementRegion, allowOnlyLocalVariables);
+        VariableCompletionMatchVisitorProvider visitorProvider = new VariableCompletionMatchVisitorProvider(file, replacementRegion, maxVariableCharPos, maxSettingCharPos);
         List<RobotCompletionProposal> variableProposals = computeCompletionProposals(file, documentOffset, argument, visitorProvider);
         if (replacementRegion.getLength() > 0) {
             // the cursor is positioned for replacing a variable, so put the variable proposals first

@@ -82,6 +82,11 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
         public LineType getWantedLineType() {
             return LineType.KEYWORD_TABLE_KEYWORD_BEGIN;
         }
+
+        @Override
+        public boolean visitImport(IFile sourceFile, RobotLine line) {
+            return true;
+        }
     }
 
     @Override

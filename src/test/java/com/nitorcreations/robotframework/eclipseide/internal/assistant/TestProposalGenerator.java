@@ -50,6 +50,7 @@ public class TestProposalGenerator {
     public abstract static class Base {
         static final String BUILTIN_KEYWORD = "BuiltIn Keyword";
         static final String BUILTIN_VARIABLE = "${BUILTIN_VARIABLE}";
+        static final String BUILTIN_PREFIX = "[BuiltIn] ";
         static final String BUILTIN_INDEX_FILE = "BuiltIn.index";
 
         final ProposalGenerator proposalGenerator = new ProposalGenerator();
@@ -96,37 +97,39 @@ public class TestProposalGenerator {
     }
 
     public static class Keywords extends Base {
+        static final String LINKED_PREFIX = "[linked] ";
+        static final String LINKED_FILENAME = "linked.txt";
+        static final String LINKED_KEYWORD = "Say Hello";
+
         @Test
         public void should_propose_keyword_from_included_resource_file() throws Exception {
             List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
-            final String linkedFileName = "linked.txt";
-            IFile origFile = addFile("orig.txt", "*Settings\nResource  " + linkedFileName + "\n");
-            IFile linkedFile = addFile(linkedFileName, "*Keywords\nSay Hello\n");
-            when(resourceManager.getRelativeFile(origFile, linkedFileName)).thenReturn(linkedFile);
+            IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\n");
+            IFile linkedFile = addFile(LINKED_FILENAME, "*Keywords\n" + LINKED_KEYWORD + "\n");
+            when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
 
             ParsedString argument = new ParsedString("", 0);
             proposalGenerator.addKeywordProposals(origFile, argument, 0, proposals);
 
             assertEquals("Got wrong amount of proposals: " + proposals, 2, proposals.size());
-            verifyProposal(proposals, 0, "[linked] Say Hello", "Say Hello");
-            verifyProposal(proposals, 1, "[BuiltIn] " + BUILTIN_KEYWORD, BUILTIN_KEYWORD);
+            verifyProposal(proposals, 0, LINKED_PREFIX + LINKED_KEYWORD, LINKED_KEYWORD);
+            verifyProposal(proposals, 1, BUILTIN_PREFIX + BUILTIN_KEYWORD, BUILTIN_KEYWORD);
         }
 
         @Test
         // #35
         public void should_propose_keyword_only_once_from_resource_file_included_twice() throws Exception {
             List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
-            final String linkedFileName = "linked.txt";
-            IFile origFile = addFile("orig.txt", "*Settings\nResource  " + linkedFileName + "\nResource  " + linkedFileName + "\n");
-            IFile linkedFile = addFile(linkedFileName, "*Keywords\nSay Hello\n");
-            when(resourceManager.getRelativeFile(origFile, linkedFileName)).thenReturn(linkedFile);
+            IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\nResource  " + LINKED_FILENAME + "\n");
+            IFile linkedFile = addFile(LINKED_FILENAME, "*Keywords\n" + LINKED_KEYWORD + "\n");
+            when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
 
             ParsedString argument = new ParsedString("", 0);
             proposalGenerator.addKeywordProposals(origFile, argument, 0, proposals);
 
             assertEquals("Got wrong amount of proposals: " + proposals, 2, proposals.size());
-            verifyProposal(proposals, 0, "[linked] Say Hello", "Say Hello");
-            verifyProposal(proposals, 1, "[BuiltIn] " + BUILTIN_KEYWORD, BUILTIN_KEYWORD);
+            verifyProposal(proposals, 0, LINKED_PREFIX + LINKED_KEYWORD, LINKED_KEYWORD);
+            verifyProposal(proposals, 1, BUILTIN_PREFIX + BUILTIN_KEYWORD, BUILTIN_KEYWORD);
         }
     }
 
@@ -134,56 +137,130 @@ public class TestProposalGenerator {
     public static class Variables {
 
         public static class when_all extends Base {
+            static final String LINKED_PREFIX = "[linked] ";
+            static final String LINKED_FILENAME = "linked.txt";
+            static final String FOO_VARIABLE = "${FOO}";
+            static final String LINKED_VARIABLE = "${LINKEDVAR}";
+
             @Test
             public void should_propose_all_variables() throws Exception {
                 List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
-                final String linkedFileName = "linked.txt";
-                IFile origFile = addFile("orig.txt", "*Settings\nResource  " + linkedFileName + "\nResource  " + linkedFileName + "\n*Variables\n${FOO}  bar\n");
-                IFile linkedFile = addFile(linkedFileName, "*Variables\n${LINKEDVAR}  value\n");
-                when(resourceManager.getRelativeFile(origFile, linkedFileName)).thenReturn(linkedFile);
+                IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\n*Variables\n" + FOO_VARIABLE + "  bar\n");
+                IFile linkedFile = addFile(LINKED_FILENAME, "*Variables\n" + LINKED_VARIABLE + "  value\n");
+                when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
 
                 ParsedString argument = new ParsedString("", 0);
-                proposalGenerator.addVariableProposals(origFile, argument, 0, proposals, false);
+                proposalGenerator.addVariableProposals(origFile, argument, 0, proposals, Integer.MAX_VALUE, Integer.MAX_VALUE);
 
                 assertEquals("Got wrong amount of proposals: " + proposals, 3, proposals.size());
-                verifyProposal(proposals, 0, "[BuiltIn] " + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
-                verifyProposal(proposals, 1, "${FOO}", "${FOO}");
-                verifyProposal(proposals, 2, "[linked] ${LINKEDVAR}", "${LINKEDVAR}");
+                verifyProposal(proposals, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
+                verifyProposal(proposals, 1, FOO_VARIABLE, FOO_VARIABLE);
+                verifyProposal(proposals, 2, LINKED_PREFIX + LINKED_VARIABLE, LINKED_VARIABLE);
             }
 
+            @Test
+            // #35
+            public void should_propose_variable_only_once_from_resource_file_included_twice() throws Exception {
+                List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+                IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\nResource  " + LINKED_FILENAME + "\n*Variables\n" + FOO_VARIABLE + "  bar\n");
+                IFile linkedFile = addFile(LINKED_FILENAME, "*Variables\n" + LINKED_VARIABLE + "  value\n");
+                when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
+
+                ParsedString argument = new ParsedString("", 0);
+                proposalGenerator.addVariableProposals(origFile, argument, 0, proposals, Integer.MAX_VALUE, Integer.MAX_VALUE);
+
+                assertEquals("Got wrong amount of proposals: " + proposals, 3, proposals.size());
+                verifyProposal(proposals, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
+                verifyProposal(proposals, 1, FOO_VARIABLE, FOO_VARIABLE);
+                verifyProposal(proposals, 2, LINKED_PREFIX + LINKED_VARIABLE, LINKED_VARIABLE);
+                // ${LINKEDVAR} not included twice
+            }
         }
 
         // #23
         public static class when_only_local extends Base {
+            static final String LINKED_FILENAME = "linked.txt";
+            static final String FOO_VARIABLE = "${FOO}";
+
             @Test
             public void should_only_propose_BuiltIn_and_local_variables() throws Exception {
                 List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
-                final String linkedFileName = "linked.txt";
-                IFile origFile = addFile("orig.txt", "*Settings\nResource  " + linkedFileName + "\nResource  " + linkedFileName + "\n*Variables\n${FOO}  bar\n");
-                IFile linkedFile = addFile(linkedFileName, "*Variables\n${LINKEDVAR}  value\n");
-                when(resourceManager.getRelativeFile(origFile, linkedFileName)).thenReturn(linkedFile);
+                IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\n*Variables\n" + FOO_VARIABLE + "  bar\n");
+                IFile linkedFile = addFile(LINKED_FILENAME, "*Variables\n${LINKEDVAR}  value\n");
+                when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
 
                 ParsedString argument = new ParsedString("", 0);
-                proposalGenerator.addVariableProposals(origFile, argument, 0, proposals, true);
+                proposalGenerator.addVariableProposals(origFile, argument, 0, proposals, Integer.MAX_VALUE, -1);
 
                 assertEquals("Got wrong amount of proposals: " + proposals, 2, proposals.size());
-                verifyProposal(proposals, 0, "[BuiltIn] " + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
-                verifyProposal(proposals, 1, "${FOO}", "${FOO}");
+                verifyProposal(proposals, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
+                verifyProposal(proposals, 1, FOO_VARIABLE, FOO_VARIABLE);
+                // ${LINKEDVAR} excluded
             }
 
             @Test
             public void should_only_propose_BuiltIn_variables_when_no_local_variables_present() throws Exception {
                 List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
-                final String linkedFileName = "linked.txt";
-                IFile origFile = addFile("orig.txt", "*Settings\nResource  " + linkedFileName + "\nResource  " + linkedFileName);
-                IFile linkedFile = addFile(linkedFileName, "*Variables\n${LINKEDVAR}  value\n");
-                when(resourceManager.getRelativeFile(origFile, linkedFileName)).thenReturn(linkedFile);
+                IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\nResource  " + LINKED_FILENAME);
+                IFile linkedFile = addFile(LINKED_FILENAME, "*Variables\n${LINKEDVAR}  value\n");
+                when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
 
                 ParsedString argument = new ParsedString("", 0);
-                proposalGenerator.addVariableProposals(origFile, argument, 0, proposals, true);
+                proposalGenerator.addVariableProposals(origFile, argument, 0, proposals, Integer.MAX_VALUE, -1);
 
                 assertEquals("Got wrong amount of proposals: " + proposals, 1, proposals.size());
-                verifyProposal(proposals, 0, "[BuiltIn] " + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
+                verifyProposal(proposals, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
+                // ${LINKEDVAR} excluded
+            }
+
+            @Test
+            public void should_propose_subset_when_maxVariableCharPos_set() throws Exception {
+                List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+                String origContents1 = "*Settings\nResource  " + LINKED_FILENAME + "\n*Variables\n" + FOO_VARIABLE + "  bar\n";
+                String origContents2 = "${BAR}  bar\n${ZOT}  zot\n";
+                IFile origFile = addFile("orig.txt", origContents1 + origContents2);
+                IFile linkedFile = addFile(LINKED_FILENAME, "*Variables\n${LINKEDVAR}  value\n");
+                when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
+
+                ParsedString argument = new ParsedString("", 0);
+                proposalGenerator.addVariableProposals(origFile, argument, 0, proposals, origContents1.length() - 1, -1);
+
+                assertEquals("Got wrong amount of proposals: " + proposals, 2, proposals.size());
+                verifyProposal(proposals, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
+                verifyProposal(proposals, 1, FOO_VARIABLE, FOO_VARIABLE);
+                // ${BAR} and ${LINKEDVAR} excluded
+            }
+
+        }
+
+        // #23
+        public static class when_partially_imported extends Base {
+            static final String LINKED_PREFIX_1 = "[linked1] ";
+            static final String LINKED_FILENAME_1 = "linked1.txt";
+            static final String LINKED_FILENAME_2 = "linked2.txt";
+            static final String FOO_VARIABLE = "${FOO}";
+            static final String LINKED_VARIABLE_1 = "${LINKEDVAR1}";
+            static final String LINKED_VARIABLE_2 = "${LINKEDVAR2}";
+
+            @Test
+            public void should_propose_subset_when_maxSettingsCharPos_set() throws Exception {
+                List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+                String origContents1 = "*Settings\nResource  " + LINKED_FILENAME_1 + "\n";
+                String origContents2 = "Resource  " + LINKED_FILENAME_2 + "\n*Variables\n" + FOO_VARIABLE + "  bar\n";
+                IFile origFile = addFile("orig.txt", origContents1 + origContents2);
+                IFile linkedFile1 = addFile(LINKED_FILENAME_1, "*Variables\n" + LINKED_VARIABLE_1 + "  value\n");
+                IFile linkedFile2 = addFile(LINKED_FILENAME_2, "*Variables\n" + LINKED_VARIABLE_2 + "  value\n");
+                when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME_1)).thenReturn(linkedFile1);
+                when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME_2)).thenReturn(linkedFile2);
+
+                ParsedString argument = new ParsedString("", 0);
+                proposalGenerator.addVariableProposals(origFile, argument, 0, proposals, Integer.MAX_VALUE, origContents1.length() - 1);
+
+                assertEquals("Got wrong amount of proposals: " + proposals, 3, proposals.size());
+                verifyProposal(proposals, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
+                verifyProposal(proposals, 1, FOO_VARIABLE, FOO_VARIABLE);
+                verifyProposal(proposals, 2, LINKED_PREFIX_1 + LINKED_VARIABLE_1, LINKED_VARIABLE_1);
+                // ${LINKED_VARIABLE_2} excluded
             }
         }
     }

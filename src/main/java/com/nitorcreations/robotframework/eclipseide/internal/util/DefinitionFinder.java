@@ -117,11 +117,17 @@ public class DefinitionFinder {
         if (interest != CONTINUE_TO_END_OF_CURRENT_FILE) {
             for (RobotLine line : lines) {
                 if (line.isResourceSetting()) {
-                    processLinkableFile(unprocessedFiles, allFiles, currentFile, line, FileType.RESOURCE);
+                    if (visitor.visitImport(currentFile, line)) {
+                        processLinkableFile(unprocessedFiles, allFiles, currentFile, line, FileType.RESOURCE);
+                    }
                 } else if (line.isVariableSetting()) {
-                    processLinkableFile(unprocessedFiles, allFiles, currentFile, line, FileType.VARIABLE);
+                    if (visitor.visitImport(currentFile, line)) {
+                        processLinkableFile(unprocessedFiles, allFiles, currentFile, line, FileType.VARIABLE);
+                    }
                 } else if (line.isLibrarySetting()) {
-                    processUnlinkableFile(unprocessedFiles, allFiles, line, FileType.LIBRARY, currentFileWithType.getProject());
+                    if (visitor.visitImport(currentFile, line)) {
+                        processUnlinkableFile(unprocessedFiles, allFiles, line, FileType.LIBRARY, currentFileWithType.getProject());
+                    }
                 }
             }
         }
