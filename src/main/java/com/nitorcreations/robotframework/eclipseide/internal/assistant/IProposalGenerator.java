@@ -23,7 +23,7 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public interface IProposalGenerator {
 
-    void addVariableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposal> proposals);
+    void addVariableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposal> proposals, boolean allowOnlyLocalVariables);
 
     void addKeywordProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposal> proposals);
 

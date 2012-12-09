@@ -26,18 +26,42 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
 
-    public VariableCompletionMatchVisitor(IFile file, ParsedString userInput, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
+    private final boolean allowOnlyLocalVariables;
+
+    public VariableCompletionMatchVisitor(IFile file, ParsedString userInput, List<RobotCompletionProposal> proposals, IRegion replacementRegion, boolean allowOnlyLocalVariables) {
         super(file, userInput, proposals, replacementRegion);
+        this.allowOnlyLocalVariables = allowOnlyLocalVariables;
     }
 
     @Override
     public VisitorInterest visitMatch(ParsedString proposal, FileWithType proposalLocation) {
+        VisitorInterest ret;
+        if (allowOnlyLocalVariables) {
+            switch (proposalLocation.getType()) {
+                case BUILTIN_VARIABLE:
+                    ret = VisitorInterest.CONTINUE;
+                    break;
+                case RESOURCE:
+                    if (proposalLocation.getFile() != file) {
+                        // past original file, stop
+                        return VisitorInterest.STOP;
+                    }
+                    ret = VisitorInterest.CONTINUE_TO_END_OF_CURRENT_FILE;
+                    break;
+                default:
+                    // past original file, stop
+                    return VisitorInterest.STOP;
+            }
+        } else {
+            ret = VisitorInterest.CONTINUE;
+        }
+
         if (userInput == null || proposal.getUnescapedValue().toLowerCase().contains(userInput.getUnescapedValue().toLowerCase())) {
             if (!addedProposals.contains(proposal.getValue().toLowerCase())) {
                 addProposal(proposal, proposalLocation);
             }
         }
-        return VisitorInterest.CONTINUE;
+        return ret;
     }
 
     @Override
