@@ -70,7 +70,8 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
         boolean allowKeywords = false;
         boolean allowVariables = false;
-        boolean allowOnlyLocalVariables = false;
+        int maxVariableCharPos = Integer.MAX_VALUE;
+        int maxSettingCharPos = Integer.MAX_VALUE;
         switch (argument.getType()) {
             case KEYWORD_CALL:
                 allowKeywords = true;
@@ -86,19 +87,21 @@ public class RobotContentAssistant implements IContentAssistProcessor {
             case SETTING_VAL:
             case SETTING_FILE:
                 allowVariables = true;
-                // TODO should we have: allowOnlyLocalVariables = true; or some hybrid where only preceding resource
-                // files' variables are imported?
+                // limit visible imported variables to those loaded before current line
+                maxSettingCharPos = robotLine.lineCharPos - 1;
                 break;
             case VARIABLE_VAL:
                 allowVariables = true;
-                allowOnlyLocalVariables = true;
+                // limit visible local variables to those declared before current line
+                maxVariableCharPos = robotLine.lineCharPos - 1;
+                maxSettingCharPos = -1;
                 break;
         }
         if (allowKeywords) {
             proposalGenerator.addKeywordProposals(file, argument, documentOffset, proposals);
         }
         if (allowVariables) {
-            proposalGenerator.addVariableProposals(file, argument, documentOffset, proposals, allowOnlyLocalVariables);
+            proposalGenerator.addVariableProposals(file, argument, documentOffset, proposals, maxVariableCharPos, maxSettingCharPos);
         }
         if (proposals.isEmpty()) {
             return null;

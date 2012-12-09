@@ -69,6 +69,11 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
         public LineType getWantedLineType() {
             return LineType.VARIABLE_TABLE_LINE;
         }
+
+        @Override
+        public boolean visitImport(IFile sourceFile, RobotLine line) {
+            return true;
+        }
     }
 
     @Override

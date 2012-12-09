@@ -24,15 +24,17 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class VariableCompletionMatchVisitorProvider extends CompletionMatchVisitorProvider {
 
-    private final boolean allowOnlyLocalVariables;
+    private final int maxVariableCharPos;
+    private final int maxSettingCharPos;
 
-    public VariableCompletionMatchVisitorProvider(IFile file, IRegion replacementRegion, boolean allowOnlyLocalVariables) {
+    public VariableCompletionMatchVisitorProvider(IFile file, IRegion replacementRegion, int maxVariableCharPos, int maxSettingCharPos) {
         super(file, replacementRegion);
-        this.allowOnlyLocalVariables = allowOnlyLocalVariables;
+        this.maxVariableCharPos = maxVariableCharPos;
+        this.maxSettingCharPos = maxSettingCharPos;
     }
 
     @Override
     public CompletionMatchVisitor get(ParsedString argument, List<RobotCompletionProposal> proposals) {
-        return new VariableCompletionMatchVisitor(file, argument, proposals, replacementRegion, allowOnlyLocalVariables);
+        return new VariableCompletionMatchVisitor(file, argument, proposals, replacementRegion, maxVariableCharPos, maxSettingCharPos);
     }
 }

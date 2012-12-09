@@ -60,6 +60,6 @@ public class TestVariableCompletionMatchVisitor {
     }
 
     private VariableCompletionMatchVisitor getVisitor(List<RobotCompletionProposal> proposals, ParsedString userInput) {
-        return new VariableCompletionMatchVisitor(null, userInput, proposals, new Region(0, 0), false);
+        return new VariableCompletionMatchVisitor(null, userInput, proposals, new Region(0, 0), Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 }

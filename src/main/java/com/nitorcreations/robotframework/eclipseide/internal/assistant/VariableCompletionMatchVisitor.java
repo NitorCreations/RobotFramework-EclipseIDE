@@ -21,39 +21,25 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
 
-    private final boolean allowOnlyLocalVariables;
+    private final int maxVariableCharPos;
+    private final int maxSettingCharPos;
 
-    public VariableCompletionMatchVisitor(IFile file, ParsedString userInput, List<RobotCompletionProposal> proposals, IRegion replacementRegion, boolean allowOnlyLocalVariables) {
+    public VariableCompletionMatchVisitor(IFile file, ParsedString userInput, List<RobotCompletionProposal> proposals, IRegion replacementRegion, int maxVariableCharPos, int maxSettingCharPos) {
         super(file, userInput, proposals, replacementRegion);
-        this.allowOnlyLocalVariables = allowOnlyLocalVariables;
+        this.maxVariableCharPos = maxVariableCharPos;
+        this.maxSettingCharPos = maxSettingCharPos;
     }
 
     @Override
     public VisitorInterest visitMatch(ParsedString proposal, FileWithType proposalLocation) {
-        VisitorInterest ret;
-        if (allowOnlyLocalVariables) {
-            switch (proposalLocation.getType()) {
-                case BUILTIN_VARIABLE:
-                    ret = VisitorInterest.CONTINUE;
-                    break;
-                case RESOURCE:
-                    if (proposalLocation.getFile() != file) {
-                        // past original file, stop
-                        return VisitorInterest.STOP;
-                    }
-                    ret = VisitorInterest.CONTINUE_TO_END_OF_CURRENT_FILE;
-                    break;
-                default:
-                    // past original file, stop
-                    return VisitorInterest.STOP;
-            }
-        } else {
-            ret = VisitorInterest.CONTINUE;
+        if (proposal.getArgCharPos() > maxVariableCharPos) {
+            return VisitorInterest.STOP;
         }
 
         if (userInput == null || proposal.getUnescapedValue().toLowerCase().contains(userInput.getUnescapedValue().toLowerCase())) {
@@ -61,11 +47,17 @@ public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
                 addProposal(proposal, proposalLocation);
             }
         }
-        return ret;
+
+        return VisitorInterest.CONTINUE;
     }
 
     @Override
     public LineType getWantedLineType() {
         return LineType.VARIABLE_TABLE_LINE;
+    }
+
+    @Override
+    public boolean visitImport(IFile sourceFile, RobotLine line) {
+        return line.lineCharPos <= maxSettingCharPos;
     }
 }
