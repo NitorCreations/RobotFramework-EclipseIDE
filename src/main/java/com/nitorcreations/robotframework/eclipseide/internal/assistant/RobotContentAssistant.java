@@ -28,6 +28,7 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
+import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.ResourceManagerProvider;
@@ -60,6 +61,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
             robotLine = lines.get(lineNo);
         } else {
             robotLine = new RobotLine(lineNo, documentOffset, Collections.<ParsedString> emptyList());
+            robotLine.type = determineLineTypeForLine(lines, lines.size() - 1);
         }
         ParsedString argument = robotLine.getArgumentAt(documentOffset);
         if (argument == null) {
@@ -68,45 +70,81 @@ public class RobotContentAssistant implements IContentAssistProcessor {
 
         IFile file = ResourceManagerProvider.get().resolveFileFor(document);
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
-        boolean allowKeywords = false;
-        boolean allowVariables = false;
-        int maxVariableCharPos = Integer.MAX_VALUE;
-        int maxSettingCharPos = Integer.MAX_VALUE;
-        switch (argument.getType()) {
-            case KEYWORD_CALL:
-                allowKeywords = true;
-                break;
-            case KEYWORD_CALL_DYNAMIC:
-                allowKeywords = true;
-                allowVariables = true;
-                break;
-            case KEYWORD_ARG:
-                allowVariables = true;
-                break;
-            case SETTING_FILE_ARG:
-            case SETTING_VAL:
-            case SETTING_FILE:
-                allowVariables = true;
-                // limit visible imported variables to those loaded before current line
-                maxSettingCharPos = robotLine.lineCharPos - 1;
-                break;
-            case VARIABLE_VAL:
-                allowVariables = true;
-                // limit visible local variables to those declared before current line
-                maxVariableCharPos = robotLine.lineCharPos - 1;
-                maxSettingCharPos = -1;
-                break;
-        }
-        if (allowKeywords) {
-            proposalGenerator.addKeywordProposals(file, argument, documentOffset, proposals);
-        }
-        if (allowVariables) {
-            proposalGenerator.addVariableProposals(file, argument, documentOffset, proposals, maxVariableCharPos, maxSettingCharPos);
+        if (argument.getArgCharPos() <= robotLine.lineCharPos + 1) {
+            if (!argument.getValue().startsWith("*")) {
+                switch (determineLineTypeForLine(lines, lineNo)) {
+                    case SETTING_TABLE_LINE:
+                        proposalGenerator.addSettingTableProposals(file, argument, documentOffset, proposals);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            proposalGenerator.addTableProposals(file, argument, documentOffset, proposals);
+            // TODO we should only include either of setting/table proposals if either has exactly one match perhaps?
+        } else {
+            boolean allowKeywords = false;
+            boolean allowVariables = false;
+            int maxVariableCharPos = Integer.MAX_VALUE;
+            int maxSettingCharPos = Integer.MAX_VALUE;
+            switch (argument.getType()) {
+                case KEYWORD_CALL:
+                    allowKeywords = true;
+                    break;
+                case KEYWORD_CALL_DYNAMIC:
+                    allowKeywords = true;
+                    allowVariables = true;
+                    break;
+                case KEYWORD_ARG:
+                    allowVariables = true;
+                    break;
+                case SETTING_FILE_ARG:
+                case SETTING_VAL:
+                case SETTING_FILE:
+                    allowVariables = true;
+                    // limit visible imported variables to those loaded before current line
+                    maxSettingCharPos = robotLine.lineCharPos - 1;
+                    break;
+                case VARIABLE_VAL:
+                    allowVariables = true;
+                    // limit visible local variables to those declared before current line
+                    maxVariableCharPos = robotLine.lineCharPos - 1;
+                    maxSettingCharPos = -1;
+                    break;
+            }
+            if (allowKeywords) {
+                proposalGenerator.addKeywordProposals(file, argument, documentOffset, proposals);
+            }
+            if (allowVariables) {
+                proposalGenerator.addVariableProposals(file, argument, documentOffset, proposals, maxVariableCharPos, maxSettingCharPos);
+            }
         }
         if (proposals.isEmpty()) {
             return null;
         }
         return proposals.toArray(new ICompletionProposal[proposals.size()]);
+    }
+
+    private LineType determineLineTypeForLine(List<RobotLine> lines, int lineNo) {
+        if (lineNo >= lines.size()) {
+            lineNo = lines.size() - 1;
+        }
+
+        for (int i = lineNo; i >= 0; --i) {
+            switch (lines.get(i).type.tableType) {
+                case SETTING:
+                    return LineType.SETTING_TABLE_LINE;
+                case VARIABLE:
+                    return LineType.VARIABLE_TABLE_LINE;
+                case TESTCASE:
+                    return LineType.TESTCASE_TABLE_IGNORE;
+                case KEYWORD:
+                    return LineType.KEYWORD_TABLE_IGNORE;
+                case IGNORE:
+                    return LineType.IGNORE;
+            }
+        }
+        return LineType.IGNORE;
     }
 
     /**

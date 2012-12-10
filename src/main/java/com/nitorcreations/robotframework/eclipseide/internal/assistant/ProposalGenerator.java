@@ -16,16 +16,121 @@
 package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+import org.eclipse.swt.graphics.Image;
 
+import com.nitorcreations.robotframework.eclipseide.builder.parser.ArgumentPreParser;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.util.ParserUtil;
 import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionFinder;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
+import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 public class ProposalGenerator implements IProposalGenerator {
+
+    private static final Map<String, String> tableNameToFull = new LinkedHashMap<String, String>();
+
+    static {
+        tableNameToFull.put("variables", "* Variables");
+        tableNameToFull.put("settings", "* Settings");
+        tableNameToFull.put("metadata", "* Settings");
+        tableNameToFull.put("testcases", "* Test Cases");
+        tableNameToFull.put("keywords", "* Keywords");
+        tableNameToFull.put("userkeywords", "* Keywords");
+    }
+
+    @Override
+    public void addTableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposal> proposals) {
+        String argumentValue = argument.getValue();
+        IRegion replacementRegion = new Region(argument.getArgCharPos(), argumentValue.length());
+
+        List<String> attempts = new ArrayList<String>(3);
+        attempts.add(argumentValue);
+        int argumentOffset = documentOffset - argument.getArgCharPos();
+        if (argumentValue.length() > argumentOffset) {
+            attempts.add(argumentValue.substring(0, argumentOffset));
+        }
+        attempts.add("");
+
+        Map<String, RobotCompletionProposal> ourProposals = new LinkedHashMap<String, RobotCompletionProposal>();
+        for (String attempt : attempts) {
+            String tableArgument = ParserUtil.parseTable(attempt);
+            for (Entry<String, String> e : tableNameToFull.entrySet()) {
+                if (e.getKey().startsWith(tableArgument)) {
+                    ParsedString proposal = new ParsedString(e.getValue(), 0);
+                    proposal.setType(ArgumentType.TABLE);
+
+                    Image image = null;
+                    String displayString = e.getValue();
+                    String additionalProposalInfo = null;
+                    String informationDisplayString = null;
+                    RobotCompletionProposal rcp = new RobotCompletionProposal(proposal, null, replacementRegion, image, displayString, informationDisplayString, additionalProposalInfo);
+                    rcp.setCursorPositionAdjustment(1);
+                    ourProposals.put(e.getValue(), rcp);
+                }
+            }
+            if (ourProposals.size() == 1 && ourProposals.values().iterator().next().getMatchArgument().getValue().equals(argumentValue)) {
+                // Found a single exact hit - probably means it was content-assisted earlier and the user now wants to
+                // change it to something else
+                ourProposals.clear();
+                continue;
+            }
+            if (!ourProposals.isEmpty()) {
+                break;
+            }
+        }
+        proposals.addAll(ourProposals.values());
+    }
+
+    @Override
+    public void addSettingTableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposal> proposals) {
+        String argumentValue = argument.getValue();
+        IRegion replacementRegion = new Region(argument.getArgCharPos(), argumentValue.length());
+
+        List<String> attempts = new ArrayList<String>(3);
+        attempts.add(argumentValue.toLowerCase());
+        int argumentOffset = documentOffset - argument.getArgCharPos();
+        if (argumentValue.length() > argumentOffset) {
+            attempts.add(argumentValue.substring(0, argumentOffset));
+        }
+        attempts.add("");
+
+        List<String> settingKeys = new ArrayList<String>(ArgumentPreParser.getSettingKeys());
+        Collections.sort(settingKeys);
+        List<RobotCompletionProposal> ourProposals = new ArrayList<RobotCompletionProposal>();
+        for (String attempt : attempts) {
+            for (String key : settingKeys) {
+                if (key.toLowerCase().startsWith(attempt)) {
+                    ParsedString proposal = new ParsedString(key, 0);
+                    proposal.setType(ArgumentType.SETTING_KEY);
+
+                    Image image = null;
+                    String displayString = key;
+                    String additionalProposalInfo = null;
+                    String informationDisplayString = null;
+                    ourProposals.add(new RobotCompletionProposal(proposal, null, replacementRegion, image, displayString, informationDisplayString, additionalProposalInfo));
+                }
+            }
+            if (ourProposals.size() == 1 && ourProposals.get(0).getMatchArgument().getValue().equals(argumentValue)) {
+                // Found a single exact hit - probably means it was content-assisted earlier and the user now wants to
+                // change it to something else
+                ourProposals.clear();
+                continue;
+            }
+            if (!ourProposals.isEmpty()) {
+                break;
+            }
+        }
+        proposals.addAll(ourProposals);
+    }
+
     @Override
     public void addKeywordProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposal> proposals) {
         IRegion replacementRegion = new Region(argument.getArgCharPos(), argument.getValue().length());

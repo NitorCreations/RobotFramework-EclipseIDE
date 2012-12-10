@@ -16,20 +16,26 @@
 package com.nitorcreations.robotframework.eclipseide.builder.parser;
 
 public enum LineType {
-    IGNORE, //
-    IGNORE_TABLE, //
-    SETTING_TABLE_BEGIN, //
-    SETTING_TABLE_LINE, //
-    VARIABLE_TABLE_BEGIN, //
-    VARIABLE_TABLE_LINE, //
-    TESTCASE_TABLE_BEGIN, //
-    TESTCASE_TABLE_IGNORE, //
-    TESTCASE_TABLE_TESTCASE_BEGIN, //
-    TESTCASE_TABLE_TESTCASE_LINE, //
-    KEYWORD_TABLE_BEGIN, //
-    KEYWORD_TABLE_IGNORE, //
-    KEYWORD_TABLE_KEYWORD_BEGIN, //
-    KEYWORD_TABLE_KEYWORD_LINE, //
-    CONTINUATION_LINE, //
-    COMMENT_LINE,
+    IGNORE(TableType.UNKNOWN), //
+    IGNORE_TABLE(TableType.IGNORE), //
+    SETTING_TABLE_BEGIN(TableType.SETTING), //
+    SETTING_TABLE_LINE(TableType.SETTING), //
+    VARIABLE_TABLE_BEGIN(TableType.VARIABLE), //
+    VARIABLE_TABLE_LINE(TableType.VARIABLE), //
+    TESTCASE_TABLE_BEGIN(TableType.TESTCASE), //
+    TESTCASE_TABLE_IGNORE(TableType.TESTCASE), //
+    TESTCASE_TABLE_TESTCASE_BEGIN(TableType.TESTCASE), //
+    TESTCASE_TABLE_TESTCASE_LINE(TableType.TESTCASE), //
+    KEYWORD_TABLE_BEGIN(TableType.KEYWORD), //
+    KEYWORD_TABLE_IGNORE(TableType.KEYWORD), //
+    KEYWORD_TABLE_KEYWORD_BEGIN(TableType.KEYWORD), //
+    KEYWORD_TABLE_KEYWORD_LINE(TableType.KEYWORD), //
+    CONTINUATION_LINE(TableType.UNKNOWN), //
+    COMMENT_LINE(TableType.UNKNOWN), //
+    ;
+    public final TableType tableType;
+
+    LineType(TableType tableType) {
+        this.tableType = tableType;
+    }
 }
