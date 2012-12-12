@@ -109,7 +109,7 @@ public class TestProposalGenerator {
             when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
 
             ParsedString argument = new ParsedString("", 0);
-            proposalGenerator.addKeywordProposals(origFile, argument, 0, proposalSets);
+            proposalGenerator.addKeywordCallProposals(origFile, argument, 0, proposalSets);
 
             assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
             RobotCompletionProposalSet proposalSet = proposalSets.get(0);
@@ -128,7 +128,7 @@ public class TestProposalGenerator {
             when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
 
             ParsedString argument = new ParsedString("", 0);
-            proposalGenerator.addKeywordProposals(origFile, argument, 0, proposalSets);
+            proposalGenerator.addKeywordCallProposals(origFile, argument, 0, proposalSets);
 
             assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
             RobotCompletionProposalSet proposalSet = proposalSets.get(0);

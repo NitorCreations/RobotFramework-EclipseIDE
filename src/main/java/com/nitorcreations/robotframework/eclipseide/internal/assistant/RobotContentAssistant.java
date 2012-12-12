@@ -114,7 +114,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
                     break;
             }
             if (allowKeywords) {
-                proposalGenerator.addKeywordProposals(file, argument, documentOffset, proposalSets);
+                proposalGenerator.addKeywordCallProposals(file, argument, documentOffset, proposalSets);
             }
             if (allowVariables) {
                 proposalGenerator.addVariableProposals(file, argument, documentOffset, proposalSets, maxVariableCharPos, maxSettingCharPos);

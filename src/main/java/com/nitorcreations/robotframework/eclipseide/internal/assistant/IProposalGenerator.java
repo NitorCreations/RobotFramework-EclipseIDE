@@ -29,6 +29,6 @@ public interface IProposalGenerator {
 
     void addVariableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets, int maxVariableCharPos, int maxSettingCharPos);
 
-    void addKeywordProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets);
+    void addKeywordCallProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets);
 
 }

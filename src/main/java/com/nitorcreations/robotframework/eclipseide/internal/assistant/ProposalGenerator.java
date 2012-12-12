@@ -142,7 +142,7 @@ public class ProposalGenerator implements IProposalGenerator {
     }
 
     @Override
-    public void addKeywordProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets) {
+    public void addKeywordCallProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets) {
         IRegion replacementRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
         KeywordCompletionMatchVisitorProvider visitorProvider = new KeywordCompletionMatchVisitorProvider(file, replacementRegion);
         proposalSets.add(computeCompletionProposals(file, documentOffset, argument, visitorProvider));
