@@ -15,23 +15,28 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.util;
 
+import java.util.Set;
+
 import org.eclipse.core.resources.IFile;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
-public interface DefinitionMatchVisitor {
+public interface LineMatchVisitor {
 
     /**
-     * @param proposal
-     *            the proposal
-     * @param proposalLocation
-     *            where proposal is located - null if the proposal is located in a variable file or a library
+     * @param line
+     *            the line
+     * @param lineLocation
+     *            where line is located - null if the proposal is located in a variable file or a library
      */
-    VisitorInterest visitMatch(ParsedString proposal, FileWithType proposalLocation);
+    VisitorInterest visitMatch(RobotLine line, FileWithType lineLocation);
 
-    LineType getWantedLineType();
+    Set<LineType> getWantedLineTypes();
+
+    boolean wantsLibraryKeywords();
+
+    boolean wantsLibraryVariables();
 
     /**
      * @return true if {@link DefinitionFinder} should descend into the given import, false if not
