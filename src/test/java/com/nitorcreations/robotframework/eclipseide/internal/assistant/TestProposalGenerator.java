@@ -87,8 +87,8 @@ public class TestProposalGenerator {
             return file;
         }
 
-        protected void verifyProposal(List<RobotCompletionProposal> proposals, int index, String expectedDisplayString, String expectedCompletion) throws BadLocationException {
-            RobotCompletionProposal proposal = proposals.get(index);
+        protected void verifyProposal(RobotCompletionProposalSet proposalSet, int index, String expectedDisplayString, String expectedCompletion) throws BadLocationException {
+            RobotCompletionProposal proposal = proposalSet.getProposals().get(index);
             assertEquals(expectedDisplayString, proposal.getDisplayString());
             final IDocument document = mock(IDocument.class, "document");
             proposal.apply(document);
@@ -103,33 +103,39 @@ public class TestProposalGenerator {
 
         @Test
         public void should_propose_keyword_from_included_resource_file() throws Exception {
-            List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+            List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
             IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\n");
             IFile linkedFile = addFile(LINKED_FILENAME, "*Keywords\n" + LINKED_KEYWORD + "\n");
             when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
 
             ParsedString argument = new ParsedString("", 0);
-            proposalGenerator.addKeywordProposals(origFile, argument, 0, proposals);
+            proposalGenerator.addKeywordProposals(origFile, argument, 0, proposalSets);
 
-            assertEquals("Got wrong amount of proposals: " + proposals, 2, proposals.size());
-            verifyProposal(proposals, 0, LINKED_PREFIX + LINKED_KEYWORD, LINKED_KEYWORD);
-            verifyProposal(proposals, 1, BUILTIN_PREFIX + BUILTIN_KEYWORD, BUILTIN_KEYWORD);
+            assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
+            RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+            assertEquals(false, proposalSet.isBasedOnInput());
+            assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 2, proposalSet.getProposals().size());
+            verifyProposal(proposalSet, 0, LINKED_PREFIX + LINKED_KEYWORD, LINKED_KEYWORD);
+            verifyProposal(proposalSet, 1, BUILTIN_PREFIX + BUILTIN_KEYWORD, BUILTIN_KEYWORD);
         }
 
         @Test
         // #35
         public void should_propose_keyword_only_once_from_resource_file_included_twice() throws Exception {
-            List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+            List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
             IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\nResource  " + LINKED_FILENAME + "\n");
             IFile linkedFile = addFile(LINKED_FILENAME, "*Keywords\n" + LINKED_KEYWORD + "\n");
             when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
 
             ParsedString argument = new ParsedString("", 0);
-            proposalGenerator.addKeywordProposals(origFile, argument, 0, proposals);
+            proposalGenerator.addKeywordProposals(origFile, argument, 0, proposalSets);
 
-            assertEquals("Got wrong amount of proposals: " + proposals, 2, proposals.size());
-            verifyProposal(proposals, 0, LINKED_PREFIX + LINKED_KEYWORD, LINKED_KEYWORD);
-            verifyProposal(proposals, 1, BUILTIN_PREFIX + BUILTIN_KEYWORD, BUILTIN_KEYWORD);
+            assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
+            RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+            assertEquals(false, proposalSet.isBasedOnInput());
+            assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 2, proposalSet.getProposals().size());
+            verifyProposal(proposalSet, 0, LINKED_PREFIX + LINKED_KEYWORD, LINKED_KEYWORD);
+            verifyProposal(proposalSet, 1, BUILTIN_PREFIX + BUILTIN_KEYWORD, BUILTIN_KEYWORD);
         }
     }
 
@@ -144,35 +150,41 @@ public class TestProposalGenerator {
 
             @Test
             public void should_propose_all_variables() throws Exception {
-                List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+                List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
                 IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\n*Variables\n" + FOO_VARIABLE + "  bar\n");
                 IFile linkedFile = addFile(LINKED_FILENAME, "*Variables\n" + LINKED_VARIABLE + "  value\n");
                 when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
 
                 ParsedString argument = new ParsedString("", 0);
-                proposalGenerator.addVariableProposals(origFile, argument, 0, proposals, Integer.MAX_VALUE, Integer.MAX_VALUE);
+                proposalGenerator.addVariableProposals(origFile, argument, 0, proposalSets, Integer.MAX_VALUE, Integer.MAX_VALUE);
 
-                assertEquals("Got wrong amount of proposals: " + proposals, 3, proposals.size());
-                verifyProposal(proposals, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
-                verifyProposal(proposals, 1, FOO_VARIABLE, FOO_VARIABLE);
-                verifyProposal(proposals, 2, LINKED_PREFIX + LINKED_VARIABLE, LINKED_VARIABLE);
+                assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
+                RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+                assertEquals(false, proposalSet.isBasedOnInput());
+                assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 3, proposalSet.getProposals().size());
+                verifyProposal(proposalSet, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
+                verifyProposal(proposalSet, 1, FOO_VARIABLE, FOO_VARIABLE);
+                verifyProposal(proposalSet, 2, LINKED_PREFIX + LINKED_VARIABLE, LINKED_VARIABLE);
             }
 
             @Test
             // #35
             public void should_propose_variable_only_once_from_resource_file_included_twice() throws Exception {
-                List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+                List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
                 IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\nResource  " + LINKED_FILENAME + "\n*Variables\n" + FOO_VARIABLE + "  bar\n");
                 IFile linkedFile = addFile(LINKED_FILENAME, "*Variables\n" + LINKED_VARIABLE + "  value\n");
                 when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
 
                 ParsedString argument = new ParsedString("", 0);
-                proposalGenerator.addVariableProposals(origFile, argument, 0, proposals, Integer.MAX_VALUE, Integer.MAX_VALUE);
+                proposalGenerator.addVariableProposals(origFile, argument, 0, proposalSets, Integer.MAX_VALUE, Integer.MAX_VALUE);
 
-                assertEquals("Got wrong amount of proposals: " + proposals, 3, proposals.size());
-                verifyProposal(proposals, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
-                verifyProposal(proposals, 1, FOO_VARIABLE, FOO_VARIABLE);
-                verifyProposal(proposals, 2, LINKED_PREFIX + LINKED_VARIABLE, LINKED_VARIABLE);
+                assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
+                RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+                assertEquals(false, proposalSet.isBasedOnInput());
+                assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 3, proposalSet.getProposals().size());
+                verifyProposal(proposalSet, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
+                verifyProposal(proposalSet, 1, FOO_VARIABLE, FOO_VARIABLE);
+                verifyProposal(proposalSet, 2, LINKED_PREFIX + LINKED_VARIABLE, LINKED_VARIABLE);
                 // ${LINKEDVAR} not included twice
             }
         }
@@ -184,38 +196,44 @@ public class TestProposalGenerator {
 
             @Test
             public void should_only_propose_BuiltIn_and_local_variables() throws Exception {
-                List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+                List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
                 IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\n*Variables\n" + FOO_VARIABLE + "  bar\n");
                 IFile linkedFile = addFile(LINKED_FILENAME, "*Variables\n${LINKEDVAR}  value\n");
                 when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
 
                 ParsedString argument = new ParsedString("", 0);
-                proposalGenerator.addVariableProposals(origFile, argument, 0, proposals, Integer.MAX_VALUE, -1);
+                proposalGenerator.addVariableProposals(origFile, argument, 0, proposalSets, Integer.MAX_VALUE, -1);
 
-                assertEquals("Got wrong amount of proposals: " + proposals, 2, proposals.size());
-                verifyProposal(proposals, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
-                verifyProposal(proposals, 1, FOO_VARIABLE, FOO_VARIABLE);
+                assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
+                RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+                assertEquals(false, proposalSet.isBasedOnInput());
+                assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 2, proposalSet.getProposals().size());
+                verifyProposal(proposalSet, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
+                verifyProposal(proposalSet, 1, FOO_VARIABLE, FOO_VARIABLE);
                 // ${LINKEDVAR} excluded
             }
 
             @Test
             public void should_only_propose_BuiltIn_variables_when_no_local_variables_present() throws Exception {
-                List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+                List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
                 IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\nResource  " + LINKED_FILENAME);
                 IFile linkedFile = addFile(LINKED_FILENAME, "*Variables\n${LINKEDVAR}  value\n");
                 when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
 
                 ParsedString argument = new ParsedString("", 0);
-                proposalGenerator.addVariableProposals(origFile, argument, 0, proposals, Integer.MAX_VALUE, -1);
+                proposalGenerator.addVariableProposals(origFile, argument, 0, proposalSets, Integer.MAX_VALUE, -1);
 
-                assertEquals("Got wrong amount of proposals: " + proposals, 1, proposals.size());
-                verifyProposal(proposals, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
+                assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
+                RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+                assertEquals(false, proposalSet.isBasedOnInput());
+                assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 1, proposalSet.getProposals().size());
+                verifyProposal(proposalSet, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
                 // ${LINKEDVAR} excluded
             }
 
             @Test
             public void should_propose_subset_when_maxVariableCharPos_set() throws Exception {
-                List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+                List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
                 String origContents1 = "*Settings\nResource  " + LINKED_FILENAME + "\n*Variables\n" + FOO_VARIABLE + "  bar\n";
                 String origContents2 = "${BAR}  bar\n${ZOT}  zot\n";
                 IFile origFile = addFile("orig.txt", origContents1 + origContents2);
@@ -223,11 +241,15 @@ public class TestProposalGenerator {
                 when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
 
                 ParsedString argument = new ParsedString("", 0);
-                proposalGenerator.addVariableProposals(origFile, argument, 0, proposals, origContents1.length() - 1, -1);
+                proposalGenerator.addVariableProposals(origFile, argument, 0, proposalSets, origContents1.length() - 1, -1);
 
-                assertEquals("Got wrong amount of proposals: " + proposals, 2, proposals.size());
-                verifyProposal(proposals, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
-                verifyProposal(proposals, 1, FOO_VARIABLE, FOO_VARIABLE);
+                assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
+                RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+                assertEquals(false, proposalSet.isBasedOnInput());
+                assertEquals(false, proposalSet.isBasedOnInput());
+                assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 2, proposalSet.getProposals().size());
+                verifyProposal(proposalSet, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
+                verifyProposal(proposalSet, 1, FOO_VARIABLE, FOO_VARIABLE);
                 // ${BAR} and ${LINKEDVAR} excluded
             }
 
@@ -244,7 +266,7 @@ public class TestProposalGenerator {
 
             @Test
             public void should_propose_subset_when_maxSettingsCharPos_set() throws Exception {
-                List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+                List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
                 String origContents1 = "*Settings\nResource  " + LINKED_FILENAME_1 + "\n";
                 String origContents2 = "Resource  " + LINKED_FILENAME_2 + "\n*Variables\n" + FOO_VARIABLE + "  bar\n";
                 IFile origFile = addFile("orig.txt", origContents1 + origContents2);
@@ -254,12 +276,15 @@ public class TestProposalGenerator {
                 when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME_2)).thenReturn(linkedFile2);
 
                 ParsedString argument = new ParsedString("", 0);
-                proposalGenerator.addVariableProposals(origFile, argument, 0, proposals, Integer.MAX_VALUE, origContents1.length() - 1);
+                proposalGenerator.addVariableProposals(origFile, argument, 0, proposalSets, Integer.MAX_VALUE, origContents1.length() - 1);
 
-                assertEquals("Got wrong amount of proposals: " + proposals, 3, proposals.size());
-                verifyProposal(proposals, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
-                verifyProposal(proposals, 1, FOO_VARIABLE, FOO_VARIABLE);
-                verifyProposal(proposals, 2, LINKED_PREFIX_1 + LINKED_VARIABLE_1, LINKED_VARIABLE_1);
+                assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
+                RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+                assertEquals(false, proposalSet.isBasedOnInput());
+                assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 3, proposalSet.getProposals().size());
+                verifyProposal(proposalSet, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
+                verifyProposal(proposalSet, 1, FOO_VARIABLE, FOO_VARIABLE);
+                verifyProposal(proposalSet, 2, LINKED_PREFIX_1 + LINKED_VARIABLE_1, LINKED_VARIABLE_1);
                 // ${LINKED_VARIABLE_2} excluded
             }
         }

@@ -47,7 +47,7 @@ public class ProposalGenerator implements IProposalGenerator {
     }
 
     @Override
-    public void addTableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposal> proposals) {
+    public void addTableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets) {
         String argumentValue = argument.getValue();
         IRegion replacementRegion = new Region(argument.getArgCharPos(), argumentValue.length());
 
@@ -60,6 +60,7 @@ public class ProposalGenerator implements IProposalGenerator {
         attempts.add("");
 
         Map<String, RobotCompletionProposal> ourProposals = new LinkedHashMap<String, RobotCompletionProposal>();
+        Boolean basedOnInput = null;
         for (String attempt : attempts) {
             String tableArgument = ParserUtil.parseTable(attempt);
             for (Entry<String, String> e : tableNameToFull.entrySet()) {
@@ -83,14 +84,20 @@ public class ProposalGenerator implements IProposalGenerator {
                 continue;
             }
             if (!ourProposals.isEmpty()) {
+                basedOnInput = !attempt.isEmpty();
                 break;
             }
         }
-        proposals.addAll(ourProposals.values());
+        if (!ourProposals.isEmpty()) {
+            RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
+            ourProposalSet.getProposals().addAll(ourProposals.values());
+            ourProposalSet.setBasedOnInput(basedOnInput);
+            proposalSets.add(ourProposalSet);
+        }
     }
 
     @Override
-    public void addSettingTableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposal> proposals) {
+    public void addSettingTableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets) {
         String argumentValue = argument.getValue();
         IRegion replacementRegion = new Region(argument.getArgCharPos(), argumentValue.length());
 
@@ -104,7 +111,7 @@ public class ProposalGenerator implements IProposalGenerator {
 
         List<String> settingKeys = new ArrayList<String>(ArgumentPreParser.getSettingKeys());
         Collections.sort(settingKeys);
-        List<RobotCompletionProposal> ourProposals = new ArrayList<RobotCompletionProposal>();
+        RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
         for (String attempt : attempts) {
             for (String key : settingKeys) {
                 if (key.toLowerCase().startsWith(attempt)) {
@@ -115,64 +122,72 @@ public class ProposalGenerator implements IProposalGenerator {
                     String displayString = key;
                     String additionalProposalInfo = null;
                     String informationDisplayString = null;
-                    ourProposals.add(new RobotCompletionProposal(proposal, null, replacementRegion, image, displayString, informationDisplayString, additionalProposalInfo));
+                    ourProposalSet.getProposals().add(new RobotCompletionProposal(proposal, null, replacementRegion, image, displayString, informationDisplayString, additionalProposalInfo));
                 }
             }
-            if (ourProposals.size() == 1 && ourProposals.get(0).getMatchArgument().getValue().equals(argumentValue)) {
+            if (ourProposalSet.getProposals().size() == 1 && ourProposalSet.getProposals().get(0).getMatchArgument().getValue().equals(argumentValue)) {
                 // Found a single exact hit - probably means it was content-assisted earlier and the user now wants to
                 // change it to something else
-                ourProposals.clear();
+                ourProposalSet.getProposals().clear();
                 continue;
             }
-            if (!ourProposals.isEmpty()) {
+            if (!ourProposalSet.getProposals().isEmpty()) {
+                ourProposalSet.setBasedOnInput(!attempt.isEmpty());
                 break;
             }
         }
-        proposals.addAll(ourProposals);
-    }
-
-    @Override
-    public void addKeywordProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposal> proposals) {
-        IRegion replacementRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        KeywordCompletionMatchVisitorProvider visitorProvider = new KeywordCompletionMatchVisitorProvider(file, replacementRegion);
-        proposals.addAll(computeCompletionProposals(file, documentOffset, argument, visitorProvider));
-    }
-
-    @Override
-    public void addVariableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposal> proposals, int maxVariableCharPos, int maxSettingCharPos) {
-        IRegion replacementRegion = VariableReplacementRegionCalculator.calculate(argument, documentOffset);
-        VariableCompletionMatchVisitorProvider visitorProvider = new VariableCompletionMatchVisitorProvider(file, replacementRegion, maxVariableCharPos, maxSettingCharPos);
-        List<RobotCompletionProposal> variableProposals = computeCompletionProposals(file, documentOffset, argument, visitorProvider);
-        if (replacementRegion.getLength() > 0) {
-            // the cursor is positioned for replacing a variable, so put the variable proposals first
-            proposals.addAll(0, variableProposals);
-        } else {
-            // default positioning of proposals
-            proposals.addAll(variableProposals);
+        if (!ourProposalSet.getProposals().isEmpty()) {
+            proposalSets.add(ourProposalSet);
         }
     }
 
-    private List<RobotCompletionProposal> computeCompletionProposals(IFile file, int documentOffset, ParsedString argument, CompletionMatchVisitorProvider visitorProvider) {
+    @Override
+    public void addKeywordProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets) {
+        IRegion replacementRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
+        KeywordCompletionMatchVisitorProvider visitorProvider = new KeywordCompletionMatchVisitorProvider(file, replacementRegion);
+        proposalSets.add(computeCompletionProposals(file, documentOffset, argument, visitorProvider));
+    }
+
+    @Override
+    public void addVariableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets, int maxVariableCharPos, int maxSettingCharPos) {
+        IRegion replacementRegion = VariableReplacementRegionCalculator.calculate(argument, documentOffset);
+        VariableCompletionMatchVisitorProvider visitorProvider = new VariableCompletionMatchVisitorProvider(file, replacementRegion, maxVariableCharPos, maxSettingCharPos);
+        RobotCompletionProposalSet variableProposals = computeCompletionProposals(file, documentOffset, argument, visitorProvider);
+        if (replacementRegion.getLength() > 0) {
+            // the cursor is positioned for replacing a variable, so put the variable proposals first
+            proposalSets.add(0, variableProposals);
+        } else {
+            // default positioning of proposals
+            proposalSets.add(variableProposals);
+        }
+    }
+
+    private RobotCompletionProposalSet computeCompletionProposals(IFile file, int documentOffset, ParsedString argument, CompletionMatchVisitorProvider visitorProvider) {
         System.out.println("RobotContentAssistant.computeCompletionProposals() " + documentOffset + " " + argument);
-        List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+        RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
         // first find matches that use the whole input as search string
-        DefinitionFinder.acceptMatches(file, visitorProvider.get(argument, proposals));
-        if (argument != null && proposalsIsEmptyOrContainsOnly(proposals, argument)) {
-            proposals.clear();
+        DefinitionFinder.acceptMatches(file, visitorProvider.get(argument, ourProposalSet.getProposals()));
+        if (argument != null && proposalsIsEmptyOrContainsOnly(ourProposalSet.getProposals(), argument)) {
+            ourProposalSet.getProposals().clear();
             // int lineOffset = documentOffset - lineCharPos;
             if (argument.getArgCharPos() < documentOffset && documentOffset < argument.getArgEndCharPos()) {
                 // try again, but only up to cursor
                 int argumentOff = documentOffset - argument.getArgCharPos();
                 ParsedString argumentleftPart = new ParsedString(argument.getValue().substring(0, argumentOff), argument.getArgCharPos());
-                DefinitionFinder.acceptMatches(file, visitorProvider.get(argumentleftPart, proposals));
+                DefinitionFinder.acceptMatches(file, visitorProvider.get(argumentleftPart, ourProposalSet.getProposals()));
             }
-            if (proposalsIsEmptyOrContainsOnly(proposals, argument)) {
+            if (proposalsIsEmptyOrContainsOnly(ourProposalSet.getProposals(), argument)) {
                 // try again, ignoring user input, i.e. show all possible keywords
-                proposals.clear();
-                DefinitionFinder.acceptMatches(file, visitorProvider.get(null, proposals));
+                ourProposalSet.getProposals().clear();
+                DefinitionFinder.acceptMatches(file, visitorProvider.get(null, ourProposalSet.getProposals()));
+                ourProposalSet.setBasedOnInput(false);
+            } else {
+                ourProposalSet.setBasedOnInput(true);
             }
+        } else {
+            ourProposalSet.setBasedOnInput(!argument.isEmpty());
         }
-        return proposals;
+        return ourProposalSet;
     }
 
     private boolean proposalsIsEmptyOrContainsOnly(List<RobotCompletionProposal> proposals, ParsedString argument) {

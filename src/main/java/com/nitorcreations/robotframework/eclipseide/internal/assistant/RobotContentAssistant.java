@@ -17,6 +17,7 @@ package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -69,18 +70,18 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         }
 
         IFile file = ResourceManagerProvider.get().resolveFileFor(document);
-        List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+        List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
         if (argument.getArgCharPos() <= robotLine.lineCharPos + 1) {
             if (!argument.getValue().startsWith("*")) {
                 switch (determineLineTypeForLine(lines, lineNo)) {
                     case SETTING_TABLE_LINE:
-                        proposalGenerator.addSettingTableProposals(file, argument, documentOffset, proposals);
+                        proposalGenerator.addSettingTableProposals(file, argument, documentOffset, proposalSets);
                         break;
                     default:
                         break;
                 }
             }
-            proposalGenerator.addTableProposals(file, argument, documentOffset, proposals);
+            proposalGenerator.addTableProposals(file, argument, documentOffset, proposalSets);
             // TODO we should only include either of setting/table proposals if either has exactly one match perhaps?
         } else {
             boolean allowKeywords = false;
@@ -113,16 +114,48 @@ public class RobotContentAssistant implements IContentAssistProcessor {
                     break;
             }
             if (allowKeywords) {
-                proposalGenerator.addKeywordProposals(file, argument, documentOffset, proposals);
+                proposalGenerator.addKeywordProposals(file, argument, documentOffset, proposalSets);
             }
             if (allowVariables) {
-                proposalGenerator.addVariableProposals(file, argument, documentOffset, proposals, maxVariableCharPos, maxSettingCharPos);
+                proposalGenerator.addVariableProposals(file, argument, documentOffset, proposalSets, maxVariableCharPos, maxSettingCharPos);
             }
         }
-        if (proposals.isEmpty()) {
+        return extractMostRelevantProposals(proposalSets);
+    }
+
+    private ICompletionProposal[] extractMostRelevantProposals(List<RobotCompletionProposalSet> proposalSets) {
+        boolean hasProposalsBasedOnInput = false;
+        for (Iterator<RobotCompletionProposalSet> proposalSetIt = proposalSets.iterator(); proposalSetIt.hasNext();) {
+            RobotCompletionProposalSet proposalSet = proposalSetIt.next();
+            if (proposalSet.getProposals().isEmpty()) {
+                proposalSetIt.remove();
+                continue;
+            }
+            if (proposalSet.isBasedOnInput()) {
+                hasProposalsBasedOnInput = true;
+            }
+        }
+        if (hasProposalsBasedOnInput) {
+            removeProposalsNotBasedOnInput(proposalSets);
+        }
+
+        if (proposalSets.isEmpty()) {
             return null;
         }
+        List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+        for (RobotCompletionProposalSet proposalSet : proposalSets) {
+            proposals.addAll(proposalSet.getProposals());
+        }
         return proposals.toArray(new ICompletionProposal[proposals.size()]);
+    }
+
+    private void removeProposalsNotBasedOnInput(List<RobotCompletionProposalSet> proposalSets) {
+        for (Iterator<RobotCompletionProposalSet> proposalSetIt = proposalSets.iterator(); proposalSetIt.hasNext();) {
+            RobotCompletionProposalSet proposalSet = proposalSetIt.next();
+            if (!proposalSet.isBasedOnInput()) {
+                proposalSetIt.remove();
+            }
+        }
     }
 
     private LineType determineLineTypeForLine(List<RobotLine> lines, int lineNo) {
