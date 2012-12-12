@@ -74,6 +74,11 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         if (argument.getArgCharPos() <= robotLine.lineCharPos + 1) {
             if (!argument.getValue().startsWith("*")) {
                 switch (determineLineTypeForLine(lines, lineNo)) {
+                    case KEYWORD_TABLE_IGNORE:
+                    case KEYWORD_TABLE_KEYWORD_BEGIN:
+                    case KEYWORD_TABLE_KEYWORD_LINE:
+                        proposalGenerator.addKeywordDefinitionProposals(file, argument, documentOffset, proposalSets);
+                        break;
                     case SETTING_TABLE_LINE:
                         proposalGenerator.addSettingTableProposals(file, argument, documentOffset, proposalSets);
                         break;
