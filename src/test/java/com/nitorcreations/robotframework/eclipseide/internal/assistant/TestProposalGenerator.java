@@ -96,7 +96,7 @@ public class TestProposalGenerator {
         }
     }
 
-    public static class Keywords extends Base {
+    public static class KeywordCalls extends Base {
         static final String LINKED_PREFIX = "[linked] ";
         static final String LINKED_FILENAME = "linked.txt";
         static final String LINKED_KEYWORD = "Say Hello";
@@ -140,7 +140,7 @@ public class TestProposalGenerator {
     }
 
     @RunWith(Enclosed.class)
-    public static class Variables {
+    public static class VariableReferences {
 
         public static class when_all extends Base {
             static final String LINKED_PREFIX = "[linked] ";
