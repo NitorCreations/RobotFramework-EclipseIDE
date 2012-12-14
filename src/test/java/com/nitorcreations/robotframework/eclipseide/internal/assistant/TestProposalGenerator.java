@@ -88,11 +88,15 @@ public class TestProposalGenerator {
         }
 
         protected void verifyProposal(List<RobotCompletionProposal> proposals, int index, String expectedDisplayString, String expectedCompletion) throws BadLocationException {
+            verifyProposal(proposals, index, expectedDisplayString, expectedCompletion, null, null);
+        }
+
+        protected void verifyProposal(List<RobotCompletionProposal> proposals, int index, String expectedDisplayString, String expectedCompletion, Integer matchOffset, Integer matchLength) throws BadLocationException {
             RobotCompletionProposal proposal = proposals.get(index);
             assertEquals(expectedDisplayString, proposal.getDisplayString());
             final IDocument document = mock(IDocument.class, "document");
             proposal.apply(document);
-            verify(document).replace(anyInt(), anyInt(), eq(expectedCompletion));
+            verify(document).replace(matchOffset != null ? eq(matchOffset) : anyInt(), matchLength != null ? eq(matchLength) : anyInt(), eq(expectedCompletion));
         }
     }
 
@@ -174,6 +178,22 @@ public class TestProposalGenerator {
                 verifyProposal(proposals, 1, FOO_VARIABLE, FOO_VARIABLE);
                 verifyProposal(proposals, 2, LINKED_PREFIX + LINKED_VARIABLE, LINKED_VARIABLE);
                 // ${LINKEDVAR} not included twice
+            }
+
+            @Test
+            // #43
+            public void should_replace_partially_typed_variable() throws Exception {
+                List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
+                String origContents1 = "*Variables\n" + FOO_VARIABLE + "  bar\n*Testcase\n  Log  ";
+                String origContents2 = "${F";
+                String origContents = origContents1 + origContents2;
+                IFile origFile = addFile("orig.txt", origContents);
+
+                ParsedString argument = new ParsedString(origContents2, origContents1.length());
+                proposalGenerator.addVariableProposals(origFile, argument, origContents.length(), proposals, Integer.MAX_VALUE, Integer.MAX_VALUE);
+
+                assertEquals("Got wrong amount of proposals: " + proposals, 1, proposals.size());
+                verifyProposal(proposals, 0, FOO_VARIABLE, FOO_VARIABLE, origContents1.length(), origContents2.length());
             }
         }
 
