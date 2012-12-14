@@ -52,15 +52,15 @@ public class VariableReplacementRegionCalculator {
             // unclosed variable at the end of the argument, replace unclosed variable
             return new Region(startPosInDocument, argument.getArgEndCharPos() - startPosInDocument);
         }
-        int nextStartPos = getNextStartPos(closePos, nextDollarPos, nextAtPos);
+        int endPos = getEndPos(closePos, nextDollarPos, nextAtPos);
         boolean cursorAtVariableStart = cursorOffset == startPos + 1 || cursorOffset == startPos + 2;
-        boolean isClosedVariable = closePos == nextStartPos - 1;
+        boolean isClosedVariable = closePos == endPos - 1;
         if (cursorAtVariableStart && !isClosedVariable) {
             // "foo$<cursor is here>{bar" replace only ${ or @{
             return new Region(startPosInDocument, 2);
         }
         // replace variable (may be followed by other variables)
-        return new Region(startPosInDocument, nextStartPos - startPos);
+        return new Region(startPosInDocument, endPos - startPos);
     }
 
     private static int getStartPos(String arg, int cursorOffset) {
@@ -69,7 +69,7 @@ public class VariableReplacementRegionCalculator {
         return Math.max(dollarPos, atPos);
     }
 
-    private static int getNextStartPos(int closePos, int nextDollarPos, int nextAtPos) {
+    private static int getEndPos(int closePos, int nextDollarPos, int nextAtPos) {
         int minPositive = minPositive(closePos, minPositive(nextDollarPos, nextAtPos));
         if (closePos == minPositive) {
             return closePos + 1;
