@@ -20,51 +20,75 @@ import org.eclipse.jface.text.Region;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class VariableReplacementRegionCalculator {
-    public static Region calculate(ParsedString argument, int documentOffset) {
+    public static Region calculate(ParsedString argument, int cursorOffsetInDocument) {
         String arg = argument.getValue();
-        int argOffset = documentOffset - argument.getArgCharPos();
-        // System.out.println("== '" + arg + "' @ " + argOffset);
-        if (argOffset == 0) {
+        int cursorOffsetInArgument = cursorOffsetInDocument - argument.getArgCharPos();
+        // System.out.println("== '" + arg + "' @ " + cursorOffsetInArgument);
+        if (cursorOffsetInArgument == 0) {
             // System.out.println("@@ start");
-            return new Region(documentOffset, 0);
+            return new Region(cursorOffsetInDocument, 0);
         }
-        int dollarPos = arg.lastIndexOf('$', argOffset - 1);
-        int atPos = arg.lastIndexOf('@', argOffset - 1);
-        int startPos = Math.max(dollarPos, atPos);
-        if (startPos == -1) {
+        int dollarPos = arg.lastIndexOf('$', cursorOffsetInArgument - 1);
+        int atPos = arg.lastIndexOf('@', cursorOffsetInArgument - 1);
+        int startPosInArgument = Math.max(dollarPos, atPos);
+        int startPosInDocument = argument.getArgCharPos() + startPosInArgument;
+        if (startPosInArgument == -1) {
             // System.out.println("@@ no $/@");
-            return new Region(documentOffset, 0);
+            return new Region(cursorOffsetInDocument, 0);
         }
-        // System.out.println("== startPos " + startPos);
-        if (!condCharAt(arg, startPos + 1, '{')) {
-            if (argOffset == startPos + 1) {
+        // System.out.println("== startPos " + startPosInArgument);
+        if (!condCharAt(arg, startPosInArgument + 1, '{')) {
+            if (cursorOffsetInArgument == startPosInArgument + 1) {
                 // include $ or @
                 // System.out.println("@@ at $/@");
-                return new Region(argument.getArgCharPos() + startPos, 1);
+                return new Region(startPosInDocument, 1);
             }
             // System.out.println("@@ after $/@");
-            return new Region(documentOffset, 0);
+            return new Region(cursorOffsetInDocument, 0);
         }
-        int closePos = arg.indexOf('}', startPos + 2);
-        if (closePos == -1) {
-            if (argOffset == startPos + 1 || argOffset == startPos + 2) {
-                // include ${ or @{
-                // System.out.println("@@ at ${/@{");
-                return new Region(argument.getArgCharPos() + startPos, 2);
-            }
-            // System.out.println("@@ after ${/@{");
-            return new Region(documentOffset, 0);
-        }
-        if (closePos < argOffset) {
+        int closePos = arg.indexOf('}', startPosInArgument + 2);
+        int nextDollarPos = arg.indexOf('$', startPosInArgument + 2);
+        int nextAtPos = arg.indexOf('@', startPosInArgument + 2);
+        if (closePos != -1 && closePos < cursorOffsetInArgument) {
             // System.out.println("@@ after");
-            return new Region(documentOffset, 0);
+            return new Region(cursorOffsetInDocument, 0);
         }
+        if (closePos == -1 && nextDollarPos == -1 && nextAtPos == -1) {
+            // System.out.println("@@ after ${/@{");
+            return new Region(startPosInDocument, argument.getArgEndCharPos() - startPosInDocument);
+        }
+        int nextStartPosInArgument = getNextStartPosInArgument(closePos, nextDollarPos, nextAtPos);
+        boolean cursorAtVariableStart = cursorOffsetInArgument == startPosInArgument + 1 || cursorOffsetInArgument == startPosInArgument + 2;
+        boolean insidePartialVariable = closePos != nextStartPosInArgument - 1;
+        if (cursorAtVariableStart && insidePartialVariable) {
+            // replace only ${ or @{
+            // System.out.println("@@ at ${/@{");
+            return new Region(startPosInDocument, 2);
+        }
+        // replace complete variable
         // System.out.println("@@ inside");
-        return new Region(argument.getArgCharPos() + startPos, closePos - startPos + 1);
+        return new Region(startPosInDocument, nextStartPosInArgument - startPosInArgument);
     }
 
-    static boolean condCharAt(String arg, int pos, char ch) {
+    private static int getNextStartPosInArgument(int closePos, int nextDollarPos, int nextAtPos) {
+        int minPositive = minPositive(closePos, minPositive(nextDollarPos, nextAtPos));
+        if (closePos == minPositive) {
+            return closePos + 1;
+        }
+        return minPositive;
+    }
+
+    private static int minPositive(int a, int b) {
+        if (a < 0) {
+            return b;
+        }
+        if (b < 0) {
+            return a;
+        }
+        return Math.min(a, b);
+    }
+
+    private static boolean condCharAt(String arg, int pos, char ch) {
         return arg.length() > pos && arg.charAt(pos) == ch;
     }
-
 }
