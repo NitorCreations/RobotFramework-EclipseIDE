@@ -23,9 +23,8 @@ public class VariableReplacementRegionCalculator {
     public static Region calculate(ParsedString argument, int cursorOffsetInDocument) {
         String arg = argument.getValue();
         int cursorOffsetInArgument = cursorOffsetInDocument - argument.getArgCharPos();
-        // System.out.println("== '" + arg + "' @ " + cursorOffsetInArgument);
         if (cursorOffsetInArgument == 0) {
-            // System.out.println("@@ start");
+            // at the beginning of the argument, nothing to replace
             return new Region(cursorOffsetInDocument, 0);
         }
         int dollarPos = arg.lastIndexOf('$', cursorOffsetInArgument - 1);
@@ -33,40 +32,36 @@ public class VariableReplacementRegionCalculator {
         int startPosInArgument = Math.max(dollarPos, atPos);
         int startPosInDocument = argument.getArgCharPos() + startPosInArgument;
         if (startPosInArgument == -1) {
-            // System.out.println("@@ no $/@");
+            // no variable in argument, nothing to replace
             return new Region(cursorOffsetInDocument, 0);
         }
-        // System.out.println("== startPos " + startPosInArgument);
-        if (!condCharAt(arg, startPosInArgument + 1, '{')) {
+        if (!isCharAt(arg, startPosInArgument + 1, '{')) {
             if (cursorOffsetInArgument == startPosInArgument + 1) {
-                // include $ or @
-                // System.out.println("@@ at $/@");
+                // "foo$<cursor is here>" or "foo$<cursor is here>bar" -> replace $ or @
                 return new Region(startPosInDocument, 1);
             }
-            // System.out.println("@@ after $/@");
+            // "foo$b<cursor is here>ar" -> nothing to replace
             return new Region(cursorOffsetInDocument, 0);
         }
-        int closePos = arg.indexOf('}', startPosInArgument + 2);
+        int closePosInArgument = arg.indexOf('}', startPosInArgument + 2);
+        if (closePosInArgument != -1 && closePosInArgument < cursorOffsetInArgument) {
+            // "${foo}b<cursor is here>ar -> nothing to replace
+            return new Region(cursorOffsetInDocument, 0);
+        }
         int nextDollarPos = arg.indexOf('$', startPosInArgument + 2);
         int nextAtPos = arg.indexOf('@', startPosInArgument + 2);
-        if (closePos != -1 && closePos < cursorOffsetInArgument) {
-            // System.out.println("@@ after");
-            return new Region(cursorOffsetInDocument, 0);
-        }
-        if (closePos == -1 && nextDollarPos == -1 && nextAtPos == -1) {
-            // System.out.println("@@ after ${/@{");
+        if (closePosInArgument == -1 && nextDollarPos == -1 && nextAtPos == -1) {
+            // unclosed variable at the end of the argument, replace unclosed variable
             return new Region(startPosInDocument, argument.getArgEndCharPos() - startPosInDocument);
         }
-        int nextStartPosInArgument = getNextStartPosInArgument(closePos, nextDollarPos, nextAtPos);
+        int nextStartPosInArgument = getNextStartPosInArgument(closePosInArgument, nextDollarPos, nextAtPos);
         boolean cursorAtVariableStart = cursorOffsetInArgument == startPosInArgument + 1 || cursorOffsetInArgument == startPosInArgument + 2;
-        boolean insidePartialVariable = closePos != nextStartPosInArgument - 1;
-        if (cursorAtVariableStart && insidePartialVariable) {
-            // replace only ${ or @{
-            // System.out.println("@@ at ${/@{");
+        boolean isClosedVariable = closePosInArgument == nextStartPosInArgument - 1;
+        if (cursorAtVariableStart && !isClosedVariable) {
+            // "foo$<cursor is here>{bar" replace only ${ or @{
             return new Region(startPosInDocument, 2);
         }
-        // replace complete variable
-        // System.out.println("@@ inside");
+        // replace variable (may be followed by other variables)
         return new Region(startPosInDocument, nextStartPosInArgument - startPosInArgument);
     }
 
@@ -88,7 +83,7 @@ public class VariableReplacementRegionCalculator {
         return Math.min(a, b);
     }
 
-    private static boolean condCharAt(String arg, int pos, char ch) {
+    private static boolean isCharAt(String arg, int pos, char ch) {
         return arg.length() > pos && arg.charAt(pos) == ch;
     }
 }
