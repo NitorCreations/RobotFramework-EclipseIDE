@@ -22,50 +22,54 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 public class VariableReplacementRegionCalculator {
     public static Region calculate(ParsedString argument, int cursorOffsetInDocument) {
         String arg = argument.getValue();
-        int cursorOffsetInArgument = cursorOffsetInDocument - argument.getArgCharPos();
-        if (cursorOffsetInArgument == 0) {
+        int cursorOffset = cursorOffsetInDocument - argument.getArgCharPos();
+        if (cursorOffset == 0) {
             // at the beginning of the argument, nothing to replace
             return new Region(cursorOffsetInDocument, 0);
         }
-        int dollarPos = arg.lastIndexOf('$', cursorOffsetInArgument - 1);
-        int atPos = arg.lastIndexOf('@', cursorOffsetInArgument - 1);
-        int startPosInArgument = Math.max(dollarPos, atPos);
-        int startPosInDocument = argument.getArgCharPos() + startPosInArgument;
-        if (startPosInArgument == -1) {
+        int startPos = getStartPos(arg, cursorOffset);
+        if (startPos == -1) {
             // no variable in argument, nothing to replace
             return new Region(cursorOffsetInDocument, 0);
         }
-        if (!isCharAt(arg, startPosInArgument + 1, '{')) {
-            if (cursorOffsetInArgument == startPosInArgument + 1) {
+        int startPosInDocument = argument.getArgCharPos() + startPos;
+        if (!isCharAt(arg, startPos + 1, '{')) {
+            if (cursorOffset == startPos + 1) {
                 // "foo$<cursor is here>" or "foo$<cursor is here>bar" -> replace $ or @
                 return new Region(startPosInDocument, 1);
             }
             // "foo$b<cursor is here>ar" -> nothing to replace
             return new Region(cursorOffsetInDocument, 0);
         }
-        int closePosInArgument = arg.indexOf('}', startPosInArgument + 2);
-        if (closePosInArgument != -1 && closePosInArgument < cursorOffsetInArgument) {
+        int closePos = arg.indexOf('}', startPos + 2);
+        if (closePos != -1 && closePos < cursorOffset) {
             // "${foo}b<cursor is here>ar -> nothing to replace
             return new Region(cursorOffsetInDocument, 0);
         }
-        int nextDollarPos = arg.indexOf('$', startPosInArgument + 2);
-        int nextAtPos = arg.indexOf('@', startPosInArgument + 2);
-        if (closePosInArgument == -1 && nextDollarPos == -1 && nextAtPos == -1) {
+        int nextDollarPos = arg.indexOf('$', startPos + 2);
+        int nextAtPos = arg.indexOf('@', startPos + 2);
+        if (closePos == -1 && nextDollarPos == -1 && nextAtPos == -1) {
             // unclosed variable at the end of the argument, replace unclosed variable
             return new Region(startPosInDocument, argument.getArgEndCharPos() - startPosInDocument);
         }
-        int nextStartPosInArgument = getNextStartPosInArgument(closePosInArgument, nextDollarPos, nextAtPos);
-        boolean cursorAtVariableStart = cursorOffsetInArgument == startPosInArgument + 1 || cursorOffsetInArgument == startPosInArgument + 2;
-        boolean isClosedVariable = closePosInArgument == nextStartPosInArgument - 1;
+        int nextStartPos = getNextStartPos(closePos, nextDollarPos, nextAtPos);
+        boolean cursorAtVariableStart = cursorOffset == startPos + 1 || cursorOffset == startPos + 2;
+        boolean isClosedVariable = closePos == nextStartPos - 1;
         if (cursorAtVariableStart && !isClosedVariable) {
             // "foo$<cursor is here>{bar" replace only ${ or @{
             return new Region(startPosInDocument, 2);
         }
         // replace variable (may be followed by other variables)
-        return new Region(startPosInDocument, nextStartPosInArgument - startPosInArgument);
+        return new Region(startPosInDocument, nextStartPos - startPos);
     }
 
-    private static int getNextStartPosInArgument(int closePos, int nextDollarPos, int nextAtPos) {
+    private static int getStartPos(String arg, int cursorOffset) {
+        int dollarPos = arg.lastIndexOf('$', cursorOffset - 1);
+        int atPos = arg.lastIndexOf('@', cursorOffset - 1);
+        return Math.max(dollarPos, atPos);
+    }
+
+    private static int getNextStartPos(int closePos, int nextDollarPos, int nextAtPos) {
         int minPositive = minPositive(closePos, minPositive(nextDollarPos, nextAtPos));
         if (closePos == minPositive) {
             return closePos + 1;
