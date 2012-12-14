@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description name="RobotFrameworkEclipseIDE">
+      RobotFramework-EclipseIDE is an Eclipse IDE plugin for the Robot Framework test automation tool.
+
+Robot Framework is a generic test automation framework for acceptance testing and acceptance test-driven development (ATDD). Acceptance Test-Driven Development is a process used to construct executable requirements before the implementation starts.
+
+This plugin helps you to write tests with Robot Framework directly from the comfort of your Eclipse IDE.
+   </description>
+   <feature url="features/com.nitorcreations.robotframework.eclipseide_1.0.7.SNAPSHOT.jar" id="com.nitorcreations.robotframework.eclipseide" version="1.0.7.SNAPSHOT" os="linux,macosx,win32">
+      <category name="com.nitorcreations.robotframework.eclipseide"/>
+   </feature>
+   <category-def name="com.nitorcreations.robotframework.eclipseide" label="Robot Framework Eclipse IDE"/>
+</site>
