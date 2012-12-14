@@ -39,6 +39,7 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
     private final String informationDisplayString;
     private final String additionalProposalInfo;
     private boolean prefixRequired = false;
+    private int cursorPositionAdjustment;
 
     public RobotCompletionProposal(ParsedString matchArgument, FileWithType proposalLocation, IRegion replacementRegion, Image image, String displayString, String informationDisplayString, String additionalProposalInfo) {
         this.matchArgument = matchArgument;
@@ -48,6 +49,10 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
         this.displayString = displayString;
         this.informationDisplayString = informationDisplayString;
         this.additionalProposalInfo = additionalProposalInfo;
+    }
+
+    public void setCursorPositionAdjustment(int adjustment) {
+        cursorPositionAdjustment = adjustment;
     }
 
     ParsedString getMatchArgument() {
@@ -76,7 +81,7 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
 
     @Override
     public Point getSelection(IDocument document) {
-        return new Point(replacementRegion.getOffset() + getReplacementString().length(), 0);
+        return new Point(replacementRegion.getOffset() + getReplacementString().length() + cursorPositionAdjustment, 0);
     }
 
     @Override
@@ -104,7 +109,7 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
 
     @Override
     public IContextInformation getContextInformation() {
-        return new ContextInformation(null, informationDisplayString);
+        return informationDisplayString == null ? null : new ContextInformation(null, informationDisplayString);
     }
 
     public void setPrefixRequired() {

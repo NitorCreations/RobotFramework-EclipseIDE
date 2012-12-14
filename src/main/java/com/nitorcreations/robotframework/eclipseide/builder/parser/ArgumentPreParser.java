@@ -15,10 +15,12 @@
  */
 package com.nitorcreations.robotframework.eclipseide.builder.parser;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
@@ -53,6 +55,10 @@ public class ArgumentPreParser {
                                                                      // keyword
                                                                      // ?
         settingTypes.put("Test Timeout", SettingType.STRING);
+    }
+
+    public static Set<String> getSettingKeys() {
+        return Collections.unmodifiableSet(settingTypes.keySet());
     }
 
     static final Map<String, SettingType> keywordSequenceSettingTypes = new HashMap<String, SettingType>();
@@ -138,6 +144,9 @@ public class ArgumentPreParser {
                 --argLen; // exclude now, deal with it later (see top of method)
             }
         } else {
+            // for (RobotLine line : lines) {
+            // System.out.println(line);
+            // }
             lines = null;
             lineIterator = null;
             argLen = 0;

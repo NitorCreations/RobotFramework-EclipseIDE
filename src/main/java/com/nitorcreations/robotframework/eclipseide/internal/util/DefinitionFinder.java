@@ -15,27 +15,50 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.util;
 
-import static com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest.CONTINUE;
-import static com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest.CONTINUE_TO_END_OF_CURRENT_FILE;
-import static com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest.STOP;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.IndexFile;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
-import com.nitorcreations.robotframework.eclipseide.editors.ResourceManagerProvider;
-import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest;
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 public class DefinitionFinder {
+
+    private static class LineMatchVisitorAdapter implements LineMatchVisitor {
+
+        private final DefinitionMatchVisitor delegate;
+
+        LineMatchVisitorAdapter(DefinitionMatchVisitor delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public VisitorInterest visitMatch(RobotLine line, FileWithType lineLocation) {
+            return delegate.visitMatch(line.arguments.get(0), lineLocation);
+        }
+
+        @Override
+        public Set<LineType> getWantedLineTypes() {
+            return Collections.singleton(delegate.getWantedLineType());
+        }
+
+        @Override
+        public boolean wantsLibraryKeywords() {
+            return delegate.getWantedLineType() == LineType.KEYWORD_TABLE_KEYWORD_BEGIN;
+        }
+
+        @Override
+        public boolean wantsLibraryVariables() {
+            return delegate.getWantedLineType() == LineType.VARIABLE_TABLE_LINE;
+        }
+
+        @Override
+        public boolean visitImport(IFile currentFile, RobotLine line) {
+            return delegate.visitImport(currentFile, line);
+        }
+
+    }
 
     /**
      * This iterates the given resource file and recursively included resource files to locate definitions of keywords
@@ -47,141 +70,7 @@ public class DefinitionFinder {
      *            the visitor of the matches found
      */
     public static void acceptMatches(IFile file, DefinitionMatchVisitor visitor) {
-        /*
-         * Priority level 0: built-in variables. Priority level 1: definitions from the local file. Priority level 2:
-         * definitions from included resource and variable files, recursively. Priority level 3: explicitly loaded
-         * libraries. Priority level 4: built-in library.
-         */
-        PriorityDeque<FileWithType> unprocessedFiles = new LinkedPriorityDeque<FileWithType>(5, new Prioritizer<FileWithType>() {
-            @Override
-            public int prioritize(FileWithType fileWithType) {
-                return fileWithType.getType() == FileType.LIBRARY ? 3 : 2;
-            }
-        });
-        unprocessedFiles.add(0, new FileWithType(FileType.BUILTIN_VARIABLE, "BuiltIn", file.getProject()));
-        unprocessedFiles.add(1, new FileWithType(FileType.RESOURCE, file));
-        unprocessedFiles.add(4, new FileWithType(FileType.LIBRARY, "BuiltIn", file.getProject()));
-
-        Set<FileWithType> allFiles = new HashSet<FileWithType>();
-        allFiles.addAll(unprocessedFiles);
-        int currentPriorityLevel = 0;
-        while (!unprocessedFiles.isEmpty()) {
-            FileWithType currentFileWithType = unprocessedFiles.removeFirst();
-
-            VisitorInterest interest;
-            switch (currentFileWithType.getType()) {
-                case RESOURCE:
-                    interest = acceptResourceFile(currentFileWithType, visitor, unprocessedFiles, allFiles);
-                    break;
-                case LIBRARY:
-                case VARIABLE:
-                case BUILTIN_VARIABLE:
-                    interest = acceptVariableOrLibraryFile(currentFileWithType, visitor);
-                    break;
-                default:
-                    throw new RuntimeException("Unhandled " + currentFileWithType);
-            }
-            int nextPriorityLevel = unprocessedFiles.peekLowestPriority();
-            switch (interest) {
-                case STOP:
-                case CONTINUE_TO_END_OF_CURRENT_FILE:
-                    return;
-                case CONTINUE_TO_END_OF_CURRENT_PRIORITY_LEVEL:
-                    if (nextPriorityLevel != currentPriorityLevel) {
-                        return;
-                    }
-                    break;
-            }
-            currentPriorityLevel = nextPriorityLevel;
-        }
-    }
-
-    private static VisitorInterest acceptResourceFile(FileWithType currentFileWithType, DefinitionMatchVisitor visitor, Collection<FileWithType> unprocessedFiles, Set<FileWithType> allFiles) {
-        IFile currentFile = currentFileWithType.getFile();
-        RobotFile currentRobotFile = RobotFile.get(currentFile, true);
-        List<RobotLine> lines;
-        if (currentRobotFile == null) {
-            return CONTINUE;
-        }
-        lines = currentRobotFile.getLines();
-        VisitorInterest interest = CONTINUE;
-        for (RobotLine line : lines) {
-            if (line.isType(visitor.getWantedLineType())) {
-                ParsedString proposal = line.arguments.get(0);
-                interest = visitor.visitMatch(proposal, currentFileWithType);
-                if (interest == STOP) {
-                    return STOP;
-                }
-            }
-        }
-        if (interest != CONTINUE_TO_END_OF_CURRENT_FILE) {
-            for (RobotLine line : lines) {
-                if (line.isResourceSetting()) {
-                    if (visitor.visitImport(currentFile, line)) {
-                        processLinkableFile(unprocessedFiles, allFiles, currentFile, line, FileType.RESOURCE);
-                    }
-                } else if (line.isVariableSetting()) {
-                    if (visitor.visitImport(currentFile, line)) {
-                        processLinkableFile(unprocessedFiles, allFiles, currentFile, line, FileType.VARIABLE);
-                    }
-                } else if (line.isLibrarySetting()) {
-                    if (visitor.visitImport(currentFile, line)) {
-                        processUnlinkableFile(unprocessedFiles, allFiles, line, FileType.LIBRARY, currentFileWithType.getProject());
-                    }
-                }
-            }
-        }
-        return interest;
-    }
-
-    private static void processLinkableFile(Collection<FileWithType> unprocessedFiles, Set<FileWithType> allFiles, IFile currentFile, RobotLine line, FileType type) {
-        ParsedString secondArgument = line.arguments.get(1);
-        IFile resourceFile = ResourceManagerProvider.get().getRelativeFile(currentFile, secondArgument.getUnescapedValue());
-        FileWithType fileWithType = new FileWithType(type, resourceFile);
-        if (resourceFile.exists()) {
-            addIfNew(unprocessedFiles, allFiles, fileWithType);
-        }
-    }
-
-    private static void processUnlinkableFile(Collection<FileWithType> unprocessedFiles, Set<FileWithType> allFiles, RobotLine line, FileType type, IProject project) {
-        ParsedString secondArgument = line.arguments.get(1);
-        FileWithType fileWithType = new FileWithType(type, secondArgument.getValue(), project);
-        if (!secondArgument.isEmpty()) {
-            addIfNew(unprocessedFiles, allFiles, fileWithType);
-        }
-    }
-
-    private static void addIfNew(Collection<FileWithType> unprocessedFiles, Set<FileWithType> allFiles, FileWithType fileWithType) {
-        if (allFiles.add(fileWithType)) {
-            unprocessedFiles.add(fileWithType);
-        }
-    }
-
-    private static VisitorInterest acceptVariableOrLibraryFile(FileWithType currentFileWithType, DefinitionMatchVisitor visitor) {
-        switch (visitor.getWantedLineType()) {
-            case KEYWORD_TABLE_KEYWORD_BEGIN: {
-                List<String> keywords = IndexFile.getKeywords(currentFileWithType);
-                return acceptList(keywords, ArgumentType.NEW_KEYWORD, visitor, currentFileWithType);
-            }
-            case VARIABLE_TABLE_LINE: {
-                List<String> variables = IndexFile.getVariables(currentFileWithType);
-                return acceptList(variables, ArgumentType.VARIABLE_KEY, visitor, currentFileWithType);
-            }
-        }
-        return CONTINUE;
-    }
-
-    static VisitorInterest acceptList(List<String> proposals, ArgumentType type, DefinitionMatchVisitor visitor, FileWithType fileWithType) {
-        VisitorInterest interest = CONTINUE;
-        for (String proposalStr : proposals) {
-            ParsedString proposal = new ParsedString(proposalStr, 0); // offset 0 = "located" at beginning of file
-            proposal.setType(type);
-            interest = visitor.visitMatch(proposal, fileWithType);
-            if (interest == STOP) {
-                return STOP;
-            }
-        }
-        return interest;
+        LineFinder.acceptMatches(file, new LineMatchVisitorAdapter(visitor));
     }
 
 }

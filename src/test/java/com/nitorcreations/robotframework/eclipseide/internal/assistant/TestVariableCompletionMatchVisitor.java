@@ -24,9 +24,9 @@ import java.util.List;
 import org.eclipse.jface.text.Region;
 import org.junit.Test;
 
-import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionMatchVisitor.VisitorInterest;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileType;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
+import com.nitorcreations.robotframework.eclipseide.internal.util.VisitorInterest;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class TestVariableCompletionMatchVisitor {

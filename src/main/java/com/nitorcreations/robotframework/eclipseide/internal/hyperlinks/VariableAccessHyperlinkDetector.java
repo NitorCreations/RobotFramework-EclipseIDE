@@ -28,6 +28,7 @@ import com.nitorcreations.robotframework.eclipseide.internal.rules.VariableUtils
 import com.nitorcreations.robotframework.eclipseide.internal.util.BaseDefinitionMatchVisitor;
 import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionFinder;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
+import com.nitorcreations.robotframework.eclipseide.internal.util.VisitorInterest;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 /**

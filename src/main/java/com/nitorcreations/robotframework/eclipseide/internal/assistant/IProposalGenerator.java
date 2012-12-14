@@ -23,8 +23,14 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public interface IProposalGenerator {
 
-    void addVariableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposal> proposals, int maxVariableCharPos, int maxSettingCharPos);
+    void addTableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets);
 
-    void addKeywordProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposal> proposals);
+    void addSettingTableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets);
+
+    void addVariableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets, int maxVariableCharPos, int maxSettingCharPos);
+
+    void addKeywordCallProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets);
+
+    void addKeywordDefinitionProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets);
 
 }
