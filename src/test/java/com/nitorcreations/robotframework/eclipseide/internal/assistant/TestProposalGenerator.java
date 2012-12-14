@@ -88,11 +88,15 @@ public class TestProposalGenerator {
         }
 
         protected void verifyProposal(RobotCompletionProposalSet proposalSet, int index, String expectedDisplayString, String expectedCompletion) throws BadLocationException {
+            verifyProposal(proposalSet, index, expectedDisplayString, expectedCompletion, null, null);
+        }
+
+        protected void verifyProposal(RobotCompletionProposalSet proposalSet, int index, String expectedDisplayString, String expectedCompletion, Integer matchOffset, Integer matchLength) throws BadLocationException {
             RobotCompletionProposal proposal = proposalSet.getProposals().get(index);
             assertEquals(expectedDisplayString, proposal.getDisplayString());
             final IDocument document = mock(IDocument.class, "document");
             proposal.apply(document);
-            verify(document).replace(anyInt(), anyInt(), eq(expectedCompletion));
+            verify(document).replace(matchOffset != null ? eq(matchOffset) : anyInt(), matchLength != null ? eq(matchLength) : anyInt(), eq(expectedCompletion));
         }
     }
 
@@ -186,6 +190,25 @@ public class TestProposalGenerator {
                 verifyProposal(proposalSet, 1, FOO_VARIABLE, FOO_VARIABLE);
                 verifyProposal(proposalSet, 2, LINKED_PREFIX + LINKED_VARIABLE, LINKED_VARIABLE);
                 // ${LINKEDVAR} not included twice
+            }
+
+            @Test
+            // #43
+            public void should_replace_partially_typed_variable() throws Exception {
+                List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
+                String origContents1 = "*Variables\n" + FOO_VARIABLE + "  bar\n*Testcase\n  Log  ";
+                String origContents2 = "${F";
+                String origContents = origContents1 + origContents2;
+                IFile origFile = addFile("orig.txt", origContents);
+
+                ParsedString argument = new ParsedString(origContents2, origContents1.length());
+                proposalGenerator.addVariableProposals(origFile, argument, origContents.length(), proposalSets, Integer.MAX_VALUE, Integer.MAX_VALUE);
+
+                assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
+                RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+                assertEquals(true, proposalSet.isBasedOnInput());
+                assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 1, proposalSet.getProposals().size());
+                verifyProposal(proposalSet, 0, FOO_VARIABLE, FOO_VARIABLE, origContents1.length(), origContents2.length());
             }
         }
 
