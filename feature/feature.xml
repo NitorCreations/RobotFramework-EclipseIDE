@@ -2,7 +2,7 @@
 <feature
       id="com.nitorcreations.robotframework.eclipseide"
       label="RobotFramework Eclipse IDE"
-      version="1.0.7.SNAPSHOT"
+      version="1.0.7"
       provider-name="Nitor Creations Oy"
       os="linux,macosx,win32">
 
@@ -235,7 +235,7 @@ References:
          id="com.nitorcreations.robotframework.eclipseide"
          download-size="0"
          install-size="0"
-         version="1.0.7.SNAPSHOT"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>
