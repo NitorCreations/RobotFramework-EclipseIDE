@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -547,6 +547,9 @@ public class ArgumentPreParser {
             } else if (suffix.equals("s")) {
                 keywordSequence_keywordArgPos = KEYWORD_ARG_POS_ALL;
             }
+        } else if (keyword.getValue().equals("Keyword Should Exist")) {
+            keywordSequence_currentArgPos = 1;
+            keywordSequence_keywordArgPos = 1;
         } else if (keyword.getValue().equals("Repeat Keyword")) {
             keywordSequence_currentArgPos = 1;
             keywordSequence_keywordArgPos = 2;
