@@ -30,7 +30,7 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import com.nitorcreations.robotframework.eclipseide.Activator;
 import com.nitorcreations.robotframework.eclipseide.PluginContext;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
-import com.nitorcreations.robotframework.eclipseide.editors.outline.RobotContentOutlinePage;
+import com.nitorcreations.robotframework.eclipseide.editors.outline.RobotOutlinePage;
 
 /**
  * https://robotframework.googlecode.com/hg/doc/userguide/ RobotFrameworkUserGuide.html?r=2.6.1 http:/
@@ -45,7 +45,7 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
 
     private final ColorManager colorManager;
 
-    private RobotContentOutlinePage outlinePage;
+    private RobotOutlinePage outlinePage;
 
     public RobotFrameworkTextfileEditor() {
         colorManager = new ColorManager();
@@ -133,7 +133,7 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
     public Object getAdapter(Class required) {
         if (IContentOutlinePage.class.equals(required)) {
             if (outlinePage == null) {
-                outlinePage = new RobotContentOutlinePage(getDocumentProvider(), this);
+                outlinePage = new RobotOutlinePage(getDocumentProvider());
                 if (getEditorInput() != null)
                     outlinePage.setInput(getEditorInput());
             }
