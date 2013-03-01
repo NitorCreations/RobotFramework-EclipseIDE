@@ -141,8 +141,15 @@ public class TestArgumentPreParser {
         }
 
         @Test
+        public void dynamickeyword_args_settings() throws Exception {
+            for (String key : new String[] { "Test Setup", "Test Teardown", "Suite Setup", "Suite Teardown" }) {
+                t("*Settings\n" + key + "  Keyword  arg", TABLE, SETTING_KEY, KEYWORD_CALL_DYNAMIC, KEYWORD_ARG);
+            }
+        }
+
+        @Test
         public void keyword_args_settings() throws Exception {
-            for (String key : new String[] { "Test Setup", "Test Teardown", "Test Template", "Suite Setup", "Suite Teardown" }) {
+            for (String key : new String[] { "Test Template" }) {
                 t("*Settings\n" + key + "  Keyword  arg", TABLE, SETTING_KEY, KEYWORD_CALL, KEYWORD_ARG);
             }
         }
@@ -191,6 +198,13 @@ public class TestArgumentPreParser {
         public void when_testcase_template_is_set_then_regular_lines_should_emit_KEYWORD_ARG_only() throws Exception {
             t("*Test cases\nTC1  [Template]  Log\n  Hello", TABLE, NEW_TESTCASE, SETTING_KEY, KEYWORD_CALL, IGNORED, KEYWORD_ARG);
             t("*Test cases\nTC1\n  Hello\n  [Template]  Log", TABLE, NEW_TESTCASE, IGNORED, KEYWORD_ARG, IGNORED, SETTING_KEY, KEYWORD_CALL);
+        }
+
+        @Test
+        public void setup_and_teardown_settings() throws Exception {
+            for (String key : new String[] { "[Setup]", "[Teardown]" }) {
+                t("*Test cases\nTC1  " + key + "  Keyword", TABLE, NEW_TESTCASE, SETTING_KEY, KEYWORD_CALL_DYNAMIC);
+            }
         }
 
         @Test
