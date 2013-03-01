@@ -25,10 +25,12 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
+import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import com.nitorcreations.robotframework.eclipseide.Activator;
 import com.nitorcreations.robotframework.eclipseide.PluginContext;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
+import com.nitorcreations.robotframework.eclipseide.editors.outline.RobotContentOutlinePage;
 
 /**
  * https://robotframework.googlecode.com/hg/doc/userguide/ RobotFrameworkUserGuide.html?r=2.6.1 http:/
@@ -42,6 +44,8 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
     public static final String EDITOR_ID = RobotFrameworkTextfileEditor.class.getName();
 
     private final ColorManager colorManager;
+
+    private RobotContentOutlinePage outlinePage;
 
     public RobotFrameworkTextfileEditor() {
         colorManager = new ColorManager();
@@ -123,6 +127,19 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
         IPreferenceStore baseEditorPreferenceStore = getPreferenceStore();
         IPreferenceStore ourPreferenceStore = Activator.getDefault().getPreferenceStore();
         setPreferenceStore(new ChainedPreferenceStore(new IPreferenceStore[] { ourPreferenceStore, baseEditorPreferenceStore }));
+    }
+
+    @Override
+    public Object getAdapter(Class required) {
+        if (IContentOutlinePage.class.equals(required)) {
+            if (outlinePage == null) {
+                outlinePage = new RobotContentOutlinePage(getDocumentProvider(), this);
+                if (getEditorInput() != null)
+                    outlinePage.setInput(getEditorInput());
+            }
+            return outlinePage;
+        }
+        return super.getAdapter(required);
     }
 }
 
