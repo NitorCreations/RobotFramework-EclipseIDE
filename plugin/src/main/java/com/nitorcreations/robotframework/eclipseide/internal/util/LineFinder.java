@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,11 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 
+import com.nitorcreations.robotframework.eclipseide.PluginContext;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.IndexFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
-import com.nitorcreations.robotframework.eclipseide.editors.ResourceManagerProvider;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -136,7 +136,7 @@ public class LineFinder {
 
     private static void processLinkableFile(Collection<FileWithType> unprocessedFiles, Set<FileWithType> allFiles, IFile currentFile, RobotLine line, FileType type) {
         ParsedString secondArgument = line.arguments.get(1);
-        IFile resourceFile = ResourceManagerProvider.get().getRelativeFile(currentFile, secondArgument.getUnescapedValue());
+        IFile resourceFile = PluginContext.getResourceManager().getRelativeFile(currentFile, secondArgument.getUnescapedValue());
         FileWithType fileWithType = new FileWithType(type, resourceFile);
         if (resourceFile.exists()) {
             addIfNew(unprocessedFiles, allFiles, fileWithType);

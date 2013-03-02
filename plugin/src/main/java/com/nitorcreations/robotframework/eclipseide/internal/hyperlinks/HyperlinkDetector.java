@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
+import com.nitorcreations.robotframework.eclipseide.PluginContext;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
-import com.nitorcreations.robotframework.eclipseide.editors.ResourceManagerProvider;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public abstract class HyperlinkDetector implements IHyperlinkDetector {
@@ -66,7 +66,7 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
         if (argument == null) {
             return null;
         }
-        IFile file = ResourceManagerProvider.get().resolveFileFor(document);
+        IFile file = PluginContext.getResourceManager().resolveFileFor(document);
         List<IHyperlink> links = new ArrayList<IHyperlink>();
         getLinks(file, rfeLine, argument, offset, links);
         if (links.isEmpty()) {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.ITokenScanner;
 
+import com.nitorcreations.robotframework.eclipseide.PluginContext;
+
 public class RobotPresentationReconciler extends PresentationReconciler {
 
     public RobotPresentationReconciler(ColorManager colorManager) {
@@ -30,7 +32,7 @@ public class RobotPresentationReconciler extends PresentationReconciler {
         DefaultDamagerRepairer dr = new DefaultDamagerRepairer(coloringScanner) {
             @Override
             public IRegion getDamageRegion(ITypedRegion partition, DocumentEvent e, boolean documentPartitioningChanged) {
-                System.out.println("Document " + ResourceManagerProvider.get().resolveFileFor(e.getDocument()) + " region changed: " + e);
+                System.out.println("Document " + PluginContext.getResourceManager().resolveFileFor(e.getDocument()) + " region changed: " + e);
                 // force damaging entire document for now; we don't support
                 // partial reparsing just yet
                 return partition;

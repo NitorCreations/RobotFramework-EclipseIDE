@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
-import com.nitorcreations.robotframework.eclipseide.editors.ResourceManagerProvider;
+import com.nitorcreations.robotframework.eclipseide.PluginContext;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 
 public class Hyperlink implements IHyperlink {
@@ -63,7 +63,7 @@ public class Hyperlink implements IHyperlink {
 
     @Override
     public void open() {
-        IEditorPart editor = ResourceManagerProvider.get().openOrReuseEditorFor(targetFile, isRobotFile);
+        IEditorPart editor = PluginContext.getResourceManager().openOrReuseEditorFor(targetFile, isRobotFile);
         if (targetRegion != null) {
             ((AbstractTextEditor) editor).selectAndReveal(targetRegion.getOffset(), targetRegion.getLength());
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 
-import com.nitorcreations.robotframework.eclipseide.editors.ResourceManagerProvider;
+import com.nitorcreations.robotframework.eclipseide.PluginContext;
 
 public class RobotFile {
 
@@ -81,7 +81,7 @@ public class RobotFile {
     }
 
     public static void erase(IDocument document) {
-        IFile file = ResourceManagerProvider.get().resolveFileFor(document);
+        IFile file = PluginContext.getResourceManager().resolveFileFor(document);
         FileInfo fileInfo = FILES.get(file);
         if (fileInfo != null) {
             fileInfo.inEditor = null;
@@ -93,7 +93,7 @@ public class RobotFile {
 
     private static RobotFile get(IFile file, boolean useEditorVersion, boolean useCached, IProgressMonitor monitor) {
         if (useEditorVersion) {
-            IDocument document = ResourceManagerProvider.get().resolveDocumentFor(file);
+            IDocument document = PluginContext.getResourceManager().resolveDocumentFor(file);
             if (document != null) {
                 return get(document, useCached);
             }
@@ -121,7 +121,7 @@ public class RobotFile {
     }
 
     private static RobotFile get(IDocument document, boolean useCached) {
-        IFile file = ResourceManagerProvider.get().resolveFileFor(document);
+        IFile file = PluginContext.getResourceManager().resolveFileFor(document);
         FileInfo fileInfo = FILES.get(file);
         if (useCached && fileInfo != null && fileInfo.inEditor != null) {
             return fileInfo.inEditor;

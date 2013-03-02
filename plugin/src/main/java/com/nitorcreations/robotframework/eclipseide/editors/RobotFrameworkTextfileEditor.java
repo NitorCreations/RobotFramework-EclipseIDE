@@ -27,6 +27,7 @@ import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import com.nitorcreations.robotframework.eclipseide.Activator;
+import com.nitorcreations.robotframework.eclipseide.PluginContext;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.editors.outline.RobotOutlinePage;
 
@@ -77,12 +78,12 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
     private void handleOpenDocument() {
         IDocument document = getEditedDocument();
         System.out.println("Opened document " + getEditorInput() + " -> " + document);
-        ResourceManagerProvider.get().registerEditor(this);
+        PluginContext.getResourceManager().registerEditor(this);
     }
 
     private void handleCloseDocument(IEditorInput old) {
         System.out.println("Closing document " + old);
-        ResourceManagerProvider.get().unregisterEditor(this);
+        PluginContext.getResourceManager().unregisterEditor(this);
         RobotFile.erase(getEditedDocument());
     }
 

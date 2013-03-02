@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 
-import com.nitorcreations.robotframework.eclipseide.editors.ResourceManagerProvider;
+import com.nitorcreations.robotframework.eclipseide.PluginContext;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 /**
@@ -96,7 +96,7 @@ public class Lexer {
      * @param document
      */
     public Lexer(IDocument document) {
-        this.filename = ResourceManagerProvider.get().resolveFileFor(document).toString();
+        this.filename = PluginContext.getResourceManager().resolveFileFor(document).toString();
         this.filestream = new StringReader(document.get());
         this.monitor = new NullProgressMonitor();
     }

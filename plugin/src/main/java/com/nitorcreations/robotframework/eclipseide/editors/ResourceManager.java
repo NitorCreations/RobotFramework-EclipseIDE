@@ -33,7 +33,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 
-final class ResourceManager implements IResourceManager {
+public final class ResourceManager implements IResourceManager {
 
     private final Map<File, Resource> resources = new HashMap<File, Resource>();
 
