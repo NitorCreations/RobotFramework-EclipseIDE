@@ -2,7 +2,7 @@
 <feature
       id="com.nitorcreations.robotframework.eclipseide.feature"
       label="RobotFramework Eclipse IDE"
-      version="1.1.0"
+      version="1.1.1"
       provider-name="Nitor Creations Oy"
       plugin="com.nitorcreations.robotframework.eclipseide"
       os="linux,macosx,win32">
