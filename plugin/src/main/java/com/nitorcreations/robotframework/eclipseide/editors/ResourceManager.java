@@ -18,7 +18,6 @@ package com.nitorcreations.robotframework.eclipseide.editors;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -125,11 +124,7 @@ final class ResourceManager implements IResourceManager {
     }
 
     private URI uriForPath(IPath path) {
-        try {
-            return new URI("file", null, path.toString(), null);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        return new File(path.toString()).toURI();
     }
 
     @Override
