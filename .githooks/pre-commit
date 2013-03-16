@@ -1,0 +1,117 @@
+#!/usr/bin/perl
+
+# Copyright 2013 Nitor Creations Oy
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+use strict;
+use warnings;
+use IPC::Open2;
+
+sub resolveLicenseFormat {
+    my $file = $_[0];
+    my $licenseFormat;
+    if ($file =~ m!\.java$!) {
+	$licenseFormat = 'javadoc';
+    } elsif ($file =~ m!\.txt$! || $file =~ m!\.pl$! || $file eq '.githooks/pre-commit') {
+	$licenseFormat = 'hash';
+    }
+    return $licenseFormat;
+}
+
+my $EMPTY_SHA = 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391';
+
+my $reporoot = `pwd`;
+chomp $reporoot;
+
+my $scriptDir = $reporoot.'/.githooks';
+my $licenseScript = $scriptDir.'/license.pl';
+die "Missing $licenseScript" unless(-r $licenseScript);
+
+my $origsep = $/;
+$/="\0";
+
+my @stage;
+open my $file_list_fh, '-|', 'git', 'ls-files', '--stage', '-z' or die;
+while(<$file_list_fh>) {
+    chomp;
+    die $_ unless(m!^([0-7]{6}) ([0-9a-f]{40}) ([0-3])\t(.*)$!);
+    push @stage, { mode => $1, sha => $2, stage => $3, name => $4 };
+}
+close $file_list_fh;
+
+my %changed;
+open my $change_list_fh, '-|', 'git', 'diff', '--cached', '--raw', '-z', '--name-only', '--no-renames', '--diff-filter=AM' or die;
+while(<$change_list_fh>) {
+    chomp;
+    $changed{$_} = 1;
+}
+close $change_list_fh;
+
+$/=$origsep;
+
+my @badlyPatched;
+foreach my $staged (@stage) {
+    next if ($staged->{stage} != 0); # conflict exists for file, skip
+
+    my $licenseFormat = resolveLicenseFormat($staged->{name});
+
+    next unless(defined($licenseFormat)); # no license formatting for file, skip
+
+    next unless(defined($changed{$staged->{name}})); # file did not change, skip
+    
+    # transform file and store transformed in git
+    # transformedsha=`git cat-file blob <origsha> | perl license.pl LICENSE-<format> <filepath> | git hash-object -w --path <filepath> --stdin`
+    local *orig_fh;
+    open(\*orig_fh, '-|', 'git', 'cat-file', 'blob', $staged->{sha}) or die 'git cat-file '.$staged->{sha};
+    local *transformed_fh;
+    my $transform_pid = open2(\*transformed_fh, '<&orig_fh', 'perl', $licenseScript, $scriptDir.'/LICENSE-'.$licenseFormat, $staged->{name}) or die 'perl license.pl';
+    local *transformed_sha_fh;
+    my $sha_pid = open2(\*transformed_sha_fh, '<&transformed_fh', 'git', 'hash-object', '-w', '--path', $staged->{name}, '--stdin') or die 'git hash-object';
+	
+    my $transformed_sha = <transformed_sha_fh>;
+    die 'read git hash-object sha' unless(defined($transformed_sha));
+    close transformed_sha_fh;
+    chomp $transformed_sha;
+    
+    waitpid $transform_pid, 0;
+    die "License transformer failed ".($? >> 8) if ($? >> 8);
+    waitpid $sha_pid, 0;
+    die "git hash-object failed ".($? >> 8) if ($? >> 8);
+
+    die "Refusing to result in empty file" if($transformed_sha eq $EMPTY_SHA);
+    
+    unless ($staged->{sha} eq $transformed_sha) {
+	# update index to use transformed version
+	system('git', 'update-index', '--cacheinfo', $staged->{mode}, $transformed_sha, $staged->{name}) and die 'git update-index '.$transformed_sha.' '.$staged->{name}.' returned '.($? >> 8);
+
+	# update checkout
+	# git diff <origsha> <transformedsha> | patch --no-backup-if-mismatch <filepath>
+	local *diff_fh;
+	open(\*diff_fh, '-|', 'git', 'diff', $staged->{sha}, $transformed_sha) or die 'git diff';
+	my $patch_pid = open2('>&STDOUT', '<&diff_fh', 'patch', '--no-backup-if-mismatch', $staged->{name}) or die 'patch';
+	waitpid $patch_pid, 0;
+	if ($? >> 8) {
+	    push @badlyPatched, $staged->{name};
+	}
+    }
+}
+
+if ($#badlyPatched >= 0) {
+    print STDERR ("\n",
+		  "ERROR: Unable to apply license update in the checkout to the following files:\n",
+		  "  ",join("\n  ", @badlyPatched),"\n",
+		  "\n",
+		  "Please apply the license updates manually for these files. Possibly see the associated .rej files for what changes are needed.\n",
+		  "\n");
+}
