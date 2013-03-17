@@ -31,122 +31,146 @@ sub resolveLicenseFormat {
 
 my $EMPTY_SHA = 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391';
 
-my $reporoot = `pwd`;
-chomp $reporoot;
+my $repoRootDir = `pwd`;
+chomp $repoRootDir;
 
-my $scriptDir = $reporoot.'/.githooks';
+my $scriptDir = $repoRootDir.'/.githooks';
 my $licenseScript = $scriptDir.'/license.pl';
 die "Missing $licenseScript" unless(-r $licenseScript);
 
-my $origsep = $/;
+my $origLineSeparator = $/;
 $/="\0";
 
-my @stage;
-open my $file_list_fh, '-|', 'git', 'ls-files', '--stage', '-z' or die;
-while(<$file_list_fh>) {
+# get list of files in stage
+my @filesInStage;
+open my $fileListFh, '-|', qw(git ls-files --stage -z) or die;
+while(<$fileListFh>) {
     chomp;
     die $_ unless(m!^([0-7]{6}) ([0-9a-f]{40}) ([0-3])\t(.*)$!);
-    push @stage, { mode => $1, sha => $2, stage => $3, name => $4 };
+    push @filesInStage, { mode => $1, sha => $2, stage => $3, name => $4 };
 }
-close $file_list_fh;
+close $fileListFh;
 
+# get list of files that will be changed by this commit
 my %changed;
-open my $change_list_fh, '-|', 'git', 'diff', '--cached', '--raw', '-z', '--name-only', '--no-renames', '--diff-filter=AM' or die;
-while(<$change_list_fh>) {
+open my $changeListFh, "-|", qw(git diff --cached --raw -z --name-only --no-renames --diff-filter=AM) or die;
+while(<$changeListFh>) {
     chomp;
     $changed{$_} = 1;
 }
-close $change_list_fh;
+close $changeListFh;
 
-$/=$origsep;
+$/=$origLineSeparator;
 
-my @badlyPatched;
-my $files_with_license_problems = 0;
-foreach my $staged (@stage) {
+# For all files, check license. For files with changes add/update the license as needed.
+my @filesInCheckoutThatCouldNotBePatchedWithLicenseUpdate;
+my $numFilesWithLicenseBrokenOrMissing = 0;
+foreach my $staged (@filesInStage) {
     next if ($staged->{stage} != 0); # conflict exists for file, skip
 
     my $licenseFormat = resolveLicenseFormat($staged->{name});
 
     next unless(defined($licenseFormat)); # no license formatting for file, skip
 
-    my $file_changed = defined($changed{$staged->{name}});
+    my $isFileChangedByCommit = defined($changed{$staged->{name}});
 
     # transform file and store transformed in git
-    # transformedsha=`git cat-file blob <origsha> | perl license.pl LICENSE-<format> <filepath> | git hash-object -w --path <filepath> --stdin`
-    local *orig_fh;
-    open(\*orig_fh, '-|', 'git', 'cat-file', 'blob', $staged->{sha}) or die 'git cat-file '.$staged->{sha};
-    local *transformed_fh;
-    my @transform_cmd = ('perl', $licenseScript, $scriptDir.'/LICENSE-'.$licenseFormat, $staged->{name});
-    if (!$file_changed) {
-	splice(@transform_cmd, 2, 0, "-n");
-    }
-    my $transform_pid = open2(\*transformed_fh, '<&orig_fh', @transform_cmd) or die 'perl license.pl';
+    # transformedsha=`git cat-file blob <origsha> | perl license.pl LICENSE-<format> <file> | git hash-object -w --path <filepath> --stdin`
 
-    if (!$file_changed) {
-	# file not changed, just ensure license is present
-	waitpid $transform_pid, 0;
+    # Run "git cat-file blob <origsha>" to get the staged files' contents on stdout e.g. readable through *origFileContentFh
+    local *origFileContentFh;
+    open(\*origFileContentFh, '-|', 'git', 'cat-file', 'blob', $staged->{sha}) or die 'git cat-file '.$staged->{sha};
+
+    # Run "perl <licenseScript> [-n] LICENSE-<format> <file>". stdin: original contents from *origFileContentFh, stdout: without -n: transformed contents (may be identical) through *transformedFileContentFh; with -n: nothing
+    local *transformedFileContentFh;
+    my @transformCommand = ('perl', $licenseScript, $scriptDir.'/LICENSE-'.$licenseFormat, $staged->{name});
+    if (!$isFileChangedByCommit) {
+	# add "-n" aka "dry run" because file is not changed by this commit. In this case stdout will not contain anything.
+	splice(@transformCommand, 2, 0, "-n");
+    }
+    my $licenseTransformerPid = open2(\*transformedFileContentFh, '<&origFileContentFh', @transformCommand) or die 'perl license.pl';
+
+    if (!$isFileChangedByCommit) {
+	# file not changed, just check license
+	waitpid $licenseTransformerPid, 0;
 	my $ret = $? >> 8;
 	if ($ret == 0) {
 	    # license ok
 	} elsif ($ret == 1) {
 	    # license malformed, error already reported by script
-	    ++$files_with_license_problems;
+	    ++$numFilesWithLicenseBrokenOrMissing;
 	} elsif ($ret == 2) {
 	    # license missing
 	    print STDERR "ERROR: License missing in ",$staged->{name},"\n";
-	    ++$files_with_license_problems;
+	    ++$numFilesWithLicenseBrokenOrMissing;
 	} else {
 	    die "Unhandled $licenseScript exit code $ret";
 	}
     } else {
 	# file changed, add license or update license to contain current year
-	
-	local *transformed_sha_fh;
-	my $sha_pid = open2(\*transformed_sha_fh, '<&transformed_fh', 'git', 'hash-object', '-w', '--path', $staged->{name}, '--stdin') or die 'git hash-object';
-	
-	my $transformed_sha = <transformed_sha_fh>;
-	die 'read git hash-object sha' unless(defined($transformed_sha));
-	close transformed_sha_fh;
-	chomp $transformed_sha;
-	
-	waitpid $transform_pid, 0;
+
+	# Run "git hash-object -w --path <file> --stdin". stdin: transformed contents from *transformedFileContentFh, stdout: sha of contents through *transformedShaFh
+	local *transformedShaFh;
+	my $gitHashObjectPid = open2(\*transformedShaFh, '<&transformedFileContentFh', 'git', 'hash-object', '-w', '--path', $staged->{name}, '--stdin') or die 'git hash-object';
+
+	# read sha of transformed file
+	my $transformedSha = <transformedShaFh>;
+	die 'read git hash-object sha' unless(defined($transformedSha));
+	close transformedShaFh;
+	chomp $transformedSha;
+
+	# check exit codes of commands run
+	waitpid $licenseTransformerPid, 0;
 	my $ret = $? >> 8;
 	if ($ret == 1) {
 	    print STDERR "Please correct the problems before re-attempting commit\n";
 	    exit(1);
-	} elsif($ret != 0) {
+	} elsif ($ret != 0) {
 	    die "Unhandled $licenseScript exit code $ret";
 	}
-	waitpid $sha_pid, 0;
+	waitpid $gitHashObjectPid, 0;
 	die "git hash-object failed ".($? >> 8) if ($? >> 8);
-	
-	die "Refusing to result in empty file" if($transformed_sha eq $EMPTY_SHA);
-	
-	unless ($staged->{sha} eq $transformed_sha) {
-	    # update index to use transformed version
-	    system('git', 'update-index', '--cacheinfo', $staged->{mode}, $transformed_sha, $staged->{name}) and die 'git update-index '.$transformed_sha.' '.$staged->{name}.' returned '.($? >> 8);
-	    
-	    # update checkout
-	    # git diff <origsha> <transformedsha> | patch --no-backup-if-mismatch <filepath>
-	    local *diff_fh;
-	    open(\*diff_fh, '-|', 'git', 'diff', $staged->{sha}, $transformed_sha) or die 'git diff';
-	    my $patch_pid = open2('>&STDOUT', '<&diff_fh', 'patch', '--no-backup-if-mismatch', $staged->{name}) or die 'patch';
-	    waitpid $patch_pid, 0;
+
+	# sanity check
+	die "Refusing to result in empty file" if($transformedSha eq $EMPTY_SHA);
+
+	# if transformed version is different from original, update stage and checkout with transformed version
+	unless ($staged->{sha} eq $transformedSha) {
+	    # Update stage by using the sha of the transformed contents for the filename in question
+
+	    # Run "git update-index --cacheinfo <mode> <sha> <file>" to update stage with transformed version
+	    system('git', 'update-index', '--cacheinfo', $staged->{mode}, $transformedSha, $staged->{name}) and die 'git update-index '.$transformedSha.' '.$staged->{name}.' returned '.($? >> 8);
+
+	    # The file in the checkout may be different than the file
+	    # in the index, so we cannot overwrite it directly.
+	    # Instead we try to apply the differencies applied by the
+	    # license transformer, and in case that fails, let user
+	    # resolve it.
+
+	    # Run "git diff <origsha> <transformedsha>". stdin: none, stdout: effective diff of license transformer operation
+	    local *licenseDiffFh;
+	    open(\*licenseDiffFh, '-|', 'git', 'diff', $staged->{sha}, $transformedSha) or die 'git diff';
+
+	    # Run "patch --no-backup-if-mismatch <filepath>". stdin: license diff, stdout: passed on to our stdout
+	    my $checkoutPatchPid = open2('>&STDOUT', '<&licenseDiffFh', 'patch', '--no-backup-if-mismatch', $staged->{name}) or die 'patch';
+
+	    # check exit codes of commands run
+	    waitpid $checkoutPatchPid, 0;
 	    if ($? >> 8) {
-		push @badlyPatched, $staged->{name};
+		push @filesInCheckoutThatCouldNotBePatchedWithLicenseUpdate, $staged->{name};
 	    }
 	}
     }
 }
 
-if ($#badlyPatched >= 0) {
+if ($#filesInCheckoutThatCouldNotBePatchedWithLicenseUpdate >= 0) {
     print STDERR ("\n",
 		  "WARNING: Unable to apply license update in the checkout to the following files:\n",
-		  "  ",join("\n  ", @badlyPatched),"\n",
+		  "  ",join("\n  ", @filesInCheckoutThatCouldNotBePatchedWithLicenseUpdate),"\n",
 		  "\n",
 		  "Please apply the license updates manually for these files. Possibly see the associated .rej files for what changes are needed.\n",
 		  "\n");
 }
-if ($files_with_license_problems) {
+if ($numFilesWithLicenseBrokenOrMissing) {
     print STDERR "NOTE: Some files had license problems, kindly fix them in a separate commit.\n";
 }
