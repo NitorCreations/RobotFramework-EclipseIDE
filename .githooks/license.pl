@@ -23,7 +23,17 @@ my $EMPTY_LINE_AFTER_HASHBANG = 1;
 
 undef $/;
 
-die "Wrong number of args, expected 2" if ($#ARGV != 1);
+my $dry_run = $#ARGV >= 0 && $ARGV[0] eq '-n';
+shift @ARGV if($dry_run);
+
+if ($#ARGV != 1) {
+    print STDERR "usage: license.pl [-n] <license-file-to-use> <source-file-name>\n\n";
+    print STDERR " -n does not write anything on stdout, just report license status as exit code:\n";
+    print STDERR "     0 - license ok\n";
+    print STDERR "     1 - license malformed\n";
+    print STDERR "     2 - license missing\n";
+    exit(10);
+}
 
 my ($license_text_file, $source_file) = @ARGV;
 
@@ -138,6 +148,7 @@ my $license_regexp = regexpify_license($license);
 my $years_str;
 if ($contents =~ s!^$license_regexp!!s) { # this removes the license as a side effect
     # license present, construct new $years_str based on currently mentioned years
+    exit(0) if($dry_run);
     my %years = unpack_ranges($1);
     $years{$author_year} = 1; # add current year to set if not yet there
     $years_str = pack_ranges(%years);
@@ -148,12 +159,13 @@ if ($contents =~ s!^$license_regexp!!s) { # this removes the license as a side e
     my @license_line_regexps = map { regexpify_license($_) } grep { m![a-zA-Z]! } split("\n", $license);
     foreach my $license_line_regexp (@license_line_regexps) {
 	if ($contents =~ m!^$license_line_regexp$!m) {
-	    print STDERR "License header seems broken in $source_file, please fix manually\n";
+	    print STDERR "ERROR: License header broken in ",$source_file," - please fix manually\n";
 	    exit(1);
 	}
     }
 
     # no license - new list of years is just current year
+    exit(2) if($dry_run);
     $years_str = $author_year;
 }
 
