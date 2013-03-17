@@ -61,7 +61,7 @@ close $change_list_fh;
 $/=$origsep;
 
 my @badlyPatched;
-my $files_missing_license = 0;
+my $files_with_license_problems = 0;
 foreach my $staged (@stage) {
     next if ($staged->{stage} != 0); # conflict exists for file, skip
 
@@ -90,9 +90,13 @@ foreach my $staged (@stage) {
 	    # license ok
 	} elsif ($ret == 1) {
 	    # license malformed, error already reported by script
+	    ++$files_with_license_problems;
 	} elsif ($ret == 2) {
 	    # license missing
 	    print STDERR "ERROR: License missing in ",$staged->{name},"\n";
+	    ++$files_with_license_problems;
+	} else {
+	    die "Unhandled $licenseScript exit code $ret";
 	}
     } else {
 	# file changed, add license or update license to contain current year
@@ -106,7 +110,13 @@ foreach my $staged (@stage) {
 	chomp $transformed_sha;
 	
 	waitpid $transform_pid, 0;
-	die "License transformer failed ".($? >> 8) if ($? >> 8);
+	my $ret = $? >> 8;
+	if ($ret == 1) {
+	    print STDERR "Please correct the problems before re-attempting commit\n";
+	    exit(1);
+	} elsif($ret != 0) {
+	    die "Unhandled $licenseScript exit code $ret";
+	}
 	waitpid $sha_pid, 0;
 	die "git hash-object failed ".($? >> 8) if ($? >> 8);
 	
@@ -136,4 +146,7 @@ if ($#badlyPatched >= 0) {
 		  "\n",
 		  "Please apply the license updates manually for these files. Possibly see the associated .rej files for what changes are needed.\n",
 		  "\n");
+}
+if ($files_with_license_problems) {
+    print STDERR "NOTE: Some files had license problems, kindly fix them in a separate commit.\n";
 }
