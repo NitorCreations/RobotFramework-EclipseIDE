@@ -61,6 +61,7 @@ close $change_list_fh;
 $/=$origsep;
 
 my @badlyPatched;
+my $files_missing_license = 0;
 foreach my $staged (@stage) {
     next if ($staged->{stage} != 0); # conflict exists for file, skip
 
@@ -68,48 +69,69 @@ foreach my $staged (@stage) {
 
     next unless(defined($licenseFormat)); # no license formatting for file, skip
 
-    next unless(defined($changed{$staged->{name}})); # file did not change, skip
-    
+    my $file_changed = defined($changed{$staged->{name}});
+
     # transform file and store transformed in git
     # transformedsha=`git cat-file blob <origsha> | perl license.pl LICENSE-<format> <filepath> | git hash-object -w --path <filepath> --stdin`
     local *orig_fh;
     open(\*orig_fh, '-|', 'git', 'cat-file', 'blob', $staged->{sha}) or die 'git cat-file '.$staged->{sha};
     local *transformed_fh;
-    my $transform_pid = open2(\*transformed_fh, '<&orig_fh', 'perl', $licenseScript, $scriptDir.'/LICENSE-'.$licenseFormat, $staged->{name}) or die 'perl license.pl';
-    local *transformed_sha_fh;
-    my $sha_pid = open2(\*transformed_sha_fh, '<&transformed_fh', 'git', 'hash-object', '-w', '--path', $staged->{name}, '--stdin') or die 'git hash-object';
+    my @transform_cmd = ('perl', $licenseScript, $scriptDir.'/LICENSE-'.$licenseFormat, $staged->{name});
+    if (!$file_changed) {
+	splice(@transform_cmd, 2, 0, "-n");
+    }
+    my $transform_pid = open2(\*transformed_fh, '<&orig_fh', @transform_cmd) or die 'perl license.pl';
+
+    if (!$file_changed) {
+	# file not changed, just ensure license is present
+	waitpid $transform_pid, 0;
+	my $ret = $? >> 8;
+	if ($ret == 0) {
+	    # license ok
+	} elsif ($ret == 1) {
+	    # license malformed, error already reported by script
+	} elsif ($ret == 2) {
+	    # license missing
+	    print STDERR "ERROR: License missing in ",$staged->{name},"\n";
+	}
+    } else {
+	# file changed, add license or update license to contain current year
 	
-    my $transformed_sha = <transformed_sha_fh>;
-    die 'read git hash-object sha' unless(defined($transformed_sha));
-    close transformed_sha_fh;
-    chomp $transformed_sha;
-    
-    waitpid $transform_pid, 0;
-    die "License transformer failed ".($? >> 8) if ($? >> 8);
-    waitpid $sha_pid, 0;
-    die "git hash-object failed ".($? >> 8) if ($? >> 8);
-
-    die "Refusing to result in empty file" if($transformed_sha eq $EMPTY_SHA);
-    
-    unless ($staged->{sha} eq $transformed_sha) {
-	# update index to use transformed version
-	system('git', 'update-index', '--cacheinfo', $staged->{mode}, $transformed_sha, $staged->{name}) and die 'git update-index '.$transformed_sha.' '.$staged->{name}.' returned '.($? >> 8);
-
-	# update checkout
-	# git diff <origsha> <transformedsha> | patch --no-backup-if-mismatch <filepath>
-	local *diff_fh;
-	open(\*diff_fh, '-|', 'git', 'diff', $staged->{sha}, $transformed_sha) or die 'git diff';
-	my $patch_pid = open2('>&STDOUT', '<&diff_fh', 'patch', '--no-backup-if-mismatch', $staged->{name}) or die 'patch';
-	waitpid $patch_pid, 0;
-	if ($? >> 8) {
-	    push @badlyPatched, $staged->{name};
+	local *transformed_sha_fh;
+	my $sha_pid = open2(\*transformed_sha_fh, '<&transformed_fh', 'git', 'hash-object', '-w', '--path', $staged->{name}, '--stdin') or die 'git hash-object';
+	
+	my $transformed_sha = <transformed_sha_fh>;
+	die 'read git hash-object sha' unless(defined($transformed_sha));
+	close transformed_sha_fh;
+	chomp $transformed_sha;
+	
+	waitpid $transform_pid, 0;
+	die "License transformer failed ".($? >> 8) if ($? >> 8);
+	waitpid $sha_pid, 0;
+	die "git hash-object failed ".($? >> 8) if ($? >> 8);
+	
+	die "Refusing to result in empty file" if($transformed_sha eq $EMPTY_SHA);
+	
+	unless ($staged->{sha} eq $transformed_sha) {
+	    # update index to use transformed version
+	    system('git', 'update-index', '--cacheinfo', $staged->{mode}, $transformed_sha, $staged->{name}) and die 'git update-index '.$transformed_sha.' '.$staged->{name}.' returned '.($? >> 8);
+	    
+	    # update checkout
+	    # git diff <origsha> <transformedsha> | patch --no-backup-if-mismatch <filepath>
+	    local *diff_fh;
+	    open(\*diff_fh, '-|', 'git', 'diff', $staged->{sha}, $transformed_sha) or die 'git diff';
+	    my $patch_pid = open2('>&STDOUT', '<&diff_fh', 'patch', '--no-backup-if-mismatch', $staged->{name}) or die 'patch';
+	    waitpid $patch_pid, 0;
+	    if ($? >> 8) {
+		push @badlyPatched, $staged->{name};
+	    }
 	}
     }
 }
 
 if ($#badlyPatched >= 0) {
     print STDERR ("\n",
-		  "ERROR: Unable to apply license update in the checkout to the following files:\n",
+		  "WARNING: Unable to apply license update in the checkout to the following files:\n",
 		  "  ",join("\n  ", @badlyPatched),"\n",
 		  "\n",
 		  "Please apply the license updates manually for these files. Possibly see the associated .rej files for what changes are needed.\n",
