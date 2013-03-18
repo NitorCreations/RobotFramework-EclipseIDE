@@ -18,6 +18,8 @@ use strict;
 use warnings;
 use IPC::Open2;
 
+require '.githooks/license.pm';
+
 sub resolveLicenseFormat {
     my $file = $_[0];
     my $licenseFormat;
@@ -35,8 +37,6 @@ my $repoRootDir = `pwd`;
 chomp $repoRootDir;
 
 my $scriptDir = $repoRootDir.'/.githooks';
-my $licenseScript = $scriptDir.'/license.pl';
-die "Missing $licenseScript" unless(-r $licenseScript);
 
 my $origLineSeparator = $/;
 $/="\0";
@@ -81,19 +81,16 @@ foreach my $staged (@filesInStage) {
     local *origFileContentFh;
     open(\*origFileContentFh, '-|', 'git', 'cat-file', 'blob', $staged->{sha}) or die 'git cat-file '.$staged->{sha};
 
-    # Run "perl <licenseScript> [-n] LICENSE-<format> <file>". stdin: original contents from *origFileContentFh, stdout: without -n: transformed contents (may be identical) through *transformedFileContentFh; with -n: nothing
-    local *transformedFileContentFh;
-    my @transformCommand = ('perl', $licenseScript, $scriptDir.'/LICENSE-'.$licenseFormat, $staged->{name});
-    if (!$isFileChangedByCommit) {
-	# add "-n" aka "dry run" because file is not changed by this commit. In this case stdout will not contain anything.
-	splice(@transformCommand, 2, 0, "-n");
-    }
-    my $licenseTransformerPid = open2(\*transformedFileContentFh, '<&origFileContentFh', @transformCommand) or die 'perl license.pl';
+    undef $/;
+    my $origFileContent = <origFileContentFh>;
+    $/ = $origLineSeparator;
+    close origFileContentFh;
 
+    my $license_text_file = $scriptDir.'/LICENSE-'.$licenseFormat;
     if (!$isFileChangedByCommit) {
 	# file not changed, just check license
-	waitpid $licenseTransformerPid, 0;
-	my $ret = $? >> 8;
+
+	my $ret = My::License::isLackingProperLicense($license_text_file, $staged->{name}, $origFileContent);
 	if ($ret == 0) {
 	    # license ok
 	} elsif ($ret == 1) {
@@ -104,14 +101,26 @@ foreach my $staged (@filesInStage) {
 	    print STDERR "ERROR: License missing in ",$staged->{name},"\n";
 	    ++$numFilesWithLicenseBrokenOrMissing;
 	} else {
-	    die "Unhandled $licenseScript exit code $ret";
+	    die "Unhandled isLackingProperLicense() return code $ret";
 	}
     } else {
 	# file changed, add license or update license to contain current year
 
+	my ($ret, @transformedContent) = My::License::maintainLicense($license_text_file, $staged->{name}, $origFileContent);
+	if ($ret == 1) {
+	    print STDERR "Please correct the problems before re-attempting commit\n";
+	    exit(1);
+	} elsif ($ret != 0) {
+	    die "Unhandled maintainLicense() return code $ret";
+	}
+
 	# Run "git hash-object -w --path <file> --stdin". stdin: transformed contents from *transformedFileContentFh, stdout: sha of contents through *transformedShaFh
 	local *transformedShaFh;
-	my $gitHashObjectPid = open2(\*transformedShaFh, '<&transformedFileContentFh', 'git', 'hash-object', '-w', '--path', $staged->{name}, '--stdin') or die 'git hash-object';
+	local *transformedFileContentFh;
+	my $gitHashObjectPid = open2(\*transformedShaFh, \*transformedFileContentFh, 'git', 'hash-object', '-w', '--path', $staged->{name}, '--stdin') or die 'git hash-object';
+
+	print transformedFileContentFh @transformedContent;
+	close transformedFileContentFh;
 
 	# read sha of transformed file
 	my $transformedSha = <transformedShaFh>;
@@ -120,14 +129,6 @@ foreach my $staged (@filesInStage) {
 	chomp $transformedSha;
 
 	# check exit codes of commands run
-	waitpid $licenseTransformerPid, 0;
-	my $ret = $? >> 8;
-	if ($ret == 1) {
-	    print STDERR "Please correct the problems before re-attempting commit\n";
-	    exit(1);
-	} elsif ($ret != 0) {
-	    die "Unhandled $licenseScript exit code $ret";
-	}
 	waitpid $gitHashObjectPid, 0;
 	die "git hash-object failed ".($? >> 8) if ($? >> 8);
 
