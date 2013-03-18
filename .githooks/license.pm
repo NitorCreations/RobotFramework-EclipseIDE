@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 # Copyright 2013 Nitor Creations Oy
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,40 +12,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+package My::License;
+
 use strict;
 use warnings;
 
+BEGIN {
+    use Exporter   ();
+    our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
+
+    $VERSION     = 1.00;
+    @ISA         = qw(Exporter);
+    @EXPORT      = qw(isLackingProperLicense maintainLicense); # default export list
+    #@EXPORT_OK   = qw(isLackingLicense addOrUpdateLicense); # exported if qw(function)
+    #%EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
+}
+our @EXPORT_OK;
+
 my $EMPTY_LINE_AFTER_HASHBANG = 1;
 
-# COLLECT INPUT
+my %licenseTextCache; # filename => contents
+my $author_year;
 
-undef $/;
-
-my $dry_run = $#ARGV >= 0 && $ARGV[0] eq '-n';
-shift @ARGV if($dry_run);
-
-if ($#ARGV != 1) {
-    print STDERR "usage: license.pl [-n] <license-file-to-use> <source-file-name>\n\n";
-    print STDERR " -n does not write anything on stdout, just report license status as exit code:\n";
-    print STDERR "     0 - license ok\n";
-    print STDERR "     1 - license malformed\n";
-    print STDERR "     2 - license missing\n";
-    exit(10);
+sub _getLicenseText {
+    my $license_text_file = $_[0];
+    my $license = $licenseTextCache{$license_text_file};
+    unless (defined($license)) {
+	open F, '<', $license_text_file or die 'Could not read license file';
+	my $sep = $/;
+	undef $/;
+	$license = <F>;
+	$/ = $sep;
+	close F;
+	$licenseTextCache{$license_text_file} = $license;
+    }
+    return $license;
 }
-
-my ($license_text_file, $source_file) = @ARGV;
-
-open F, '<', $license_text_file or die 'Could not read license file';
-my $license = <F>;
-close F;
-
-my $contents = <STDIN>;
-
-my $author_date = extract_timestamp($ENV{'GIT_AUTHOR_DATE'}) || time();
-my @author_date_fields = localtime($author_date);
-my $author_year = $author_date_fields[5] + 1900;
-
-# FUNCTIONS
 
 sub extract_timestamp {
     my $gitdate = $_[0];
@@ -127,53 +127,73 @@ sub pack_ranges {
     return join(", ", @year_ranges);
 }
 
-# MAIN
+sub _execute {
+    my ($license_text_file, $source_file, $contents, $dry_run) = @_;
 
-# check for possible hashbang line and temporarily detach it
+    my $author_date = extract_timestamp($ENV{'GIT_AUTHOR_DATE'}) || time();
+    my @author_date_fields = localtime($author_date);
+    $author_year = $author_date_fields[5] + 1900;
 
-my $hashbang = '';
-if ($contents =~ s{^(#!\V+\v)(?:\h*\v)*}{}s) {
-    $hashbang = $1;
-    if ($EMPTY_LINE_AFTER_HASHBANG) {
-	$hashbang .= "\n";
-    }
-}
+    my $license = _getLicenseText($license_text_file);
 
-# create regexp version of license for relaxed detection of existing license
+    # check for possible hashbang line and temporarily detach it
 
-my $license_regexp = regexpify_license($license);
-
-# check for possibly existing license and remove it
-
-my $years_str;
-if ($contents =~ s!^$license_regexp!!s) { # this removes the license as a side effect
-    # license present, construct new $years_str based on currently mentioned years
-    exit(0) if($dry_run);
-    my %years = unpack_ranges($1);
-    $years{$author_year} = 1; # add current year to set if not yet there
-    $years_str = pack_ranges(%years);
-
-} else {
-    # full license not present - see if any single line of license is
-    # present, in which case someone broke the header accidentally
-    my @license_line_regexps = map { regexpify_license($_) } grep { m![a-zA-Z]! } split("\n", $license);
-    foreach my $license_line_regexp (@license_line_regexps) {
-	if ($contents =~ m!^$license_line_regexp$!m) {
-	    print STDERR "ERROR: License header broken in ",$source_file," - please fix manually\n";
-	    exit(1);
+    my $hashbang = '';
+    if ($contents =~ s{^(#!\V+\v)(?:\h*\v)*}{}s) {
+	$hashbang = $1;
+	if ($EMPTY_LINE_AFTER_HASHBANG) {
+	    $hashbang .= "\n";
 	}
     }
 
-    # no license - new list of years is just current year
-    exit(2) if($dry_run);
-    $years_str = $author_year;
+    # create regexp version of license for relaxed detection of existing license
+
+    my $license_regexp = regexpify_license($license);
+
+    # check for possibly existing license and remove it
+
+    my $years_str;
+    if ($contents =~ s!^$license_regexp!!s) { # this removes the license as a side effect
+	# license present, construct new $years_str based on currently mentioned years
+	return 0 if($dry_run);
+	my %years = unpack_ranges($1);
+	$years{$author_year} = 1; # add current year to set if not yet there
+	$years_str = pack_ranges(%years);
+
+    } else {
+	# full license not present - see if any single line of license is
+	# present, in which case someone broke the header accidentally
+	my @license_line_regexps = map { regexpify_license($_) } grep { m![a-zA-Z]! } split("\n", $license);
+	foreach my $license_line_regexp (@license_line_regexps) {
+	    if ($contents =~ m!^$license_line_regexp$!m) {
+		print STDERR "ERROR: License header broken in ",$source_file," - please fix manually\n";
+		return 1;
+	    }
+	}
+
+	# no license - new list of years is just current year
+	return 2 if($dry_run);
+	$years_str = $author_year;
+    }
+
+    # format new license
+
+    my $newlicense = $license;
+    $newlicense =~ s!YEAR!$years_str!g;
+
+    # output
+
+    return 0, $hashbang, $newlicense, $contents;
 }
 
-# format new license
+sub isLackingProperLicense {
+    my ($license_text_file, $source_file, $contents) = @_;
+    return _execute($license_text_file, $source_file, $contents, 1);
+}
 
-my $newlicense = $license;
-$newlicense =~ s!YEAR!$years_str!g;
+sub maintainLicense {
+    my ($license_text_file, $source_file, $contents) = @_;
+    return _execute($license_text_file, $source_file, $contents, 0);
+}
 
-# output
-
-print $hashbang, $newlicense, $contents;
+1;
