@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,21 +37,22 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         // store.setDefault(PreferenceConstants.P_CHOICE, "choice2");
         // store.setDefault(PreferenceConstants.P_STRING, "Default value");
 
-        store.setDefault(PreferenceConstants.P_COMMENT, "128,128,128");
-        store.setDefault(PreferenceConstants.P_TABLE, "192,0,192");
-        store.setDefault(PreferenceConstants.P_SETTING, "0,192,0");
-        store.setDefault(PreferenceConstants.P_SETTING_VALUE, "0,255,0");
-        store.setDefault(PreferenceConstants.P_SETTING_FILE, "0,0,0"); // new RGB(255, 255, 255)
-        store.setDefault(PreferenceConstants.P_SETTING_FILE_ARG, "0,255,64");
-        store.setDefault(PreferenceConstants.P_SETTING_FILE_WITH_NAME, "192,192,192");
-        store.setDefault(PreferenceConstants.P_VARIABLE, "0,170,180");
-        store.setDefault(PreferenceConstants.P_VARIABLE_VALUE, "140,152,162"); // new RGB(180, 192, 202)
-        store.setDefault(PreferenceConstants.P_TESTCASE_NEW, "222,0,0");
-        store.setDefault(PreferenceConstants.P_KEYWORD_NEW, "128,128,50"); // new RGB(255, 255, 50)
-        store.setDefault(PreferenceConstants.P_KEYWORD_LVALUE, "255,0,180");
-        store.setDefault(PreferenceConstants.P_KEYWORD, "255,180,0");
-        store.setDefault(PreferenceConstants.P_KEYWORD_ARG, "255,100,0");
-        store.setDefault(PreferenceConstants.P_FOR_PART, "0,255,255");
+        // commented colors are for dark background
+        store.setDefault(PreferenceConstants.P_COMMENT, "128,128,128"); // 128,128,128
+        store.setDefault(PreferenceConstants.P_TABLE, "192,0,192"); // 192,0,192
+        store.setDefault(PreferenceConstants.P_SETTING, "0,128,0"); // 0,192,0
+        store.setDefault(PreferenceConstants.P_SETTING_VALUE, "0,192,0"); // 0,255,0
+        store.setDefault(PreferenceConstants.P_SETTING_FILE, "0,0,0"); // 255,255,255
+        store.setDefault(PreferenceConstants.P_SETTING_FILE_ARG, "0,192,64"); // 0,255,64
+        store.setDefault(PreferenceConstants.P_SETTING_FILE_WITH_NAME, "192,192,192"); // 192,192,192
+        store.setDefault(PreferenceConstants.P_VARIABLE, "0,170,180"); // 0,170,180
+        store.setDefault(PreferenceConstants.P_VARIABLE_VALUE, "115,124,133"); // 180,192,202
+        store.setDefault(PreferenceConstants.P_TESTCASE_NEW, "222,0,0"); // 222,0,0
+        store.setDefault(PreferenceConstants.P_KEYWORD_NEW, "128,128,50"); // 255,255,50
+        store.setDefault(PreferenceConstants.P_KEYWORD_LVALUE, "225,0,159"); // 255,0,180
+        store.setDefault(PreferenceConstants.P_KEYWORD, "212,149,0"); // 255,180,0
+        store.setDefault(PreferenceConstants.P_KEYWORD_ARG, "255,100,0"); // 255,100,0
+        store.setDefault(PreferenceConstants.P_FOR_PART, "0,128,128"); // 0,255,255
     }
 
 }
