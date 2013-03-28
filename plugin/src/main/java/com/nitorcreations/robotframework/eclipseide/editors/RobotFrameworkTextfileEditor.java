@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
@@ -88,6 +89,18 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
 
     public IFile getEditedFile() {
         return (IFile) getEditorInput().getAdapter(IFile.class);
+    }
+
+    @Override
+    protected void initializeViewerColors(ISourceViewer viewer) {
+        super.initializeViewerColors(viewer);
+        /*
+         * Workaround for issue mentioned in #36. Steps to repeat: 1. Comment out the line below 2. Change some robot
+         * ide syntax color preference and apply the changes 3. change the default text editor foreground in
+         * "General/Editors/Text Editors". As a result the editor colors are wrongly rendered. Making any change to the
+         * file fixes the problem. The line below seems to work around this problem.
+         */
+        viewer.invalidateTextPresentation();
     }
 
     @Override
