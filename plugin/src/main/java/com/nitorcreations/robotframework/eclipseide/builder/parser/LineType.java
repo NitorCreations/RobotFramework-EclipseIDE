@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,5 +37,9 @@ public enum LineType {
 
     LineType(TableType tableType) {
         this.tableType = tableType;
+    }
+
+    public boolean isTestCaseLine() {
+        return this == TESTCASE_TABLE_TESTCASE_BEGIN || this == TESTCASE_TABLE_TESTCASE_LINE;
     }
 }

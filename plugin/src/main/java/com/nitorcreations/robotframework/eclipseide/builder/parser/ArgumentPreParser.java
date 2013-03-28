@@ -360,13 +360,13 @@ public class ArgumentPreParser {
                 prepareNextToken();
             } else {
                 keywordSequence_keywordCallState = KeywordCallState.UNDETERMINED;
-                parseKeywordCall(lastRealType == LineType.TESTCASE_TABLE_TESTCASE_BEGIN || lastRealType == LineType.TESTCASE_TABLE_TESTCASE_LINE);
+                parseKeywordCall(lastRealType.isTestCaseLine());
             }
         } else {
             if (keywordSequence_isSetting) {
                 parseKeywordSequenceSetting();
             } else {
-                parseKeywordCall(lastRealType == LineType.TESTCASE_TABLE_TESTCASE_BEGIN || lastRealType == LineType.TESTCASE_TABLE_TESTCASE_LINE);
+                parseKeywordCall(lastRealType.isTestCaseLine());
             }
         }
     }
