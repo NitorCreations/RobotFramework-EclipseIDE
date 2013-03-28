@@ -27,8 +27,6 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
 
 public class ArgumentPreParser {
 
-    private static final String RUN_KEYWORD = "Run Keyword";
-
     enum SettingType {
         UNKNOWN, STRING, FILE, FILE_ARGS, KEYWORD_ARGS,
     }
@@ -316,6 +314,7 @@ public class ArgumentPreParser {
     }
 
     private void parseKeywordAndArgs() {
+
         if (!keyword_parsed) {
             keyword_parsed = true;
             ParsedString keywordOrSetting = line.arguments.get(argOff);
@@ -430,8 +429,10 @@ public class ArgumentPreParser {
                 parseKeywordCall(false);
                 return;
             }
+            default: {
+                throw new RuntimeException();
+            }
         }
-        throw new RuntimeException();
     }
 
     /**
@@ -528,8 +529,9 @@ public class ArgumentPreParser {
                 prepareNextToken();
                 return;
             }
+            default:
+                throw new RuntimeException();
         }
-        throw new RuntimeException();
     }
 
     /* The value of the map is the argument position of the keyword that the key keyword takes as a parameter. */
