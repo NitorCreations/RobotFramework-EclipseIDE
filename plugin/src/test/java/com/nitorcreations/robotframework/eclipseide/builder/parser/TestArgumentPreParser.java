@@ -277,9 +277,15 @@ public class TestArgumentPreParser {
         }
 
         @Test
+        public void template_settings_are_ignored_in_keywords() throws Exception {
+            t("*Keywords\nKW1\n  [Template]  Run Keyword\n  Test", TABLE, NEW_KEYWORD, IGNORED, SETTING_KEY, KEYWORD_CALL, IGNORED, KEYWORD_CALL);
+            t("*Settings\nTest Template  Run Keyword\n*Keywords\nKW1\n  Test", TABLE, SETTING_KEY, KEYWORD_CALL, TABLE, NEW_KEYWORD, IGNORED, KEYWORD_CALL);
+        }
+
+        @Test
         public void recursive_keyword_calls_by_template() throws Exception {
-            t("*Keywords\nKW1\n  [Template]  Run Keyword\n  Test", TABLE, NEW_KEYWORD, IGNORED, SETTING_KEY, KEYWORD_CALL, IGNORED, KEYWORD_CALL_DYNAMIC);
-            t("*Settings\nTest Template  Run Keyword\n*Keywords\nKW1\n  Test", TABLE, SETTING_KEY, KEYWORD_CALL, TABLE, NEW_KEYWORD, IGNORED, KEYWORD_CALL_DYNAMIC);
+            t("*Test Cases\nTC1\n  [Template]  Run Keyword\n  Test", TABLE, NEW_TESTCASE, IGNORED, SETTING_KEY, KEYWORD_CALL, IGNORED, KEYWORD_CALL_DYNAMIC);
+            t("*Settings\nTest Template  Run Keyword\n*Test Cases\nTC1\n  Test", TABLE, SETTING_KEY, KEYWORD_CALL, TABLE, NEW_KEYWORD, IGNORED, KEYWORD_CALL_DYNAMIC);
         }
     }
 

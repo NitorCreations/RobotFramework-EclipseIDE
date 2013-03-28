@@ -27,6 +27,8 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
 
 public class ArgumentPreParser {
 
+    private static final String RUN_KEYWORD = "Run Keyword";
+
     enum SettingType {
         UNKNOWN, STRING, FILE, FILE_ARGS, KEYWORD_ARGS,
     }
@@ -532,8 +534,8 @@ public class ArgumentPreParser {
 
     private void setUpKeywordArgPos(ParsedString keyword) {
         keywordSequence_keywordArgPos = KEYWORD_ARG_POS_NONE;
-        if (keyword.getValue().startsWith("Run Keyword")) {
-            String suffix = keyword.getValue().substring(3 + 1 + 7);
+        if (keyword.getValue().startsWith(RUN_KEYWORD)) {
+            String suffix = keyword.getValue().substring(RUN_KEYWORD.length());
             if (suffix.isEmpty() || suffix.equals(" And Continue On Failure") || suffix.equals(" And Ignore Error") //
                     || suffix.equals(" If All Critical Tests Passed") || suffix.equals(" If All Tests Passed") //
                     || suffix.equals(" If Any Critical Tests Failed") || suffix.equals(" If Any Tests Failed") //
