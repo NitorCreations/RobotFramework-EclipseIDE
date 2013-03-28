@@ -186,47 +186,16 @@ public class ArgumentPreParser {
             case VARIABLE_TABLE_BEGIN:
             case TESTCASE_TABLE_BEGIN:
             case KEYWORD_TABLE_BEGIN: {
-                assert argOff == 0;
-                ParsedString table = line.arguments.get(0);
-                table.setType(ArgumentType.TABLE);
-                prepareNextLine();
+                parseTableBeginToken();
                 return;
             }
             case SETTING_TABLE_LINE: {
-                switch (argOff) {
-                    case 0: {
-                        ParsedString setting = line.arguments.get(0);
-                        setting.setType(ArgumentType.SETTING_KEY);
-                        setting_type = settingTypes.get(setting.getValue());
-                        if (setting_type == null) {
-                            setting_type = SettingType.UNKNOWN;
-                        }
-                        setting_gotFirstArg = false;
-                        keywordSequence_keywordCallState = KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT; // TODO
-                                                                                                           // possibly
-                                                                                                           // should
-                                                                                                           // be
-                                                                                                           // KEYWORD_NOT_FOR_NOINDENT
-                        prepareNextToken();
-                        return;
-                    }
-                    default: {
-                        parseSettingArgs();
-                        return;
-                    }
-                }
+                parseSettingTableLineToken();
+                return;
             }
             case VARIABLE_TABLE_LINE: {
-                switch (argOff) {
-                    case 0:
-                        ParsedString variable = line.arguments.get(0);
-                        variable.setType(ArgumentType.VARIABLE_KEY);
-                        prepareNextToken();
-                        return;
-                    default:
-                        parseVariableArgs();
-                        return;
-                }
+                parseVariableTableLineToken();
+                return;
             }
             case COMMENT_LINE: // prepareNextLine handles the comments
             case IGNORE:
@@ -236,79 +205,137 @@ public class ArgumentPreParser {
                 return;
             }
             case TESTCASE_TABLE_TESTCASE_BEGIN:
-            case KEYWORD_TABLE_KEYWORD_BEGIN:
-                if (argOff == 0) {
-                    keyword_parsed = false;
-                    lookForLocalTestTemplate();
-                    ParsedString newName = line.arguments.get(0);
-                    if (!newName.isEmpty()) {
-                        boolean isTestCase = type == LineType.TESTCASE_TABLE_TESTCASE_BEGIN;
-                        newName.setType(isTestCase ? ArgumentType.NEW_TESTCASE : ArgumentType.NEW_KEYWORD);
-                    }
-                    prepareNextToken();
-                    return;
-                }
-
-                // FALL THROUGH
-
+            case KEYWORD_TABLE_KEYWORD_BEGIN: {
+                parseTestCaseOrKeywordTableBegin(type);
+                return;
+            }
             case TESTCASE_TABLE_TESTCASE_LINE:
             case KEYWORD_TABLE_KEYWORD_LINE: {
-                if (argOff == 0) {
-                    keyword_parsed = false;
-                    prepareNextToken();
-                    return;
-                }
-                parseKeywordAndArgs();
-                break;
+                parseTestCaseOrKeywordLineToken();
+                return;
             }
             case CONTINUATION_LINE: {
-                if (argOff == 0) {
-                    argOff = determineContinuationLineArgOff(line);
-                    if (argOff >= argLen) {
-                        prepareNextLine();
-                        return;
-                    }
+                parseContinuationLineToken();
+                return;
+            }
+        }
+    }
+
+    private void parseTableBeginToken() {
+        assert argOff == 0;
+        ParsedString table = line.arguments.get(0);
+        table.setType(ArgumentType.TABLE);
+        prepareNextLine();
+        return;
+    }
+
+    private void parseSettingTableLineToken() {
+        switch (argOff) {
+            case 0: {
+                ParsedString setting = line.arguments.get(0);
+                setting.setType(ArgumentType.SETTING_KEY);
+                setting_type = settingTypes.get(setting.getValue());
+                if (setting_type == null) {
+                    setting_type = SettingType.UNKNOWN;
                 }
-                switch (lastRealType) {
-                    case COMMENT_LINE:
-                    case CONTINUATION_LINE:
-                        throw new RuntimeException();
-                    case IGNORE:
-                    case TESTCASE_TABLE_IGNORE:
-                    case KEYWORD_TABLE_IGNORE: {
-                        // continue ignoring
-                        prepareNextLine();
-                        return;
-                    }
-                    case IGNORE_TABLE:
-                    case SETTING_TABLE_BEGIN:
-                    case VARIABLE_TABLE_BEGIN:
-                    case TESTCASE_TABLE_BEGIN:
-                    case KEYWORD_TABLE_BEGIN: {
-                        // all arguments ignored
-                        prepareNextLine();
-                        return;
-                    }
-                    case SETTING_TABLE_LINE: {
-                        parseSettingArgs();
-                        return;
-                    }
-                    case VARIABLE_TABLE_LINE: {
-                        parseVariableArgs();
-                        return;
-                    }
-                    case TESTCASE_TABLE_TESTCASE_BEGIN:
-                    case TESTCASE_TABLE_TESTCASE_LINE:
-                    case KEYWORD_TABLE_KEYWORD_BEGIN:
-                    case KEYWORD_TABLE_KEYWORD_LINE: {
-                        parseKeywordAndArgs();
-                        return;
-                    }
-                    default: {
-                        prepareNextLine();
-                        return;
-                    }
-                }
+                setting_gotFirstArg = false;
+                // TODO possibly should be KEYWORD_NOT_FOR_NOINDENT:
+                keywordSequence_keywordCallState = KeywordCallState.UNDETERMINED_NOT_FOR_NOINDENT;
+                prepareNextToken();
+                return;
+            }
+            default: {
+                parseSettingArgs();
+                return;
+            }
+        }
+    }
+
+    private void parseVariableTableLineToken() {
+        switch (argOff) {
+            case 0:
+                ParsedString variable = line.arguments.get(0);
+                variable.setType(ArgumentType.VARIABLE_KEY);
+                prepareNextToken();
+                return;
+            default:
+                parseVariableArgs();
+                return;
+        }
+    }
+
+    private void parseTestCaseOrKeywordTableBegin(LineType type) {
+        if (argOff == 0) {
+            keyword_parsed = false;
+            lookForLocalTestTemplate();
+            ParsedString newName = line.arguments.get(0);
+            if (!newName.isEmpty()) {
+                boolean isTestCase = type == LineType.TESTCASE_TABLE_TESTCASE_BEGIN;
+                newName.setType(isTestCase ? ArgumentType.NEW_TESTCASE : ArgumentType.NEW_KEYWORD);
+            }
+            prepareNextToken();
+            return;
+        }
+        parseTestCaseOrKeywordLineToken();
+        return;
+    }
+
+    private void parseTestCaseOrKeywordLineToken() {
+        if (argOff == 0) {
+            keyword_parsed = false;
+            prepareNextToken();
+            return;
+        }
+        parseKeywordAndArgs();
+        return;
+    }
+
+    private void parseContinuationLineToken() {
+        if (argOff == 0) {
+            argOff = determineContinuationLineArgOff(line);
+            if (argOff >= argLen) {
+                prepareNextLine();
+                return;
+            }
+        }
+        switch (lastRealType) {
+            case COMMENT_LINE:
+            case CONTINUATION_LINE:
+                throw new RuntimeException();
+            case IGNORE:
+            case TESTCASE_TABLE_IGNORE:
+            case KEYWORD_TABLE_IGNORE: {
+                // continue ignoring
+                prepareNextLine();
+                return;
+            }
+            case IGNORE_TABLE:
+            case SETTING_TABLE_BEGIN:
+            case VARIABLE_TABLE_BEGIN:
+            case TESTCASE_TABLE_BEGIN:
+            case KEYWORD_TABLE_BEGIN: {
+                // all arguments ignored
+                prepareNextLine();
+                return;
+            }
+            case SETTING_TABLE_LINE: {
+                parseSettingArgs();
+                return;
+            }
+            case VARIABLE_TABLE_LINE: {
+                parseVariableArgs();
+                return;
+            }
+            case TESTCASE_TABLE_TESTCASE_BEGIN:
+            case TESTCASE_TABLE_TESTCASE_LINE:
+            case KEYWORD_TABLE_KEYWORD_BEGIN:
+            case KEYWORD_TABLE_KEYWORD_LINE: {
+                parseKeywordAndArgs();
+                return;
+            }
+            default: {
+                prepareNextLine();
+                return;
             }
         }
     }
