@@ -532,32 +532,39 @@ public class ArgumentPreParser {
         throw new RuntimeException();
     }
 
+    /* The value of the map is the argument position of the keyword that the key keyword takes as a parameter. */
+    private static final Map<String, Integer> keywordsTakingKeywords = new HashMap<String, Integer>();
+    static {
+        keywordsTakingKeywords.put("Run Keyword", 1);
+        keywordsTakingKeywords.put("Run Keyword And Continue On Failure", 1);
+        keywordsTakingKeywords.put("Run Keyword And Ignore Error", 1);
+        keywordsTakingKeywords.put("Run Keyword If All Critical Tests Passed", 1);
+        keywordsTakingKeywords.put("Run Keyword If All Tests Passed", 1);
+        keywordsTakingKeywords.put("Run Keyword If Any Critical Tests Failed", 1);
+        keywordsTakingKeywords.put("Run Keyword If Any Tests Failed", 1);
+        keywordsTakingKeywords.put("Run Keyword If Test Failed", 1);
+        keywordsTakingKeywords.put("Run Keyword If Test Passed", 1);
+        keywordsTakingKeywords.put("Run Keyword If Timeout Occurred", 1);
+        keywordsTakingKeywords.put("Keyword Should Exist", 1);
+
+        keywordsTakingKeywords.put("Run Keyword And Expect Error", 2);
+        keywordsTakingKeywords.put("Run Keyword If", 2);
+        keywordsTakingKeywords.put("Run Keyword Unless", 2);
+        keywordsTakingKeywords.put("Repeat Keyword", 2);
+
+        keywordsTakingKeywords.put("Wait Until Keyword Succeeds", 3);
+
+        keywordsTakingKeywords.put("Run Keywords", KEYWORD_ARG_POS_ALL);
+    }
+
     private void setUpKeywordArgPos(ParsedString keyword) {
         keywordSequence_keywordArgPos = KEYWORD_ARG_POS_NONE;
-        if (keyword.getValue().startsWith(RUN_KEYWORD)) {
-            String suffix = keyword.getValue().substring(RUN_KEYWORD.length());
-            if (suffix.isEmpty() || suffix.equals(" And Continue On Failure") || suffix.equals(" And Ignore Error") //
-                    || suffix.equals(" If All Critical Tests Passed") || suffix.equals(" If All Tests Passed") //
-                    || suffix.equals(" If Any Critical Tests Failed") || suffix.equals(" If Any Tests Failed") //
-                    || suffix.equals(" If Test Failed") || suffix.equals(" If Test Passed") //
-                    || suffix.equals(" If Timeout Occurred")) {
+        if (keywordsTakingKeywords.containsKey(keyword.getValue())) {
+            int keywordArgumentPosition = keywordsTakingKeywords.get(keyword.getValue());
+            keywordSequence_keywordArgPos = keywordArgumentPosition;
+            if (keywordArgumentPosition != KEYWORD_ARG_POS_ALL) {
                 keywordSequence_currentArgPos = 1;
-                keywordSequence_keywordArgPos = 1;
-            } else if (suffix.equals(" And Expect Error") || suffix.equals(" If") || suffix.equals(" Unless")) {
-                keywordSequence_currentArgPos = 1;
-                keywordSequence_keywordArgPos = 2;
-            } else if (suffix.equals("s")) {
-                keywordSequence_keywordArgPos = KEYWORD_ARG_POS_ALL;
             }
-        } else if (keyword.getValue().equals("Keyword Should Exist")) {
-            keywordSequence_currentArgPos = 1;
-            keywordSequence_keywordArgPos = 1;
-        } else if (keyword.getValue().equals("Repeat Keyword")) {
-            keywordSequence_currentArgPos = 1;
-            keywordSequence_keywordArgPos = 2;
-        } else if (keyword.getValue().equals("Wait Until Keyword Succeeds")) {
-            keywordSequence_currentArgPos = 1;
-            keywordSequence_keywordArgPos = 3;
         }
     }
 
