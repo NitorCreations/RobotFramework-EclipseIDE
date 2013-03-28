@@ -17,13 +17,15 @@ package com.nitorcreations.robotframework.eclipseide.editors;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.swt.graphics.Color;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 
+import com.nitorcreations.robotframework.eclipseide.Activator;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 
 /**
@@ -89,15 +91,24 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
     }
 
     @Override
-    protected void initializeViewerColors(ISourceViewer viewer) {
-        super.initializeViewerColors(viewer);
-        colorManager.setDarkBackgroundScheme(isDarkBackground(viewer));
+    protected boolean affectsTextPresentation(PropertyChangeEvent event) {
+        return colorManager.isColorPreference(event.getProperty());
     }
 
-    private boolean isDarkBackground(ISourceViewer viewer) {
-        Color background = viewer.getTextWidget().getBackground();
-        int lightness = background.getBlue() * 11 + background.getGreen() * 59 + background.getRed() * 30;
-        return lightness < 12800;
+    @Override
+    protected void initializeEditor() {
+        super.initializeEditor();
+        /*
+         * Extend the base preferences of the editor (this class) with our own plugin preferences. The base editor
+         * (superclass) listens to changes in the preference store and uses affectsTextPresentation() above to determine
+         * whether to redraw the editor.
+         * 
+         * [ASSUMPTION] We need to include/extend the preferences of the base editor in order for base editor to operate
+         * accoding to generic editor preferences chosen by the user (font, background etc).
+         */
+        IPreferenceStore baseEditorPreferenceStore = getPreferenceStore();
+        IPreferenceStore ourPreferenceStore = Activator.getDefault().getPreferenceStore();
+        setPreferenceStore(new ChainedPreferenceStore(new IPreferenceStore[] { ourPreferenceStore, baseEditorPreferenceStore }));
     }
 }
 

@@ -66,6 +66,29 @@
          </action>
       </objectContribution>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="com.nitorcreations.robotframework.eclipseide.preferences.MainPreferencePage"
+            id="com.nitorcreations.robotframework.eclipseide.preferences.MainPreferencePage"
+            name="Robot Framework">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="com.nitorcreations.robotframework.eclipseide.preferences.ColorPreferencePage"
+            id="com.nitorcreations.robotframework.eclipseide.preferences.ColorPreferencePage"
+            category="com.nitorcreations.robotframework.eclipseide.preferences.MainPreferencePage"
+            name="Syntax Coloring">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.nitorcreations.robotframework.eclipseide.preferences.PreferenceInitializer">
+      </initializer>
+   </extension>
    <!--
    <extension
          point="org.eclipse.debug.ui.launchShortcuts">
