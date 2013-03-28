@@ -283,8 +283,12 @@ public class TestArgumentPreParser {
         }
 
         @Test
-        public void recursive_keyword_calls_by_template() throws Exception {
+        public void recursive_keyword_calls_by_local_template_setting() throws Exception {
             t("*Test Cases\nTC1\n  [Template]  Run Keyword\n  Test", TABLE, NEW_TESTCASE, IGNORED, SETTING_KEY, KEYWORD_CALL, IGNORED, KEYWORD_CALL_DYNAMIC);
+        }
+
+        @Test
+        public void recursive_keyword_calls_by_global_template_setting() throws Exception {
             t("*Settings\nTest Template  Run Keyword\n*Test Cases\nTC1\n  Test", TABLE, SETTING_KEY, KEYWORD_CALL, TABLE, NEW_KEYWORD, IGNORED, KEYWORD_CALL_DYNAMIC);
         }
     }
