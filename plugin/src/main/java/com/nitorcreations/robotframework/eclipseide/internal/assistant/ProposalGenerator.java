@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,14 +58,7 @@ public class ProposalGenerator implements IProposalGenerator {
     public void addTableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets) {
         String argumentValue = argument.getValue();
         IRegion replacementRegion = new Region(argument.getArgCharPos(), argumentValue.length());
-
-        List<String> attempts = new ArrayList<String>(3);
-        attempts.add(argumentValue);
-        int argumentOffset = documentOffset - argument.getArgCharPos();
-        if (argumentValue.length() > argumentOffset) {
-            attempts.add(argumentValue.substring(0, argumentOffset));
-        }
-        attempts.add("");
+        List<String> attempts = generateAttempts(argument, documentOffset, argumentValue);
 
         Map<String, RobotCompletionProposal> ourProposals = new LinkedHashMap<String, RobotCompletionProposal>();
         Boolean basedOnInput = null;
@@ -108,14 +101,7 @@ public class ProposalGenerator implements IProposalGenerator {
     public void addSettingTableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets) {
         String argumentValue = argument.getValue();
         IRegion replacementRegion = new Region(argument.getArgCharPos(), argumentValue.length());
-
-        List<String> attempts = new ArrayList<String>(3);
-        attempts.add(argumentValue.toLowerCase());
-        int argumentOffset = documentOffset - argument.getArgCharPos();
-        if (argumentValue.length() > argumentOffset) {
-            attempts.add(argumentValue.substring(0, argumentOffset));
-        }
-        attempts.add("");
+        List<String> attempts = generateAttempts(argument, documentOffset, argumentValue.toLowerCase());
 
         List<String> settingKeys = new ArrayList<String>(ArgumentPreParser.getSettingKeys());
         Collections.sort(settingKeys);
@@ -165,14 +151,7 @@ public class ProposalGenerator implements IProposalGenerator {
     public void addKeywordDefinitionProposals(final IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets) {
         String argumentValue = argument.getValue();
         IRegion replacementRegion = new Region(argument.getArgCharPos(), argumentValue.length());
-
-        List<String> attempts = new ArrayList<String>(3);
-        attempts.add(argumentValue.toLowerCase());
-        int argumentOffset = documentOffset - argument.getArgCharPos();
-        if (argumentValue.length() > argumentOffset) {
-            attempts.add(argumentValue.substring(0, argumentOffset));
-        }
-        attempts.add("");
+        List<String> attempts = generateAttempts(argument, documentOffset, argumentValue.toLowerCase());
 
         final Map<String, List<KeywordNeed>> undefinedKeywords = collectUndefinedKeywords(file, argument);
         RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
@@ -211,6 +190,17 @@ public class ProposalGenerator implements IProposalGenerator {
         if (!ourProposalSet.getProposals().isEmpty()) {
             proposalSets.add(ourProposalSet);
         }
+    }
+
+    private List<String> generateAttempts(ParsedString argument, int documentOffset, String lookFor) {
+        List<String> attempts = new ArrayList<String>(3);
+        attempts.add(lookFor);
+        int argumentOffset = documentOffset - argument.getArgCharPos();
+        if (lookFor.length() > argumentOffset) {
+            attempts.add(lookFor.substring(0, argumentOffset));
+        }
+        attempts.add("");
+        return attempts;
     }
 
     private static class KeywordNeed {
