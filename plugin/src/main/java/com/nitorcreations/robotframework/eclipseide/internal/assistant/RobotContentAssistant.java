@@ -63,60 +63,72 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         }
 
         IFile file = PluginContext.getResourceManager().resolveFileFor(document);
-        List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
+        List<RobotCompletionProposalSet> proposalSets;
         if (argument.getArgCharPos() <= robotLine.lineCharPos + 1) {
-            if (!argument.getValue().startsWith("*")) {
-                switch (determineTableTypeForLine(lines, lineNo)) {
-                    case KEYWORD:
-                        proposalGenerator.addKeywordDefinitionProposals(file, argument, documentOffset, proposalSets);
-                        break;
-                    case SETTING:
-                        proposalGenerator.addSettingTableProposals(file, argument, documentOffset, proposalSets);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            proposalGenerator.addTableProposals(file, argument, documentOffset, proposalSets);
-            // TODO we should only include either of setting/table proposals if either has exactly one match perhaps?
+            proposalSets = generateProposalsForFirstArgument(file, argument, documentOffset, lines, lineNo);
         } else {
-            boolean allowKeywords = false;
-            boolean allowVariables = false;
-            int maxVariableCharPos = Integer.MAX_VALUE;
-            int maxSettingCharPos = Integer.MAX_VALUE;
-            switch (argument.getType()) {
-                case KEYWORD_CALL:
-                    allowKeywords = true;
-                    break;
-                case KEYWORD_CALL_DYNAMIC:
-                    allowKeywords = true;
-                    allowVariables = true;
-                    break;
-                case KEYWORD_ARG:
-                    allowVariables = true;
-                    break;
-                case SETTING_FILE_ARG:
-                case SETTING_VAL:
-                case SETTING_FILE:
-                    allowVariables = true;
-                    // limit visible imported variables to those loaded before current line
-                    maxSettingCharPos = robotLine.lineCharPos - 1;
-                    break;
-                case VARIABLE_VAL:
-                    allowVariables = true;
-                    // limit visible local variables to those declared before current line
-                    maxVariableCharPos = robotLine.lineCharPos - 1;
-                    maxSettingCharPos = -1;
-                    break;
-            }
-            if (allowKeywords) {
-                proposalGenerator.addKeywordCallProposals(file, argument, documentOffset, proposalSets);
-            }
-            if (allowVariables) {
-                proposalGenerator.addVariableProposals(file, argument, documentOffset, proposalSets, maxVariableCharPos, maxSettingCharPos);
-            }
+            proposalSets = generateProposalsForRestOfArguments(file, argument, documentOffset, robotLine);
         }
         return extractMostRelevantProposals(proposalSets);
+    }
+
+    private List<RobotCompletionProposalSet> generateProposalsForFirstArgument(IFile file, ParsedString argument, int documentOffset, List<RobotLine> lines, int lineNo) {
+        List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
+        if (!argument.getValue().startsWith("*")) {
+            switch (determineTableTypeForLine(lines, lineNo)) {
+                case KEYWORD:
+                    proposalGenerator.addKeywordDefinitionProposals(file, argument, documentOffset, proposalSets);
+                    break;
+                case SETTING:
+                    proposalGenerator.addSettingTableProposals(file, argument, documentOffset, proposalSets);
+                    break;
+                default:
+                    break;
+            }
+        }
+        proposalGenerator.addTableProposals(file, argument, documentOffset, proposalSets);
+        // TODO we should only include either of setting/table proposals if either has exactly one match perhaps?
+        return proposalSets;
+    }
+
+    private List<RobotCompletionProposalSet> generateProposalsForRestOfArguments(IFile file, ParsedString argument, int documentOffset, RobotLine robotLine) {
+        boolean allowKeywords = false;
+        boolean allowVariables = false;
+        int maxVariableCharPos = Integer.MAX_VALUE;
+        int maxSettingCharPos = Integer.MAX_VALUE;
+        switch (argument.getType()) {
+            case KEYWORD_CALL:
+                allowKeywords = true;
+                break;
+            case KEYWORD_CALL_DYNAMIC:
+                allowKeywords = true;
+                allowVariables = true;
+                break;
+            case KEYWORD_ARG:
+                allowVariables = true;
+                break;
+            case SETTING_FILE_ARG:
+            case SETTING_VAL:
+            case SETTING_FILE:
+                allowVariables = true;
+                // limit visible imported variables to those loaded before current line
+                maxSettingCharPos = robotLine.lineCharPos - 1;
+                break;
+            case VARIABLE_VAL:
+                allowVariables = true;
+                // limit visible local variables to those declared before current line
+                maxVariableCharPos = robotLine.lineCharPos - 1;
+                maxSettingCharPos = -1;
+                break;
+        }
+        List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
+        if (allowKeywords) {
+            proposalGenerator.addKeywordCallProposals(file, argument, documentOffset, proposalSets);
+        }
+        if (allowVariables) {
+            proposalGenerator.addVariableProposals(file, argument, documentOffset, proposalSets, maxVariableCharPos, maxSettingCharPos);
+        }
+        return proposalSets;
     }
 
     private ICompletionProposal[] extractMostRelevantProposals(List<RobotCompletionProposalSet> proposalSets) {
