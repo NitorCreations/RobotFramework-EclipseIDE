@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package com.nitorcreations.robotframework.eclipseide.structure;
+
+import org.eclipse.jface.text.IRegion;
 
 import com.nitorcreations.robotframework.eclipseide.internal.rules.ArgumentUtils;
 import com.nitorcreations.robotframework.eclipseide.structure.api.IParsedKeywordString;
@@ -157,4 +159,13 @@ public class ParsedString implements IParsedKeywordString {
         setType(source.getType());
     }
 
+    public ParsedString extractRegion(IRegion region) {
+        int regionEnd = region.getOffset() + region.getLength();
+        if (region.getOffset() < argCharPos || regionEnd > getArgEndCharPos()) {
+            throw new IndexOutOfBoundsException("region " + region + " outside parsedString " + this);
+        }
+        ParsedString parsedStringRegion = new ParsedString(value.substring(region.getOffset() - argCharPos, regionEnd - argCharPos), region.getOffset());
+        parsedStringRegion.setType(type);
+        return parsedStringRegion;
+    }
 }
