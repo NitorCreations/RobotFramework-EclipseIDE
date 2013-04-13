@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,16 @@ package com.nitorcreations.robotframework.eclipseide.builder.parser;
 import java.io.IOException;
 import java.io.Reader;
 
+/**
+ * Tested indirectly through {@link TestLexer}.
+ */
 public class CountingLineReader {
 
     private final Reader reader;
 
     private int charsConsumed;
+
+    private boolean eof;
 
     private final StringBuilder sb = new StringBuilder();
 
@@ -39,25 +44,23 @@ public class CountingLineReader {
     }
 
     public String readLine() throws IOException {
+        if (eof) {
+            return null;
+        }
         int lf;
         do {
             lf = sb.indexOf("\n");
         } while (lf == -1 && fill());
         String ret;
         if (lf == -1) {
+            eof = true;
             ret = sb.toString();
-            if (ret.length() == 0) {
-                ret = null;
-            }
             sb.setLength(0);
-            charsConsumed += lf;
+            charsConsumed += ret.length();
         } else {
             ret = sb.substring(0, lf);
             sb.delete(0, lf + 1);
             charsConsumed += lf + 1;
-        }
-        if (ret == null) {
-            return null;
         }
         return ret.replace("\r", "");
     }
