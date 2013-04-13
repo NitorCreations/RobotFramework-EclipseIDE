@@ -16,7 +16,6 @@
 package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -57,13 +56,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         }
 
         List<RobotLine> lines = RobotFile.get(document).getLines();
-        RobotLine robotLine;
-        if (lineNo < lines.size()) {
-            robotLine = lines.get(lineNo);
-        } else {
-            robotLine = new RobotLine(lineNo, documentOffset, Collections.<ParsedString> emptyList());
-            robotLine.type = determineLineTypeForLine(lines, lines.size() - 1);
-        }
+        RobotLine robotLine = lines.get(lineNo);
         ParsedString argument = robotLine.getArgumentAt(documentOffset);
         if (argument == null) {
             argument = synthesizeArgument(document, documentOffset, lineNo);
@@ -164,10 +157,6 @@ public class RobotContentAssistant implements IContentAssistProcessor {
     }
 
     private LineType determineLineTypeForLine(List<RobotLine> lines, int lineNo) {
-        if (lineNo >= lines.size()) {
-            lineNo = lines.size() - 1;
-        }
-
         for (int i = lineNo; i >= 0; --i) {
             switch (lines.get(i).type.tableType) {
                 case SETTING:

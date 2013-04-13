@@ -58,9 +58,6 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
             return null;
         }
         lines = RobotFile.get(document).getLines();
-        if (lineNumber >= lines.size()) {
-            return null;
-        }
         RobotLine rfeLine = lines.get(lineNumber);
         ParsedString argument = rfeLine.getArgumentAt(offset);
         if (argument == null) {
