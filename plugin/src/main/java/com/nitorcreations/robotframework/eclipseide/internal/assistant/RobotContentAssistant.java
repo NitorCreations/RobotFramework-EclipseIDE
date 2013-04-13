@@ -29,9 +29,9 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
 import com.nitorcreations.robotframework.eclipseide.PluginContext;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.TableType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -66,13 +66,11 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
         if (argument.getArgCharPos() <= robotLine.lineCharPos + 1) {
             if (!argument.getValue().startsWith("*")) {
-                switch (determineLineTypeForLine(lines, lineNo)) {
-                    case KEYWORD_TABLE_IGNORE:
-                    case KEYWORD_TABLE_KEYWORD_BEGIN:
-                    case KEYWORD_TABLE_KEYWORD_LINE:
+                switch (determineTableTypeForLine(lines, lineNo)) {
+                    case KEYWORD:
                         proposalGenerator.addKeywordDefinitionProposals(file, argument, documentOffset, proposalSets);
                         break;
-                    case SETTING_TABLE_LINE:
+                    case SETTING:
                         proposalGenerator.addSettingTableProposals(file, argument, documentOffset, proposalSets);
                         break;
                     default:
@@ -156,22 +154,14 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         }
     }
 
-    private LineType determineLineTypeForLine(List<RobotLine> lines, int lineNo) {
+    private TableType determineTableTypeForLine(List<RobotLine> lines, int lineNo) {
         for (int i = lineNo; i >= 0; --i) {
-            switch (lines.get(i).type.tableType) {
-                case SETTING:
-                    return LineType.SETTING_TABLE_LINE;
-                case VARIABLE:
-                    return LineType.VARIABLE_TABLE_LINE;
-                case TESTCASE:
-                    return LineType.TESTCASE_TABLE_IGNORE;
-                case KEYWORD:
-                    return LineType.KEYWORD_TABLE_IGNORE;
-                case IGNORE:
-                    return LineType.IGNORE;
+            TableType tableType = lines.get(i).type.tableType;
+            if (tableType != TableType.UNKNOWN) {
+                return tableType;
             }
         }
-        return LineType.IGNORE;
+        return TableType.UNKNOWN;
     }
 
     /**
