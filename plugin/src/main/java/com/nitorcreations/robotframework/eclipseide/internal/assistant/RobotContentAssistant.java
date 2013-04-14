@@ -74,17 +74,15 @@ public class RobotContentAssistant implements IContentAssistProcessor {
 
     private List<RobotCompletionProposalSet> generateProposalsForFirstArgument(IFile file, ParsedString argument, int documentOffset, List<RobotLine> lines, int lineNo) {
         List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
-        if (!argument.getValue().startsWith("*")) {
-            switch (determineTableTypeForLine(lines, lineNo)) {
-                case KEYWORD:
-                    proposalGenerator.addKeywordDefinitionProposals(file, argument, documentOffset, proposalSets);
-                    break;
-                case SETTING:
-                    proposalGenerator.addSettingTableProposals(file, argument, documentOffset, proposalSets);
-                    break;
-                default:
-                    break;
-            }
+        switch (determineTableTypeForLine(lines, lineNo)) {
+            case KEYWORD:
+                proposalGenerator.addKeywordDefinitionProposals(file, argument, documentOffset, proposalSets);
+                break;
+            case SETTING:
+                proposalGenerator.addSettingTableProposals(file, argument, documentOffset, proposalSets);
+                break;
+            default:
+                break;
         }
         proposalGenerator.addTableProposals(file, argument, documentOffset, proposalSets);
         // TODO we should only include either of setting/table proposals if either has exactly one match perhaps?
