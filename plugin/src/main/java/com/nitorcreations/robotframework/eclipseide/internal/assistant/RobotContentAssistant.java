@@ -64,7 +64,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
 
         IFile file = PluginContext.getResourceManager().resolveFileFor(document);
         List<RobotCompletionProposalSet> proposalSets;
-        if (argument.getArgCharPos() <= robotLine.lineCharPos + 1) {
+        if (argument.getArgumentIndex() == 0) {
             proposalSets = generateProposalsForFirstArgument(file, argument, documentOffset, lines, lineNo);
         } else {
             proposalSets = generateProposalsForRestOfArguments(file, argument, documentOffset, robotLine);
