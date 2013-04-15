@@ -197,7 +197,7 @@ public class RobotContentAssistant implements IContentAssistProcessor {
         assert synthesizedArgument != null;
         assert synthesizedArgument.getArgCharPos() == documentOffset;
         String synthesizedArgumentWithoutDummyCharacter = synthesizedArgument.getValue().substring(1);
-        ParsedString actualArgument = new ParsedString(synthesizedArgumentWithoutDummyCharacter, documentOffset);
+        ParsedString actualArgument = new ParsedString(synthesizedArgumentWithoutDummyCharacter, documentOffset, synthesizedArgument.getArgumentIndex());
         actualArgument.copyTypeVariablesFrom(synthesizedArgument);
         return actualArgument;
     }

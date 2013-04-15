@@ -31,6 +31,7 @@ public class ParsedString implements IParsedKeywordString {
 
     private final String value;
     private final int argCharPos;
+    private final Integer argumentIndex;
     private ArgumentType type = ArgumentType.IGNORED;
     private boolean hasSpaceAfter;
 
@@ -39,6 +40,14 @@ public class ParsedString implements IParsedKeywordString {
     }
 
     public ParsedString(String value, int argCharPos) {
+        this(value, argCharPos, null);
+    }
+
+    public ParsedString(String value, int argCharPos, int argumentIndex) {
+        this(value, argCharPos, Integer.valueOf(argumentIndex));
+    }
+
+    private ParsedString(String value, int argCharPos, Integer argumentIndex) {
         if (value == null) {
             throw new NullPointerException("value");
         }
@@ -47,6 +56,7 @@ public class ParsedString implements IParsedKeywordString {
         }
         this.value = value;
         this.argCharPos = argCharPos;
+        this.argumentIndex = argumentIndex;
     }
 
     @Override
@@ -71,6 +81,13 @@ public class ParsedString implements IParsedKeywordString {
     // if argument is followed by a space, this extends the endCharPos to include that space
     public int getExtendedArgEndCharPos() {
         return getArgEndCharPos() + (hasSpaceAfter ? 1 : 0);
+    }
+
+    public int getArgumentIndex() {
+        if (argumentIndex == null) {
+            throw new IllegalStateException("Called getArgumentIndex() on ParsedString without argumentIndex information: " + this);
+        }
+        return argumentIndex;
     }
 
     @Override
@@ -109,6 +126,7 @@ public class ParsedString implements IParsedKeywordString {
         final int prime = 31;
         int result = 1;
         result = prime * result + argCharPos;
+        result = prime * result + ((argumentIndex == null) ? 0 : argumentIndex.hashCode());
         result = prime * result + (hasSpaceAfter ? 1231 : 1237);
         result = prime * result + ((type == null) ? 0 : type.hashCode());
         result = prime * result + ((value == null) ? 0 : value.hashCode());
@@ -125,6 +143,11 @@ public class ParsedString implements IParsedKeywordString {
             return false;
         ParsedString other = (ParsedString) obj;
         if (argCharPos != other.argCharPos)
+            return false;
+        if (argumentIndex == null) {
+            if (other.argumentIndex != null)
+                return false;
+        } else if (!argumentIndex.equals(other.argumentIndex))
             return false;
         if (hasSpaceAfter != other.hasSpaceAfter)
             return false;
@@ -164,7 +187,7 @@ public class ParsedString implements IParsedKeywordString {
         if (region.getOffset() < argCharPos || regionEnd > getArgEndCharPos()) {
             throw new IndexOutOfBoundsException("region " + region + " outside parsedString " + this);
         }
-        ParsedString parsedStringRegion = new ParsedString(value.substring(region.getOffset() - argCharPos, regionEnd - argCharPos), region.getOffset());
+        ParsedString parsedStringRegion = new ParsedString(value.substring(region.getOffset() - argCharPos, regionEnd - argCharPos), region.getOffset(), argumentIndex);
         parsedStringRegion.setType(type);
         return parsedStringRegion;
     }

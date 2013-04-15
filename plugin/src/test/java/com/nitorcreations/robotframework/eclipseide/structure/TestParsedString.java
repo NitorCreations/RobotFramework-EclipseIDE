@@ -15,8 +15,11 @@
  */
 package com.nitorcreations.robotframework.eclipseide.structure;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import org.eclipse.jface.text.Region;
 import org.junit.Before;
@@ -28,6 +31,27 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
 
 @RunWith(Enclosed.class)
 public class TestParsedString {
+
+    public static class ArgumentIndex {
+        @Test
+        public void getter_should_throw_exception_when_not_set() {
+            ParsedString parsedString = new ParsedString("Hello", 52);
+            try {
+                parsedString.getArgumentIndex();
+                fail("Should throw IllegalStateException");
+            } catch (IllegalStateException e) {
+                // expected
+            }
+        }
+
+        @Test
+        public void getter_should_return_value_when_set() {
+            final int ARGUMENT_INDEX = 4;
+            ParsedString parsedString = new ParsedString("Hello", 52, ARGUMENT_INDEX);
+            int argumentIndex = parsedString.getArgumentIndex();
+            assertThat(argumentIndex, is(ARGUMENT_INDEX));
+        }
+    }
 
     public static class BasicOffsets {
         @Test
