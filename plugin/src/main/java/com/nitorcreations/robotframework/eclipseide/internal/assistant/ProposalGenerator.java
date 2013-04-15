@@ -321,7 +321,7 @@ public class ProposalGenerator implements IProposalGenerator {
             if (argument.getArgCharPos() < documentOffset && documentOffset < argument.getArgEndCharPos()) {
                 // try again, but only up to cursor
                 int argumentOff = documentOffset - argument.getArgCharPos();
-                ParsedString argumentleftPart = new ParsedString(argument.getValue().substring(0, argumentOff), argument.getArgCharPos());
+                ParsedString argumentleftPart = argument.extractRegion(new Region(argument.getArgCharPos(), argumentOff));
                 DefinitionFinder.acceptMatches(file, visitorProvider.get(argumentleftPart, ourProposalSet.getProposals()));
             }
             if (proposalsIsEmptyOrContainsOnly(ourProposalSet.getProposals(), argument)) {
