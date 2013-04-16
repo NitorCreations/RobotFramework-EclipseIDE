@@ -176,7 +176,7 @@ public class LineFinder {
         for (String proposalStr : proposals) {
             ParsedString proposal = new ParsedString(proposalStr, 0); // offset 0 = "located" at beginning of file
             proposal.setType(type);
-            RobotLine line = new RobotLine(0, 0, Collections.singletonList(proposal));
+            RobotLine line = new RobotLine(-1, -1, Collections.singletonList(proposal));
             line.type = lineType;
             interest = visitor.visitMatch(line, fileWithType);
             if (interest == STOP) {

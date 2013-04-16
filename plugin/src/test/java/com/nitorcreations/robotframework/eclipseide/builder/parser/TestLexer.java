@@ -33,7 +33,7 @@ public class TestLexer {
         List<RobotLine> lines = lexer.lex();
         assertEquals(1, lines.size());
         RobotLine line1 = lines.get(0);
-        assertThat(line1.lineNo, is(1));
+        assertThat(line1.lineNo, is(0));
         assertThat(line1.lineCharPos, is(0));
         assertThat(line1.arguments.size(), is(0));
     }
@@ -44,7 +44,7 @@ public class TestLexer {
         List<RobotLine> lines = lexer.lex();
         assertEquals(1, lines.size());
         RobotLine line1 = lines.get(0);
-        assertThat(line1.lineNo, is(1));
+        assertThat(line1.lineNo, is(0));
         assertThat(line1.lineCharPos, is(0));
         assertThat(line1.arguments.size(), is(0));
     }
@@ -55,7 +55,7 @@ public class TestLexer {
         List<RobotLine> lines = lexer.lex();
         assertEquals(1, lines.size());
         RobotLine line1 = lines.get(0);
-        assertThat(line1.lineNo, is(1));
+        assertThat(line1.lineNo, is(0));
         assertThat(line1.lineCharPos, is(0));
         assertThat(line1.arguments.size(), is(1));
     }
@@ -66,11 +66,11 @@ public class TestLexer {
         List<RobotLine> lines = lexer.lex();
         assertEquals(2, lines.size());
         RobotLine line1 = lines.get(0);
-        assertThat(line1.lineNo, is(1));
+        assertThat(line1.lineNo, is(0));
         assertThat(line1.lineCharPos, is(0));
         assertThat(line1.arguments.size(), is(0));
         RobotLine line2 = lines.get(1);
-        assertThat(line2.lineNo, is(2));
+        assertThat(line2.lineNo, is(1));
         assertThat(line2.lineCharPos, is(1));
         assertThat(line2.arguments.size(), is(0));
     }
@@ -81,11 +81,11 @@ public class TestLexer {
         List<RobotLine> lines = lexer.lex();
         assertEquals(2, lines.size());
         RobotLine line1 = lines.get(0);
-        assertThat(line1.lineNo, is(1));
+        assertThat(line1.lineNo, is(0));
         assertThat(line1.lineCharPos, is(0));
         assertThat(line1.arguments.size(), is(1));
         RobotLine line2 = lines.get(1);
-        assertThat(line2.lineNo, is(2));
+        assertThat(line2.lineNo, is(1));
         assertThat(line2.lineCharPos, is(2));
         assertThat(line2.arguments.size(), is(0));
     }
@@ -96,11 +96,11 @@ public class TestLexer {
         List<RobotLine> lines = lexer.lex();
         assertEquals(2, lines.size());
         RobotLine line1 = lines.get(0);
-        assertThat(line1.lineNo, is(1));
+        assertThat(line1.lineNo, is(0));
         assertThat(line1.lineCharPos, is(0));
         assertThat(line1.arguments.size(), is(1));
         RobotLine line2 = lines.get(1);
-        assertThat(line2.lineNo, is(2));
+        assertThat(line2.lineNo, is(1));
         assertThat(line2.lineCharPos, is(2));
         assertThat(line2.arguments.size(), is(1));
     }
@@ -111,11 +111,11 @@ public class TestLexer {
         List<RobotLine> lines = lexer.lex();
         assertEquals(2, lines.size());
         RobotLine line1 = lines.get(0);
-        assertThat(line1.lineNo, is(1));
+        assertThat(line1.lineNo, is(0));
         assertThat(line1.lineCharPos, is(0));
         assertThat(line1.arguments.size(), is(0));
         RobotLine line2 = lines.get(1);
-        assertThat(line2.lineNo, is(2));
+        assertThat(line2.lineNo, is(1));
         assertThat(line2.lineCharPos, is(1));
         assertThat(line2.arguments.size(), is(1));
     }
@@ -126,11 +126,11 @@ public class TestLexer {
         List<RobotLine> lines = lexer.lex();
         assertEquals(2, lines.size());
         RobotLine line1 = lines.get(0);
-        assertThat(line1.lineNo, is(1));
+        assertThat(line1.lineNo, is(0));
         assertThat(line1.lineCharPos, is(0));
         assertThat(line1.arguments.size(), is(1));
         RobotLine line2 = lines.get(1);
-        assertThat(line2.lineNo, is(2));
+        assertThat(line2.lineNo, is(1));
         assertThat(line2.lineCharPos, is(3));
         assertThat(line2.arguments.size(), is(0));
     }
@@ -141,11 +141,11 @@ public class TestLexer {
         List<RobotLine> lines = lexer.lex();
         assertEquals(2, lines.size());
         RobotLine line1 = lines.get(0);
-        assertThat(line1.lineNo, is(1));
+        assertThat(line1.lineNo, is(0));
         assertThat(line1.lineCharPos, is(0));
         assertThat(line1.arguments.size(), is(2));
         RobotLine line2 = lines.get(1);
-        assertThat(line2.lineNo, is(2));
+        assertThat(line2.lineNo, is(1));
         assertThat(line2.lineCharPos, is(4));
         assertThat(line2.arguments.size(), is(0));
     }
@@ -156,11 +156,11 @@ public class TestLexer {
         List<RobotLine> lines = lexer.lex();
         assertEquals(2, lines.size());
         RobotLine line1 = lines.get(0);
-        assertThat(line1.lineNo, is(1));
+        assertThat(line1.lineNo, is(0));
         assertThat(line1.lineCharPos, is(0));
         assertThat(line1.arguments.size(), is(0));
         RobotLine line2 = lines.get(1);
-        assertThat(line2.lineNo, is(2));
+        assertThat(line2.lineNo, is(1));
         assertThat(line2.lineCharPos, is(2));
         assertThat(line2.arguments.size(), is(0));
     }
@@ -171,11 +171,11 @@ public class TestLexer {
         List<RobotLine> lines = lexer.lex();
         assertEquals(2, lines.size());
         RobotLine line1 = lines.get(0);
-        assertThat(line1.lineNo, is(1));
+        assertThat(line1.lineNo, is(0));
         assertThat(line1.lineCharPos, is(0));
         assertThat(line1.arguments.size(), is(0));
         RobotLine line2 = lines.get(1);
-        assertThat(line2.lineNo, is(2));
+        assertThat(line2.lineNo, is(1));
         assertThat(line2.lineCharPos, is(2));
         assertThat(line2.arguments.size(), is(0));
     }

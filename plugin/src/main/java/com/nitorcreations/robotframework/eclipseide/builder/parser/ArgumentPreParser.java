@@ -599,12 +599,12 @@ public class ArgumentPreParser {
 
     private boolean isTemplateActive() {
         if (localTemplateAtLine != NO_TEMPLATE) {
-            RobotLine line = lines.get(localTemplateAtLine - 1);
+            RobotLine line = lines.get(localTemplateAtLine);
             if (line.arguments.size() > localTemplateAtColumn + 1) {
                 return !NONE_STR.equals(line.arguments.get(localTemplateAtColumn + 1).getValue());
             }
-            outer: for (int lineIdx = localTemplateAtLine; lineIdx < lines.size(); ++lineIdx) {
-                line = lines.get(lineIdx);
+            outer: for (int lineNo = localTemplateAtLine + 1; lineNo < lines.size(); ++lineNo) {
+                line = lines.get(lineNo);
                 switch (line.type) {
                     case IGNORE:
                     case COMMENT_LINE:
@@ -635,8 +635,8 @@ public class ArgumentPreParser {
             return keywordCallState;
         }
 
-        outer: for (int lineIdx = lineIterator.nextIndex(); lineIdx < lines.size(); ++lineIdx) {
-            RobotLine nextLine = lines.get(lineIdx);
+        outer: for (int lineNo = lineIterator.nextIndex(); lineNo < lines.size(); ++lineNo) {
+            RobotLine nextLine = lines.get(lineNo);
             LineType type = nextLine.type;
             switch (type) {
                 case COMMENT_LINE:
@@ -707,9 +707,9 @@ public class ArgumentPreParser {
 
     private void lookForLocalTestTemplate() {
         localTemplateAtLine = NO_TEMPLATE;
-        outer: for (int lineIdx = lineIterator.nextIndex() - 1; lineIdx < lines.size(); ++lineIdx) {
-            RobotLine line = lines.get(lineIdx);
-            assert line.lineNo - 1 == lineIdx;
+        outer: for (int lineNo = lineIterator.nextIndex() - 1; lineNo < lines.size(); ++lineNo) {
+            RobotLine line = lines.get(lineNo);
+            assert line.lineNo == lineNo;
             int settingKeyPos = 1;
             switch (line.type) {
                 case TESTCASE_TABLE_TESTCASE_BEGIN:
