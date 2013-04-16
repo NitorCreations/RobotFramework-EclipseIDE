@@ -724,6 +724,7 @@ public class ArgumentPreParser {
                     settingKeyPos = determineContinuationLineArgOff(line);
                     break;
                 case COMMENT_LINE:
+                case IGNORE:
                     continue;
                 default:
                     // testcase ended, do not look further

@@ -242,6 +242,11 @@ public class TestArgumentPreParser {
         public void local_template_is_not_detected_from_next_testcase() throws Exception {
             t("*Test cases\nTC1\n  Keyword\nTC2\n  [Template]  Log", TABLE, NEW_TESTCASE, IGNORED, KEYWORD_CALL, NEW_TESTCASE, IGNORED, SETTING_KEY, KEYWORD_CALL);
         }
+
+        @Test
+        public void local_template_is_still_detected_when_empty_lines_in_front() throws Exception {
+            t("*Test cases\nTC1\n  Keyword\n\n  [Template]  Log", TABLE, NEW_TESTCASE, IGNORED, KEYWORD_ARG, IGNORED, SETTING_KEY, KEYWORD_CALL);
+        }
     }
 
     public static class Keyword_table_parsing {
