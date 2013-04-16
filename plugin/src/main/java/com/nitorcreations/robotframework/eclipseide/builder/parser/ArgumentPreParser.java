@@ -713,6 +713,11 @@ public class ArgumentPreParser {
             int settingKeyPos = 1;
             switch (line.type) {
                 case TESTCASE_TABLE_TESTCASE_BEGIN:
+                    if (lineNo >= lineIterator.nextIndex()) {
+                        // testcase ended, do not look further
+                        break outer;
+                    }
+                    break;
                 case TESTCASE_TABLE_TESTCASE_LINE:
                     break;
                 case CONTINUATION_LINE:
