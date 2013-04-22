@@ -67,6 +67,12 @@ public class TestRobotContentAssistant2 {
         final IProject project = mock(IProject.class, "project");
         final IResourceManager resourceManager = mock(IResourceManager.class, "resourceManager");
 
+        static final MockProposalAdder PROPOSAL_ADDER_FOR_TABLE_PROPOSALS = new MockProposalAdder();
+        static final MockProposalAdder PROPOSAL_ADDER_FOR_SETTING_TABLE_PROPOSALS = new MockProposalAdder();
+        static final MockProposalAdder PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS = new MockProposalAdder();
+        static final MockProposalAdder PROPOSAL_ADDER_FOR_KEYWORD_CALL_PROPOSALS = new MockProposalAdder();
+        static final MockProposalAdder PROPOSAL_ADDER_FOR_KEYWORD_DEFINITION_PROPOSALS = new MockProposalAdder();
+
         @Before
         public void setup() throws Exception {
             proposalGenerator = mock(IProposalGenerator.class, "proposalGenerator");
@@ -85,6 +91,12 @@ public class TestRobotContentAssistant2 {
             when(project.getWorkspace()).thenReturn(workspace);
             when(workspace.getRoot()).thenReturn(workspaceRoot);
             when(workspaceRoot.getFile(builtinIndexPath)).thenReturn(builtinIndexFile);
+
+            doAnswer(PROPOSAL_ADDER_FOR_TABLE_PROPOSALS).when(proposalGenerator).addTableProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyListOf(RobotCompletionProposalSet.class));
+            doAnswer(PROPOSAL_ADDER_FOR_SETTING_TABLE_PROPOSALS).when(proposalGenerator).addSettingTableProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyListOf(RobotCompletionProposalSet.class));
+            doAnswer(PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS).when(proposalGenerator).addVariableProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyListOf(RobotCompletionProposalSet.class), anyInt(), anyInt());
+            doAnswer(PROPOSAL_ADDER_FOR_KEYWORD_CALL_PROPOSALS).when(proposalGenerator).addKeywordCallProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyListOf(RobotCompletionProposalSet.class));
+            doAnswer(PROPOSAL_ADDER_FOR_KEYWORD_DEFINITION_PROPOSALS).when(proposalGenerator).addKeywordDefinitionProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyListOf(RobotCompletionProposalSet.class));
         }
 
         @SuppressWarnings("unchecked")
@@ -105,30 +117,6 @@ public class TestRobotContentAssistant2 {
     public static class VariableReferences {
 
         public static class when_partially_entered extends Base {
-            private static final class MockProposalAdder implements Answer<Void> {
-                public final RobotCompletionProposalSet addedProposalSet = new RobotCompletionProposalSet();
-                public final RobotCompletionProposal addedProposal;
-                public final boolean insertInsteadOfAppend;
-
-                MockProposalAdder(boolean basedOnInput, boolean insertInsteadOfAppend) {
-                    this.insertInsteadOfAppend = insertInsteadOfAppend;
-                    addedProposal = new RobotCompletionProposal(null, null, null, null, null, null, null);
-                    addedProposalSet.getProposals().add(addedProposal);
-                    addedProposalSet.setBasedOnInput(basedOnInput);
-                }
-
-                @Override
-                public Void answer(InvocationOnMock invocation) throws Throwable {
-                    @SuppressWarnings("unchecked")
-                    List<RobotCompletionProposalSet> proposalSets = (List<RobotCompletionProposalSet>) invocation.getArguments()[3];
-                    if (insertInsteadOfAppend) {
-                        proposalSets.add(0, addedProposalSet);
-                    } else {
-                        proposalSets.add(addedProposalSet);
-                    }
-                    return null;
-                }
-            }
 
             static final String LINKED_PREFIX = "[linked] ";
             static final String LINKED_FILENAME = "linked.txt";
@@ -143,21 +131,52 @@ public class TestRobotContentAssistant2 {
                 final String origContents2 = "${F";
                 final String origContents = origContents1 + origContents2;
                 IFile origFile = mock(IFile.class);
-                MockProposalAdder proposalAdder = new MockProposalAdder(true, false);
-                doAnswer(proposalAdder).when(proposalGenerator).addVariableProposals(same(origFile), any(ParsedString.class), anyInt(), anyListOf(RobotCompletionProposalSet.class), anyInt(), anyInt());
                 List<RobotLine> lines = RobotFile.parse(origContents).getLines();
                 int documentOffset = origContents.length();
                 int lineNo = lines.size() - 1;
+                PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS.setBasedOnInput(true);
+                PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS.setInsertInsteadOfAppend(false);
 
                 ICompletionProposal[] proposals = assistant.generateProposals(origFile, documentOffset, origContents, lines, lineNo);
 
-                assertSame(proposalAdder.addedProposal, proposals[0]);
+                assertSame(PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS.addedProposal, proposals[0]);
                 ParsedString expectedArgument = new ParsedString(origContents2, origContents1.length(), 2);
                 expectedArgument.setHasSpaceAfter(false);
                 expectedArgument.setType(ArgumentType.KEYWORD_ARG);
                 verify(proposalGenerator).addVariableProposals(same(origFile), eq(expectedArgument), eq(documentOffset), anyListOf(RobotCompletionProposalSet.class), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));
                 verifyNoMoreInteractions(proposalGenerator);
             }
+        }
+    }
+
+    static final class MockProposalAdder implements Answer<Void> {
+        private final RobotCompletionProposalSet addedProposalSet = new RobotCompletionProposalSet();
+        public final RobotCompletionProposal addedProposal;
+        private boolean insertInsteadOfAppend;
+
+        MockProposalAdder() {
+            addedProposal = new RobotCompletionProposal(null, null, null, null, null, null, null);
+            addedProposalSet.getProposals().add(addedProposal);
+        }
+
+        public void setBasedOnInput(boolean basedOnInput) {
+            addedProposalSet.setBasedOnInput(basedOnInput);
+        }
+
+        public void setInsertInsteadOfAppend(boolean insertInsteadOfAppend) {
+            this.insertInsteadOfAppend = insertInsteadOfAppend;
+        }
+
+        @Override
+        public Void answer(InvocationOnMock invocation) throws Throwable {
+            @SuppressWarnings("unchecked")
+            List<RobotCompletionProposalSet> proposalSets = (List<RobotCompletionProposalSet>) invocation.getArguments()[3];
+            if (insertInsteadOfAppend) {
+                proposalSets.add(0, addedProposalSet);
+            } else {
+                proposalSets.add(addedProposalSet);
+            }
+            return null;
         }
     }
 }
