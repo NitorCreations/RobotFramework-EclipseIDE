@@ -73,7 +73,7 @@ public class TestRobotContentAssistant {
         public void setup() throws Exception {
             proposalGenerator = mock(IProposalGenerator.class, "proposalGenerator");
             textViewer = mock(ITextViewer.class, "textViewer");
-            assistant = new RobotContentAssistant(proposalGenerator);
+            assistant = new RobotContentAssistant(new RobotContentAssistant2(proposalGenerator));
             document = mock(IDocument.class, "document");
             when(textViewer.getDocument()).thenReturn(document);
 
@@ -159,7 +159,7 @@ public class TestRobotContentAssistant {
                 doAnswer(proposalAdder).when(proposalGenerator).addVariableProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyListOf(RobotCompletionProposalSet.class), anyInt(), anyInt());
                 ICompletionProposal[] proposals = assistant.computeCompletionProposals(textViewer, origContents.length());
                 assertSame(proposalAdder.addedProposal, proposals[0]);
-                ParsedString expectedArgument = new ParsedString(origContents2, origContents1.length());
+                ParsedString expectedArgument = new ParsedString(origContents2, origContents1.length(), 2);
                 expectedArgument.setHasSpaceAfter(false);
                 expectedArgument.setType(ArgumentType.KEYWORD_ARG);
                 verify(proposalGenerator).addVariableProposals(same(origFile), eq(expectedArgument), eq(origContents.length()), anyListOf(RobotCompletionProposalSet.class), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));

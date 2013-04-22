@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.ProposalGenerator;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.RobotContentAssistant;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.RobotContentAssistant2;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.KeywordCallHyperlinkDetector;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.ResourceHyperlinkDetector;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.VariableAccessHyperlinkDetector;
@@ -94,7 +95,7 @@ public class RobotSourceViewerConfiguration extends TextSourceViewerConfiguratio
         // assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
         // assistant.setStatusLineVisible(true);
 
-        assistant.setContentAssistProcessor(new RobotContentAssistant(new ProposalGenerator()), IDocument.DEFAULT_CONTENT_TYPE);
+        assistant.setContentAssistProcessor(new RobotContentAssistant(new RobotContentAssistant2(new ProposalGenerator())), IDocument.DEFAULT_CONTENT_TYPE);
 
         assistant.setInformationControlCreator(new AbstractReusableInformationControlCreator() {
             @Override
