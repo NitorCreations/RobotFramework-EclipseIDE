@@ -36,8 +36,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -48,6 +46,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.nitorcreations.robotframework.eclipseide.PluginContext;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.IResourceManager;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
@@ -62,9 +62,7 @@ public class TestRobotContentAssistant2 {
         static final String BUILTIN_INDEX_FILE = "BuiltIn.index";
 
         IProposalGenerator proposalGenerator;
-        ITextViewer textViewer;
-        RobotContentAssistant assistant;
-        IDocument document;
+        IRobotContentAssistant2 assistant;
 
         final IProject project = mock(IProject.class, "project");
         final IResourceManager resourceManager = mock(IResourceManager.class, "resourceManager");
@@ -72,10 +70,7 @@ public class TestRobotContentAssistant2 {
         @Before
         public void setup() throws Exception {
             proposalGenerator = mock(IProposalGenerator.class, "proposalGenerator");
-            textViewer = mock(ITextViewer.class, "textViewer");
-            assistant = new RobotContentAssistant(new RobotContentAssistant2(proposalGenerator));
-            document = mock(IDocument.class, "document");
-            when(textViewer.getDocument()).thenReturn(document);
+            assistant = new RobotContentAssistant2(proposalGenerator);
 
             PluginContext.setResourceManager(resourceManager);
 
@@ -140,29 +135,27 @@ public class TestRobotContentAssistant2 {
             static final String FOO_VARIABLE = "${FOO}";
             static final String LINKED_VARIABLE = "${LINKEDVAR}";
 
+            // return document.get().substring(0, (Integer) invocation.getArguments()[0]).replaceAll("[^\n]+",
+            // "").length();
             @Test
             public void should_suggest_replacing_entered_variable() throws Exception {
                 final String origContents1 = "*Variables\n" + FOO_VARIABLE + "  bar\n*Testcases\nTestcase\n  Log  ";
                 final String origContents2 = "${F";
                 final String origContents = origContents1 + origContents2;
-                IFile origFile = addFile("orig.txt", origContents);
-                when(resourceManager.resolveFileFor(document)).thenReturn(origFile);
-                when(document.get()).thenReturn(origContents);
-                when(document.getLineOfOffset(anyInt())).thenAnswer(new Answer<Integer>() {
-                    @Override
-                    public Integer answer(InvocationOnMock invocation) throws Throwable {
-                        return document.get().substring(0, (Integer) invocation.getArguments()[0]).replaceAll("[^\n]+", "").length();
-                    }
-                });
-
+                IFile origFile = mock(IFile.class);
                 MockProposalAdder proposalAdder = new MockProposalAdder(true, false);
-                doAnswer(proposalAdder).when(proposalGenerator).addVariableProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyListOf(RobotCompletionProposalSet.class), anyInt(), anyInt());
-                ICompletionProposal[] proposals = assistant.computeCompletionProposals(textViewer, origContents.length());
+                doAnswer(proposalAdder).when(proposalGenerator).addVariableProposals(same(origFile), any(ParsedString.class), anyInt(), anyListOf(RobotCompletionProposalSet.class), anyInt(), anyInt());
+                List<RobotLine> lines = RobotFile.parse(origContents).getLines();
+                int documentOffset = origContents.length();
+                int lineNo = lines.size() - 1;
+
+                ICompletionProposal[] proposals = assistant.generateProposals(origFile, documentOffset, origContents, lines, lineNo);
+
                 assertSame(proposalAdder.addedProposal, proposals[0]);
                 ParsedString expectedArgument = new ParsedString(origContents2, origContents1.length(), 2);
                 expectedArgument.setHasSpaceAfter(false);
                 expectedArgument.setType(ArgumentType.KEYWORD_ARG);
-                verify(proposalGenerator).addVariableProposals(same(origFile), eq(expectedArgument), eq(origContents.length()), anyListOf(RobotCompletionProposalSet.class), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));
+                verify(proposalGenerator).addVariableProposals(same(origFile), eq(expectedArgument), eq(documentOffset), anyListOf(RobotCompletionProposalSet.class), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));
                 verifyNoMoreInteractions(proposalGenerator);
             }
         }
