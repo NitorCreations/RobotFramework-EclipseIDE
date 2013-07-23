@@ -61,7 +61,6 @@ public class ProposalGenerator implements IProposalGenerator {
         List<String> attempts = generateAttempts(argument, documentOffset, argumentValue);
 
         Map<String, RobotCompletionProposal> ourProposals = new LinkedHashMap<String, RobotCompletionProposal>();
-        Boolean basedOnInput = null;
         for (String attempt : attempts) {
             String tableArgument = ParserUtil.parseTable(attempt);
             for (Entry<String, String> e : tableNameToFull.entrySet()) {
@@ -85,15 +84,12 @@ public class ProposalGenerator implements IProposalGenerator {
                 continue;
             }
             if (!ourProposals.isEmpty()) {
-                basedOnInput = !attempt.isEmpty();
-                break;
+                RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
+                ourProposalSet.getProposals().addAll(ourProposals.values());
+                ourProposalSet.setBasedOnInput(!attempt.isEmpty());
+                proposalSets.add(ourProposalSet);
+                return;
             }
-        }
-        if (!ourProposals.isEmpty()) {
-            RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
-            ourProposalSet.getProposals().addAll(ourProposals.values());
-            ourProposalSet.setBasedOnInput(basedOnInput);
-            proposalSets.add(ourProposalSet);
         }
     }
 
@@ -127,11 +123,9 @@ public class ProposalGenerator implements IProposalGenerator {
             }
             if (!ourProposalSet.getProposals().isEmpty()) {
                 ourProposalSet.setBasedOnInput(!attempt.isEmpty());
-                break;
+                proposalSets.add(ourProposalSet);
+                return;
             }
-        }
-        if (!ourProposalSet.getProposals().isEmpty()) {
-            proposalSets.add(ourProposalSet);
         }
     }
 
@@ -184,11 +178,9 @@ public class ProposalGenerator implements IProposalGenerator {
             }
             if (!ourProposalSet.getProposals().isEmpty()) {
                 ourProposalSet.setBasedOnInput(!attempt.isEmpty());
-                break;
+                proposalSets.add(ourProposalSet);
+                return;
             }
-        }
-        if (!ourProposalSet.getProposals().isEmpty()) {
-            proposalSets.add(ourProposalSet);
         }
     }
 
