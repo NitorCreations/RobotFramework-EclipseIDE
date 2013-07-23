@@ -60,8 +60,8 @@ public class ProposalGenerator implements IProposalGenerator {
         IRegion replacementRegion = new Region(argument.getArgCharPos(), argumentValue.length());
         List<String> attempts = generateAttempts(argument, documentOffset, argumentValue);
 
-        Map<String, RobotCompletionProposal> ourProposals = new LinkedHashMap<String, RobotCompletionProposal>();
         for (String attempt : attempts) {
+            Map<String, RobotCompletionProposal> ourProposals = new LinkedHashMap<String, RobotCompletionProposal>();
             String tableArgument = ParserUtil.parseTable(attempt);
             for (Entry<String, String> e : tableNameToFull.entrySet()) {
                 if (e.getKey().startsWith(tableArgument)) {
@@ -77,15 +77,15 @@ public class ProposalGenerator implements IProposalGenerator {
                     ourProposals.put(e.getValue(), rcp);
                 }
             }
-            if (ourProposals.size() == 1 && ourProposals.values().iterator().next().getMatchArgument().getValue().equals(argumentValue)) {
+            RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
+            ourProposalSet.getProposals().addAll(ourProposals.values());
+
+            if (ourProposalSet.getProposals().size() == 1 && proposalsIsEmptyOrContainsOnly(ourProposalSet.getProposals(), argument)) {
                 // Found a single exact hit - probably means it was content-assisted earlier and the user now wants to
                 // change it to something else
-                ourProposals.clear();
                 continue;
             }
-            if (!ourProposals.isEmpty()) {
-                RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
-                ourProposalSet.getProposals().addAll(ourProposals.values());
+            if (!ourProposalSet.getProposals().isEmpty()) {
                 ourProposalSet.setBasedOnInput(!attempt.isEmpty());
                 proposalSets.add(ourProposalSet);
                 return;
@@ -101,8 +101,8 @@ public class ProposalGenerator implements IProposalGenerator {
 
         List<String> settingKeys = new ArrayList<String>(ArgumentPreParser.getSettingKeys());
         Collections.sort(settingKeys);
-        RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
         for (String attempt : attempts) {
+            RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
             for (String key : settingKeys) {
                 if (key.toLowerCase().startsWith(attempt)) {
                     ParsedString proposal = new ParsedString(key, 0);
@@ -118,7 +118,6 @@ public class ProposalGenerator implements IProposalGenerator {
             if (ourProposalSet.getProposals().size() == 1 && ourProposalSet.getProposals().get(0).getMatchArgument().getValue().equals(argumentValue)) {
                 // Found a single exact hit - probably means it was content-assisted earlier and the user now wants to
                 // change it to something else
-                ourProposalSet.getProposals().clear();
                 continue;
             }
             if (!ourProposalSet.getProposals().isEmpty()) {
@@ -148,8 +147,8 @@ public class ProposalGenerator implements IProposalGenerator {
         List<String> attempts = generateAttempts(argument, documentOffset, argumentValue.toLowerCase());
 
         final Map<String, List<KeywordNeed>> undefinedKeywords = collectUndefinedKeywords(file, argument);
-        RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
         for (String attempt : attempts) {
+            RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
             for (Entry<String, List<KeywordNeed>> e : undefinedKeywords.entrySet()) {
                 String key = e.getKey();
                 if (key.toLowerCase().startsWith(attempt)) {
@@ -170,10 +169,9 @@ public class ProposalGenerator implements IProposalGenerator {
                     ourProposalSet.getProposals().add(new RobotCompletionProposal(proposal, null, replacementRegion, image, displayString, informationDisplayString, additionalProposalInfo));
                 }
             }
-            if (ourProposalSet.getProposals().size() == 1 && ourProposalSet.getProposals().get(0).getMatchArgument().getValue().equals(argumentValue)) {
+            if (ourProposalSet.getProposals().size() == 1 && proposalsIsEmptyOrContainsOnly(ourProposalSet.getProposals(), argument)) {
                 // Found a single exact hit - probably means it was content-assisted earlier and the user now wants to
                 // change it to something else
-                ourProposalSet.getProposals().clear();
                 continue;
             }
             if (!ourProposalSet.getProposals().isEmpty()) {
