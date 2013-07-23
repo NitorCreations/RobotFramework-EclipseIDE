@@ -15,6 +15,7 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -49,6 +50,7 @@ import com.nitorcreations.robotframework.eclipseide.PluginContext;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.IResourceManager;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.TestRobotContentAssistant2.MockProposalAdder.AddStyle;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -135,10 +137,11 @@ public class TestRobotContentAssistant2 {
                 int documentOffset = origContents.length();
                 int lineNo = lines.size() - 1;
                 PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS.setBasedOnInput(true);
-                PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS.setInsertInsteadOfAppend(false);
+                PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS.setAddStyle(AddStyle.APPEND);
 
                 ICompletionProposal[] proposals = assistant.generateProposals(origFile, documentOffset, origContents, lines, lineNo);
 
+                assertEquals(1, proposals.length);
                 assertSame(PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS.addedProposal, proposals[0]);
                 ParsedString expectedArgument = new ParsedString(origContents2, origContents1.length(), 2);
                 expectedArgument.setHasSpaceAfter(false);
@@ -149,10 +152,47 @@ public class TestRobotContentAssistant2 {
         }
     }
 
+    @RunWith(Enclosed.class)
+    public static class FeatureTests {
+        static final String LINKED_PREFIX = "[linked] ";
+        static final String LINKED_FILENAME = "linked.txt";
+        static final String FOO_VARIABLE = "${FOO}";
+        static final String LINKED_VARIABLE = "${LINKEDVAR}";
+
+        @RunWith(Enclosed.class)
+        public static class Argument_synthesis {
+            @RunWith(Enclosed.class)
+            public static class synthesized extends Base {
+                public static class produces_new  extends Base {
+                    public void at_empty_line() throws Exception {}
+                    public void at_beginning_of_line_with_onespace_before_first_nonempty_argument() throws Exception {}
+                    public void between_arguments_at_twospaces_after_previous() throws Exception {}
+                    public void between_arguments_at_tab_after_previous() throws Exception {}
+                    public void twospaces_after_last_argument() throws Exception {}
+                    public void at_empty_argument() throws Exception {}
+                    public void onespace_after_empty_argument() throws Exception {} // ??
+                }
+                public static class extends_old extends Base {
+                }
+            }
+
+            public static class not_synthesized extends Base {
+                public void at_start_of_argument() throws Exception {}
+                public void in_middle_of_argment() throws Exception {}
+                public void at_end_of_argument() throws Exception {}
+                public void onespace_after_argument() throws Exception {}
+            }
+        }
+    }
+
     static final class MockProposalAdder implements Answer<Void> {
         private final RobotCompletionProposalSet addedProposalSet = new RobotCompletionProposalSet();
         public final RobotCompletionProposal addedProposal;
-        private boolean insertInsteadOfAppend;
+        private AddStyle addStyle;
+
+        enum AddStyle {
+            PREPEND, APPEND
+        }
 
         MockProposalAdder() {
             addedProposal = new RobotCompletionProposal(null, null, null, null, null, null, null);
@@ -163,15 +203,15 @@ public class TestRobotContentAssistant2 {
             addedProposalSet.setBasedOnInput(basedOnInput);
         }
 
-        public void setInsertInsteadOfAppend(boolean insertInsteadOfAppend) {
-            this.insertInsteadOfAppend = insertInsteadOfAppend;
+        public void setAddStyle(AddStyle addStyle) {
+            this.addStyle = addStyle;
         }
 
         @Override
         public Void answer(InvocationOnMock invocation) throws Throwable {
             @SuppressWarnings("unchecked")
             List<RobotCompletionProposalSet> proposalSets = (List<RobotCompletionProposalSet>) invocation.getArguments()[3];
-            if (insertInsteadOfAppend) {
+            if (addStyle == AddStyle.PREPEND) {
                 proposalSets.add(0, addedProposalSet);
             } else {
                 proposalSets.add(addedProposalSet);
