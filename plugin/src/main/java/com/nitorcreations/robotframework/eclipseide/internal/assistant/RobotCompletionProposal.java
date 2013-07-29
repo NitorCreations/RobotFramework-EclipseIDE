@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.eclipse.swt.graphics.Point;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
-class RobotCompletionProposal implements ICompletionProposal, ICompletionProposalExtension6 {
+public class RobotCompletionProposal implements ICompletionProposal, ICompletionProposalExtension6 {
 
     private final ParsedString matchArgument;
     private final FileWithType matchLocation;
