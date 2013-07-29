@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,12 @@ import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public abstract class CompletionMatchVisitor extends BaseDefinitionMatchVisitor {
-    protected final ParsedString userInput;
+    protected final String userInput;
     protected final List<RobotCompletionProposal> proposals;
     private final IRegion replacementRegion;
     protected final HashSet<String> addedProposals = new HashSet<String>();
 
-    public CompletionMatchVisitor(IFile file, ParsedString userInput, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
+    public CompletionMatchVisitor(IFile file, String userInput, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
         super(file);
         this.userInput = userInput;
         this.proposals = proposals;

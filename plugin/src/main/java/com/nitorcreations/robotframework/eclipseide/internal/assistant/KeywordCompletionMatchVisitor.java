@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
 
-    public KeywordCompletionMatchVisitor(IFile file, ParsedString argument, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
+    public KeywordCompletionMatchVisitor(IFile file, String argument, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
         super(file, argument, proposals, replacementRegion);
     }
 
@@ -37,7 +37,7 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
         if (userInput == null) {
             addProposal(proposal, proposalLocation);
         } else {
-            String userInputString = userInput.getValue().toLowerCase();
+            String userInputString = userInput.toLowerCase();
             String proposalString = proposal.getValue().toLowerCase();
             if (proposalString.contains(userInputString) || matchesWithoutPrefix(userInputString, proposalString, proposalLocation)) {
                 addProposal(proposal, proposalLocation);

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
     private final int maxVariableCharPos;
     private final int maxSettingCharPos;
 
-    public VariableCompletionMatchVisitor(IFile file, ParsedString userInput, List<RobotCompletionProposal> proposals, IRegion replacementRegion, int maxVariableCharPos, int maxSettingCharPos) {
+    public VariableCompletionMatchVisitor(IFile file, String userInput, List<RobotCompletionProposal> proposals, IRegion replacementRegion, int maxVariableCharPos, int maxSettingCharPos) {
         super(file, userInput, proposals, replacementRegion);
         this.maxVariableCharPos = maxVariableCharPos;
         this.maxSettingCharPos = maxSettingCharPos;
@@ -43,13 +43,17 @@ public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
             return VisitorInterest.STOP;
         }
 
-        if (userInput == null || proposal.getUnescapedValue().toLowerCase().contains(userInput.getUnescapedValue().toLowerCase())) {
+        if (userInput == null || proposal.getUnescapedValue().toLowerCase().contains(getUnescapedUserInputLowerCase())) {
             if (!addedProposals.contains(proposal.getValue().toLowerCase())) {
                 addProposal(proposal, proposalLocation);
             }
         }
 
         return VisitorInterest.CONTINUE;
+    }
+
+    private String getUnescapedUserInputLowerCase() {
+        return new ParsedString(userInput, 0).getUnescapedValue().toLowerCase();
     }
 
     @Override

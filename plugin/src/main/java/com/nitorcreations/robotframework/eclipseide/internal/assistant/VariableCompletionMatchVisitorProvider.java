@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
-
 public class VariableCompletionMatchVisitorProvider extends CompletionMatchVisitorProvider {
 
     private final int maxVariableCharPos;
@@ -34,7 +32,7 @@ public class VariableCompletionMatchVisitorProvider extends CompletionMatchVisit
     }
 
     @Override
-    public CompletionMatchVisitor get(ParsedString argument, List<RobotCompletionProposal> proposals) {
+    public CompletionMatchVisitor get(String argument, List<RobotCompletionProposal> proposals) {
         return new VariableCompletionMatchVisitor(file, argument, proposals, replacementRegion, maxVariableCharPos, maxSettingCharPos);
     }
 }

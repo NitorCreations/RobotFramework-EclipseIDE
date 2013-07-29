@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class TestVariableCompletionMatchVisitor {
     @Test
     public void testVisitMatchAddsProposalIfMatchIsFound() throws Exception {
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
-        VariableCompletionMatchVisitor visitor = getVisitor(proposals, new ParsedString("${fo", 0));
+        VariableCompletionMatchVisitor visitor = getVisitor(proposals, "${fo");
         assertEquals(visitor.visitMatch(PROPOSAL, DUMMY_LOCATION), VisitorInterest.CONTINUE);
         assertEquals(proposals.size(), 1);
         assertEquals(proposals.get(0).getMatchArgument(), PROPOSAL);
@@ -54,12 +54,12 @@ public class TestVariableCompletionMatchVisitor {
     @Test
     public void testVisitMatchDoesNotAddProposalIfMatchIsNotFound() throws Exception {
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
-        VariableCompletionMatchVisitor visitor = getVisitor(proposals, new ParsedString("${for", 0));
+        VariableCompletionMatchVisitor visitor = getVisitor(proposals, "${for");
         assertEquals(visitor.visitMatch(PROPOSAL, DUMMY_LOCATION), VisitorInterest.CONTINUE);
         assertTrue(proposals.isEmpty());
     }
 
-    private VariableCompletionMatchVisitor getVisitor(List<RobotCompletionProposal> proposals, ParsedString userInput) {
+    private VariableCompletionMatchVisitor getVisitor(List<RobotCompletionProposal> proposals, String userInput) {
         return new VariableCompletionMatchVisitor(null, userInput, proposals, new Region(0, 0), Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 }
