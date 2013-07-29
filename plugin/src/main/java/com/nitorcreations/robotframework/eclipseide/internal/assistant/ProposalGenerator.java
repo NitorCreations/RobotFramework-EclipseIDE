@@ -182,17 +182,6 @@ public class ProposalGenerator implements IProposalGenerator {
         }
     }
 
-    private List<String> generateAttempts(ParsedString argument, int documentOffset, String lookFor) {
-        List<String> attempts = new ArrayList<String>(3);
-        attempts.add(lookFor);
-        int argumentOffset = documentOffset - argument.getArgCharPos();
-        if (lookFor.length() > argumentOffset) {
-            attempts.add(lookFor.substring(0, argumentOffset));
-        }
-        attempts.add("");
-        return attempts;
-    }
-
     private static class KeywordNeed {
         public final ParsedString callingTestcaseOrKeyword;
         public final ParsedString calledKeyword;
@@ -335,4 +324,14 @@ public class ProposalGenerator implements IProposalGenerator {
         return proposals.get(0).getMatchArgument().getValue().equals(argument.getValue());
     }
 
+    private List<String> generateAttempts(ParsedString argument, int documentOffset, String lookFor) {
+        List<String> attempts = new ArrayList<String>(3);
+        attempts.add(lookFor);
+        int argumentOffset = documentOffset - argument.getArgCharPos();
+        if (lookFor.length() > argumentOffset) {
+            attempts.add(lookFor.substring(0, argumentOffset));
+        }
+        attempts.add("");
+        return attempts;
+    }
 }
