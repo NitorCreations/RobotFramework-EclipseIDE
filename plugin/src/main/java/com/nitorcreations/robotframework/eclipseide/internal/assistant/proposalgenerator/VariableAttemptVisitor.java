@@ -36,6 +36,10 @@ public class VariableAttemptVisitor implements AttemptVisitor {
         RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
         CompletionMatchVisitor visitor = new VariableCompletionMatchVisitor(file, attempt, ourProposalSet.getProposals(), replacementRegion, maxVariableCharPos, maxSettingCharPos);
         DefinitionFinder.acceptMatches(file, visitor);
+        if (replacementRegion.getLength() > 0) {
+            // the cursor is positioned for replacing a variable, so mark the variable proposals high priority
+            ourProposalSet.setPriorityProposal();
+        }
         return ourProposalSet;
 
         // TODO
