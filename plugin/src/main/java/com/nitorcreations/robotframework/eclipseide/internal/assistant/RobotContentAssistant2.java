@@ -120,31 +120,29 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
         return proposalSets;
     }
 
+    private static final int NOT_PRIORITY_PROPOSAL_MASK = 1 << 0;
+    private static final int NOT_BASED_ON_INPUT_MASK = 1 << 1;
+
     private PriorityDeque<RobotCompletionProposalSet> createProposalSets() {
         return new ArrayPriorityDeque<RobotCompletionProposalSet>(4, new Prioritizer<RobotCompletionProposalSet>() {
             @Override
             public int prioritize(RobotCompletionProposalSet t) {
-                return (t.isPriorityProposal() ? 0 : 1) + (t.isBasedOnInput() ? 0 : 2);
+                return (t.isPriorityProposal() ? 0 : NOT_PRIORITY_PROPOSAL_MASK) + (t.isBasedOnInput() ? 0 : NOT_BASED_ON_INPUT_MASK);
             }
         });
     }
 
     private ICompletionProposal[] extractMostRelevantProposals(PriorityDeque<RobotCompletionProposalSet> proposalSets) {
-        for (Iterator<RobotCompletionProposalSet> proposalSetIt = proposalSets.iterator(); proposalSetIt.hasNext();) {
-            RobotCompletionProposalSet proposalSet = proposalSetIt.next();
-            if (proposalSet.getProposals().isEmpty()) {
-                proposalSetIt.remove();
-                continue;
-            }
-        }
+        removeEmptyProposalSets(proposalSets);
+
         int lowestPriority = proposalSets.peekLowestPriority();
         boolean isEmpty = lowestPriority == -1;
         if (isEmpty) {
             return null;
         }
-        if (lowestPriority < 2) {
+        if (lowestPriority < NOT_BASED_ON_INPUT_MASK) {
             // we have got proposals based on input, so remove proposals not based on input
-            proposalSets.clear(2, proposalSets.getNumberOfPriorityLevels() - 1);
+            proposalSets.clear(NOT_BASED_ON_INPUT_MASK, proposalSets.getNumberOfPriorityLevels() - 1);
         }
 
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
@@ -152,6 +150,16 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
             proposals.addAll(proposalSet.getProposals());
         }
         return proposals.toArray(new ICompletionProposal[proposals.size()]);
+    }
+
+    private void removeEmptyProposalSets(PriorityDeque<RobotCompletionProposalSet> proposalSets) {
+        for (Iterator<RobotCompletionProposalSet> proposalSetIt = proposalSets.iterator(); proposalSetIt.hasNext();) {
+            RobotCompletionProposalSet proposalSet = proposalSetIt.next();
+            if (proposalSet.getProposals().isEmpty()) {
+                proposalSetIt.remove();
+                continue;
+            }
+        }
     }
 
     private TableType determineTableTypeForLine(List<RobotLine> lines, int lineNo) {
