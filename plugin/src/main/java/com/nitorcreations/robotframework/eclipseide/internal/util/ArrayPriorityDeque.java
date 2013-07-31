@@ -80,14 +80,18 @@ public class ArrayPriorityDeque<T> extends AbstractQueue<T> implements PriorityD
     }
 
     private Deque<T> q(int priority) {
+        qc(priority);
+        Deque<T> deque = queues[priority];
+        return deque;
+    }
+
+    private void qc(int priority) {
         if (priority < 0) {
             throw new IllegalArgumentException("Illegal negative priority level");
         }
         if (priority >= queues.length) {
             throw new IllegalArgumentException("Too great priority level - levels 0.." + (queues.length - 1) + " supported by this instance");
         }
-        Deque<T> deque = queues[priority];
-        return deque;
     }
 
     // --------------------------------------
@@ -148,6 +152,16 @@ public class ArrayPriorityDeque<T> extends AbstractQueue<T> implements PriorityD
     public void clear(int priority) {
         Deque<T> deque = q(priority);
         deque.clear();
+        ++mod;
+    }
+
+    @Override
+    public void clear(int minPriority, int maxPriority) {
+        qc(minPriority);
+        qc(maxPriority);
+        for (int i = minPriority; i <= maxPriority; ++i) {
+            queues[i].clear();
+        }
         ++mod;
     }
 

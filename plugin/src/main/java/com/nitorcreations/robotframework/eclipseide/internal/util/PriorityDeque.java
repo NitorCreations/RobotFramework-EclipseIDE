@@ -41,6 +41,8 @@ public interface PriorityDeque<T> extends Deque<T> {
 
     void clear(int priority);
 
+    void clear(int minPriority, int maxPriority);
+
     int getNumberOfPriorityLevels();
 
     /**

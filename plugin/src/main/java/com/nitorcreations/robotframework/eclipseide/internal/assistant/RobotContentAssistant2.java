@@ -121,47 +121,37 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
     }
 
     private PriorityDeque<RobotCompletionProposalSet> createProposalSets() {
-        return new ArrayPriorityDeque<RobotCompletionProposalSet>(2, new Prioritizer<RobotCompletionProposalSet>() {
+        return new ArrayPriorityDeque<RobotCompletionProposalSet>(4, new Prioritizer<RobotCompletionProposalSet>() {
             @Override
             public int prioritize(RobotCompletionProposalSet t) {
-                return t.isPriorityProposal() ? 0 : 1;
+                return (t.isPriorityProposal() ? 0 : 1) + (t.isBasedOnInput() ? 0 : 2);
             }
         });
     }
 
     private ICompletionProposal[] extractMostRelevantProposals(PriorityDeque<RobotCompletionProposalSet> proposalSets) {
-        boolean hasProposalsBasedOnInput = false;
         for (Iterator<RobotCompletionProposalSet> proposalSetIt = proposalSets.iterator(); proposalSetIt.hasNext();) {
             RobotCompletionProposalSet proposalSet = proposalSetIt.next();
             if (proposalSet.getProposals().isEmpty()) {
                 proposalSetIt.remove();
                 continue;
             }
-            if (proposalSet.isBasedOnInput()) {
-                hasProposalsBasedOnInput = true;
-            }
         }
-        if (hasProposalsBasedOnInput) {
-            removeProposalsNotBasedOnInput(proposalSets);
-        }
-
-        if (proposalSets.isEmpty()) {
+        int lowestPriority = proposalSets.peekLowestPriority();
+        boolean isEmpty = lowestPriority == -1;
+        if (isEmpty) {
             return null;
         }
+        if (lowestPriority < 2) {
+            // we have got proposals based on input, so remove proposals not based on input
+            proposalSets.clear(2, proposalSets.getNumberOfPriorityLevels() - 1);
+        }
+
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
         for (RobotCompletionProposalSet proposalSet : proposalSets) {
             proposals.addAll(proposalSet.getProposals());
         }
         return proposals.toArray(new ICompletionProposal[proposals.size()]);
-    }
-
-    private void removeProposalsNotBasedOnInput(PriorityDeque<RobotCompletionProposalSet> proposalSets) {
-        for (Iterator<RobotCompletionProposalSet> proposalSetIt = proposalSets.iterator(); proposalSetIt.hasNext();) {
-            RobotCompletionProposalSet proposalSet = proposalSetIt.next();
-            if (!proposalSet.isBasedOnInput()) {
-                proposalSetIt.remove();
-            }
-        }
     }
 
     private TableType determineTableTypeForLine(List<RobotLine> lines, int lineNo) {
