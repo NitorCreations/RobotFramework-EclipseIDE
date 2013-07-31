@@ -18,9 +18,6 @@ package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposal
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.CompletionMatchVisitorProvider;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.KeywordCompletionMatchVisitorProvider;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.RobotCompletionProposalSet;
 import com.nitorcreations.robotframework.eclipseide.internal.util.DefinitionFinder;
 
 public class KeywordCallAttemptVisitor implements AttemptVisitor {

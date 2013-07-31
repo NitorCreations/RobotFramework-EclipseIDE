@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nitorcreations.robotframework.eclipseide.internal.assistant;
+package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +22,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.AttemptVisitor;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.KeywordCallAttemptVisitor;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.KeywordDefinitionAttemptVisitor;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.SettingTableAttemptVisitor;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.TableAttemptVisitor;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.VariableAttemptVisitor;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class ProposalGenerator implements IProposalGenerator {

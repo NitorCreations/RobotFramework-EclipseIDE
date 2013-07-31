@@ -17,7 +17,6 @@ package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposal
 
 import org.eclipse.jface.text.IRegion;
 
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.RobotCompletionProposalSet;
 
 public interface AttemptVisitor {
     RobotCompletionProposalSet visitAttempt(String attempt, IRegion replacementRegion);

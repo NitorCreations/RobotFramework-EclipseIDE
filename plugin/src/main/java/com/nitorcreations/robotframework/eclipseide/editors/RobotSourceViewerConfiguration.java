@@ -31,9 +31,9 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.ProposalGenerator;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.RobotContentAssistant;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.RobotContentAssistant2;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.ProposalGenerator;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.KeywordCallHyperlinkDetector;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.ResourceHyperlinkDetector;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.VariableAccessHyperlinkDetector;

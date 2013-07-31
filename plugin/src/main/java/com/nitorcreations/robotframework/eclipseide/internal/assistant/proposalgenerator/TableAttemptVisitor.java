@@ -23,8 +23,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.swt.graphics.Image;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.util.ParserUtil;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.RobotCompletionProposal;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.RobotCompletionProposalSet;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nitorcreations.robotframework.eclipseide.internal.assistant;
+package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
@@ -24,6 +24,7 @@ import java.util.List;
 import org.eclipse.jface.text.Region;
 import org.junit.Test;
 
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.VariableCompletionMatchVisitor;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileType;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.internal.util.VisitorInterest;

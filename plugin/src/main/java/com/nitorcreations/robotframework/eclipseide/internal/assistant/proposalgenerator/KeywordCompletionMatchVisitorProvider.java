@@ -13,26 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nitorcreations.robotframework.eclipseide.internal.assistant;
+package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 
-public class VariableCompletionMatchVisitorProvider extends CompletionMatchVisitorProvider {
 
-    private final int maxVariableCharPos;
-    private final int maxSettingCharPos;
+public class KeywordCompletionMatchVisitorProvider extends CompletionMatchVisitorProvider {
 
-    public VariableCompletionMatchVisitorProvider(IFile file, IRegion replacementRegion, int maxVariableCharPos, int maxSettingCharPos) {
+    public KeywordCompletionMatchVisitorProvider(IFile file, IRegion replacementRegion) {
         super(file, replacementRegion);
-        this.maxVariableCharPos = maxVariableCharPos;
-        this.maxSettingCharPos = maxSettingCharPos;
     }
 
     @Override
     public CompletionMatchVisitor get(String argument, List<RobotCompletionProposal> proposals) {
-        return new VariableCompletionMatchVisitor(file, argument, proposals, replacementRegion, maxVariableCharPos, maxSettingCharPos);
+        return new KeywordCompletionMatchVisitor(file, argument, proposals, replacementRegion);
     }
 }

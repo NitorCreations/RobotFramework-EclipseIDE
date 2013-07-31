@@ -51,6 +51,9 @@ import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.IResourceManager;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.TestRobotContentAssistant2.MockProposalAdder.AddStyle;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalGenerator;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposal;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposalSet;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 

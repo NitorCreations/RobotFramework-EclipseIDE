@@ -29,8 +29,6 @@ import org.eclipse.swt.graphics.Image;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.LineType;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.RobotCompletionProposal;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.RobotCompletionProposalSet;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.internal.util.LineFinder;
 import com.nitorcreations.robotframework.eclipseide.internal.util.LineMatchVisitor;
