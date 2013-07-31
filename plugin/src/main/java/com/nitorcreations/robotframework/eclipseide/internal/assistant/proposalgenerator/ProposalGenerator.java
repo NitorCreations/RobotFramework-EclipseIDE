@@ -60,25 +60,22 @@ public class ProposalGenerator implements IProposalGenerator {
         IRegion replacementRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
         List<String> attempts = generateAttempts(argument, documentOffset, lookFor);
         for (String attempt : attempts) {
-            RobotCompletionProposalSet ourProposalSet = attemptVisitor.visitAttempt(attempt, replacementRegion);
-            if (ourProposalSet.getProposals().size() == 1 && proposalsIsEmptyOrContainsOnly(ourProposalSet.getProposals(), argument)) {
+            RobotCompletionProposalSet proposalSet = attemptVisitor.visitAttempt(attempt, replacementRegion);
+            if (proposalsContainsOnly(proposalSet.getProposals(), argument)) {
                 // Found a single exact hit - probably means it was content-assisted earlier and the user now wants to
                 // change it to something else
                 continue;
             }
-            if (!ourProposalSet.getProposals().isEmpty()) {
-                ourProposalSet.setBasedOnInput(!attempt.isEmpty());
-                proposalSets.add(ourProposalSet);
+            if (!proposalSet.getProposals().isEmpty()) {
+                proposalSet.setBasedOnInput(!attempt.isEmpty());
+                proposalSets.add(proposalSet);
                 return;
             }
         }
     }
 
-    private boolean proposalsIsEmptyOrContainsOnly(List<RobotCompletionProposal> proposals, ParsedString argument) {
-        if (proposals.size() != 1) {
-            return proposals.isEmpty();
-        }
-        return proposals.get(0).getMatchArgument().getValue().equals(argument.getValue());
+    private boolean proposalsContainsOnly(List<RobotCompletionProposal> proposals, ParsedString argument) {
+        return proposals.size() == 1 && proposals.get(0).getMatchArgument().getValue().equals(argument.getValue());
     }
 
     private List<String> generateAttempts(ParsedString argument, int documentOffset, String lookFor) {
