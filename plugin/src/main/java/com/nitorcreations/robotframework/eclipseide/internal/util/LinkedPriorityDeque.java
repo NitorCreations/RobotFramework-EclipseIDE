@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class LinkedPriorityDeque<T> extends AbstractQueue<T> implements Priority
         if (queues.length == 0) {
             throw new IllegalArgumentException("Must have a positive amount of priority levels");
         }
-        this.queues = Arrays.copyOf(queues, queues.length);
+        this.queues = queues;
         this.prioritizer = prioritizer;
     }
 
