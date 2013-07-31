@@ -24,8 +24,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -107,7 +107,7 @@ public class TestProposalGenerator {
 
         @Test
         public void should_propose_keyword_from_included_resource_file() throws Exception {
-            List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
+            Deque<RobotCompletionProposalSet> proposalSets = new ArrayDeque<RobotCompletionProposalSet>();
             IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\n");
             IFile linkedFile = addFile(LINKED_FILENAME, "*Keywords\n" + LINKED_KEYWORD + "\n");
             when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
@@ -116,7 +116,7 @@ public class TestProposalGenerator {
             proposalGenerator.addKeywordCallProposals(origFile, argument, 0, proposalSets);
 
             assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
-            RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+            RobotCompletionProposalSet proposalSet = proposalSets.iterator().next();
             assertEquals(false, proposalSet.isBasedOnInput());
             assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 2, proposalSet.getProposals().size());
             verifyProposal(proposalSet, 0, LINKED_PREFIX + LINKED_KEYWORD, LINKED_KEYWORD);
@@ -126,7 +126,7 @@ public class TestProposalGenerator {
         @Test
         // #35
         public void should_propose_keyword_only_once_from_resource_file_included_twice() throws Exception {
-            List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
+            Deque<RobotCompletionProposalSet> proposalSets = new ArrayDeque<RobotCompletionProposalSet>();
             IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\nResource  " + LINKED_FILENAME + "\n");
             IFile linkedFile = addFile(LINKED_FILENAME, "*Keywords\n" + LINKED_KEYWORD + "\n");
             when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
@@ -135,7 +135,7 @@ public class TestProposalGenerator {
             proposalGenerator.addKeywordCallProposals(origFile, argument, 0, proposalSets);
 
             assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
-            RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+            RobotCompletionProposalSet proposalSet = proposalSets.iterator().next();
             assertEquals(false, proposalSet.isBasedOnInput());
             assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 2, proposalSet.getProposals().size());
             verifyProposal(proposalSet, 0, LINKED_PREFIX + LINKED_KEYWORD, LINKED_KEYWORD);
@@ -154,7 +154,7 @@ public class TestProposalGenerator {
 
             @Test
             public void should_propose_all_variables() throws Exception {
-                List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
+                Deque<RobotCompletionProposalSet> proposalSets = new ArrayDeque<RobotCompletionProposalSet>();
                 IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\n*Variables\n" + FOO_VARIABLE + "  bar\n");
                 IFile linkedFile = addFile(LINKED_FILENAME, "*Variables\n" + LINKED_VARIABLE + "  value\n");
                 when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
@@ -163,7 +163,7 @@ public class TestProposalGenerator {
                 proposalGenerator.addVariableProposals(origFile, argument, 0, proposalSets, Integer.MAX_VALUE, Integer.MAX_VALUE);
 
                 assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
-                RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+                RobotCompletionProposalSet proposalSet = proposalSets.iterator().next();
                 assertEquals(false, proposalSet.isBasedOnInput());
                 assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 3, proposalSet.getProposals().size());
                 verifyProposal(proposalSet, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
@@ -174,7 +174,7 @@ public class TestProposalGenerator {
             @Test
             // #35
             public void should_propose_variable_only_once_from_resource_file_included_twice() throws Exception {
-                List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
+                Deque<RobotCompletionProposalSet> proposalSets = new ArrayDeque<RobotCompletionProposalSet>();
                 IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\nResource  " + LINKED_FILENAME + "\n*Variables\n" + FOO_VARIABLE + "  bar\n");
                 IFile linkedFile = addFile(LINKED_FILENAME, "*Variables\n" + LINKED_VARIABLE + "  value\n");
                 when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
@@ -183,7 +183,7 @@ public class TestProposalGenerator {
                 proposalGenerator.addVariableProposals(origFile, argument, 0, proposalSets, Integer.MAX_VALUE, Integer.MAX_VALUE);
 
                 assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
-                RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+                RobotCompletionProposalSet proposalSet = proposalSets.iterator().next();
                 assertEquals(false, proposalSet.isBasedOnInput());
                 assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 3, proposalSet.getProposals().size());
                 verifyProposal(proposalSet, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
@@ -195,7 +195,7 @@ public class TestProposalGenerator {
             @Test
             // #43
             public void should_replace_partially_typed_variable() throws Exception {
-                List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
+                Deque<RobotCompletionProposalSet> proposalSets = new ArrayDeque<RobotCompletionProposalSet>();
                 String origContents1 = "*Variables\n" + FOO_VARIABLE + "  bar\n*Testcase\n  Log  ";
                 String origContents2 = "${F";
                 String origContents = origContents1 + origContents2;
@@ -205,7 +205,7 @@ public class TestProposalGenerator {
                 proposalGenerator.addVariableProposals(origFile, argument, origContents.length(), proposalSets, Integer.MAX_VALUE, Integer.MAX_VALUE);
 
                 assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
-                RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+                RobotCompletionProposalSet proposalSet = proposalSets.iterator().next();
                 assertEquals(true, proposalSet.isBasedOnInput());
                 assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 1, proposalSet.getProposals().size());
                 verifyProposal(proposalSet, 0, FOO_VARIABLE, FOO_VARIABLE, origContents1.length(), origContents2.length());
@@ -219,7 +219,7 @@ public class TestProposalGenerator {
 
             @Test
             public void should_only_propose_BuiltIn_and_local_variables() throws Exception {
-                List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
+                Deque<RobotCompletionProposalSet> proposalSets = new ArrayDeque<RobotCompletionProposalSet>();
                 IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\n*Variables\n" + FOO_VARIABLE + "  bar\n");
                 IFile linkedFile = addFile(LINKED_FILENAME, "*Variables\n${LINKEDVAR}  value\n");
                 when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
@@ -228,7 +228,7 @@ public class TestProposalGenerator {
                 proposalGenerator.addVariableProposals(origFile, argument, 0, proposalSets, Integer.MAX_VALUE, -1);
 
                 assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
-                RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+                RobotCompletionProposalSet proposalSet = proposalSets.iterator().next();
                 assertEquals(false, proposalSet.isBasedOnInput());
                 assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 2, proposalSet.getProposals().size());
                 verifyProposal(proposalSet, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
@@ -238,7 +238,7 @@ public class TestProposalGenerator {
 
             @Test
             public void should_only_propose_BuiltIn_variables_when_no_local_variables_present() throws Exception {
-                List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
+                Deque<RobotCompletionProposalSet> proposalSets = new ArrayDeque<RobotCompletionProposalSet>();
                 IFile origFile = addFile("orig.txt", "*Settings\nResource  " + LINKED_FILENAME + "\nResource  " + LINKED_FILENAME);
                 IFile linkedFile = addFile(LINKED_FILENAME, "*Variables\n${LINKEDVAR}  value\n");
                 when(resourceManager.getRelativeFile(origFile, LINKED_FILENAME)).thenReturn(linkedFile);
@@ -247,7 +247,7 @@ public class TestProposalGenerator {
                 proposalGenerator.addVariableProposals(origFile, argument, 0, proposalSets, Integer.MAX_VALUE, -1);
 
                 assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
-                RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+                RobotCompletionProposalSet proposalSet = proposalSets.iterator().next();
                 assertEquals(false, proposalSet.isBasedOnInput());
                 assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 1, proposalSet.getProposals().size());
                 verifyProposal(proposalSet, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);
@@ -256,7 +256,7 @@ public class TestProposalGenerator {
 
             @Test
             public void should_propose_subset_when_maxVariableCharPos_set() throws Exception {
-                List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
+                Deque<RobotCompletionProposalSet> proposalSets = new ArrayDeque<RobotCompletionProposalSet>();
                 String origContents1 = "*Settings\nResource  " + LINKED_FILENAME + "\n*Variables\n" + FOO_VARIABLE + "  bar\n";
                 String origContents2 = "${BAR}  bar\n${ZOT}  zot\n";
                 IFile origFile = addFile("orig.txt", origContents1 + origContents2);
@@ -267,7 +267,7 @@ public class TestProposalGenerator {
                 proposalGenerator.addVariableProposals(origFile, argument, 0, proposalSets, origContents1.length() - 1, -1);
 
                 assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
-                RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+                RobotCompletionProposalSet proposalSet = proposalSets.iterator().next();
                 assertEquals(false, proposalSet.isBasedOnInput());
                 assertEquals(false, proposalSet.isBasedOnInput());
                 assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 2, proposalSet.getProposals().size());
@@ -289,7 +289,7 @@ public class TestProposalGenerator {
 
             @Test
             public void should_propose_subset_when_maxSettingsCharPos_set() throws Exception {
-                List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
+                Deque<RobotCompletionProposalSet> proposalSets = new ArrayDeque<RobotCompletionProposalSet>();
                 String origContents1 = "*Settings\nResource  " + LINKED_FILENAME_1 + "\n";
                 String origContents2 = "Resource  " + LINKED_FILENAME_2 + "\n*Variables\n" + FOO_VARIABLE + "  bar\n";
                 IFile origFile = addFile("orig.txt", origContents1 + origContents2);
@@ -302,7 +302,7 @@ public class TestProposalGenerator {
                 proposalGenerator.addVariableProposals(origFile, argument, 0, proposalSets, Integer.MAX_VALUE, origContents1.length() - 1);
 
                 assertEquals("Got wrong amount of proposal sets: " + proposalSets, 1, proposalSets.size());
-                RobotCompletionProposalSet proposalSet = proposalSets.get(0);
+                RobotCompletionProposalSet proposalSet = proposalSets.iterator().next();
                 assertEquals(false, proposalSet.isBasedOnInput());
                 assertEquals("Got wrong amount of proposals: " + proposalSet.getProposals(), 3, proposalSet.getProposals().size());
                 verifyProposal(proposalSet, 0, BUILTIN_PREFIX + BUILTIN_VARIABLE, BUILTIN_VARIABLE);

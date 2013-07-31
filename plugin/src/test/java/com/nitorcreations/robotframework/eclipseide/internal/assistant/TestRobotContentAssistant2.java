@@ -20,7 +20,7 @@ import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doAnswer;
@@ -54,6 +54,8 @@ import com.nitorcreations.robotframework.eclipseide.internal.assistant.TestRobot
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalGenerator;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposal;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposalSet;
+import com.nitorcreations.robotframework.eclipseide.internal.util.ArrayPriorityDeque;
+import com.nitorcreations.robotframework.eclipseide.internal.util.PriorityDeque;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -97,11 +99,11 @@ public class TestRobotContentAssistant2 {
             when(workspace.getRoot()).thenReturn(workspaceRoot);
             when(workspaceRoot.getFile(builtinIndexPath)).thenReturn(builtinIndexFile);
 
-            doAnswer(PROPOSAL_ADDER_FOR_TABLE_PROPOSALS).when(proposalGenerator).addTableProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyListOf(RobotCompletionProposalSet.class));
-            doAnswer(PROPOSAL_ADDER_FOR_SETTING_TABLE_PROPOSALS).when(proposalGenerator).addSettingTableProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyListOf(RobotCompletionProposalSet.class));
-            doAnswer(PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS).when(proposalGenerator).addVariableProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyListOf(RobotCompletionProposalSet.class), anyInt(), anyInt());
-            doAnswer(PROPOSAL_ADDER_FOR_KEYWORD_CALL_PROPOSALS).when(proposalGenerator).addKeywordCallProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyListOf(RobotCompletionProposalSet.class));
-            doAnswer(PROPOSAL_ADDER_FOR_KEYWORD_DEFINITION_PROPOSALS).when(proposalGenerator).addKeywordDefinitionProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyListOf(RobotCompletionProposalSet.class));
+            doAnswer(PROPOSAL_ADDER_FOR_TABLE_PROPOSALS).when(proposalGenerator).addTableProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyPriorityDequeOf(RobotCompletionProposalSet.class));
+            doAnswer(PROPOSAL_ADDER_FOR_SETTING_TABLE_PROPOSALS).when(proposalGenerator).addSettingTableProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyPriorityDequeOf(RobotCompletionProposalSet.class));
+            doAnswer(PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS).when(proposalGenerator).addVariableProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyPriorityDequeOf(RobotCompletionProposalSet.class), anyInt(), anyInt());
+            doAnswer(PROPOSAL_ADDER_FOR_KEYWORD_CALL_PROPOSALS).when(proposalGenerator).addKeywordCallProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyPriorityDequeOf(RobotCompletionProposalSet.class));
+            doAnswer(PROPOSAL_ADDER_FOR_KEYWORD_DEFINITION_PROPOSALS).when(proposalGenerator).addKeywordDefinitionProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyPriorityDequeOf(RobotCompletionProposalSet.class));
         }
 
         @SuppressWarnings("unchecked")
@@ -149,7 +151,7 @@ public class TestRobotContentAssistant2 {
                 ParsedString expectedArgument = new ParsedString(origContents2, origContents1.length(), 2);
                 expectedArgument.setHasSpaceAfter(false);
                 expectedArgument.setType(ArgumentType.KEYWORD_ARG);
-                verify(proposalGenerator).addVariableProposals(same(origFile), eq(expectedArgument), eq(documentOffset), anyListOf(RobotCompletionProposalSet.class), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));
+                verify(proposalGenerator).addVariableProposals(same(origFile), eq(expectedArgument), eq(documentOffset), anyPriorityDequeOf(RobotCompletionProposalSet.class), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));
                 verifyNoMoreInteractions(proposalGenerator);
             }
         }
@@ -166,23 +168,32 @@ public class TestRobotContentAssistant2 {
         public static class Argument_synthesis {
             @RunWith(Enclosed.class)
             public static class synthesized extends Base {
-                public static class produces_new  extends Base {
+                public static class produces_new extends Base {
                     public void at_empty_line() throws Exception {}
+
                     public void at_beginning_of_line_with_onespace_before_first_nonempty_argument() throws Exception {}
+
                     public void between_arguments_at_twospaces_after_previous() throws Exception {}
+
                     public void between_arguments_at_tab_after_previous() throws Exception {}
+
                     public void twospaces_after_last_argument() throws Exception {}
+
                     public void at_empty_argument() throws Exception {}
+
                     public void onespace_after_empty_argument() throws Exception {} // ??
                 }
-                public static class extends_old extends Base {
-                }
+
+                public static class extends_old extends Base {}
             }
 
             public static class not_synthesized extends Base {
                 public void at_start_of_argument() throws Exception {}
+
                 public void in_middle_of_argment() throws Exception {}
+
                 public void at_end_of_argument() throws Exception {}
+
                 public void onespace_after_argument() throws Exception {}
             }
         }
@@ -221,5 +232,10 @@ public class TestRobotContentAssistant2 {
             }
             return null;
         }
+    }
+
+    static <T> PriorityDeque<T> anyPriorityDequeOf(Class<T> clazz) {
+        anyList();
+        return new ArrayPriorityDeque<T>(1);
     }
 }

@@ -15,7 +15,7 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
-import java.util.List;
+import java.util.Deque;
 
 import org.eclipse.core.resources.IFile;
 
@@ -23,14 +23,14 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public interface IProposalGenerator {
 
-    void addTableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets);
+    void addTableProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets);
 
-    void addSettingTableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets);
+    void addSettingTableProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets);
 
-    void addVariableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets, int maxVariableCharPos, int maxSettingCharPos);
+    void addVariableProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets, int maxVariableCharPos, int maxSettingCharPos);
 
-    void addKeywordCallProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets);
+    void addKeywordCallProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets);
 
-    void addKeywordDefinitionProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets);
+    void addKeywordDefinitionProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets);
 
 }

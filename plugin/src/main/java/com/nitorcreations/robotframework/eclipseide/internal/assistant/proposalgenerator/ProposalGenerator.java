@@ -16,6 +16,7 @@
 package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -27,28 +28,28 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 public class ProposalGenerator implements IProposalGenerator {
 
     @Override
-    public void addTableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets) {
+    public void addTableProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets) {
         acceptAttempts(argument, documentOffset, argument.getValue(), proposalSets, new TableAttemptVisitor());
     }
 
     @Override
-    public void addSettingTableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets) {
+    public void addSettingTableProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets) {
         acceptAttempts(argument, documentOffset, argument.getValue().toLowerCase(), proposalSets, new SettingTableAttemptVisitor());
     }
 
     @Override
-    public void addKeywordDefinitionProposals(final IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets) {
+    public void addKeywordDefinitionProposals(final IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets) {
         acceptAttempts(argument, documentOffset, argument.getValue().toLowerCase(), proposalSets, new KeywordDefinitionAttemptVisitor(file, argument));
     }
 
     @Override
-    public void addKeywordCallProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets) {
+    public void addKeywordCallProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets) {
         // toLowerCase?
         acceptAttempts(argument, documentOffset, argument.getValue().toLowerCase(), proposalSets, new KeywordCallAttemptVisitor(file));
     }
 
     @Override
-    public void addVariableProposals(IFile file, ParsedString argument, int documentOffset, List<RobotCompletionProposalSet> proposalSets, int maxVariableCharPos, int maxSettingCharPos) {
+    public void addVariableProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets, int maxVariableCharPos, int maxSettingCharPos) {
         IRegion replacementRegion = VariableReplacementRegionCalculator.calculate(argument, documentOffset);
         ParsedString subArgument = argument.extractRegion(replacementRegion);
 
@@ -56,7 +57,7 @@ public class ProposalGenerator implements IProposalGenerator {
         acceptAttempts(subArgument, documentOffset, subArgument.getValue().toLowerCase(), proposalSets, new VariableAttemptVisitor(file, maxVariableCharPos, maxSettingCharPos));
     }
 
-    private void acceptAttempts(ParsedString argument, int documentOffset, String lookFor, List<RobotCompletionProposalSet> proposalSets, AttemptVisitor attemptVisitor) {
+    private void acceptAttempts(ParsedString argument, int documentOffset, String lookFor, Deque<RobotCompletionProposalSet> proposalSets, AttemptVisitor attemptVisitor) {
         IRegion replacementRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
         List<String> attempts = generateAttempts(argument, documentOffset, lookFor);
         for (String attempt : attempts) {

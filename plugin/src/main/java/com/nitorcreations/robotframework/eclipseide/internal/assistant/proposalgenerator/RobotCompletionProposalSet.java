@@ -22,6 +22,7 @@ public class RobotCompletionProposalSet {
 
     private final List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
     private Boolean basedOnInput;
+    private boolean priorityProposal;
 
     public List<RobotCompletionProposal> getProposals() {
         return proposals;
@@ -38,4 +39,11 @@ public class RobotCompletionProposalSet {
         this.basedOnInput = basedOnInput;
     }
 
+    public boolean isPriorityProposal() {
+        return priorityProposal;
+    }
+
+    public void setPriorityProposal() {
+        priorityProposal = true;
+    }
 }

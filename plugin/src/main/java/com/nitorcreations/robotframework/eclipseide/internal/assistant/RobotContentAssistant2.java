@@ -28,6 +28,9 @@ import com.nitorcreations.robotframework.eclipseide.builder.parser.TableType;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalGenerator;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposal;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposalSet;
+import com.nitorcreations.robotframework.eclipseide.internal.util.ArrayPriorityDeque;
+import com.nitorcreations.robotframework.eclipseide.internal.util.Prioritizer;
+import com.nitorcreations.robotframework.eclipseide.internal.util.PriorityDeque;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -51,7 +54,7 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
     }
 
     private ICompletionProposal[] generateProposalsForArgument(IFile file, ParsedString argument, int documentOffset, List<RobotLine> lines, int lineNo, RobotLine robotLine) {
-        List<RobotCompletionProposalSet> proposalSets;
+        PriorityDeque<RobotCompletionProposalSet> proposalSets;
         if (argument.getArgumentIndex() == 0) {
             proposalSets = generateProposalsForFirstArgument(file, argument, documentOffset, lines, lineNo);
         } else {
@@ -60,8 +63,8 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
         return extractMostRelevantProposals(proposalSets);
     }
 
-    private List<RobotCompletionProposalSet> generateProposalsForFirstArgument(IFile file, ParsedString argument, int documentOffset, List<RobotLine> lines, int lineNo) {
-        List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
+    private PriorityDeque<RobotCompletionProposalSet> generateProposalsForFirstArgument(IFile file, ParsedString argument, int documentOffset, List<RobotLine> lines, int lineNo) {
+        PriorityDeque<RobotCompletionProposalSet> proposalSets = createProposalSets();
         switch (determineTableTypeForLine(lines, lineNo)) {
             case KEYWORD:
                 proposalGenerator.addKeywordDefinitionProposals(file, argument, documentOffset, proposalSets);
@@ -77,7 +80,7 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
         return proposalSets;
     }
 
-    private List<RobotCompletionProposalSet> generateProposalsForRestOfArguments(IFile file, ParsedString argument, int documentOffset, RobotLine robotLine) {
+    private PriorityDeque<RobotCompletionProposalSet> generateProposalsForRestOfArguments(IFile file, ParsedString argument, int documentOffset, RobotLine robotLine) {
         boolean allowKeywords = false;
         boolean allowVariables = false;
         int maxVariableCharPos = Integer.MAX_VALUE;
@@ -107,7 +110,7 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
                 maxSettingCharPos = -1;
                 break;
         }
-        List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
+        PriorityDeque<RobotCompletionProposalSet> proposalSets = createProposalSets();
         if (allowKeywords) {
             proposalGenerator.addKeywordCallProposals(file, argument, documentOffset, proposalSets);
         }
@@ -117,7 +120,16 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
         return proposalSets;
     }
 
-    private ICompletionProposal[] extractMostRelevantProposals(List<RobotCompletionProposalSet> proposalSets) {
+    private PriorityDeque<RobotCompletionProposalSet> createProposalSets() {
+        return new ArrayPriorityDeque<RobotCompletionProposalSet>(2, new Prioritizer<RobotCompletionProposalSet>() {
+            @Override
+            public int prioritize(RobotCompletionProposalSet t) {
+                return t.isPriorityProposal() ? 0 : 1;
+            }
+        });
+    }
+
+    private ICompletionProposal[] extractMostRelevantProposals(PriorityDeque<RobotCompletionProposalSet> proposalSets) {
         boolean hasProposalsBasedOnInput = false;
         for (Iterator<RobotCompletionProposalSet> proposalSetIt = proposalSets.iterator(); proposalSetIt.hasNext();) {
             RobotCompletionProposalSet proposalSet = proposalSetIt.next();
@@ -143,7 +155,7 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
         return proposals.toArray(new ICompletionProposal[proposals.size()]);
     }
 
-    private void removeProposalsNotBasedOnInput(List<RobotCompletionProposalSet> proposalSets) {
+    private void removeProposalsNotBasedOnInput(PriorityDeque<RobotCompletionProposalSet> proposalSets) {
         for (Iterator<RobotCompletionProposalSet> proposalSetIt = proposalSets.iterator(); proposalSetIt.hasNext();) {
             RobotCompletionProposalSet proposalSet = proposalSetIt.next();
             if (!proposalSet.isBasedOnInput()) {
