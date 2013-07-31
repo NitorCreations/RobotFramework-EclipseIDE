@@ -53,7 +53,7 @@ public class LineFinder {
          * definitions from included resource and variable files, recursively. Priority level 3: explicitly loaded
          * libraries. Priority level 4: built-in library.
          */
-        PriorityDeque<FileWithType> unprocessedFiles = new LinkedPriorityDeque<FileWithType>(5, new Prioritizer<FileWithType>() {
+        PriorityDeque<FileWithType> unprocessedFiles = new ArrayPriorityDeque<FileWithType>(5, new Prioritizer<FileWithType>() {
             @Override
             public int prioritize(FileWithType fileWithType) {
                 return fileWithType.getType() == FileType.LIBRARY ? 3 : 2;

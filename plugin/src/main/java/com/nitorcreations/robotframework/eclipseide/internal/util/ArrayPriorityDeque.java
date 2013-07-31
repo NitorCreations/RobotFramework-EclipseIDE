@@ -28,30 +28,30 @@ import java.util.NoSuchElementException;
  * priority level. Priority levels can be given either explicitly or determined implicitly by a given
  * {@link Prioritizer} instance.
  */
-public class LinkedPriorityDeque<T> extends AbstractQueue<T> implements PriorityDeque<T> {
+public class ArrayPriorityDeque<T> extends AbstractQueue<T> implements PriorityDeque<T> {
 
     private final Deque<T>[] queues;
     private final Prioritizer<T> prioritizer;
     private int mod;
 
-    public LinkedPriorityDeque(int priorityLevels) {
+    public ArrayPriorityDeque(int priorityLevels) {
         this(priorityLevels, null);
     }
 
-    public LinkedPriorityDeque(Deque<T>[] queues) {
+    public ArrayPriorityDeque(Deque<T>[] queues) {
         this(queues, null);
     }
 
     @SuppressWarnings("unchecked")
-    public LinkedPriorityDeque(int priorityLevels, Prioritizer<T> prioritizer) {
+    public ArrayPriorityDeque(int priorityLevels, Prioritizer<T> prioritizer) {
         this(prioritizer, (Deque<T>[]) createDequesArray(priorityLevels));
     }
 
-    public LinkedPriorityDeque(Deque<T>[] queues, Prioritizer<T> prioritizer) {
+    public ArrayPriorityDeque(Deque<T>[] queues, Prioritizer<T> prioritizer) {
         this(prioritizer, Arrays.copyOf(queues, queues.length));
     }
 
-    private LinkedPriorityDeque(Prioritizer<T> prioritizer, Deque<T>[] queues) {
+    private ArrayPriorityDeque(Prioritizer<T> prioritizer, Deque<T>[] queues) {
         if (queues.length == 0) {
             throw new IllegalArgumentException("Must have a positive amount of priority levels");
         }
