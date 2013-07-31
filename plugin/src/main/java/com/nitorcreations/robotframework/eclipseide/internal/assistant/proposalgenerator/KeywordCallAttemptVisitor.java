@@ -29,10 +29,9 @@ public class KeywordCallAttemptVisitor implements AttemptVisitor {
 
     @Override
     public RobotCompletionProposalSet visitAttempt(String attempt, IRegion replacementRegion) {
-        final CompletionMatchVisitorProvider visitorProvider = new KeywordCompletionMatchVisitorProvider(file, replacementRegion);
         RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
-        // first find matches that use the whole input as search string
-        DefinitionFinder.acceptMatches(file, visitorProvider.get(attempt, ourProposalSet.getProposals()));
+        CompletionMatchVisitor visitor = new KeywordCompletionMatchVisitor(file, attempt, ourProposalSet.getProposals(), replacementRegion);
+        DefinitionFinder.acceptMatches(file, visitor);
         return ourProposalSet;
     }
 }

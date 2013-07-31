@@ -33,10 +33,9 @@ public class VariableAttemptVisitor implements AttemptVisitor {
 
     @Override
     public RobotCompletionProposalSet visitAttempt(String attempt, IRegion replacementRegion) {
-        final CompletionMatchVisitorProvider visitorProvider = new VariableCompletionMatchVisitorProvider(file, replacementRegion, maxVariableCharPos, maxSettingCharPos);
         RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
-        // first find matches that use the whole input as search string
-        DefinitionFinder.acceptMatches(file, visitorProvider.get(attempt, ourProposalSet.getProposals()));
+        CompletionMatchVisitor visitor = new VariableCompletionMatchVisitor(file, attempt, ourProposalSet.getProposals(), replacementRegion, maxVariableCharPos, maxSettingCharPos);
+        DefinitionFinder.acceptMatches(file, visitor);
         return ourProposalSet;
 
         // TODO
