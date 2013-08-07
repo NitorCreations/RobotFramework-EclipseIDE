@@ -30,6 +30,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -50,7 +51,6 @@ import com.nitorcreations.robotframework.eclipseide.PluginContext;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.IResourceManager;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.TestRobotContentAssistant2.MockProposalAdder.AddStyle;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalGenerator;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposal;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposalSet;
@@ -142,7 +142,7 @@ public class TestRobotContentAssistant2 {
                 int documentOffset = origContents.length();
                 int lineNo = lines.size() - 1;
                 PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS.setBasedOnInput(true);
-                PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS.setAddStyle(AddStyle.APPEND);
+                // TODO PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS.setAddStyle(AddStyle.APPEND);
 
                 ICompletionProposal[] proposals = assistant.generateProposals(origFile, documentOffset, origContents, lines, lineNo);
 
@@ -202,11 +202,6 @@ public class TestRobotContentAssistant2 {
     static final class MockProposalAdder implements Answer<Void> {
         private final RobotCompletionProposalSet addedProposalSet = new RobotCompletionProposalSet();
         public final RobotCompletionProposal addedProposal;
-        private AddStyle addStyle;
-
-        enum AddStyle {
-            PREPEND, APPEND
-        }
 
         MockProposalAdder() {
             addedProposal = new RobotCompletionProposal(null, null, null, null, null, null, null);
@@ -217,19 +212,11 @@ public class TestRobotContentAssistant2 {
             addedProposalSet.setBasedOnInput(basedOnInput);
         }
 
-        public void setAddStyle(AddStyle addStyle) {
-            this.addStyle = addStyle;
-        }
-
         @Override
         public Void answer(InvocationOnMock invocation) throws Throwable {
             @SuppressWarnings("unchecked")
-            List<RobotCompletionProposalSet> proposalSets = (List<RobotCompletionProposalSet>) invocation.getArguments()[3];
-            if (addStyle == AddStyle.PREPEND) {
-                proposalSets.add(0, addedProposalSet);
-            } else {
-                proposalSets.add(addedProposalSet);
-            }
+            Collection<RobotCompletionProposalSet> proposalSets = (Collection<RobotCompletionProposalSet>) invocation.getArguments()[3];
+            proposalSets.add(addedProposalSet);
             return null;
         }
     }
