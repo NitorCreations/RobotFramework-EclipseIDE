@@ -34,6 +34,11 @@ import com.nitorcreations.robotframework.eclipseide.internal.util.PriorityDeque;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
+/**
+ * This class determines what TYPES of proposals that are relevant for the current cursor position, e.g. "Keyword",
+ * "Variable reference", "Table start" or similar. It then uses the given ProposalGenerator to generate proposals for
+ * those types.
+ */
 public class RobotContentAssistant2 implements IRobotContentAssistant2 {
 
     private final IProposalGenerator proposalGenerator;
