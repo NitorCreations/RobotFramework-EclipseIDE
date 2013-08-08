@@ -29,34 +29,32 @@ public class ProposalGenerator implements IProposalGenerator {
 
     @Override
     public void addTableProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets) {
-        acceptAttempts(argument, documentOffset, argument.getValue(), proposalSets, new TableAttemptVisitor());
+        acceptAttempts(argument, documentOffset, proposalSets, new TableAttemptVisitor());
     }
 
     @Override
     public void addSettingTableProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets) {
-        acceptAttempts(argument, documentOffset, argument.getValue().toLowerCase(), proposalSets, new SettingTableAttemptVisitor());
+        acceptAttempts(argument, documentOffset, proposalSets, new SettingTableAttemptVisitor());
     }
 
     @Override
     public void addKeywordDefinitionProposals(final IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets) {
-        acceptAttempts(argument, documentOffset, argument.getValue().toLowerCase(), proposalSets, new KeywordDefinitionAttemptVisitor(file, argument));
+        acceptAttempts(argument, documentOffset, proposalSets, new KeywordDefinitionAttemptVisitor(file, argument));
     }
 
     @Override
     public void addKeywordCallProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets) {
-        // toLowerCase?
-        acceptAttempts(argument, documentOffset, argument.getValue().toLowerCase(), proposalSets, new KeywordCallAttemptVisitor(file));
+        acceptAttempts(argument, documentOffset, proposalSets, new KeywordCallAttemptVisitor(file));
     }
 
     @Override
     public void addVariableProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets, int maxVariableCharPos, int maxSettingCharPos) {
-        // toLowerCase?
-        acceptAttempts(argument, documentOffset, argument.getValue().toLowerCase(), proposalSets, new VariableAttemptVisitor(file, maxVariableCharPos, maxSettingCharPos));
+        acceptAttempts(argument, documentOffset, proposalSets, new VariableAttemptVisitor(file, maxVariableCharPos, maxSettingCharPos));
     }
 
-    private void acceptAttempts(ParsedString argument, int documentOffset, String lookFor, Deque<RobotCompletionProposalSet> proposalSets, AttemptVisitor attemptVisitor) {
+    private void acceptAttempts(ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets, AttemptVisitor attemptVisitor) {
         IRegion replacementRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        List<String> attempts = generateAttempts(argument, documentOffset, lookFor);
+        List<String> attempts = generateAttempts(argument, documentOffset);
         for (String attempt : attempts) {
             RobotCompletionProposalSet proposalSet = attemptVisitor.visitAttempt(attempt, replacementRegion);
             if (proposalsContainsOnly(proposalSet.getProposals(), argument)) {
@@ -76,7 +74,8 @@ public class ProposalGenerator implements IProposalGenerator {
         return proposals.size() == 1 && proposals.get(0).getMatchArgument().getValue().equals(argument.getValue());
     }
 
-    private List<String> generateAttempts(ParsedString argument, int documentOffset, String lookFor) {
+    private List<String> generateAttempts(ParsedString argument, int documentOffset) {
+        String lookFor = argument.getValue().toLowerCase();
         List<String> attempts = new ArrayList<String>(3);
         attempts.add(lookFor);
         int argumentOffset = documentOffset - argument.getArgCharPos();
