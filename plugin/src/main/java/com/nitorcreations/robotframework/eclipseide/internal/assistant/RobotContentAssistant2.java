@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
@@ -28,6 +29,7 @@ import com.nitorcreations.robotframework.eclipseide.builder.parser.TableType;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalGenerator;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposal;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposalSet;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.VariableReplacementRegionCalculator;
 import com.nitorcreations.robotframework.eclipseide.internal.util.ArrayPriorityDeque;
 import com.nitorcreations.robotframework.eclipseide.internal.util.Prioritizer;
 import com.nitorcreations.robotframework.eclipseide.internal.util.PriorityDeque;
@@ -120,7 +122,9 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
             proposalGenerator.addKeywordCallProposals(file, argument, documentOffset, proposalSets);
         }
         if (allowVariables) {
-            proposalGenerator.addVariableProposals(file, argument, documentOffset, proposalSets, maxVariableCharPos, maxSettingCharPos);
+            IRegion variableReplacementRegion = VariableReplacementRegionCalculator.calculate(argument, documentOffset);
+            ParsedString variableInsideArgument = argument.extractRegion(variableReplacementRegion);
+            proposalGenerator.addVariableProposals(file, variableInsideArgument, documentOffset, proposalSets, maxVariableCharPos, maxSettingCharPos);
         }
         return proposalSets;
     }

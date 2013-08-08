@@ -50,11 +50,8 @@ public class ProposalGenerator implements IProposalGenerator {
 
     @Override
     public void addVariableProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets, int maxVariableCharPos, int maxSettingCharPos) {
-        IRegion replacementRegion = VariableReplacementRegionCalculator.calculate(argument, documentOffset);
-        ParsedString subArgument = argument.extractRegion(replacementRegion);
-
         // toLowerCase?
-        acceptAttempts(subArgument, documentOffset, subArgument.getValue().toLowerCase(), proposalSets, new VariableAttemptVisitor(file, maxVariableCharPos, maxSettingCharPos));
+        acceptAttempts(argument, documentOffset, argument.getValue().toLowerCase(), proposalSets, new VariableAttemptVisitor(file, maxVariableCharPos, maxSettingCharPos));
     }
 
     private void acceptAttempts(ParsedString argument, int documentOffset, String lookFor, Deque<RobotCompletionProposalSet> proposalSets, AttemptVisitor attemptVisitor) {
