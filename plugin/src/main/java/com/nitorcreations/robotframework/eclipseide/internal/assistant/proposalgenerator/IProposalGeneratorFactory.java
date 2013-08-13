@@ -15,22 +15,20 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
-import java.util.Deque;
-
 import org.eclipse.core.resources.IFile;
 
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
-public interface IProposalGenerator {
+public interface IProposalGeneratorFactory {
 
-    void addTableProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets);
+    AttemptVisitor createTableAttemptVisitor();
 
-    void addSettingTableProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets);
+    AttemptVisitor createSettingTableAttemptVisitor();
 
-    void addVariableProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets, int maxVariableCharPos, int maxSettingCharPos);
+    AttemptVisitor createKeywordDefinitionAttemptVisitor(final IFile file, ParsedString argument);
 
-    void addKeywordCallProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets);
+    AttemptVisitor createKeywordCallAttemptVisitor(IFile file);
 
-    void addKeywordDefinitionProposals(IFile file, ParsedString argument, int documentOffset, Deque<RobotCompletionProposalSet> proposalSets);
+    AttemptVisitor createVariableAttemptVisitor(IFile file, int maxVariableCharPos, int maxSettingCharPos);
 
 }

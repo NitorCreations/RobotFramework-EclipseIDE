@@ -26,7 +26,9 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.TableType;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalGenerator;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.AttemptVisitor;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IAttemptGenerator;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalGeneratorFactory;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposal;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposalSet;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.VariableReplacementRegionCalculator;
@@ -43,10 +45,12 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
  */
 public class RobotContentAssistant2 implements IRobotContentAssistant2 {
 
-    private final IProposalGenerator proposalGenerator;
+    private final IProposalGeneratorFactory proposalGeneratorFactory;
+    private final IAttemptGenerator attemptGenerator;
 
-    public RobotContentAssistant2(IProposalGenerator proposalGenerator) {
-        this.proposalGenerator = proposalGenerator;
+    public RobotContentAssistant2(IProposalGeneratorFactory proposalGeneratorFactory, IAttemptGenerator attemptGenerator) {
+        this.proposalGeneratorFactory = proposalGeneratorFactory;
+        this.attemptGenerator = attemptGenerator;
     }
 
     @Override
@@ -61,33 +65,48 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
     }
 
     private ICompletionProposal[] generateProposalsForArgument(IFile file, ParsedString argument, int documentOffset, List<RobotLine> lines, int lineNo, RobotLine robotLine) {
-        PriorityDeque<RobotCompletionProposalSet> proposalSets;
+        List<VisitorInfo> visitors;
         if (argument.getArgumentIndex() == 0) {
-            proposalSets = generateProposalsForFirstArgument(file, argument, documentOffset, lines, lineNo);
+            visitors = createProposalGeneratorsForFirstArgument(file, argument, documentOffset, lines, lineNo);
         } else {
-            proposalSets = generateProposalsForRestOfArguments(file, argument, documentOffset, robotLine);
+            visitors = createProposalGeneratorsForRestOfArguments(file, argument, documentOffset, robotLine);
+        }
+
+        PriorityDeque<RobotCompletionProposalSet> proposalSets = createProposalSets();
+        for (VisitorInfo visitorInfo : visitors) {
+            attemptGenerator.acceptAttempts(visitorInfo.visitorArgument, documentOffset, proposalSets, visitorInfo.visitior);
         }
         return extractMostRelevantProposals(proposalSets);
     }
 
-    private PriorityDeque<RobotCompletionProposalSet> generateProposalsForFirstArgument(IFile file, ParsedString argument, int documentOffset, List<RobotLine> lines, int lineNo) {
-        PriorityDeque<RobotCompletionProposalSet> proposalSets = createProposalSets();
+    static class VisitorInfo {
+        public final AttemptVisitor visitior;
+        public final ParsedString visitorArgument;
+
+        public VisitorInfo(ParsedString visitorArgument, AttemptVisitor visitior) {
+            this.visitior = visitior;
+            this.visitorArgument = visitorArgument;
+        }
+    }
+
+    private List<VisitorInfo> createProposalGeneratorsForFirstArgument(IFile file, ParsedString argument, int documentOffset, List<RobotLine> lines, int lineNo) {
+        List<VisitorInfo> visitorInfos = new ArrayList<VisitorInfo>();
         switch (determineTableTypeForLine(lines, lineNo)) {
             case KEYWORD:
-                proposalGenerator.addKeywordDefinitionProposals(file, argument, documentOffset, proposalSets);
+                visitorInfos.add(new VisitorInfo(argument, proposalGeneratorFactory.createKeywordDefinitionAttemptVisitor(file, argument)));
                 break;
             case SETTING:
-                proposalGenerator.addSettingTableProposals(file, argument, documentOffset, proposalSets);
+                visitorInfos.add(new VisitorInfo(argument, proposalGeneratorFactory.createSettingTableAttemptVisitor()));
                 break;
             default:
                 break;
         }
-        proposalGenerator.addTableProposals(file, argument, documentOffset, proposalSets);
+        visitorInfos.add(new VisitorInfo(argument, proposalGeneratorFactory.createTableAttemptVisitor()));
         // TODO we should only include either of setting/table proposals if either has exactly one match perhaps?
-        return proposalSets;
+        return visitorInfos;
     }
 
-    private PriorityDeque<RobotCompletionProposalSet> generateProposalsForRestOfArguments(IFile file, ParsedString argument, int documentOffset, RobotLine robotLine) {
+    private List<VisitorInfo> createProposalGeneratorsForRestOfArguments(IFile file, ParsedString argument, int documentOffset, RobotLine robotLine) {
         boolean allowKeywords = false;
         boolean allowVariables = false;
         int maxVariableCharPos = Integer.MAX_VALUE;
@@ -117,16 +136,16 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
                 maxSettingCharPos = -1;
                 break;
         }
-        PriorityDeque<RobotCompletionProposalSet> proposalSets = createProposalSets();
+        List<VisitorInfo> visitorInfos = new ArrayList<VisitorInfo>();
         if (allowKeywords) {
-            proposalGenerator.addKeywordCallProposals(file, argument, documentOffset, proposalSets);
+            visitorInfos.add(new VisitorInfo(argument, proposalGeneratorFactory.createKeywordCallAttemptVisitor(file)));
         }
         if (allowVariables) {
             IRegion variableReplacementRegion = VariableReplacementRegionCalculator.calculate(argument, documentOffset);
             ParsedString variableInsideArgument = argument.extractRegion(variableReplacementRegion);
-            proposalGenerator.addVariableProposals(file, variableInsideArgument, documentOffset, proposalSets, maxVariableCharPos, maxSettingCharPos);
+            visitorInfos.add(new VisitorInfo(variableInsideArgument, proposalGeneratorFactory.createVariableAttemptVisitor(file, maxVariableCharPos, maxSettingCharPos)));
         }
-        return proposalSets;
+        return visitorInfos;
     }
 
     private static final int NOT_PRIORITY_PROPOSAL_MASK = 1 << 0;

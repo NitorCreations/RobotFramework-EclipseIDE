@@ -16,21 +16,18 @@
 package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -44,16 +41,14 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import com.nitorcreations.robotframework.eclipseide.PluginContext;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.IResourceManager;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalGenerator;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposal;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposalSet;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.AttemptVisitor;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IAttemptGenerator;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalGeneratorFactory;
 import com.nitorcreations.robotframework.eclipseide.internal.util.ArrayPriorityDeque;
 import com.nitorcreations.robotframework.eclipseide.internal.util.PriorityDeque;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
@@ -68,22 +63,24 @@ public class TestRobotContentAssistant2 {
         static final String BUILTIN_PREFIX = "[BuiltIn] ";
         static final String BUILTIN_INDEX_FILE = "BuiltIn.index";
 
-        IProposalGenerator proposalGenerator;
+        IProposalGeneratorFactory proposalGeneratorFactory;
+        IAttemptGenerator attemptGenerator;
         IRobotContentAssistant2 assistant;
 
         final IProject project = mock(IProject.class, "project");
         final IResourceManager resourceManager = mock(IResourceManager.class, "resourceManager");
 
-        static final MockProposalAdder PROPOSAL_ADDER_FOR_TABLE_PROPOSALS = new MockProposalAdder();
-        static final MockProposalAdder PROPOSAL_ADDER_FOR_SETTING_TABLE_PROPOSALS = new MockProposalAdder();
-        static final MockProposalAdder PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS = new MockProposalAdder();
-        static final MockProposalAdder PROPOSAL_ADDER_FOR_KEYWORD_CALL_PROPOSALS = new MockProposalAdder();
-        static final MockProposalAdder PROPOSAL_ADDER_FOR_KEYWORD_DEFINITION_PROPOSALS = new MockProposalAdder();
+        final AttemptVisitor mockTableAttemptVisitor = mock(AttemptVisitor.class);
+        final AttemptVisitor mockSettingTableAttemptVisitor = mock(AttemptVisitor.class);
+        final AttemptVisitor mockVariableAttemptVisitor = mock(AttemptVisitor.class);
+        final AttemptVisitor mockKeywordCallAttemptVisitor = mock(AttemptVisitor.class);
+        final AttemptVisitor mockKeywordDefinitionAttemptVisitor = mock(AttemptVisitor.class);
 
         @Before
         public void setup() throws Exception {
-            proposalGenerator = mock(IProposalGenerator.class, "proposalGenerator");
-            assistant = new RobotContentAssistant2(proposalGenerator);
+            proposalGeneratorFactory = mock(IProposalGeneratorFactory.class, "proposalGenerator");
+            attemptGenerator = mock(IAttemptGenerator.class, "attemptGenerator");
+            assistant = new RobotContentAssistant2(proposalGeneratorFactory, attemptGenerator);
 
             PluginContext.setResourceManager(resourceManager);
 
@@ -99,11 +96,11 @@ public class TestRobotContentAssistant2 {
             when(workspace.getRoot()).thenReturn(workspaceRoot);
             when(workspaceRoot.getFile(builtinIndexPath)).thenReturn(builtinIndexFile);
 
-            doAnswer(PROPOSAL_ADDER_FOR_TABLE_PROPOSALS).when(proposalGenerator).addTableProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyPriorityDequeOf(RobotCompletionProposalSet.class));
-            doAnswer(PROPOSAL_ADDER_FOR_SETTING_TABLE_PROPOSALS).when(proposalGenerator).addSettingTableProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyPriorityDequeOf(RobotCompletionProposalSet.class));
-            doAnswer(PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS).when(proposalGenerator).addVariableProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyPriorityDequeOf(RobotCompletionProposalSet.class), anyInt(), anyInt());
-            doAnswer(PROPOSAL_ADDER_FOR_KEYWORD_CALL_PROPOSALS).when(proposalGenerator).addKeywordCallProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyPriorityDequeOf(RobotCompletionProposalSet.class));
-            doAnswer(PROPOSAL_ADDER_FOR_KEYWORD_DEFINITION_PROPOSALS).when(proposalGenerator).addKeywordDefinitionProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyPriorityDequeOf(RobotCompletionProposalSet.class));
+            when(proposalGeneratorFactory.createTableAttemptVisitor()).thenReturn(mockTableAttemptVisitor);
+            when(proposalGeneratorFactory.createSettingTableAttemptVisitor()).thenReturn(mockSettingTableAttemptVisitor);
+            when(proposalGeneratorFactory.createVariableAttemptVisitor(any(IFile.class), anyInt(), anyInt())).thenReturn(mockVariableAttemptVisitor);
+            when(proposalGeneratorFactory.createKeywordCallAttemptVisitor(any(IFile.class))).thenReturn(mockKeywordCallAttemptVisitor);
+            when(proposalGeneratorFactory.createKeywordDefinitionAttemptVisitor(any(IFile.class), any(ParsedString.class))).thenReturn(mockKeywordDefinitionAttemptVisitor);
         }
 
         @SuppressWarnings("unchecked")
@@ -141,18 +138,18 @@ public class TestRobotContentAssistant2 {
                 List<RobotLine> lines = RobotFile.parse(origContents).getLines();
                 int documentOffset = origContents.length();
                 int lineNo = lines.size() - 1;
-                PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS.setBasedOnInput(true);
-                // TODO PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS.setAddStyle(AddStyle.APPEND);
+                // TODO mockVariableAttemptVisitor.setBasedOnInput(true);
+                // TODO mockVARIABLEAttemptVisitor.setAddStyle(AddStyle.APPEND);
 
                 ICompletionProposal[] proposals = assistant.generateProposals(origFile, documentOffset, origContents, lines, lineNo);
 
                 assertEquals(1, proposals.length);
-                assertSame(PROPOSAL_ADDER_FOR_VARIABLE_PROPOSALS.addedProposal, proposals[0]);
+                // TODO assertSame(mockVariableAttemptVisitor.addedProposal, proposals[0]);
                 ParsedString expectedArgument = new ParsedString(origContents2, origContents1.length(), 2);
                 expectedArgument.setHasSpaceAfter(false);
                 expectedArgument.setType(ArgumentType.KEYWORD_ARG);
-                verify(proposalGenerator).addVariableProposals(same(origFile), eq(expectedArgument), eq(documentOffset), anyPriorityDequeOf(RobotCompletionProposalSet.class), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));
-                verifyNoMoreInteractions(proposalGenerator);
+                verify(proposalGeneratorFactory).createVariableAttemptVisitor(same(origFile), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));
+                verifyNoMoreInteractions(proposalGeneratorFactory, attemptGenerator);
             }
         }
     }
@@ -196,28 +193,6 @@ public class TestRobotContentAssistant2 {
 
                 public void onespace_after_argument() throws Exception {}
             }
-        }
-    }
-
-    static final class MockProposalAdder implements Answer<Void> {
-        private final RobotCompletionProposalSet addedProposalSet = new RobotCompletionProposalSet();
-        public final RobotCompletionProposal addedProposal;
-
-        MockProposalAdder() {
-            addedProposal = new RobotCompletionProposal(null, null, null, null, null, null, null);
-            addedProposalSet.getProposals().add(addedProposal);
-        }
-
-        public void setBasedOnInput(boolean basedOnInput) {
-            addedProposalSet.setBasedOnInput(basedOnInput);
-        }
-
-        @Override
-        public Void answer(InvocationOnMock invocation) throws Throwable {
-            @SuppressWarnings("unchecked")
-            Collection<RobotCompletionProposalSet> proposalSets = (Collection<RobotCompletionProposalSet>) invocation.getArguments()[3];
-            proposalSets.add(addedProposalSet);
-            return null;
         }
     }
 
