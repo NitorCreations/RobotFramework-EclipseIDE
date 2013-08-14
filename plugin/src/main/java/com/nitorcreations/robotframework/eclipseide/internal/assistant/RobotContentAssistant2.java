@@ -31,7 +31,6 @@ import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalg
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalGeneratorFactory;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposal;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposalSet;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.VariableReplacementRegionCalculator;
 import com.nitorcreations.robotframework.eclipseide.internal.util.ArrayPriorityDeque;
 import com.nitorcreations.robotframework.eclipseide.internal.util.Prioritizer;
 import com.nitorcreations.robotframework.eclipseide.internal.util.PriorityDeque;
@@ -47,10 +46,12 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
 
     private final IProposalGeneratorFactory proposalGeneratorFactory;
     private final IAttemptGenerator attemptGenerator;
+    private final IVariableReplacementRegionCalculator variableReplacementRegionCalculator;
 
-    public RobotContentAssistant2(IProposalGeneratorFactory proposalGeneratorFactory, IAttemptGenerator attemptGenerator) {
+    public RobotContentAssistant2(IProposalGeneratorFactory proposalGeneratorFactory, IAttemptGenerator attemptGenerator, IVariableReplacementRegionCalculator variableReplacementRegionCalculator) {
         this.proposalGeneratorFactory = proposalGeneratorFactory;
         this.attemptGenerator = attemptGenerator;
+        this.variableReplacementRegionCalculator = variableReplacementRegionCalculator;
     }
 
     @Override
@@ -141,7 +142,7 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
             visitorInfos.add(new VisitorInfo(argument, proposalGeneratorFactory.createKeywordCallAttemptVisitor(file)));
         }
         if (allowVariables) {
-            IRegion variableReplacementRegion = VariableReplacementRegionCalculator.calculate(argument, documentOffset);
+            IRegion variableReplacementRegion = variableReplacementRegionCalculator.calculate(argument, documentOffset);
             ParsedString variableInsideArgument = argument.extractRegion(variableReplacementRegion);
             visitorInfos.add(new VisitorInfo(variableInsideArgument, proposalGeneratorFactory.createVariableAttemptVisitor(file, maxVariableCharPos, maxSettingCharPos)));
         }

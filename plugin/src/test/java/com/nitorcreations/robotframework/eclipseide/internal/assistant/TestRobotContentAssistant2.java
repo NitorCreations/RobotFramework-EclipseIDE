@@ -65,6 +65,7 @@ public class TestRobotContentAssistant2 {
 
         IProposalGeneratorFactory proposalGeneratorFactory;
         IAttemptGenerator attemptGenerator;
+        IVariableReplacementRegionCalculator variableReplacementRegionCalculator;
         IRobotContentAssistant2 assistant;
 
         final IProject project = mock(IProject.class, "project");
@@ -80,7 +81,8 @@ public class TestRobotContentAssistant2 {
         public void setup() throws Exception {
             proposalGeneratorFactory = mock(IProposalGeneratorFactory.class, "proposalGenerator");
             attemptGenerator = mock(IAttemptGenerator.class, "attemptGenerator");
-            assistant = new RobotContentAssistant2(proposalGeneratorFactory, attemptGenerator);
+            variableReplacementRegionCalculator = mock(IVariableReplacementRegionCalculator.class, "variableReplacementRegionCalculator");
+            assistant = new RobotContentAssistant2(proposalGeneratorFactory, attemptGenerator, variableReplacementRegionCalculator);
 
             PluginContext.setResourceManager(resourceManager);
 
