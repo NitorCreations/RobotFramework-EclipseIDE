@@ -185,7 +185,7 @@ public class ParsedString implements IParsedKeywordString {
     public ParsedString extractRegion(IRegion region) {
         int regionEnd = region.getOffset() + region.getLength();
         if (region.getOffset() < argCharPos || regionEnd > getArgEndCharPos()) {
-            throw new IndexOutOfBoundsException("region " + region + " outside parsedString " + this);
+            throw new IndexOutOfBoundsException("region @" + region.getOffset() + "-" + (regionEnd - 1) + " outside parsedString " + getDebugString());
         }
         ParsedString parsedStringRegion = new ParsedString(value.substring(region.getOffset() - argCharPos, regionEnd - argCharPos), region.getOffset(), argumentIndex);
         parsedStringRegion.setType(type);
