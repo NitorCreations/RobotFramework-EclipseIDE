@@ -35,7 +35,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -49,6 +51,7 @@ import com.nitorcreations.robotframework.eclipseide.editors.IResourceManager;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.AttemptVisitor;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IAttemptGenerator;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalGeneratorFactory;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IRelevantProposalsFilter;
 import com.nitorcreations.robotframework.eclipseide.internal.util.ArrayPriorityDeque;
 import com.nitorcreations.robotframework.eclipseide.internal.util.PriorityDeque;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
@@ -63,9 +66,12 @@ public class TestRobotContentAssistant2 {
         static final String BUILTIN_PREFIX = "[BuiltIn] ";
         static final String BUILTIN_INDEX_FILE = "BuiltIn.index";
 
+        static final Region VARIABLE_REGION = new Region(50, 1);
+
         IProposalGeneratorFactory proposalGeneratorFactory;
         IAttemptGenerator attemptGenerator;
         IVariableReplacementRegionCalculator variableReplacementRegionCalculator;
+        IRelevantProposalsFilter relevantProposalsFilter;
         IRobotContentAssistant2 assistant;
 
         final IProject project = mock(IProject.class, "project");
@@ -82,7 +88,8 @@ public class TestRobotContentAssistant2 {
             proposalGeneratorFactory = mock(IProposalGeneratorFactory.class, "proposalGenerator");
             attemptGenerator = mock(IAttemptGenerator.class, "attemptGenerator");
             variableReplacementRegionCalculator = mock(IVariableReplacementRegionCalculator.class, "variableReplacementRegionCalculator");
-            assistant = new RobotContentAssistant2(proposalGeneratorFactory, attemptGenerator, variableReplacementRegionCalculator);
+            relevantProposalsFilter = mock(IRelevantProposalsFilter.class, "relevantProposalsFilter");
+            assistant = new RobotContentAssistant2(proposalGeneratorFactory, attemptGenerator, variableReplacementRegionCalculator, relevantProposalsFilter);
 
             PluginContext.setResourceManager(resourceManager);
 
@@ -103,6 +110,13 @@ public class TestRobotContentAssistant2 {
             when(proposalGeneratorFactory.createVariableAttemptVisitor(any(IFile.class), anyInt(), anyInt())).thenReturn(mockVariableAttemptVisitor);
             when(proposalGeneratorFactory.createKeywordCallAttemptVisitor(any(IFile.class))).thenReturn(mockKeywordCallAttemptVisitor);
             when(proposalGeneratorFactory.createKeywordDefinitionAttemptVisitor(any(IFile.class), any(ParsedString.class))).thenReturn(mockKeywordDefinitionAttemptVisitor);
+
+            when(variableReplacementRegionCalculator.calculate(any(ParsedString.class), anyInt())).thenReturn(VARIABLE_REGION);
+        }
+
+        @After
+        public void checks() {
+            verifyNoMoreInteractions(proposalGeneratorFactory, attemptGenerator, variableReplacementRegionCalculator, relevantProposalsFilter);
         }
 
         @SuppressWarnings("unchecked")
@@ -151,7 +165,6 @@ public class TestRobotContentAssistant2 {
                 expectedArgument.setHasSpaceAfter(false);
                 expectedArgument.setType(ArgumentType.KEYWORD_ARG);
                 verify(proposalGeneratorFactory).createVariableAttemptVisitor(same(origFile), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));
-                verifyNoMoreInteractions(proposalGeneratorFactory, attemptGenerator);
             }
         }
     }

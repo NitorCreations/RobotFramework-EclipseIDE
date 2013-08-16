@@ -16,7 +16,6 @@
 package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -29,11 +28,8 @@ import com.nitorcreations.robotframework.eclipseide.builder.parser.TableType;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.AttemptVisitor;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IAttemptGenerator;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalGeneratorFactory;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposal;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IRelevantProposalsFilter;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposalSet;
-import com.nitorcreations.robotframework.eclipseide.internal.util.ArrayPriorityDeque;
-import com.nitorcreations.robotframework.eclipseide.internal.util.Prioritizer;
-import com.nitorcreations.robotframework.eclipseide.internal.util.PriorityDeque;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -47,11 +43,13 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
     private final IProposalGeneratorFactory proposalGeneratorFactory;
     private final IAttemptGenerator attemptGenerator;
     private final IVariableReplacementRegionCalculator variableReplacementRegionCalculator;
+    private final IRelevantProposalsFilter relevantProposalsFilter;
 
-    public RobotContentAssistant2(IProposalGeneratorFactory proposalGeneratorFactory, IAttemptGenerator attemptGenerator, IVariableReplacementRegionCalculator variableReplacementRegionCalculator) {
+    public RobotContentAssistant2(IProposalGeneratorFactory proposalGeneratorFactory, IAttemptGenerator attemptGenerator, IVariableReplacementRegionCalculator variableReplacementRegionCalculator, IRelevantProposalsFilter relevantProposalsFilter) {
         this.proposalGeneratorFactory = proposalGeneratorFactory;
         this.attemptGenerator = attemptGenerator;
         this.variableReplacementRegionCalculator = variableReplacementRegionCalculator;
+        this.relevantProposalsFilter = relevantProposalsFilter;
     }
 
     @Override
@@ -73,11 +71,11 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
             visitors = createProposalGeneratorsForRestOfArguments(file, argument, documentOffset, robotLine);
         }
 
-        PriorityDeque<RobotCompletionProposalSet> proposalSets = createProposalSets();
+        List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
         for (VisitorInfo visitorInfo : visitors) {
             attemptGenerator.acceptAttempts(visitorInfo.visitorArgument, documentOffset, proposalSets, visitorInfo.visitior);
         }
-        return extractMostRelevantProposals(proposalSets);
+        return relevantProposalsFilter.extractMostRelevantProposals(proposalSets);
     }
 
     static class VisitorInfo {
@@ -147,48 +145,6 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
             visitorInfos.add(new VisitorInfo(variableInsideArgument, proposalGeneratorFactory.createVariableAttemptVisitor(file, maxVariableCharPos, maxSettingCharPos)));
         }
         return visitorInfos;
-    }
-
-    private static final int NOT_PRIORITY_PROPOSAL_MASK = 1 << 0;
-    private static final int NOT_BASED_ON_INPUT_MASK = 1 << 1;
-
-    private PriorityDeque<RobotCompletionProposalSet> createProposalSets() {
-        return new ArrayPriorityDeque<RobotCompletionProposalSet>(4, new Prioritizer<RobotCompletionProposalSet>() {
-            @Override
-            public int prioritize(RobotCompletionProposalSet t) {
-                return (t.isPriorityProposal() ? 0 : NOT_PRIORITY_PROPOSAL_MASK) + (t.isBasedOnInput() ? 0 : NOT_BASED_ON_INPUT_MASK);
-            }
-        });
-    }
-
-    private ICompletionProposal[] extractMostRelevantProposals(PriorityDeque<RobotCompletionProposalSet> proposalSets) {
-        removeEmptyProposalSets(proposalSets);
-
-        int lowestPriority = proposalSets.peekLowestPriority();
-        boolean isEmpty = lowestPriority == -1;
-        if (isEmpty) {
-            return null;
-        }
-        if (lowestPriority < NOT_BASED_ON_INPUT_MASK) {
-            // we have got proposals based on input, so remove proposals not based on input
-            proposalSets.clear(NOT_BASED_ON_INPUT_MASK, proposalSets.getNumberOfPriorityLevels() - 1);
-        }
-
-        List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
-        for (RobotCompletionProposalSet proposalSet : proposalSets) {
-            proposals.addAll(proposalSet.getProposals());
-        }
-        return proposals.toArray(new ICompletionProposal[proposals.size()]);
-    }
-
-    private void removeEmptyProposalSets(PriorityDeque<RobotCompletionProposalSet> proposalSets) {
-        for (Iterator<RobotCompletionProposalSet> proposalSetIt = proposalSets.iterator(); proposalSetIt.hasNext();) {
-            RobotCompletionProposalSet proposalSet = proposalSetIt.next();
-            if (proposalSet.getProposals().isEmpty()) {
-                proposalSetIt.remove();
-                continue;
-            }
-        }
     }
 
     private TableType determineTableTypeForLine(List<RobotLine> lines, int lineNo) {

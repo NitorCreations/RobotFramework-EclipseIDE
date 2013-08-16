@@ -36,6 +36,7 @@ import com.nitorcreations.robotframework.eclipseide.internal.assistant.RobotCont
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.VariableReplacementRegionCalculator;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.AttemptGenerator;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.ProposalGeneratorFactory;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RelevantProposalsFilter;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.KeywordCallHyperlinkDetector;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.ResourceHyperlinkDetector;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.VariableAccessHyperlinkDetector;
@@ -97,7 +98,7 @@ public class RobotSourceViewerConfiguration extends TextSourceViewerConfiguratio
         // assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
         // assistant.setStatusLineVisible(true);
 
-        RobotContentAssistant2 assistant2 = new RobotContentAssistant2(new ProposalGeneratorFactory(), new AttemptGenerator(), new VariableReplacementRegionCalculator());
+        RobotContentAssistant2 assistant2 = new RobotContentAssistant2(new ProposalGeneratorFactory(), new AttemptGenerator(), new VariableReplacementRegionCalculator(), new RelevantProposalsFilter());
         assistant.setContentAssistProcessor(new RobotContentAssistant(assistant2), IDocument.DEFAULT_CONTENT_TYPE);
 
         assistant.setInformationControlCreator(new AbstractReusableInformationControlCreator() {
