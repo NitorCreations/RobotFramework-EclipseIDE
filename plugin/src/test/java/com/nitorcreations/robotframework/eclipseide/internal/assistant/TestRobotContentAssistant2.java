@@ -15,11 +15,14 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
@@ -43,6 +46,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 import com.nitorcreations.robotframework.eclipseide.PluginContext;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
@@ -52,8 +56,7 @@ import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalg
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IAttemptGenerator;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalGeneratorFactory;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IRelevantProposalsFilter;
-import com.nitorcreations.robotframework.eclipseide.internal.util.ArrayPriorityDeque;
-import com.nitorcreations.robotframework.eclipseide.internal.util.PriorityDeque;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposalSet;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
@@ -66,7 +69,7 @@ public class TestRobotContentAssistant2 {
         static final String BUILTIN_PREFIX = "[BuiltIn] ";
         static final String BUILTIN_INDEX_FILE = "BuiltIn.index";
 
-        static final Region VARIABLE_REGION = new Region(50, 1);
+        static final ICompletionProposal[] PROPOSALS = new ICompletionProposal[0];
 
         IProposalGeneratorFactory proposalGeneratorFactory;
         IAttemptGenerator attemptGenerator;
@@ -111,7 +114,7 @@ public class TestRobotContentAssistant2 {
             when(proposalGeneratorFactory.createKeywordCallAttemptVisitor(any(IFile.class))).thenReturn(mockKeywordCallAttemptVisitor);
             when(proposalGeneratorFactory.createKeywordDefinitionAttemptVisitor(any(IFile.class), any(ParsedString.class))).thenReturn(mockKeywordDefinitionAttemptVisitor);
 
-            when(variableReplacementRegionCalculator.calculate(any(ParsedString.class), anyInt())).thenReturn(VARIABLE_REGION);
+            when(relevantProposalsFilter.extractMostRelevantProposals(anyListOf(RobotCompletionProposalSet.class))).thenReturn(PROPOSALS);
         }
 
         @After
@@ -144,31 +147,40 @@ public class TestRobotContentAssistant2 {
             static final String LINKED_VARIABLE = "${LINKEDVAR}";
 
             // return document.get().substring(0, (Integer) invocation.getArguments()[0]).replaceAll("[^\n]+",
+            @SuppressWarnings({ "rawtypes", "unchecked" })
             // "").length();
             @Test
             public void should_suggest_replacing_entered_variable() throws Exception {
                 final String origContents1 = "*Variables\n" + FOO_VARIABLE + "  bar\n*Testcases\nTestcase\n  Log  ";
                 final String origContents2 = "${F";
                 final String origContents = origContents1 + origContents2;
+                int documentOffset = origContents.length();
+
                 IFile origFile = mock(IFile.class);
                 List<RobotLine> lines = RobotFile.parse(origContents).getLines();
-                int documentOffset = origContents.length();
                 int lineNo = lines.size() - 1;
-                // TODO mockVariableAttemptVisitor.setBasedOnInput(true);
-                // TODO mockVARIABLEAttemptVisitor.setAddStyle(AddStyle.APPEND);
+
+                ParsedString variableSubArgument = new ParsedString(origContents2, origContents1.length(), 2).setType(ArgumentType.KEYWORD_ARG);
+
+                Region variableRegion = new Region(origContents1.length(), origContents2.length());
+                when(variableReplacementRegionCalculator.calculate(variableSubArgument, documentOffset)).thenReturn(variableRegion);
 
                 ICompletionProposal[] proposals = assistant.generateProposals(origFile, documentOffset, origContents, lines, lineNo);
 
-                assertEquals(1, proposals.length);
-                // TODO assertSame(mockVariableAttemptVisitor.addedProposal, proposals[0]);
-                ParsedString expectedArgument = new ParsedString(origContents2, origContents1.length(), 2);
-                expectedArgument.setHasSpaceAfter(false);
-                expectedArgument.setType(ArgumentType.KEYWORD_ARG);
+                assertSame(PROPOSALS, proposals);
+
+                ArgumentCaptor<List> proposalSets = ArgumentCaptor.forClass(List.class);
+                verify(variableReplacementRegionCalculator).calculate(variableSubArgument, documentOffset);
+                verify(proposalGeneratorFactory).createVariableAttemptVisitor(origFile, Integer.MAX_VALUE, Integer.MAX_VALUE);
+                verify(attemptGenerator).acceptAttempts(eq(variableSubArgument), eq(documentOffset), proposalSets.capture(), same(mockVariableAttemptVisitor));
+                assertThat(proposalSets.getValue(), is(instanceOf(List.class)));
+                verify(relevantProposalsFilter).extractMostRelevantProposals(proposalSets.getValue());
                 verify(proposalGeneratorFactory).createVariableAttemptVisitor(same(origFile), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));
             }
         }
     }
 
+    @Ignore
     @RunWith(Enclosed.class)
     public static class FeatureTests {
         static final String LINKED_PREFIX = "[linked] ";
@@ -209,10 +221,5 @@ public class TestRobotContentAssistant2 {
                 public void onespace_after_argument() throws Exception {}
             }
         }
-    }
-
-    static <T> PriorityDeque<T> anyPriorityDequeOf(Class<T> clazz) {
-        anyList();
-        return new ArrayPriorityDeque<T>(1);
     }
 }

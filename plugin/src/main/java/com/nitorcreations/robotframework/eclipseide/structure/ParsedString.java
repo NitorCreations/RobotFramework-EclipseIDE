@@ -113,12 +113,16 @@ public class ParsedString implements IParsedKeywordString {
 
     @Override
     public String toString() {
+        return getSimpleString();
+    }
+
+    public String getSimpleString() {
         return '"' + value + "\" (" + type + ')';
     }
 
     @Override
     public String getDebugString() {
-        return toString() + " @" + argCharPos + "-" + (getArgEndCharPos() - 1);
+        return getSimpleString() + " @" + argCharPos + "-" + (getArgEndCharPos() - 1) + " [" + argumentIndex + ']';
     }
 
     @Override
