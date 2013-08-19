@@ -17,6 +17,7 @@ package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -147,7 +148,6 @@ public class TestRobotContentAssistant2 {
             static final String LINKED_VARIABLE = "${LINKEDVAR}";
 
             // return document.get().substring(0, (Integer) invocation.getArguments()[0]).replaceAll("[^\n]+",
-            @SuppressWarnings({ "rawtypes", "unchecked" })
             // "").length();
             @Test
             public void should_suggest_replacing_entered_variable() throws Exception {
@@ -167,15 +167,36 @@ public class TestRobotContentAssistant2 {
 
                 ICompletionProposal[] proposals = assistant.generateProposals(origFile, documentOffset, origContents, lines, lineNo);
 
-                assertSame(PROPOSALS, proposals);
-
-                ArgumentCaptor<List> proposalSets = ArgumentCaptor.forClass(List.class);
                 verify(variableReplacementRegionCalculator).calculate(variableSubArgument, documentOffset);
-                verify(proposalGeneratorFactory).createVariableAttemptVisitor(origFile, Integer.MAX_VALUE, Integer.MAX_VALUE);
-                verify(attemptGenerator).acceptAttempts(eq(variableSubArgument), eq(documentOffset), proposalSets.capture(), same(mockVariableAttemptVisitor));
-                assertThat(proposalSets.getValue(), is(instanceOf(List.class)));
-                verify(relevantProposalsFilter).extractMostRelevantProposals(proposalSets.getValue());
                 verify(proposalGeneratorFactory).createVariableAttemptVisitor(same(origFile), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));
+                verifyBase(proposals, documentOffset, variableSubArgument, mockVariableAttemptVisitor);
+            }
+
+            private void verifyBase(ICompletionProposal[] proposals, int documentOffset, ParsedString variableSubArgument, AttemptVisitor visitor) {
+                verifyBase(proposals, documentOffset, new ParsedString[] { variableSubArgument }, new AttemptVisitor[] { visitor });
+            }
+
+            @SuppressWarnings({ "rawtypes", "unchecked" })
+            private void verifyBase(ICompletionProposal[] proposals, int documentOffset, ParsedString[] variableSubArguments, AttemptVisitor[] visitors) {
+
+                assertSame(PROPOSALS, proposals);
+                assertEquals(variableSubArguments.length, visitors.length);
+
+                ArgumentCaptor<List> proposalSetsCaptor = ArgumentCaptor.forClass(List.class);
+                for (int i = 0; i < variableSubArguments.length; ++i) {
+                    ParsedString variableSubArgument = variableSubArguments[i];
+                    AttemptVisitor visitor = visitors[i];
+                    verify(attemptGenerator).acceptAttempts(eq(variableSubArgument), eq(documentOffset), proposalSetsCaptor.capture(), same(visitor));
+                }
+                if (visitors.length >= 1) {
+                    List<List> listOfProposalSets = proposalSetsCaptor.getAllValues();
+                    for (List proposalSets : listOfProposalSets) {
+                        assertThat(proposalSets, is(instanceOf(List.class)));
+                    }
+                    verify(relevantProposalsFilter).extractMostRelevantProposals(proposalSetsCaptor.getValue());
+                } else {
+                    verify(relevantProposalsFilter).extractMostRelevantProposals(anyListOf(RobotCompletionProposalSet.class));
+                }
             }
         }
     }
@@ -191,7 +212,7 @@ public class TestRobotContentAssistant2 {
         @RunWith(Enclosed.class)
         public static class Argument_synthesis {
             @RunWith(Enclosed.class)
-            public static class synthesized extends Base {
+            public static class synthesized {
                 public static class produces_new extends Base {
                     public void at_empty_line() throws Exception {}
 
