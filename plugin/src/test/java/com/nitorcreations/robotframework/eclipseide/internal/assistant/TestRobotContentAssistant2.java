@@ -32,12 +32,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -45,7 +40,6 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.junit.After;
 import org.junit.Before;
@@ -141,6 +135,33 @@ public class TestRobotContentAssistant2 {
             when(file.exists()).thenReturn(true);
             return file;
         }
+
+        protected void verifyBase(ICompletionProposal[] proposals, int documentOffset, ParsedString variableSubArgument, AttemptVisitor visitor) {
+            verifyBase(proposals, documentOffset, new ParsedString[] { variableSubArgument }, new AttemptVisitor[] { visitor });
+        }
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        protected void verifyBase(ICompletionProposal[] proposals, int documentOffset, ParsedString[] variableSubArguments, AttemptVisitor[] visitors) {
+
+            assertSame(PROPOSALS, proposals);
+            assertEquals(variableSubArguments.length, visitors.length);
+
+            ArgumentCaptor<List> proposalSetsCaptor = ArgumentCaptor.forClass(List.class);
+            for (int i = 0; i < variableSubArguments.length; ++i) {
+                ParsedString variableSubArgument = variableSubArguments[i];
+                AttemptVisitor visitor = visitors[i];
+                verify(attemptGenerator).acceptAttempts(eq(variableSubArgument), eq(documentOffset), proposalSetsCaptor.capture(), same(visitor));
+            }
+            if (visitors.length >= 1) {
+                List<List> listOfProposalSets = proposalSetsCaptor.getAllValues();
+                for (List proposalSets : listOfProposalSets) {
+                    assertThat(proposalSets, is(instanceOf(List.class)));
+                }
+                verify(relevantProposalsFilter).extractMostRelevantProposals(proposalSetsCaptor.getValue());
+            } else {
+                verify(relevantProposalsFilter).extractMostRelevantProposals(anyListOf(RobotCompletionProposalSet.class));
+            }
+        }
     }
 
     @RunWith(Enclosed.class)
@@ -148,69 +169,11 @@ public class TestRobotContentAssistant2 {
 
         public static class when_partially_entered extends Base {
 
-            /**
-             * This class accepts text annotated with &lt;text&gt; which results in a pointer with the name "text" to be
-             * remembered at the specfieid point.
-             */
-            public static class Content {
-                private static final Pattern POINTER_RE = Pattern.compile("<([^>]+)>");
-                private final Map<String, Integer> pointers = new LinkedHashMap<String, Integer>();
-                private final String content;
-
-                public Content(String contentWithPointers) {
-                    Matcher m = POINTER_RE.matcher(contentWithPointers);
-                    StringBuffer sb = new StringBuffer();
-                    pointers.put("start", 0);
-                    while (m.find()) {
-                        m.appendReplacement(sb, "");
-                        String pointerName = m.group(1);
-                        int pointerTarget = sb.length();
-                        pointers.put(pointerName, pointerTarget);
-                    }
-                    pointers.put("end", sb.length());
-                    m.appendTail(sb);
-                    content = sb.toString();
-                }
-
-                public int o(String pointerName) {
-                    if (!pointers.containsKey(pointerName)) {
-                        throw new NoSuchElementException(pointerName);
-                    }
-                    return pointers.get(pointerName);
-                }
-
-                public int l(String pointerRange) {
-                    String[] pointers = pointerRange.split("-", 2);
-                    return o(pointers[1]) - o(pointers[0]);
-                }
-
-                public IRegion r(String pointerRange) {
-                    String[] pointers = pointerRange.split("-", 2);
-                    int p0 = o(pointers[0]);
-                    int p1 = o(pointers[1]);
-                    return new Region(p0, p1 - p0);
-                }
-
-                public ParsedString ps(String pointerRange, int argIndex, ArgumentType argType) {
-                    return ps(r(pointerRange), argIndex, argType);
-                }
-
-                public ParsedString ps(IRegion region, int argIndex, ArgumentType argType) {
-                    return new ParsedString(content.substring(region.getOffset(), region.getOffset() + region.getLength()), region.getOffset(), argIndex).setType(argType);
-                }
-
-                public String c() {
-                    return content;
-                }
-            }
-
             static final String LINKED_PREFIX = "[linked] ";
             static final String LINKED_FILENAME = "linked.txt";
             static final String FOO_VARIABLE = "${FOO}";
             static final String LINKED_VARIABLE = "${LINKEDVAR}";
 
-            // return document.get().substring(0, (Integer) invocation.getArguments()[0]).replaceAll("[^\n]+",
-            // "").length();
             @Test
             public void should_suggest_replacing_entered_variable() throws Exception {
                 Content content = new Content("*Testcases\nTestcase\n  Log  <arg>${F<cursor>");
@@ -229,33 +192,6 @@ public class TestRobotContentAssistant2 {
                 verify(variableReplacementRegionCalculator).calculate(variableSubArgument, documentOffset);
                 verify(proposalGeneratorFactory).createVariableAttemptVisitor(same(origFile), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));
                 verifyBase(proposals, documentOffset, variableSubArgument, mockVariableAttemptVisitor);
-            }
-
-            private void verifyBase(ICompletionProposal[] proposals, int documentOffset, ParsedString variableSubArgument, AttemptVisitor visitor) {
-                verifyBase(proposals, documentOffset, new ParsedString[] { variableSubArgument }, new AttemptVisitor[] { visitor });
-            }
-
-            @SuppressWarnings({ "rawtypes", "unchecked" })
-            private void verifyBase(ICompletionProposal[] proposals, int documentOffset, ParsedString[] variableSubArguments, AttemptVisitor[] visitors) {
-
-                assertSame(PROPOSALS, proposals);
-                assertEquals(variableSubArguments.length, visitors.length);
-
-                ArgumentCaptor<List> proposalSetsCaptor = ArgumentCaptor.forClass(List.class);
-                for (int i = 0; i < variableSubArguments.length; ++i) {
-                    ParsedString variableSubArgument = variableSubArguments[i];
-                    AttemptVisitor visitor = visitors[i];
-                    verify(attemptGenerator).acceptAttempts(eq(variableSubArgument), eq(documentOffset), proposalSetsCaptor.capture(), same(visitor));
-                }
-                if (visitors.length >= 1) {
-                    List<List> listOfProposalSets = proposalSetsCaptor.getAllValues();
-                    for (List proposalSets : listOfProposalSets) {
-                        assertThat(proposalSets, is(instanceOf(List.class)));
-                    }
-                    verify(relevantProposalsFilter).extractMostRelevantProposals(proposalSetsCaptor.getValue());
-                } else {
-                    verify(relevantProposalsFilter).extractMostRelevantProposals(anyListOf(RobotCompletionProposalSet.class));
-                }
             }
         }
     }
