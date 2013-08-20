@@ -32,13 +32,19 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.junit.After;
@@ -142,6 +148,62 @@ public class TestRobotContentAssistant2 {
 
         public static class when_partially_entered extends Base {
 
+            /**
+             * This class accepts text annotated with &lt;text&gt; which results in a pointer with the name "text" to be
+             * remembered at the specfieid point.
+             */
+            public static class Content {
+                private static final Pattern POINTER_RE = Pattern.compile("<([^>]+)>");
+                private final Map<String, Integer> pointers = new LinkedHashMap<String, Integer>();
+                private final String content;
+
+                public Content(String contentWithPointers) {
+                    Matcher m = POINTER_RE.matcher(contentWithPointers);
+                    StringBuffer sb = new StringBuffer();
+                    pointers.put("start", 0);
+                    while (m.find()) {
+                        m.appendReplacement(sb, "");
+                        String pointerName = m.group(1);
+                        int pointerTarget = sb.length();
+                        pointers.put(pointerName, pointerTarget);
+                    }
+                    pointers.put("end", sb.length());
+                    m.appendTail(sb);
+                    content = sb.toString();
+                }
+
+                public int o(String pointerName) {
+                    if (!pointers.containsKey(pointerName)) {
+                        throw new NoSuchElementException(pointerName);
+                    }
+                    return pointers.get(pointerName);
+                }
+
+                public int l(String pointerRange) {
+                    String[] pointers = pointerRange.split("-", 2);
+                    return o(pointers[1]) - o(pointers[0]);
+                }
+
+                public IRegion r(String pointerRange) {
+                    String[] pointers = pointerRange.split("-", 2);
+                    int p0 = o(pointers[0]);
+                    int p1 = o(pointers[1]);
+                    return new Region(p0, p1 - p0);
+                }
+
+                public ParsedString ps(String pointerRange, int argIndex, ArgumentType argType) {
+                    return ps(r(pointerRange), argIndex, argType);
+                }
+
+                public ParsedString ps(IRegion region, int argIndex, ArgumentType argType) {
+                    return new ParsedString(content.substring(region.getOffset(), region.getOffset() + region.getLength()), region.getOffset(), argIndex).setType(argType);
+                }
+
+                public String c() {
+                    return content;
+                }
+            }
+
             static final String LINKED_PREFIX = "[linked] ";
             static final String LINKED_FILENAME = "linked.txt";
             static final String FOO_VARIABLE = "${FOO}";
@@ -151,21 +213,18 @@ public class TestRobotContentAssistant2 {
             // "").length();
             @Test
             public void should_suggest_replacing_entered_variable() throws Exception {
-                final String origContents1 = "*Variables\n" + FOO_VARIABLE + "  bar\n*Testcases\nTestcase\n  Log  ";
-                final String origContents2 = "${F";
-                final String origContents = origContents1 + origContents2;
-                int documentOffset = origContents.length();
+                Content content = new Content("*Variables\n" + FOO_VARIABLE + "  bar\n*Testcases\nTestcase\n  Log  <arg>${F<cursor>");
+                int documentOffset = content.o("cursor");
 
                 IFile origFile = mock(IFile.class);
-                List<RobotLine> lines = RobotFile.parse(origContents).getLines();
+                List<RobotLine> lines = RobotFile.parse(content.c()).getLines();
                 int lineNo = lines.size() - 1;
 
-                ParsedString variableSubArgument = new ParsedString(origContents2, origContents1.length(), 2).setType(ArgumentType.KEYWORD_ARG);
-
-                Region variableRegion = new Region(origContents1.length(), origContents2.length());
+                ParsedString variableSubArgument = content.ps("arg-end", 2, ArgumentType.KEYWORD_ARG);
+                IRegion variableRegion = content.r("arg-end");
                 when(variableReplacementRegionCalculator.calculate(variableSubArgument, documentOffset)).thenReturn(variableRegion);
 
-                ICompletionProposal[] proposals = assistant.generateProposals(origFile, documentOffset, origContents, lines, lineNo);
+                ICompletionProposal[] proposals = assistant.generateProposals(origFile, documentOffset, content.c(), lines, lineNo);
 
                 verify(variableReplacementRegionCalculator).calculate(variableSubArgument, documentOffset);
                 verify(proposalGeneratorFactory).createVariableAttemptVisitor(same(origFile), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));
