@@ -213,7 +213,7 @@ public class TestRobotContentAssistant2 {
             // "").length();
             @Test
             public void should_suggest_replacing_entered_variable() throws Exception {
-                Content content = new Content("*Variables\n" + FOO_VARIABLE + "  bar\n*Testcases\nTestcase\n  Log  <arg>${F<cursor>");
+                Content content = new Content("*Testcases\nTestcase\n  Log  <arg>${F<cursor>");
                 int documentOffset = content.o("cursor");
 
                 IFile origFile = mock(IFile.class);
