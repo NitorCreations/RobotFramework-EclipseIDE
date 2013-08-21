@@ -19,36 +19,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.TableType;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.AttemptVisitor;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IAttemptGenerator;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalGeneratorFactory;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalSuitabilityDeterminer;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IRelevantProposalsFilter;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.ProposalSuitabilityDeterminer.VisitorInfo;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposalSet;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 /**
- * This class determines what TYPES of proposals that are relevant for the current cursor position, e.g. "Keyword",
- * "Variable reference", "Table start" or similar. It then uses the given ProposalGenerator to generate proposals for
- * those types.
+ * This class first makes sure we have an <b>argument</b> that is the target to generate proposals for, then uses an
+ * {@link IProposalSuitabilityDeterminer} to produce a <b>set of proposal generators</b> to be used, then an
+ * {@link IAttemptGenerator} to produce <b>proposals</b> using the proposal generators, and finally an
+ * {@link IRelevantProposalsFilter} to extract the <b>most relevant proposals</b> considering the different types of
+ * proposals that were generated.
  */
 public class RobotContentAssistant2 implements IRobotContentAssistant2 {
 
-    private final IProposalGeneratorFactory proposalGeneratorFactory;
+    private final IProposalSuitabilityDeterminer proposalSuitabilityDeterminer;
     private final IAttemptGenerator attemptGenerator;
-    private final IVariableReplacementRegionCalculator variableReplacementRegionCalculator;
     private final IRelevantProposalsFilter relevantProposalsFilter;
 
-    public RobotContentAssistant2(IProposalGeneratorFactory proposalGeneratorFactory, IAttemptGenerator attemptGenerator, IVariableReplacementRegionCalculator variableReplacementRegionCalculator, IRelevantProposalsFilter relevantProposalsFilter) {
-        this.proposalGeneratorFactory = proposalGeneratorFactory;
+    public RobotContentAssistant2(IProposalSuitabilityDeterminer proposalSuitabilityDeterminer, IAttemptGenerator attemptGenerator, IRelevantProposalsFilter relevantProposalsFilter) {
+        this.proposalSuitabilityDeterminer = proposalSuitabilityDeterminer;
         this.attemptGenerator = attemptGenerator;
-        this.variableReplacementRegionCalculator = variableReplacementRegionCalculator;
         this.relevantProposalsFilter = relevantProposalsFilter;
     }
 
@@ -64,97 +62,12 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
     }
 
     private ICompletionProposal[] generateProposalsForArgument(IFile file, ParsedString argument, int documentOffset, List<RobotLine> lines, int lineNo, RobotLine robotLine) {
-        List<VisitorInfo> visitors;
-        if (argument.getArgumentIndex() == 0) {
-            visitors = createProposalGeneratorsForFirstArgument(file, argument, documentOffset, lines, lineNo);
-        } else {
-            visitors = createProposalGeneratorsForRestOfArguments(file, argument, documentOffset, robotLine);
-        }
-
+        List<VisitorInfo> visitors = proposalSuitabilityDeterminer.generateAttemptVisitors(file, argument, documentOffset, lines, lineNo, robotLine);
         List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
         for (VisitorInfo visitorInfo : visitors) {
             attemptGenerator.acceptAttempts(visitorInfo.visitorArgument, documentOffset, proposalSets, visitorInfo.visitior);
         }
         return relevantProposalsFilter.extractMostRelevantProposals(proposalSets);
-    }
-
-    static class VisitorInfo {
-        public final AttemptVisitor visitior;
-        public final ParsedString visitorArgument;
-
-        public VisitorInfo(ParsedString visitorArgument, AttemptVisitor visitior) {
-            this.visitior = visitior;
-            this.visitorArgument = visitorArgument;
-        }
-    }
-
-    private List<VisitorInfo> createProposalGeneratorsForFirstArgument(IFile file, ParsedString argument, int documentOffset, List<RobotLine> lines, int lineNo) {
-        List<VisitorInfo> visitorInfos = new ArrayList<VisitorInfo>();
-        switch (determineTableTypeForLine(lines, lineNo)) {
-            case KEYWORD:
-                visitorInfos.add(new VisitorInfo(argument, proposalGeneratorFactory.createKeywordDefinitionAttemptVisitor(file, argument)));
-                break;
-            case SETTING:
-                visitorInfos.add(new VisitorInfo(argument, proposalGeneratorFactory.createSettingTableAttemptVisitor()));
-                break;
-            default:
-                break;
-        }
-        visitorInfos.add(new VisitorInfo(argument, proposalGeneratorFactory.createTableAttemptVisitor()));
-        // TODO we should only include either of setting/table proposals if either has exactly one match perhaps?
-        return visitorInfos;
-    }
-
-    private List<VisitorInfo> createProposalGeneratorsForRestOfArguments(IFile file, ParsedString argument, int documentOffset, RobotLine robotLine) {
-        boolean allowKeywords = false;
-        boolean allowVariables = false;
-        int maxVariableCharPos = Integer.MAX_VALUE;
-        int maxSettingCharPos = Integer.MAX_VALUE;
-        switch (argument.getType()) {
-            case KEYWORD_CALL:
-                allowKeywords = true;
-                break;
-            case KEYWORD_CALL_DYNAMIC:
-                allowKeywords = true;
-                allowVariables = true;
-                break;
-            case KEYWORD_ARG:
-                allowVariables = true;
-                break;
-            case SETTING_FILE_ARG:
-            case SETTING_VAL:
-            case SETTING_FILE:
-                allowVariables = true;
-                // limit visible imported variables to those loaded before current line
-                maxSettingCharPos = robotLine.lineCharPos - 1;
-                break;
-            case VARIABLE_VAL:
-                allowVariables = true;
-                // limit visible local variables to those declared before current line
-                maxVariableCharPos = robotLine.lineCharPos - 1;
-                maxSettingCharPos = -1;
-                break;
-        }
-        List<VisitorInfo> visitorInfos = new ArrayList<VisitorInfo>();
-        if (allowKeywords) {
-            visitorInfos.add(new VisitorInfo(argument, proposalGeneratorFactory.createKeywordCallAttemptVisitor(file)));
-        }
-        if (allowVariables) {
-            IRegion variableReplacementRegion = variableReplacementRegionCalculator.calculate(argument, documentOffset);
-            ParsedString variableInsideArgument = argument.extractRegion(variableReplacementRegion);
-            visitorInfos.add(new VisitorInfo(variableInsideArgument, proposalGeneratorFactory.createVariableAttemptVisitor(file, maxVariableCharPos, maxSettingCharPos)));
-        }
-        return visitorInfos;
-    }
-
-    private TableType determineTableTypeForLine(List<RobotLine> lines, int lineNo) {
-        for (int i = lineNo; i >= 0; --i) {
-            TableType tableType = lines.get(i).type.tableType;
-            if (tableType != TableType.UNKNOWN) {
-                return tableType;
-            }
-        }
-        return TableType.UNKNOWN;
     }
 
     /**

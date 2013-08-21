@@ -17,12 +17,10 @@ package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
@@ -32,6 +30,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -39,7 +38,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.junit.After;
 import org.junit.Before;
@@ -55,8 +53,9 @@ import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.IResourceManager;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.AttemptVisitor;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IAttemptGenerator;
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalGeneratorFactory;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IProposalSuitabilityDeterminer;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.IRelevantProposalsFilter;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.ProposalSuitabilityDeterminer.VisitorInfo;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RobotCompletionProposalSet;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
@@ -72,28 +71,20 @@ public class TestRobotContentAssistant2 {
 
         static final ICompletionProposal[] PROPOSALS = new ICompletionProposal[0];
 
-        IProposalGeneratorFactory proposalGeneratorFactory;
+        IProposalSuitabilityDeterminer proposalSuitabilityDeterminer;
         IAttemptGenerator attemptGenerator;
-        IVariableReplacementRegionCalculator variableReplacementRegionCalculator;
         IRelevantProposalsFilter relevantProposalsFilter;
         IRobotContentAssistant2 assistant;
 
         final IProject project = mock(IProject.class, "project");
         final IResourceManager resourceManager = mock(IResourceManager.class, "resourceManager");
 
-        final AttemptVisitor mockTableAttemptVisitor = mock(AttemptVisitor.class);
-        final AttemptVisitor mockSettingTableAttemptVisitor = mock(AttemptVisitor.class);
-        final AttemptVisitor mockVariableAttemptVisitor = mock(AttemptVisitor.class);
-        final AttemptVisitor mockKeywordCallAttemptVisitor = mock(AttemptVisitor.class);
-        final AttemptVisitor mockKeywordDefinitionAttemptVisitor = mock(AttemptVisitor.class);
-
         @Before
         public void setup() throws Exception {
-            proposalGeneratorFactory = mock(IProposalGeneratorFactory.class, "proposalGenerator");
+            proposalSuitabilityDeterminer = mock(IProposalSuitabilityDeterminer.class, "proposalSuitabilityDeterminer");
             attemptGenerator = mock(IAttemptGenerator.class, "attemptGenerator");
-            variableReplacementRegionCalculator = mock(IVariableReplacementRegionCalculator.class, "variableReplacementRegionCalculator");
             relevantProposalsFilter = mock(IRelevantProposalsFilter.class, "relevantProposalsFilter");
-            assistant = new RobotContentAssistant2(proposalGeneratorFactory, attemptGenerator, variableReplacementRegionCalculator, relevantProposalsFilter);
+            assistant = new RobotContentAssistant2(proposalSuitabilityDeterminer, attemptGenerator, relevantProposalsFilter);
 
             PluginContext.setResourceManager(resourceManager);
 
@@ -109,18 +100,12 @@ public class TestRobotContentAssistant2 {
             when(workspace.getRoot()).thenReturn(workspaceRoot);
             when(workspaceRoot.getFile(builtinIndexPath)).thenReturn(builtinIndexFile);
 
-            when(proposalGeneratorFactory.createTableAttemptVisitor()).thenReturn(mockTableAttemptVisitor);
-            when(proposalGeneratorFactory.createSettingTableAttemptVisitor()).thenReturn(mockSettingTableAttemptVisitor);
-            when(proposalGeneratorFactory.createVariableAttemptVisitor(any(IFile.class), anyInt(), anyInt())).thenReturn(mockVariableAttemptVisitor);
-            when(proposalGeneratorFactory.createKeywordCallAttemptVisitor(any(IFile.class))).thenReturn(mockKeywordCallAttemptVisitor);
-            when(proposalGeneratorFactory.createKeywordDefinitionAttemptVisitor(any(IFile.class), any(ParsedString.class))).thenReturn(mockKeywordDefinitionAttemptVisitor);
-
             when(relevantProposalsFilter.extractMostRelevantProposals(anyListOf(RobotCompletionProposalSet.class))).thenReturn(PROPOSALS);
         }
 
         @After
         public void checks() {
-            verifyNoMoreInteractions(proposalGeneratorFactory, attemptGenerator, variableReplacementRegionCalculator, relevantProposalsFilter);
+            verifyNoMoreInteractions(proposalSuitabilityDeterminer, attemptGenerator, relevantProposalsFilter);
         }
 
         @SuppressWarnings("unchecked")
@@ -136,63 +121,51 @@ public class TestRobotContentAssistant2 {
             return file;
         }
 
-        protected void verifyBase(ICompletionProposal[] proposals, int documentOffset, ParsedString variableSubArgument, AttemptVisitor visitor) {
-            verifyBase(proposals, documentOffset, new ParsedString[] { variableSubArgument }, new AttemptVisitor[] { visitor });
-        }
-
         @SuppressWarnings({ "rawtypes", "unchecked" })
-        protected void verifyBase(ICompletionProposal[] proposals, int documentOffset, ParsedString[] variableSubArguments, AttemptVisitor[] visitors) {
-
+        protected void verifyBase(ICompletionProposal[] proposals, int documentOffset, List<VisitorInfo> visitorInfos) {
             assertSame(PROPOSALS, proposals);
-            assertEquals(variableSubArguments.length, visitors.length);
 
             ArgumentCaptor<List> proposalSetsCaptor = ArgumentCaptor.forClass(List.class);
-            for (int i = 0; i < variableSubArguments.length; ++i) {
-                ParsedString variableSubArgument = variableSubArguments[i];
-                AttemptVisitor visitor = visitors[i];
-                verify(attemptGenerator).acceptAttempts(eq(variableSubArgument), eq(documentOffset), proposalSetsCaptor.capture(), same(visitor));
+            for (VisitorInfo visitorInfo : visitorInfos) {
+                verify(attemptGenerator).acceptAttempts(same(visitorInfo.visitorArgument), eq(documentOffset), proposalSetsCaptor.capture(), same(visitorInfo.visitior));
             }
-            if (visitors.length >= 1) {
-                List<List> listOfProposalSets = proposalSetsCaptor.getAllValues();
-                for (List proposalSets : listOfProposalSets) {
-                    assertThat(proposalSets, is(instanceOf(List.class)));
-                }
-                verify(relevantProposalsFilter).extractMostRelevantProposals(proposalSetsCaptor.getValue());
-            } else {
-                verify(relevantProposalsFilter).extractMostRelevantProposals(anyListOf(RobotCompletionProposalSet.class));
+            verify(relevantProposalsFilter).extractMostRelevantProposals(proposalSetsCaptor.capture());
+
+            List<List> listOfProposalSets = proposalSetsCaptor.getAllValues();
+            List lastProposalSets = proposalSetsCaptor.getValue();
+            assertThat(lastProposalSets, is(instanceOf(List.class)));
+            for (List proposalSets : listOfProposalSets) {
+                assertThat(proposalSets, is(sameInstance(lastProposalSets)));
             }
         }
     }
 
-    @RunWith(Enclosed.class)
-    public static class VariableReferences {
+    public static class when_partially_entered extends Base {
 
-        public static class when_partially_entered extends Base {
+        static final String LINKED_PREFIX = "[linked] ";
+        static final String LINKED_FILENAME = "linked.txt";
+        static final String FOO_VARIABLE = "${FOO}";
+        static final String LINKED_VARIABLE = "${LINKEDVAR}";
 
-            static final String LINKED_PREFIX = "[linked] ";
-            static final String LINKED_FILENAME = "linked.txt";
-            static final String FOO_VARIABLE = "${FOO}";
-            static final String LINKED_VARIABLE = "${LINKEDVAR}";
+        @Test
+        public void should_suggest_replacing_entered_variable() throws Exception {
+            Content content = new Content("*Testcases\nTestcase\n  Log  <arg>${F<cursor>");
+            int documentOffset = content.o("cursor");
 
-            @Test
-            public void should_suggest_replacing_entered_variable() throws Exception {
-                Content content = new Content("*Testcases\nTestcase\n  Log  <arg>${F<cursor>");
-                int documentOffset = content.o("cursor");
+            IFile origFile = mock(IFile.class);
+            List<RobotLine> lines = RobotFile.parse(content.c()).getLines();
+            int lineNo = lines.size() - 1;
 
-                IFile origFile = mock(IFile.class);
-                List<RobotLine> lines = RobotFile.parse(content.c()).getLines();
-                int lineNo = lines.size() - 1;
+            ParsedString variableSubArgument = content.ps("arg-end", 2, ArgumentType.KEYWORD_ARG);
 
-                ParsedString variableSubArgument = content.ps("arg-end", 2, ArgumentType.KEYWORD_ARG);
-                IRegion variableRegion = content.r("arg-end");
-                when(variableReplacementRegionCalculator.calculate(variableSubArgument, documentOffset)).thenReturn(variableRegion);
+            AttemptVisitor visitior = mock(AttemptVisitor.class, "attemptVisitor");
+            List<VisitorInfo> visitorInfos = Collections.singletonList(new VisitorInfo(variableSubArgument, visitior));
+            when(proposalSuitabilityDeterminer.generateAttemptVisitors(origFile, variableSubArgument, documentOffset, lines, lineNo, lines.get(lineNo))).thenReturn(visitorInfos);
 
-                ICompletionProposal[] proposals = assistant.generateProposals(origFile, documentOffset, content.c(), lines, lineNo);
+            ICompletionProposal[] proposals = assistant.generateProposals(origFile, documentOffset, content.c(), lines, lineNo);
 
-                verify(variableReplacementRegionCalculator).calculate(variableSubArgument, documentOffset);
-                verify(proposalGeneratorFactory).createVariableAttemptVisitor(same(origFile), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));
-                verifyBase(proposals, documentOffset, variableSubArgument, mockVariableAttemptVisitor);
-            }
+            verify(proposalSuitabilityDeterminer).generateAttemptVisitors(origFile, variableSubArgument, documentOffset, lines, lineNo, lines.get(lineNo));
+            verifyBase(proposals, documentOffset, visitorInfos);
         }
     }
 
