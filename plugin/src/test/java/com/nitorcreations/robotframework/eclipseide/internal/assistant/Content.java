@@ -28,8 +28,8 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 /**
- * This class accepts text annotated with &lt;text&gt; which results in a pointer with the name "text" to be
- * remembered at the specfieid point.
+ * This class accepts text annotated with &lt;text&gt; which results in a pointer with the name "text" to be remembered
+ * at the specfieid point.
  */
 public class Content {
     private static final Pattern POINTER_RE = Pattern.compile("<([^>]+)>");
@@ -44,7 +44,10 @@ public class Content {
             m.appendReplacement(sb, "");
             String pointerName = m.group(1);
             int pointerTarget = sb.length();
-            pointers.put(pointerName, pointerTarget);
+            Integer old = pointers.put(pointerName, pointerTarget);
+            if (old != null) {
+                throw new IllegalStateException("Duplicate pointer " + pointerName);
+            }
         }
         pointers.put("end", sb.length());
         m.appendTail(sb);

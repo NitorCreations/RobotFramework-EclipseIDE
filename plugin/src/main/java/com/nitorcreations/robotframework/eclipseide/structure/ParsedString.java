@@ -122,7 +122,7 @@ public class ParsedString implements IParsedKeywordString {
 
     @Override
     public String getDebugString() {
-        return getSimpleString() + " @" + argCharPos + "-" + (getArgEndCharPos() - 1) + " [" + argumentIndex + ']';
+        return getSimpleString() + " @" + argCharPos + "-" + (getArgEndCharPos() - 1) + (hasSpaceAfter ? "+" : "") + " [" + argumentIndex + ']';
     }
 
     @Override

@@ -42,6 +42,9 @@ public class RobotLine {
     }
 
     public ParsedString getArgumentAt(int offset) {
+        if (offset < lineCharPos) { // TODO verify upper boundary too
+            throw new IndexOutOfBoundsException(offset + "<" + lineCharPos);
+        }
         for (ParsedString argument : arguments) {
             if (offset >= argument.getArgCharPos() && offset <= argument.getExtendedArgEndCharPos()) {
                 return argument;
