@@ -92,7 +92,7 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
         assert synthesizedArgument != null;
         assert synthesizedArgument.getArgCharPos() == documentOffset;
         String synthesizedArgumentWithoutDummyCharacter = synthesizedArgument.getValue().substring(1);
-        ParsedString actualArgument = new ParsedString(synthesizedArgumentWithoutDummyCharacter, documentOffset, synthesizedArgument.getArgumentIndex());
+        ParsedString actualArgument = new ParsedString(synthesizedArgumentWithoutDummyCharacter, documentOffset, synthesizedArgument.getArgumentIndex()).setHasSpaceAfter(synthesizedArgument.hasSpaceAfter());
         actualArgument.copyTypeVariablesFrom(synthesizedArgument);
         return actualArgument;
     }

@@ -174,8 +174,9 @@ public class ParsedString implements IParsedKeywordString {
         return ArgumentUtils.unescapeArgument(value, 0, value.length());
     }
 
-    public void setHasSpaceAfter(boolean hasSpaceAfter) {
+    public ParsedString setHasSpaceAfter(boolean hasSpaceAfter) {
         this.hasSpaceAfter = hasSpaceAfter;
+        return this;
     }
 
     public boolean hasSpaceAfter() {
