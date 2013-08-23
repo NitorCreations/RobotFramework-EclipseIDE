@@ -50,6 +50,13 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
 @RunWith(Enclosed.class)
 public class TestArgumentPreParser {
 
+    public static class Empty_file_parsing {
+        @Test
+        public void at_start_of_line() throws Exception {
+            t("");
+        }
+    }
+
     public static class Comment_parsing {
         @Test
         public void at_start_of_line() throws Exception {

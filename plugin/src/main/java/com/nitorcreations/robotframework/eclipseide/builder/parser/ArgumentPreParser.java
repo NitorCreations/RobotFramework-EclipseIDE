@@ -166,6 +166,10 @@ public class ArgumentPreParser {
     }
 
     public void parseAll() {
+        if (lines == null) {
+            // empty file
+            return;
+        }
         lookForGlobalTestTemplate();
         while (lineIterator != null) {
             parseMoreTokens();
