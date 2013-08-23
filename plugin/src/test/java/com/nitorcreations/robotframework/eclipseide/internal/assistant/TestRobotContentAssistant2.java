@@ -84,26 +84,6 @@ public class TestRobotContentAssistant2 {
             PluginContext.setResourceManager(null);
         }
 
-        // @SuppressWarnings({ "rawtypes", "unchecked" })
-        // protected void verifyBase(ICompletionProposal[] proposals, int documentOffset, List<VisitorInfo>
-        // visitorInfos) {
-        // assertSame(PROPOSALS, proposals);
-        //
-        // ArgumentCaptor<List> proposalSetsCaptor = ArgumentCaptor.forClass(List.class);
-        // for (VisitorInfo visitorInfo : visitorInfos) {
-        // verify(attemptGenerator).acceptAttempts(same(visitorInfo.visitorArgument), eq(documentOffset),
-        // proposalSetsCaptor.capture(), same(visitorInfo.visitior));
-        // }
-        // verify(relevantProposalsFilter).extractMostRelevantProposals(proposalSetsCaptor.capture());
-        //
-        // List<List> listOfProposalSets = proposalSetsCaptor.getAllValues();
-        // List lastProposalSets = proposalSetsCaptor.getValue();
-        // assertThat(lastProposalSets, is(instanceOf(List.class)));
-        // for (List proposalSets : listOfProposalSets) {
-        // assertThat(proposalSets, is(sameInstance(lastProposalSets)));
-        // }
-        // }
-
         protected VisitorInfo createVisitorInfo(int i) {
             AttemptVisitor visitior = mock(AttemptVisitor.class, "attemptVisitor");
             ParsedString argument = new ParsedString("text" + i, i, i);
@@ -111,320 +91,295 @@ public class TestRobotContentAssistant2 {
         }
     }
 
-    public static class when_partially_entered extends Base {
-        @Test
-        public void should_suggest_replacing_entered_variable() throws Exception {
-            Content content = new Content("*Testcases\nTestcase\n  Log  <arg>${F<cursor>");
-            int documentOffset = content.o("cursor");
-
-            List<RobotLine> lines = RobotFile.parse(content.c()).getLines();
-            int lineNo = lines.size() - 1;
-
-            ParsedString variableSubArgument = content.ps("arg-end", 2, ArgumentType.KEYWORD_ARG);
-
-            AttemptVisitor visitior = mock(AttemptVisitor.class, "attemptVisitor");
-            List<VisitorInfo> visitorInfos = Collections.singletonList(new VisitorInfo(variableSubArgument, visitior));
-            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, variableSubArgument, documentOffset, lines, lineNo, lines.get(lineNo))).thenReturn(visitorInfos);
-
-            ICompletionProposal[] proposals = assistant.generateProposals(dummyFile, documentOffset, content.c(), lines, lineNo);
-
-            verify(proposalSuitabilityDeterminer).generateAttemptVisitors(dummyFile, variableSubArgument, documentOffset, lines, lineNo, lines.get(lineNo));
-            // verifyBase(proposals, documentOffset, visitorInfos);
-        }
-    }
-
     @RunWith(Enclosed.class)
-    public static class ResponsibilityTests {
+    public static class Makes_sure_we_have_an_argument_for_the_current_cursor_position {
+        @Ignore
+        public static abstract class ArgumentBase extends Base {
+            protected final void doTest(Content content, List<RobotLine> lines, int lineNo, ParsedString argument) {
+                int documentOffset = content.o("cursor");
+                when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, argument, documentOffset, lines, lineNo, lines.get(lineNo))).thenReturn(dummyNoVisitorInfos);
+
+                assistant.generateProposals(dummyFile, documentOffset, content.c(), lines, lineNo);
+
+                verify(proposalSuitabilityDeterminer).generateAttemptVisitors(dummyFile, argument, documentOffset, lines, lineNo, lines.get(lineNo));
+            }
+
+            @After
+            public final void checks() {
+                verifyNoMoreInteractions(proposalSuitabilityDeterminer);
+            }
+        }
+
         @RunWith(Enclosed.class)
-        public static class Makes_sure_we_have_an_argument_for_the_current_cursor_position {
-            @Ignore
-            public static abstract class ArgumentBase extends Base {
-                protected final void doTest(Content content, List<RobotLine> lines, int lineNo, ParsedString argument) {
-                    int documentOffset = content.o("cursor");
-                    when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, argument, documentOffset, lines, lineNo, lines.get(lineNo))).thenReturn(dummyNoVisitorInfos);
-
-                    assistant.generateProposals(dummyFile, documentOffset, content.c(), lines, lineNo);
-
-                    verify(proposalSuitabilityDeterminer).generateAttemptVisitors(dummyFile, argument, documentOffset, lines, lineNo, lines.get(lineNo));
-                }
-
-                @After
-                public final void checks() {
-                    verifyNoMoreInteractions(proposalSuitabilityDeterminer);
-                }
-            }
-
-            @RunWith(Enclosed.class)
-            public static class synthesizes_argument_when_there_is_none_available {
-                public static class produces_new extends ArgumentBase {
-                    @Test
-                    public void in_empty_file() throws Exception {
-                        Content content = new Content("<arg><cursor><argend>");
-                        ParsedString argument = content.ps("arg-argend", 0, ArgumentType.IGNORED);
-                        int lineNo = 0;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    @Test
-                    public void at_empty_line_in_beginning_of_file() throws Exception {
-                        Content content = new Content("<arg><cursor><argend>\n*Settings");
-                        ParsedString argument = content.ps("arg-argend", 0, ArgumentType.IGNORED);
-                        int lineNo = 0;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    @Test
-                    public void at_empty_line_in_middle_of_file() throws Exception {
-                        Content content = new Content("*Settings\n<arg><cursor><argend>\nResource  foo.txt");
-                        ParsedString argument = content.ps("arg-argend", 0, ArgumentType.SETTING_KEY);
-                        int lineNo = 1;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    @Test
-                    public void at_empty_line_at_end_of_file() throws Exception {
-                        Content content = new Content("*Settings\n<arg><cursor><argend>");
-                        ParsedString argument = content.ps("arg-argend", 0, ArgumentType.SETTING_KEY);
-                        int lineNo = 1;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    @Test
-                    public void at_empty_first_argument_separated_by_twospaces() throws Exception {
-                        Content content = new Content("*Settings\n<arg><cursor><argend>  second");
-                        ParsedString argument = content.ps("arg-argend", 0, ArgumentType.SETTING_KEY).setHasSpaceAfter(true);
-                        int lineNo = 1;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    @Test
-                    public void at_empty_first_argument_separated_by_tab() throws Exception {
-                        Content content = new Content("*Settings\n<arg><cursor><argend>\tsecond");
-                        ParsedString argument = content.ps("arg-argend", 0, ArgumentType.SETTING_KEY);
-                        int lineNo = 1;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    @Test
-                    public void at_empty_middle_argument_separated_by_twospaces() throws Exception {
-                        Content content = new Content("*Settings\nDocumentation  <arg><cursor><argend>  next");
-                        ParsedString argument = content.ps("arg-argend", 1, ArgumentType.SETTING_VAL).setHasSpaceAfter(true);
-                        int lineNo = 1;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    @Test
-                    public void at_empty_middle_argument_separated_by_tabs() throws Exception {
-                        Content content = new Content("*Settings\nDocumentation\t<arg><cursor><argend>\tnext");
-                        ParsedString argument = content.ps("arg-argend", 1, ArgumentType.SETTING_VAL);
-                        int lineNo = 1;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    @Test
-                    public void twospaces_after_last_argument() throws Exception {
-                        Content content = new Content("*Settings\nDocumentation  <arg><cursor><argend>");
-                        ParsedString argument = content.ps("arg-argend", 1, ArgumentType.SETTING_VAL);
-                        int lineNo = 1;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    @Test
-                    public void twospaces_after_last_argument_with_space_after() throws Exception {
-                        Content content = new Content("*Settings\nDocumentation  <arg><cursor><argend> ");
-                        ParsedString argument = content.ps("arg-argend", 1, ArgumentType.SETTING_VAL).setHasSpaceAfter(true);
-                        int lineNo = 1;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    @Test
-                    public void tab_after_last_argument() throws Exception {
-                        Content content = new Content("*Settings\nDocumentation\t<arg><cursor><argend>");
-                        ParsedString argument = content.ps("arg-argend", 1, ArgumentType.SETTING_VAL);
-                        int lineNo = 1;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    @Test
-                    public void tab_after_last_argument_with_space_after() throws Exception {
-                        Content content = new Content("*Settings\nDocumentation\t<arg><cursor><argend> ");
-                        ParsedString argument = content.ps("arg-argend", 1, ArgumentType.SETTING_VAL).setHasSpaceAfter(true);
-                        int lineNo = 1;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    private void doTest(Content content, ParsedString argument, int lineNo) {
-                        List<RobotLine> lines = RobotFile.parse(content.c()).getLines();
-                        doTest(content, lines, lineNo, argument);
-                    }
-                }
-
-                public static class extends_old extends ArgumentBase {
-
-                    @Test
-                    public void at_beginning_of_line_with_onespace_before_first_nonempty_argument() throws Exception {
-                        Content content = new Content("*Settings\n<cursor><arg> Documentation<argend>");
-                        ParsedString argument = content.ps("arg-argend", 0, ArgumentType.SETTING_KEY);
-                        int lineNo = 1;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    @Test
-                    public void middle_of_line_with_onespace_before_first_nonempty_argument() throws Exception {
-                        Content content = new Content("*Settings\n   <cursor><arg> Documentation<argend>");
-                        ParsedString argument = content.ps("arg-argend", 1, ArgumentType.IGNORED);
-                        int lineNo = 1;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    @Test
-                    public void between_arguments_twospaces_after_previous_onespace_before_next() throws Exception {
-                        Content content = new Content("*Settings\nDocumentation  previous  <arg><cursor> next<argend>");
-                        ParsedString argument = content.ps("arg-argend", 2, ArgumentType.SETTING_VAL);
-                        int lineNo = 1;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    @Test
-                    public void between_arguments_tab_after_previous_onespace_before_next() throws Exception {
-                        Content content = new Content("*Settings\nDocumentation  previous\t<arg><cursor> next<argend>");
-                        ParsedString argument = content.ps("arg-argend", 2, ArgumentType.SETTING_VAL);
-                        int lineNo = 1;
-                        doTest(content, argument, lineNo);
-                    }
-
-                    private void doTest(Content content, ParsedString argument, int lineNo) {
-                        List<RobotLine> lines = RobotFile.parse(content.c()).getLines();
-                        doTest(content, lines, lineNo, argument);
-                    }
-                }
-            }
-
-            public static class uses_existing_argument_when_available extends ArgumentBase {
+        public static class synthesizes_argument_when_there_is_none_available {
+            public static class produces_new extends ArgumentBase {
                 @Test
-                public void at_start_of_argument_in_beginning_of_document() throws Exception {
-                    doTest("<arg><cursor>ARGUMENT<argend>  NEXTARGUMENT");
+                public void in_empty_file() throws Exception {
+                    Content content = new Content("<arg><cursor><argend>");
+                    ParsedString argument = content.ps("arg-argend", 0, ArgumentType.IGNORED);
+                    int lineNo = 0;
+                    doTest(content, argument, lineNo);
                 }
 
                 @Test
-                public void at_start_of_argument() throws Exception {
-                    doTest("TEST  <arg><cursor>ARGUMENT<argend>  NEXTARGUMENT");
+                public void at_empty_line_in_beginning_of_file() throws Exception {
+                    Content content = new Content("<arg><cursor><argend>\n*Settings");
+                    ParsedString argument = content.ps("arg-argend", 0, ArgumentType.IGNORED);
+                    int lineNo = 0;
+                    doTest(content, argument, lineNo);
                 }
 
                 @Test
-                public void in_middle_of_argment() throws Exception {
-                    doTest("TEST  <arg>ARGU<cursor>MENT<argend>  NEXTARGUMENT");
+                public void at_empty_line_in_middle_of_file() throws Exception {
+                    Content content = new Content("*Settings\n<arg><cursor><argend>\nResource  foo.txt");
+                    ParsedString argument = content.ps("arg-argend", 0, ArgumentType.SETTING_KEY);
+                    int lineNo = 1;
+                    doTest(content, argument, lineNo);
                 }
 
                 @Test
-                public void at_end_of_argument() throws Exception {
-                    doTest("TEST  <arg>ARGUMENT<cursor><argend>  NEXTARGUMENT");
+                public void at_empty_line_at_end_of_file() throws Exception {
+                    Content content = new Content("*Settings\n<arg><cursor><argend>");
+                    ParsedString argument = content.ps("arg-argend", 0, ArgumentType.SETTING_KEY);
+                    int lineNo = 1;
+                    doTest(content, argument, lineNo);
                 }
 
                 @Test
-                public void onespace_after_argument() throws Exception {
-                    doTest("TEST  <arg>ARGUMENT<argend> <cursor> NEXTARGUMENT");
+                public void at_empty_first_argument_separated_by_twospaces() throws Exception {
+                    Content content = new Content("*Settings\n<arg><cursor><argend>  second");
+                    ParsedString argument = content.ps("arg-argend", 0, ArgumentType.SETTING_KEY).setHasSpaceAfter(true);
+                    int lineNo = 1;
+                    doTest(content, argument, lineNo);
                 }
 
-                private void doTest(String contentWithPointers) {
-                    Content content = new Content(contentWithPointers);
+                @Test
+                public void at_empty_first_argument_separated_by_tab() throws Exception {
+                    Content content = new Content("*Settings\n<arg><cursor><argend>\tsecond");
+                    ParsedString argument = content.ps("arg-argend", 0, ArgumentType.SETTING_KEY);
+                    int lineNo = 1;
+                    doTest(content, argument, lineNo);
+                }
+
+                @Test
+                public void at_empty_middle_argument_separated_by_twospaces() throws Exception {
+                    Content content = new Content("*Settings\nDocumentation  <arg><cursor><argend>  next");
+                    ParsedString argument = content.ps("arg-argend", 1, ArgumentType.SETTING_VAL).setHasSpaceAfter(true);
+                    int lineNo = 1;
+                    doTest(content, argument, lineNo);
+                }
+
+                @Test
+                public void at_empty_middle_argument_separated_by_tabs() throws Exception {
+                    Content content = new Content("*Settings\nDocumentation\t<arg><cursor><argend>\tnext");
+                    ParsedString argument = content.ps("arg-argend", 1, ArgumentType.SETTING_VAL);
+                    int lineNo = 1;
+                    doTest(content, argument, lineNo);
+                }
+
+                @Test
+                public void twospaces_after_last_argument() throws Exception {
+                    Content content = new Content("*Settings\nDocumentation  <arg><cursor><argend>");
+                    ParsedString argument = content.ps("arg-argend", 1, ArgumentType.SETTING_VAL);
+                    int lineNo = 1;
+                    doTest(content, argument, lineNo);
+                }
+
+                @Test
+                public void twospaces_after_last_argument_with_space_after() throws Exception {
+                    Content content = new Content("*Settings\nDocumentation  <arg><cursor><argend> ");
+                    ParsedString argument = content.ps("arg-argend", 1, ArgumentType.SETTING_VAL).setHasSpaceAfter(true);
+                    int lineNo = 1;
+                    doTest(content, argument, lineNo);
+                }
+
+                @Test
+                public void tab_after_last_argument() throws Exception {
+                    Content content = new Content("*Settings\nDocumentation\t<arg><cursor><argend>");
+                    ParsedString argument = content.ps("arg-argend", 1, ArgumentType.SETTING_VAL);
+                    int lineNo = 1;
+                    doTest(content, argument, lineNo);
+                }
+
+                @Test
+                public void tab_after_last_argument_with_space_after() throws Exception {
+                    Content content = new Content("*Settings\nDocumentation\t<arg><cursor><argend> ");
+                    ParsedString argument = content.ps("arg-argend", 1, ArgumentType.SETTING_VAL).setHasSpaceAfter(true);
+                    int lineNo = 1;
+                    doTest(content, argument, lineNo);
+                }
+
+                private void doTest(Content content, ParsedString argument, int lineNo) {
                     List<RobotLine> lines = RobotFile.parse(content.c()).getLines();
-                    int lineNo = lines.size() - 1;
+                    doTest(content, lines, lineNo, argument);
+                }
+            }
 
-                    ParsedString argument = lines.get(lineNo).getArgumentAt(content.o("arg"));
+            public static class extends_old extends ArgumentBase {
 
+                @Test
+                public void at_beginning_of_line_with_onespace_before_first_nonempty_argument() throws Exception {
+                    Content content = new Content("*Settings\n<cursor><arg> Documentation<argend>");
+                    ParsedString argument = content.ps("arg-argend", 0, ArgumentType.SETTING_KEY);
+                    int lineNo = 1;
+                    doTest(content, argument, lineNo);
+                }
+
+                @Test
+                public void middle_of_line_with_onespace_before_first_nonempty_argument() throws Exception {
+                    Content content = new Content("*Settings\n   <cursor><arg> Documentation<argend>");
+                    ParsedString argument = content.ps("arg-argend", 1, ArgumentType.IGNORED);
+                    int lineNo = 1;
+                    doTest(content, argument, lineNo);
+                }
+
+                @Test
+                public void between_arguments_twospaces_after_previous_onespace_before_next() throws Exception {
+                    Content content = new Content("*Settings\nDocumentation  previous  <arg><cursor> next<argend>");
+                    ParsedString argument = content.ps("arg-argend", 2, ArgumentType.SETTING_VAL);
+                    int lineNo = 1;
+                    doTest(content, argument, lineNo);
+                }
+
+                @Test
+                public void between_arguments_tab_after_previous_onespace_before_next() throws Exception {
+                    Content content = new Content("*Settings\nDocumentation  previous\t<arg><cursor> next<argend>");
+                    ParsedString argument = content.ps("arg-argend", 2, ArgumentType.SETTING_VAL);
+                    int lineNo = 1;
+                    doTest(content, argument, lineNo);
+                }
+
+                private void doTest(Content content, ParsedString argument, int lineNo) {
+                    List<RobotLine> lines = RobotFile.parse(content.c()).getLines();
                     doTest(content, lines, lineNo, argument);
                 }
             }
         }
 
-        public static class Iterates_produced_proposal_generators extends Base {
-
+        public static class uses_existing_argument_when_available extends ArgumentBase {
             @Test
-            public void when_no_generator_produced() {
-                testWith(Collections.<VisitorInfo> emptyList());
+            public void at_start_of_argument_in_beginning_of_document() throws Exception {
+                doTest("<arg><cursor>ARGUMENT<argend>  NEXTARGUMENT");
             }
 
             @Test
-            public void when_single_generator_produced() {
-                testWith(Collections.singletonList(createVisitorInfo(0)));
+            public void at_start_of_argument() throws Exception {
+                doTest("TEST  <arg><cursor>ARGUMENT<argend>  NEXTARGUMENT");
             }
 
             @Test
-            public void when_multiple_generator_produced() {
-                List<VisitorInfo> list = new ArrayList<VisitorInfo>();
-                list.add(createVisitorInfo(0));
-                list.add(createVisitorInfo(1));
-                list.add(createVisitorInfo(2));
-                testWith(list);
+            public void in_middle_of_argment() throws Exception {
+                doTest("TEST  <arg>ARGU<cursor>MENT<argend>  NEXTARGUMENT");
             }
 
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            private void testWith(List<VisitorInfo> visitorInfos) {
-                when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLines, dummyLineNo, dummyLines.get(dummyLineNo))).thenReturn(visitorInfos);
+            @Test
+            public void at_end_of_argument() throws Exception {
+                doTest("TEST  <arg>ARGUMENT<cursor><argend>  NEXTARGUMENT");
+            }
 
-                assistant.generateProposals(dummyFile, dummyDocumentOffset, dummyContent, dummyLines, dummyLineNo);
+            @Test
+            public void onespace_after_argument() throws Exception {
+                doTest("TEST  <arg>ARGUMENT<argend> <cursor> NEXTARGUMENT");
+            }
 
-                if (!visitorInfos.isEmpty()) {
-                    ArgumentCaptor<List> proposalSetsCaptor = ArgumentCaptor.forClass(List.class);
-                    for (VisitorInfo visitorInfo : visitorInfos) {
-                        verify(attemptGenerator).acceptAttempts(same(visitorInfo.visitorArgument), eq(dummyDocumentOffset), proposalSetsCaptor.capture(), same(visitorInfo.visitior));
-                    }
+            private void doTest(String contentWithPointers) {
+                Content content = new Content(contentWithPointers);
+                List<RobotLine> lines = RobotFile.parse(content.c()).getLines();
+                int lineNo = lines.size() - 1;
 
-                    List<List> listOfProposalSets = proposalSetsCaptor.getAllValues();
-                    List lastProposalSets = proposalSetsCaptor.getValue();
-                    assertThat(lastProposalSets, is(instanceOf(List.class)));
-                    for (List proposalSets : listOfProposalSets) {
-                        assertThat(proposalSets, is(sameInstance(lastProposalSets)));
-                    }
+                ParsedString argument = lines.get(lineNo).getArgumentAt(content.o("arg"));
+
+                doTest(content, lines, lineNo, argument);
+            }
+        }
+    }
+
+    public static class Iterates_produced_proposal_generators extends Base {
+
+        @Test
+        public void when_no_generator_produced() {
+            testWith(Collections.<VisitorInfo> emptyList());
+        }
+
+        @Test
+        public void when_single_generator_produced() {
+            testWith(Collections.singletonList(createVisitorInfo(0)));
+        }
+
+        @Test
+        public void when_multiple_generator_produced() {
+            List<VisitorInfo> list = new ArrayList<VisitorInfo>();
+            list.add(createVisitorInfo(0));
+            list.add(createVisitorInfo(1));
+            list.add(createVisitorInfo(2));
+            testWith(list);
+        }
+
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        private void testWith(List<VisitorInfo> visitorInfos) {
+            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLines, dummyLineNo, dummyLines.get(dummyLineNo))).thenReturn(visitorInfos);
+
+            assistant.generateProposals(dummyFile, dummyDocumentOffset, dummyContent, dummyLines, dummyLineNo);
+
+            if (!visitorInfos.isEmpty()) {
+                ArgumentCaptor<List> proposalSetsCaptor = ArgumentCaptor.forClass(List.class);
+                for (VisitorInfo visitorInfo : visitorInfos) {
+                    verify(attemptGenerator).acceptAttempts(same(visitorInfo.visitorArgument), eq(dummyDocumentOffset), proposalSetsCaptor.capture(), same(visitorInfo.visitior));
+                }
+
+                List<List> listOfProposalSets = proposalSetsCaptor.getAllValues();
+                List lastProposalSets = proposalSetsCaptor.getValue();
+                assertThat(lastProposalSets, is(instanceOf(List.class)));
+                for (List proposalSets : listOfProposalSets) {
+                    assertThat(proposalSets, is(sameInstance(lastProposalSets)));
                 }
             }
-
-            @After
-            public void checks() {
-                verifyNoMoreInteractions(attemptGenerator);
-            }
         }
 
-        public static class Extracts_most_relevant_proposals_from_produced_proposals extends Base {
+        @After
+        public void checks() {
+            verifyNoMoreInteractions(attemptGenerator);
+        }
+    }
 
-            @Before
-            public void setup() {
-                VisitorInfo visitorInfo = createVisitorInfo(0);
-                List<VisitorInfo> visitorInfos = Collections.singletonList(visitorInfo);
-                when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLines, dummyLineNo, dummyLines.get(dummyLineNo))).thenReturn(visitorInfos);
-            }
+    public static class Extracts_most_relevant_proposals_from_produced_proposals extends Base {
 
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            @Test
-            public void extractMostRelevantProposals_is_called_with_same_instance_of_proposalSets_as_acceptAttempts() {
-                assistant.generateProposals(dummyFile, dummyDocumentOffset, dummyContent, dummyLines, dummyLineNo);
-
-                ArgumentCaptor<List> proposalSetsCaptor = ArgumentCaptor.forClass(List.class);
-                verify(attemptGenerator).acceptAttempts(any(ParsedString.class), anyInt(), proposalSetsCaptor.capture(), any(AttemptVisitor.class));
-                verify(relevantProposalsFilter).extractMostRelevantProposals(same(proposalSetsCaptor.getValue()));
-            }
-
-            @After
-            public void checks() {
-                verifyNoMoreInteractions(relevantProposalsFilter);
-            }
+        @Before
+        public void setup() {
+            VisitorInfo visitorInfo = createVisitorInfo(0);
+            List<VisitorInfo> visitorInfos = Collections.singletonList(visitorInfo);
+            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLines, dummyLineNo, dummyLines.get(dummyLineNo))).thenReturn(visitorInfos);
         }
 
-        public static class Returns_extracted_proposals extends Base {
-            static final ICompletionProposal[] PROPOSALS = new ICompletionProposal[0];
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        @Test
+        public void extractMostRelevantProposals_is_called_with_same_instance_of_proposalSets_as_acceptAttempts() {
+            assistant.generateProposals(dummyFile, dummyDocumentOffset, dummyContent, dummyLines, dummyLineNo);
 
-            @Before
-            public void setup() {
-                when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLines, dummyLineNo, dummyLines.get(dummyLineNo))).thenReturn(dummyNoVisitorInfos);
-                when(relevantProposalsFilter.extractMostRelevantProposals(anyListOf(RobotCompletionProposalSet.class))).thenReturn(PROPOSALS);
-            }
+            ArgumentCaptor<List> proposalSetsCaptor = ArgumentCaptor.forClass(List.class);
+            verify(attemptGenerator).acceptAttempts(any(ParsedString.class), anyInt(), proposalSetsCaptor.capture(), any(AttemptVisitor.class));
+            verify(relevantProposalsFilter).extractMostRelevantProposals(same(proposalSetsCaptor.getValue()));
+        }
 
-            @Test
-            public void test() {
-                ICompletionProposal[] actualProposals = assistant.generateProposals(dummyFile, dummyDocumentOffset, dummyContent, dummyLines, dummyLineNo);
-                assertSame(PROPOSALS, actualProposals);
-            }
+        @After
+        public void checks() {
+            verifyNoMoreInteractions(relevantProposalsFilter);
+        }
+    }
+
+    public static class Returns_extracted_proposals extends Base {
+        static final ICompletionProposal[] PROPOSALS = new ICompletionProposal[0];
+
+        @Before
+        public void setup() {
+            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLines, dummyLineNo, dummyLines.get(dummyLineNo))).thenReturn(dummyNoVisitorInfos);
+            when(relevantProposalsFilter.extractMostRelevantProposals(anyListOf(RobotCompletionProposalSet.class))).thenReturn(PROPOSALS);
+        }
+
+        @Test
+        public void test() {
+            ICompletionProposal[] actualProposals = assistant.generateProposals(dummyFile, dummyDocumentOffset, dummyContent, dummyLines, dummyLineNo);
+            assertSame(PROPOSALS, actualProposals);
         }
     }
 
