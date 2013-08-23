@@ -27,6 +27,8 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
 
 public class ArgumentPreParser {
 
+    public static boolean DEBUG = false;
+
     enum SettingType {
         UNKNOWN, STRING, FILE, FILE_ARGS, KEYWORD_ARGS,
     }
@@ -144,9 +146,11 @@ public class ArgumentPreParser {
                 --argLen; // exclude now, deal with it later (see top of method)
             }
         } else {
-            // for (RobotLine line : lines) {
-            // System.out.println(line);
-            // }
+            if (DEBUG) {
+                for (RobotLine line : lines) {
+                    System.out.println(line);
+                }
+            }
             lines = null;
             lineIterator = null;
             argLen = 0;
