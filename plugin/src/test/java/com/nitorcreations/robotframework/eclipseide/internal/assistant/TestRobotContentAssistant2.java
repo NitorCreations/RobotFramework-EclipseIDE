@@ -137,9 +137,26 @@ public class TestRobotContentAssistant2 {
     public static class ResponsibilityTests {
         @RunWith(Enclosed.class)
         public static class Makes_sure_we_have_an_argument_for_the_current_cursor_position {
+            @Ignore
+            public static abstract class ArgumentBase extends Base {
+                protected final void doTest(Content content, List<RobotLine> lines, int lineNo, ParsedString argument) {
+                    int documentOffset = content.o("cursor");
+                    when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, argument, documentOffset, lines, lineNo, lines.get(lineNo))).thenReturn(dummyNoVisitorInfos);
+
+                    assistant.generateProposals(dummyFile, documentOffset, content.c(), lines, lineNo);
+
+                    verify(proposalSuitabilityDeterminer).generateAttemptVisitors(dummyFile, argument, documentOffset, lines, lineNo, lines.get(lineNo));
+                }
+
+                @After
+                public final void checks() {
+                    verifyNoMoreInteractions(proposalSuitabilityDeterminer);
+                }
+            }
+
             @RunWith(Enclosed.class)
             public static class synthesizes_argument_when_there_is_none_available {
-                public static class produces_new extends Base {
+                public static class produces_new extends ArgumentBase {
                     @Test
                     public void in_empty_file() throws Exception {
                         Content content = new Content("<arg><cursor><argend>");
@@ -240,77 +257,50 @@ public class TestRobotContentAssistant2 {
                         List<RobotLine> lines = RobotFile.parse(content.c()).getLines();
                         doTest(content, lines, lineNo, argument);
                     }
-
-                    private void doTest(Content content, List<RobotLine> lines, int lineNo, ParsedString argument) {
-                        int documentOffset = content.o("cursor");
-                        when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, argument, documentOffset, lines, lineNo, lines.get(lineNo))).thenReturn(dummyNoVisitorInfos);
-
-                        assistant.generateProposals(dummyFile, documentOffset, content.c(), lines, lineNo);
-
-                        verify(proposalSuitabilityDeterminer).generateAttemptVisitors(dummyFile, argument, documentOffset, lines, lineNo, lines.get(lineNo));
-                    }
-
-                    @After
-                    public void checks() {
-                        verifyNoMoreInteractions(proposalSuitabilityDeterminer);
-                    }
                 }
 
-                public static class extends_old extends Base {
+                public static class extends_old extends ArgumentBase {
 
                     @Test
                     public void at_beginning_of_line_with_onespace_before_first_nonempty_argument() throws Exception {
-                        Content content = new Content("*Settings\n<cursor><arg> first<argend>");
+                        Content content = new Content("*Settings\n<cursor><arg> Documentation<argend>");
                         ParsedString argument = content.ps("arg-argend", 0, ArgumentType.SETTING_KEY);
                         int lineNo = 1;
                         doTest(content, argument, lineNo);
                     }
 
                     @Test
-                    public void between_arguments_at_twospaces_after_previous() throws Exception {
-                        Content content = new Content("*Settings\nDocumentation  <arg><cursor><argend>");
-                        ParsedString argument = content.ps("arg-argend", 1, ArgumentType.SETTING_VAL);
+                    public void middle_of_line_with_onespace_before_first_nonempty_argument() throws Exception {
+                        Content content = new Content("*Settings\n   <cursor><arg> Documentation<argend>");
+                        ParsedString argument = content.ps("arg-argend", 1, ArgumentType.IGNORED);
                         int lineNo = 1;
                         doTest(content, argument, lineNo);
                     }
 
                     @Test
-                    public void between_arguments_at_tab_after_previous() throws Exception {
-                        Content content = new Content("*Settings\nDocumentation  <arg><cursor><argend>");
-                        ParsedString argument = content.ps("arg-argend", 1, ArgumentType.SETTING_VAL);
+                    public void between_arguments_twospaces_after_previous_onespace_before_next() throws Exception {
+                        Content content = new Content("*Settings\nDocumentation  previous  <arg><cursor> next<argend>");
+                        ParsedString argument = content.ps("arg-argend", 2, ArgumentType.SETTING_VAL);
                         int lineNo = 1;
                         doTest(content, argument, lineNo);
                     }
 
-                    // TODO more tests in this inner class
-
                     @Test
-                    public void onespace_after_empty_argument() throws Exception {
-                        // ??
+                    public void between_arguments_tab_after_previous_onespace_before_next() throws Exception {
+                        Content content = new Content("*Settings\nDocumentation  previous\t<arg><cursor> next<argend>");
+                        ParsedString argument = content.ps("arg-argend", 2, ArgumentType.SETTING_VAL);
+                        int lineNo = 1;
+                        doTest(content, argument, lineNo);
                     }
 
                     private void doTest(Content content, ParsedString argument, int lineNo) {
                         List<RobotLine> lines = RobotFile.parse(content.c()).getLines();
                         doTest(content, lines, lineNo, argument);
                     }
-
-                    private void doTest(Content content, List<RobotLine> lines, int lineNo, ParsedString argument) {
-                        int documentOffset = content.o("cursor");
-                        when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, argument, documentOffset, lines, lineNo, lines.get(lineNo))).thenReturn(dummyNoVisitorInfos);
-
-                        assistant.generateProposals(dummyFile, documentOffset, content.c(), lines, lineNo);
-
-                        verify(proposalSuitabilityDeterminer).generateAttemptVisitors(dummyFile, argument, documentOffset, lines, lineNo, lines.get(lineNo));
-                    }
-
-                    @After
-                    public void checks() {
-                        verifyNoMoreInteractions(proposalSuitabilityDeterminer);
-                    }
                 }
             }
 
-            public static class uses_existing_argument_when_available extends Base {
+            public static class uses_existing_argument_when_available extends ArgumentBase {
                 @Test
                 public void at_start_of_argument_in_beginning_of_document() throws Exception {
                     doTest("<arg><cursor>ARGUMENT<argend>  NEXTARGUMENT");
@@ -344,20 +334,6 @@ public class TestRobotContentAssistant2 {
                     ParsedString argument = lines.get(lineNo).getArgumentAt(content.o("arg"));
 
                     doTest(content, lines, lineNo, argument);
-                }
-
-                private void doTest(Content content, List<RobotLine> lines, int lineNo, ParsedString argument) {
-                    int documentOffset = content.o("cursor");
-                    when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, argument, documentOffset, lines, lineNo, lines.get(lineNo))).thenReturn(dummyNoVisitorInfos);
-
-                    assistant.generateProposals(dummyFile, documentOffset, content.c(), lines, lineNo);
-
-                    verify(proposalSuitabilityDeterminer).generateAttemptVisitors(dummyFile, argument, documentOffset, lines, lineNo, lines.get(lineNo));
-                }
-
-                @After
-                public void checks() {
-                    verifyNoMoreInteractions(proposalSuitabilityDeterminer);
                 }
             }
         }
