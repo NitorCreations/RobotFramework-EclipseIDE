@@ -43,7 +43,7 @@ public class ProposalSuitabilityDeterminer implements IProposalSuitabilityDeterm
     public List<VisitorInfo> generateAttemptVisitors(IFile file, ParsedString argument, int documentOffset, int lineCharPos) {
         List<VisitorInfo> visitors;
         if (argument.getArgumentIndex() == 0) {
-            visitors = createProposalGeneratorsForFirstArgument(file, argument, documentOffset);
+            visitors = createProposalGeneratorsForFirstArgument(file, argument);
         } else {
             visitors = createProposalGeneratorsForRestOfArguments(file, argument, documentOffset, lineCharPos);
         }
@@ -91,7 +91,7 @@ public class ProposalSuitabilityDeterminer implements IProposalSuitabilityDeterm
         }
     }
 
-    private List<VisitorInfo> createProposalGeneratorsForFirstArgument(IFile file, ParsedString argument, int documentOffset) {
+    private List<VisitorInfo> createProposalGeneratorsForFirstArgument(IFile file, ParsedString argument) {
         List<VisitorInfo> visitorInfos = new ArrayList<VisitorInfo>();
         switch (argument.getType()) {
             case NEW_KEYWORD:
