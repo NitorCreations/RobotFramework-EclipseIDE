@@ -22,7 +22,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
-import com.nitorcreations.robotframework.eclipseide.builder.parser.TableType;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.IVariableReplacementRegionCalculator;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
@@ -42,10 +41,10 @@ public class ProposalSuitabilityDeterminer implements IProposalSuitabilityDeterm
     }
 
     @Override
-    public List<VisitorInfo> generateAttemptVisitors(IFile file, ParsedString argument, int documentOffset, List<RobotLine> lines, int lineNo, RobotLine robotLine) {
+    public List<VisitorInfo> generateAttemptVisitors(IFile file, ParsedString argument, int documentOffset, RobotLine robotLine) {
         List<VisitorInfo> visitors;
         if (argument.getArgumentIndex() == 0) {
-            visitors = createProposalGeneratorsForFirstArgument(file, argument, documentOffset, lines, lineNo);
+            visitors = createProposalGeneratorsForFirstArgument(file, argument, documentOffset);
         } else {
             visitors = createProposalGeneratorsForRestOfArguments(file, argument, documentOffset, robotLine);
         }
@@ -93,13 +92,13 @@ public class ProposalSuitabilityDeterminer implements IProposalSuitabilityDeterm
         }
     }
 
-    private List<VisitorInfo> createProposalGeneratorsForFirstArgument(IFile file, ParsedString argument, int documentOffset, List<RobotLine> lines, int lineNo) {
+    private List<VisitorInfo> createProposalGeneratorsForFirstArgument(IFile file, ParsedString argument, int documentOffset) {
         List<VisitorInfo> visitorInfos = new ArrayList<VisitorInfo>();
-        switch (determineTableTypeForLine(lines, lineNo)) {
-            case KEYWORD:
+        switch (argument.getType()) {
+            case NEW_KEYWORD:
                 visitorInfos.add(new VisitorInfo(argument, proposalGeneratorFactory.createKeywordDefinitionAttemptVisitor(file, argument)));
                 break;
-            case SETTING:
+            case SETTING_KEY:
                 visitorInfos.add(new VisitorInfo(argument, proposalGeneratorFactory.createSettingTableAttemptVisitor()));
                 break;
             default:
@@ -150,15 +149,5 @@ public class ProposalSuitabilityDeterminer implements IProposalSuitabilityDeterm
             visitorInfos.add(new VisitorInfo(variableInsideArgument, proposalGeneratorFactory.createVariableAttemptVisitor(file, maxVariableCharPos, maxSettingCharPos)));
         }
         return visitorInfos;
-    }
-
-    private TableType determineTableTypeForLine(List<RobotLine> lines, int lineNo) {
-        for (int i = lineNo; i >= 0; --i) {
-            TableType tableType = lines.get(i).type.tableType;
-            if (tableType != TableType.UNKNOWN) {
-                return tableType;
-            }
-        }
-        return TableType.UNKNOWN;
     }
 }

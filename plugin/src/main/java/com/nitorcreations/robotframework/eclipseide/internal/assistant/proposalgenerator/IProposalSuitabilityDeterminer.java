@@ -25,6 +25,6 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public interface IProposalSuitabilityDeterminer {
 
-    List<VisitorInfo> generateAttemptVisitors(IFile file, ParsedString argument, int documentOffset, List<RobotLine> lines, int lineNo, RobotLine robotLine);
+    List<VisitorInfo> generateAttemptVisitors(IFile file, ParsedString argument, int documentOffset, RobotLine robotLine);
 
 }

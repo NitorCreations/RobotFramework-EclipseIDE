@@ -97,11 +97,11 @@ public class TestRobotContentAssistant2 {
         public static abstract class ArgumentBase extends Base {
             protected final void doTest(Content content, List<RobotLine> lines, int lineNo, ParsedString argument) {
                 int documentOffset = content.o("cursor");
-                when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, argument, documentOffset, lines, lineNo, lines.get(lineNo))).thenReturn(dummyNoVisitorInfos);
+                when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, argument, documentOffset, lines.get(lineNo))).thenReturn(dummyNoVisitorInfos);
 
                 assistant.generateProposals(dummyFile, documentOffset, content.c(), lines, lineNo);
 
-                verify(proposalSuitabilityDeterminer).generateAttemptVisitors(dummyFile, argument, documentOffset, lines, lineNo, lines.get(lineNo));
+                verify(proposalSuitabilityDeterminer).generateAttemptVisitors(dummyFile, argument, documentOffset, lines.get(lineNo));
             }
 
             @After
@@ -317,7 +317,7 @@ public class TestRobotContentAssistant2 {
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
         private void testWith(List<VisitorInfo> visitorInfos) {
-            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLines, dummyLineNo, dummyLines.get(dummyLineNo))).thenReturn(visitorInfos);
+            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLines.get(dummyLineNo))).thenReturn(visitorInfos);
 
             assistant.generateProposals(dummyFile, dummyDocumentOffset, dummyContent, dummyLines, dummyLineNo);
 
@@ -348,7 +348,7 @@ public class TestRobotContentAssistant2 {
         public void setup() {
             VisitorInfo visitorInfo = createVisitorInfo(0);
             List<VisitorInfo> visitorInfos = Collections.singletonList(visitorInfo);
-            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLines, dummyLineNo, dummyLines.get(dummyLineNo))).thenReturn(visitorInfos);
+            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLines.get(dummyLineNo))).thenReturn(visitorInfos);
         }
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -372,7 +372,7 @@ public class TestRobotContentAssistant2 {
 
         @Before
         public void setup() {
-            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLines, dummyLineNo, dummyLines.get(dummyLineNo))).thenReturn(dummyNoVisitorInfos);
+            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLines.get(dummyLineNo))).thenReturn(dummyNoVisitorInfos);
             when(relevantProposalsFilter.extractMostRelevantProposals(anyListOf(RobotCompletionProposalSet.class))).thenReturn(PROPOSALS);
         }
 

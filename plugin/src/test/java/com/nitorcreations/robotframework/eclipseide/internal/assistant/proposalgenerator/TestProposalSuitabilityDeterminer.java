@@ -110,7 +110,7 @@ public class TestProposalSuitabilityDeterminer {
                 IRegion variableRegion = content.r("arg-end");
                 when(variableReplacementRegionCalculator.calculate(variableSubArgument, documentOffset)).thenReturn(variableRegion);
 
-                List<VisitorInfo> attemptVisitors = proposalSuitabilityDeterminer.generateAttemptVisitors(file, variableSubArgument, documentOffset, lines, lineNo, lines.get(lineNo));
+                List<VisitorInfo> attemptVisitors = proposalSuitabilityDeterminer.generateAttemptVisitors(file, variableSubArgument, documentOffset, lines.get(lineNo));
 
                 verify(variableReplacementRegionCalculator).calculate(variableSubArgument, documentOffset);
                 verify(proposalGeneratorFactory).createVariableAttemptVisitor(same(file), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));

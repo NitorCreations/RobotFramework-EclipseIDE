@@ -58,11 +58,11 @@ public class RobotContentAssistant2 implements IRobotContentAssistant2 {
             argument = synthesizeArgument(documentText, documentOffset, lineNo);
         }
 
-        return generateProposalsForArgument(file, argument, documentOffset, lines, lineNo, robotLine);
+        return generateProposalsForArgument(file, argument, documentOffset, robotLine);
     }
 
-    private ICompletionProposal[] generateProposalsForArgument(IFile file, ParsedString argument, int documentOffset, List<RobotLine> lines, int lineNo, RobotLine robotLine) {
-        List<VisitorInfo> visitors = proposalSuitabilityDeterminer.generateAttemptVisitors(file, argument, documentOffset, lines, lineNo, robotLine);
+    private ICompletionProposal[] generateProposalsForArgument(IFile file, ParsedString argument, int documentOffset, RobotLine robotLine) {
+        List<VisitorInfo> visitors = proposalSuitabilityDeterminer.generateAttemptVisitors(file, argument, documentOffset, robotLine);
         List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
         for (VisitorInfo visitorInfo : visitors) {
             attemptGenerator.acceptAttempts(visitorInfo.visitorArgument, documentOffset, proposalSets, visitorInfo.visitior);
