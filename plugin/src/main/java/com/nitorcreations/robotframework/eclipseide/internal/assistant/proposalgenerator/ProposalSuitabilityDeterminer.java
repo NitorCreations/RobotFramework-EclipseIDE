@@ -54,9 +54,17 @@ public class ProposalSuitabilityDeterminer implements IProposalSuitabilityDeterm
         public final AttemptVisitor visitior;
         public final ParsedString visitorArgument;
 
-        public VisitorInfo(ParsedString visitorArgument, AttemptVisitor visitior) {
-            this.visitior = visitior;
+        public VisitorInfo(ParsedString visitorArgument, AttemptVisitor visitor) {
+            if (visitorArgument == null || visitor == null) {
+                throw new IllegalArgumentException("visitorArgument=" + visitorArgument + " visitor=" + visitor);
+            }
+            this.visitior = visitor;
             this.visitorArgument = visitorArgument;
+        }
+
+        @Override
+        public String toString() {
+            return "VisitorInfo [visitior=" + visitior + ", visitorArgument=" + visitorArgument + "]";
         }
 
         @Override
