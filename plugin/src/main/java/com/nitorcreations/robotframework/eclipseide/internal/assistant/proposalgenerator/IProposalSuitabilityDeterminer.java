@@ -19,12 +19,11 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.ProposalSuitabilityDeterminer.VisitorInfo;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public interface IProposalSuitabilityDeterminer {
 
-    List<VisitorInfo> generateAttemptVisitors(IFile file, ParsedString argument, int documentOffset, RobotLine robotLine);
+    List<VisitorInfo> generateAttemptVisitors(IFile file, ParsedString argument, int documentOffset, int lineCharPos);
 
 }

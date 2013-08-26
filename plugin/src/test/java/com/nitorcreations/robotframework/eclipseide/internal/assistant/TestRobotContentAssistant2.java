@@ -67,11 +67,12 @@ public class TestRobotContentAssistant2 {
 
         final IFile dummyFile = mock(IFile.class);
 
-        static final int dummyDocumentOffset = 4;
         static final int dummyLineNo = 0;
         static final String dummyContent = "";
-        static final ParsedString dummyArgument = new ParsedString("foo", 1, 0).setType(ArgumentType.COMMENT);
-        static final List<RobotLine> dummyLines = Collections.singletonList(new RobotLine(dummyLineNo, 0, Collections.singletonList(dummyArgument)));
+        static final int dummyLineCharPos = 33;
+        static final int dummyDocumentOffset = dummyLineCharPos + 4;
+        static final ParsedString dummyArgument = new ParsedString("foo", dummyLineCharPos + 1, 0).setType(ArgumentType.COMMENT);
+        static final List<RobotLine> dummyLines = Collections.singletonList(new RobotLine(dummyLineNo, dummyLineCharPos, Collections.singletonList(dummyArgument)));
         static final List<VisitorInfo> dummyNoVisitorInfos = Collections.emptyList();
 
         @Before
@@ -97,11 +98,11 @@ public class TestRobotContentAssistant2 {
         public static abstract class ArgumentBase extends Base {
             protected final void doTest(Content content, List<RobotLine> lines, int lineNo, ParsedString argument) {
                 int documentOffset = content.o("cursor");
-                when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, argument, documentOffset, lines.get(lineNo))).thenReturn(dummyNoVisitorInfos);
+                when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, argument, documentOffset, lines.get(lineNo).lineCharPos)).thenReturn(dummyNoVisitorInfos);
 
                 assistant.generateProposals(dummyFile, documentOffset, content.c(), lines, lineNo);
 
-                verify(proposalSuitabilityDeterminer).generateAttemptVisitors(dummyFile, argument, documentOffset, lines.get(lineNo));
+                verify(proposalSuitabilityDeterminer).generateAttemptVisitors(dummyFile, argument, documentOffset, lines.get(lineNo).lineCharPos);
             }
 
             @After
@@ -317,7 +318,7 @@ public class TestRobotContentAssistant2 {
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
         private void testWith(List<VisitorInfo> visitorInfos) {
-            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLines.get(dummyLineNo))).thenReturn(visitorInfos);
+            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLineCharPos)).thenReturn(visitorInfos);
 
             assistant.generateProposals(dummyFile, dummyDocumentOffset, dummyContent, dummyLines, dummyLineNo);
 
@@ -348,7 +349,7 @@ public class TestRobotContentAssistant2 {
         public void setup() {
             VisitorInfo visitorInfo = createVisitorInfo(0);
             List<VisitorInfo> visitorInfos = Collections.singletonList(visitorInfo);
-            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLines.get(dummyLineNo))).thenReturn(visitorInfos);
+            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLineCharPos)).thenReturn(visitorInfos);
         }
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -372,7 +373,7 @@ public class TestRobotContentAssistant2 {
 
         @Before
         public void setup() {
-            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLines.get(dummyLineNo))).thenReturn(dummyNoVisitorInfos);
+            when(proposalSuitabilityDeterminer.generateAttemptVisitors(dummyFile, dummyArgument, dummyDocumentOffset, dummyLineCharPos)).thenReturn(dummyNoVisitorInfos);
             when(relevantProposalsFilter.extractMostRelevantProposals(anyListOf(RobotCompletionProposalSet.class))).thenReturn(PROPOSALS);
         }
 

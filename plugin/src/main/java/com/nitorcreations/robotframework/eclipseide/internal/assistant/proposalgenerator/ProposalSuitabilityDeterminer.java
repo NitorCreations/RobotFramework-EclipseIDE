@@ -21,7 +21,6 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 
-import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.IVariableReplacementRegionCalculator;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
@@ -41,12 +40,12 @@ public class ProposalSuitabilityDeterminer implements IProposalSuitabilityDeterm
     }
 
     @Override
-    public List<VisitorInfo> generateAttemptVisitors(IFile file, ParsedString argument, int documentOffset, RobotLine robotLine) {
+    public List<VisitorInfo> generateAttemptVisitors(IFile file, ParsedString argument, int documentOffset, int lineCharPos) {
         List<VisitorInfo> visitors;
         if (argument.getArgumentIndex() == 0) {
             visitors = createProposalGeneratorsForFirstArgument(file, argument, documentOffset);
         } else {
-            visitors = createProposalGeneratorsForRestOfArguments(file, argument, documentOffset, robotLine);
+            visitors = createProposalGeneratorsForRestOfArguments(file, argument, documentOffset, lineCharPos);
         }
         return visitors;
     }
@@ -109,7 +108,7 @@ public class ProposalSuitabilityDeterminer implements IProposalSuitabilityDeterm
         return visitorInfos;
     }
 
-    private List<VisitorInfo> createProposalGeneratorsForRestOfArguments(IFile file, ParsedString argument, int documentOffset, RobotLine robotLine) {
+    private List<VisitorInfo> createProposalGeneratorsForRestOfArguments(IFile file, ParsedString argument, int documentOffset, int lineCharPos) {
         boolean allowKeywords = false;
         boolean allowVariables = false;
         int maxVariableCharPos = Integer.MAX_VALUE;
@@ -130,12 +129,12 @@ public class ProposalSuitabilityDeterminer implements IProposalSuitabilityDeterm
             case SETTING_FILE:
                 allowVariables = true;
                 // limit visible imported variables to those loaded before current line
-                maxSettingCharPos = robotLine.lineCharPos - 1;
+                maxSettingCharPos = lineCharPos - 1;
                 break;
             case VARIABLE_VAL:
                 allowVariables = true;
                 // limit visible local variables to those declared before current line
-                maxVariableCharPos = robotLine.lineCharPos - 1;
+                maxVariableCharPos = lineCharPos - 1;
                 maxSettingCharPos = -1;
                 break;
         }
