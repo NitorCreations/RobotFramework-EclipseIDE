@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.ProposalSuitabilityDeterminer.VisitorInfo;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public interface IProposalSuitabilityDeterminer {

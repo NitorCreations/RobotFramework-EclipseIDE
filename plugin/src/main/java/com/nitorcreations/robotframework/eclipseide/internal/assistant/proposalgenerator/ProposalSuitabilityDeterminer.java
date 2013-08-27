@@ -50,55 +50,6 @@ public class ProposalSuitabilityDeterminer implements IProposalSuitabilityDeterm
         return visitors;
     }
 
-    public static class VisitorInfo {
-        public final AttemptVisitor visitior;
-        public final ParsedString visitorArgument;
-
-        public VisitorInfo(ParsedString visitorArgument, AttemptVisitor visitor) {
-            if (visitorArgument == null || visitor == null) {
-                throw new IllegalArgumentException("visitorArgument=" + visitorArgument + " visitor=" + visitor);
-            }
-            this.visitior = visitor;
-            this.visitorArgument = visitorArgument;
-        }
-
-        @Override
-        public String toString() {
-            return "VisitorInfo [visitior=" + visitior + ", visitorArgument=" + visitorArgument + "]";
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((visitior == null) ? 0 : visitior.hashCode());
-            result = prime * result + ((visitorArgument == null) ? 0 : visitorArgument.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            VisitorInfo other = (VisitorInfo) obj;
-            if (visitior == null) {
-                if (other.visitior != null)
-                    return false;
-            } else if (!visitior.equals(other.visitior))
-                return false;
-            if (visitorArgument == null) {
-                if (other.visitorArgument != null)
-                    return false;
-            } else if (!visitorArgument.equals(other.visitorArgument))
-                return false;
-            return true;
-        }
-    }
-
     private List<VisitorInfo> createProposalGeneratorsForFirstArgument(IFile file, ParsedString argument) {
         List<VisitorInfo> visitorInfos = new ArrayList<VisitorInfo>();
         switch (argument.getType()) {
