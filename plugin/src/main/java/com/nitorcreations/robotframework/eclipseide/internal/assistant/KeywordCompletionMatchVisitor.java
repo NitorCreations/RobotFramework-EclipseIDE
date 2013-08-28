@@ -90,7 +90,7 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
             return false;
         }
         String userInputPrefix = userInputString.substring(0, indexOfDot);
-        return proposalLocation.getName().toLowerCase().equals(userInputPrefix);
+        return proposalLocation.getName().toLowerCase().startsWith(userInputPrefix);
     }
 
     // private String lookFor(String value) {
