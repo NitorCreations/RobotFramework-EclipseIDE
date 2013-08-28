@@ -60,7 +60,7 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
             }
             if (match.getValue().equalsIgnoreCase(linkString)) {
                 IRegion targetRegion = new Region(match.getArgEndCharPos(), 0);
-                links.add(new Hyperlink(linkRegion, getDisplayString(match, location), targetRegion, location));
+                links.add(new Hyperlink(linkRegion, getDisplayString(match.getValue(), location), targetRegion, location));
                 return VisitorInterest.STOP;
             }
             return VisitorInterest.CONTINUE;

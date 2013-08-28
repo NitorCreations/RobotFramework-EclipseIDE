@@ -45,7 +45,7 @@ public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
 
         if (userInput == null || proposal.getUnescapedValue().toLowerCase().contains(getUnescapedUserInputLowerCase())) {
             if (!addedProposals.contains(proposal.getValue().toLowerCase())) {
-                addProposal(proposal, proposalLocation);
+                addProposal(proposal.getValue(), proposalLocation);
             }
         }
 

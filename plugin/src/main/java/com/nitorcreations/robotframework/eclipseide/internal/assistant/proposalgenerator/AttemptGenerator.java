@@ -46,7 +46,7 @@ public class AttemptGenerator implements IAttemptGenerator {
     }
 
     private static boolean proposalsContainsOnly(List<RobotCompletionProposal> proposals, ParsedString argument) {
-        return proposals.size() == 1 && proposals.get(0).getMatchArgument().getValue().equals(argument.getValue());
+        return proposals.size() == 1 && proposals.get(0).getMatchArgument().equals(argument.getValue());
     }
 
     private static List<String> generateAttempts(ParsedString argument, int documentOffset) {

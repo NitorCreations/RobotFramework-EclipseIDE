@@ -23,8 +23,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.swt.graphics.Image;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.ArgumentPreParser;
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 public class SettingTableAttemptVisitor implements AttemptVisitor {
 
@@ -40,9 +38,7 @@ public class SettingTableAttemptVisitor implements AttemptVisitor {
         RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
         for (String key : settingKeys) {
             if (key.toLowerCase().startsWith(attempt)) {
-                ParsedString proposal = new ParsedString(key, 0);
-                proposal.setType(ArgumentType.SETTING_KEY);
-
+                String proposal = key;
                 Image image = null;
                 String displayString = key;
                 String additionalProposalInfo = null;

@@ -27,11 +27,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class RobotCompletionProposal implements ICompletionProposal, ICompletionProposalExtension6 {
 
-    private final ParsedString matchArgument;
+    private final String matchArgument;
     private final FileWithType matchLocation;
     private final IRegion replacementRegion;
     private final Image image;
@@ -41,7 +40,7 @@ public class RobotCompletionProposal implements ICompletionProposal, ICompletion
     private boolean prefixRequired = false;
     private int cursorPositionAdjustment;
 
-    public RobotCompletionProposal(ParsedString matchArgument, FileWithType proposalLocation, IRegion replacementRegion, Image image, String displayString, String informationDisplayString, String additionalProposalInfo) {
+    public RobotCompletionProposal(String matchArgument, FileWithType proposalLocation, IRegion replacementRegion, Image image, String displayString, String informationDisplayString, String additionalProposalInfo) {
         this.matchArgument = matchArgument;
         this.matchLocation = proposalLocation;
         this.replacementRegion = replacementRegion;
@@ -55,7 +54,7 @@ public class RobotCompletionProposal implements ICompletionProposal, ICompletion
         cursorPositionAdjustment = adjustment;
     }
 
-    ParsedString getMatchArgument() {
+    String getMatchArgument() {
         return matchArgument;
     }
 
@@ -74,9 +73,9 @@ public class RobotCompletionProposal implements ICompletionProposal, ICompletion
 
     private String getReplacementString() {
         if (prefixRequired) {
-            return matchLocation.getName() + "." + matchArgument.getValue();
+            return matchLocation.getName() + "." + matchArgument;
         }
-        return matchArgument.getValue();
+        return matchArgument;
     }
 
     @Override

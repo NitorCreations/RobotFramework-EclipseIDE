@@ -61,9 +61,7 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
         for (Entry<String, List<KeywordDefinitionAttemptVisitor.KeywordNeed>> e : undefinedKeywords.entrySet()) {
             String key = e.getKey();
             if (key.toLowerCase().startsWith(attempt)) {
-                ParsedString proposal = new ParsedString(key, 0);
-                proposal.setType(ArgumentType.SETTING_KEY);
-
+                String proposal = key;
                 Image image = null;
                 String displayString = key;
                 StringBuilder sb = new StringBuilder();

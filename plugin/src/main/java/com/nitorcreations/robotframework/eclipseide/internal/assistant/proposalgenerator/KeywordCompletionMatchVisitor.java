@@ -35,12 +35,12 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
     @Override
     public VisitorInterest visitMatch(ParsedString proposal, FileWithType proposalLocation) {
         if (userInput == null) {
-            addProposal(proposal, proposalLocation);
+            addProposal(proposal.getValue(), proposalLocation);
         } else {
             String userInputString = userInput.toLowerCase();
             String proposalString = proposal.getValue().toLowerCase();
             if (proposalString.contains(userInputString) || matchesWithoutPrefix(userInputString, proposalString, proposalLocation)) {
-                addProposal(proposal, proposalLocation);
+                addProposal(proposal.getValue(), proposalLocation);
             }
             // if (KeywordMatchResult.DIFFERENT == match(proposalString, lookFor(userInputString))) {
             // if (!prefixesMatch(userInputString, proposalLocation)) {
@@ -56,8 +56,8 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
     }
 
     @Override
-    protected void addProposal(ParsedString proposal, FileWithType proposalLocation) {
-        String proposalString = proposal.getValue().toLowerCase();
+    protected void addProposal(String proposal, FileWithType proposalLocation) {
+        String proposalString = proposal.toLowerCase();
         boolean proposalExisted = addedProposals.contains(proposalString);
         super.addProposal(proposal, proposalLocation);
         if (proposalExisted) {
@@ -71,7 +71,7 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
         if (file == robotCompletionProposal.getMatchLocation().getFile()) {
             return;
         }
-        if (robotCompletionProposal.getMatchArgument().getValue().toLowerCase().equals(proposalString)) {
+        if (robotCompletionProposal.getMatchArgument().toLowerCase().equals(proposalString)) {
             robotCompletionProposal.setPrefixRequired();
         }
     }

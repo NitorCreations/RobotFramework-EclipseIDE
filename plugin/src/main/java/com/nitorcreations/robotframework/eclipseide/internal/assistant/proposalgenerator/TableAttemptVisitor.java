@@ -23,8 +23,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.swt.graphics.Image;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.util.ParserUtil;
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 public class TableAttemptVisitor implements AttemptVisitor {
     private final Map<String, String> tableNameToFull = new LinkedHashMap<String, String>();
@@ -44,9 +42,7 @@ public class TableAttemptVisitor implements AttemptVisitor {
         String tableArgument = ParserUtil.parseTable(attempt);
         for (Entry<String, String> e : tableNameToFull.entrySet()) {
             if (e.getKey().startsWith(tableArgument)) {
-                ParsedString proposal = new ParsedString(e.getValue(), 0);
-                proposal.setType(ArgumentType.TABLE);
-
+                String proposal = e.getValue();
                 Image image = null;
                 String displayString = e.getValue();
                 String additionalProposalInfo = null;

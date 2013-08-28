@@ -24,7 +24,6 @@ import org.eclipse.swt.graphics.Image;
 
 import com.nitorcreations.robotframework.eclipseide.internal.util.BaseDefinitionMatchVisitor;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public abstract class CompletionMatchVisitor extends BaseDefinitionMatchVisitor {
     protected final String userInput;
@@ -39,13 +38,13 @@ public abstract class CompletionMatchVisitor extends BaseDefinitionMatchVisitor 
         this.replacementRegion = replacementRegion;
     }
 
-    protected void addProposal(ParsedString proposal, FileWithType proposalLocation) {
+    protected void addProposal(String proposal, FileWithType proposalLocation) {
         Image image = null;
         String displayString = getDisplayString(proposal, proposalLocation);
-        String replacementString = proposal.getValue();
+        String replacementString = proposal;
         String additionalProposalInfo = "I recommend: " + replacementString;
         String informationDisplayString = "You chose: " + replacementString;
         proposals.add(new RobotCompletionProposal(proposal, proposalLocation, replacementRegion, image, displayString, informationDisplayString, additionalProposalInfo));
-        addedProposals.add(proposal.getValue().toLowerCase());
+        addedProposals.add(proposal.toLowerCase());
     }
 }
