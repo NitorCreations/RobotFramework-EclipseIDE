@@ -38,14 +38,14 @@ public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
     }
 
     @Override
-    public VisitorInterest visitMatch(ParsedString proposal, FileWithType proposalLocation) {
-        if (proposal.getArgCharPos() > maxVariableCharPos) {
+    public VisitorInterest visitMatch(ParsedString match, FileWithType matchLocation) {
+        if (match.getArgCharPos() > maxVariableCharPos) {
             return VisitorInterest.STOP;
         }
 
-        if (userInput == null || proposal.getUnescapedValue().toLowerCase().contains(getUnescapedUserInputLowerCase())) {
-            if (!addedProposals.contains(proposal.getValue().toLowerCase())) {
-                addProposal(proposal.getValue(), proposalLocation);
+        if (userInput == null || match.getUnescapedValue().toLowerCase().contains(getUnescapedUserInputLowerCase())) {
+            if (!addedProposals.contains(match.getValue().toLowerCase())) {
+                addProposal(match.getValue(), matchLocation);
             }
         }
 
