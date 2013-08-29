@@ -15,9 +15,12 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -252,26 +255,33 @@ public class TestAttemptGenerator {
 
             generator.acceptAttempts(argument, ARGUMENT_POS + argOff, proposalSets, attemptVisitor);
 
+            // verify correct calls to attemptVisitor
             String inputLC = input.toLowerCase();
             InOrder inOrder = inOrder(attemptVisitor);
-            inOrder.verify(attemptVisitor).visitAttempt(eq(inputLC), any(IRegion.class));
+            String lastAttemptLC = inputLC;
+            inOrder.verify(attemptVisitor).visitAttempt(eq(lastAttemptLC), any(IRegion.class));
             if (!isFinal1 && !inputLC.isEmpty()) {
-                String partialInput = argOff > 0 && argOff < inputLC.length() ? inputLC.substring(0, argOff) : "";
-                inOrder.verify(attemptVisitor).visitAttempt(eq(partialInput), any(IRegion.class));
-                if (!isFinal2 && !partialInput.isEmpty()) {
-                    assertNotSame("Test setup fail", "", partialInput);
-                    inOrder.verify(attemptVisitor).visitAttempt(eq(""), any(IRegion.class));
+                String partialInputLC = argOff > 0 && argOff < inputLC.length() ? inputLC.substring(0, argOff) : "";
+                lastAttemptLC = partialInputLC;
+                inOrder.verify(attemptVisitor).visitAttempt(eq(lastAttemptLC), any(IRegion.class));
+                if (!isFinal2 && !partialInputLC.isEmpty()) {
+                    assertNotSame("Test setup fail", "", partialInputLC);
+                    lastAttemptLC = "";
+                    inOrder.verify(attemptVisitor).visitAttempt(eq(lastAttemptLC), any(IRegion.class));
                 }
             }
 
-            if (isFinal1) {
-                expectedProposalSets.add(SET_1);
-            } else if (isFinal2) {
-                expectedProposalSets.add(SET_2);
-            } else if (isFinal3) {
-                expectedProposalSets.add(SET_3);
+            // verify correct update of proposalSets
+            RobotCompletionProposalSet set = isFinal1 ? SET_1 : isFinal2 ? SET_2 : isFinal3 ? SET_3 : null;
+            if (set != null) {
+                expectedProposalSets.add(set);
             }
             assertEquals(expectedProposalSets, proposalSets);
+
+            // verify state of "set"
+            if (set != null) {
+                assertThat(set.isBasedOnInput(), is(not(lastAttemptLC.isEmpty())));
+            }
         }
     }
 }
