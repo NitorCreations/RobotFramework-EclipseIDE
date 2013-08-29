@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.nitorcreations.junit.runners.NicelyParameterized;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 @RunWith(Enclosed.class)
@@ -54,7 +54,7 @@ public class TestTxtArgumentSplitter {
         return l.get(0);
     }
 
-    @RunWith(Parameterized.class)
+    @RunWith(NicelyParameterized.class)
     public static class Basic_tests {
 
         private final String input;
