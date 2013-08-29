@@ -149,7 +149,7 @@ public class TestAttemptGenerator {
         public static List<Object[]> parameters() {
             List<Object[]> p = new ArrayList<Object[]>();
             for (boolean isGivenListPopulated : new boolean[] { false, true }) {
-                for (String input : new String[] { "", "abc" }) {
+                for (String input : new String[] { "", "abc", "ABC" }) {
                     for (int argOff = 0; argOff <= input.length() + 1; ++argOff) {
                         int baseAmount = input.isEmpty() ? 1 : argOff > 0 && argOff < input.length() ? 3 : 2;
                         for (AttemptResponse attemptResp1 : baseAmount > 1 ? allExpected : allExpectedForEmpty) {
@@ -210,7 +210,7 @@ public class TestAttemptGenerator {
                     return false; // single exact match - should ignore and continue
                 case INEXACT:
                     assertFalse("Test setup fail", input.isEmpty());
-                    set.getProposals().add(new RobotCompletionProposal(input.toUpperCase(), null, null, null, null, null, null));
+                    set.getProposals().add(new RobotCompletionProposal(inexactInput(), null, null, null, null, null, null));
                     return true;
                 case NONE:
                 case _:
@@ -235,11 +235,15 @@ public class TestAttemptGenerator {
                     set.getProposals().add(new RobotCompletionProposal("multi1", null, null, null, null, null, null));
                     set.getProposals().add(new RobotCompletionProposal("multi2", null, null, null, null, null, null));
                     set.getProposals().add(new RobotCompletionProposal("multi3", null, null, null, null, null, null));
-                    set.getProposals().add(new RobotCompletionProposal(input.toUpperCase(), null, null, null, null, null, null));
+                    set.getProposals().add(new RobotCompletionProposal(inexactInput(), null, null, null, null, null, null));
                     return true;
                 default:
                     throw new IllegalStateException(attemptResp.toString());
             }
+        }
+
+        private String inexactInput() {
+            return Character.isLowerCase(input.charAt(0)) ? input.toUpperCase() : input.toLowerCase();
         }
 
         @Test
