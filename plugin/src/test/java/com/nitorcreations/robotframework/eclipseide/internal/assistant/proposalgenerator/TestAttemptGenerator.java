@@ -27,6 +27,8 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -59,9 +61,9 @@ public class TestAttemptGenerator {
         final AttemptGenerator generator = new AttemptGenerator();
 
         static final String argumentText = "1234567890";
-        final RobotCompletionProposalSet SET_1 = new RobotCompletionProposalSet();
-        final RobotCompletionProposalSet SET_2 = new RobotCompletionProposalSet();
-        final RobotCompletionProposalSet SET_3 = new RobotCompletionProposalSet();
+        final RobotCompletionProposalSet SET_1 = spy(new RobotCompletionProposalSet());
+        final RobotCompletionProposalSet SET_2 = spy(new RobotCompletionProposalSet());
+        final RobotCompletionProposalSet SET_3 = spy(new RobotCompletionProposalSet());
         final AttemptVisitor attemptVisitor = mock(AttemptVisitor.class, "attemptVisitor");
 
         final List<RobotCompletionProposalSet> proposalSets = new ArrayList<RobotCompletionProposalSet>();
@@ -69,6 +71,9 @@ public class TestAttemptGenerator {
         @After
         public final void checks() {
             verifyNoMoreInteractions(attemptVisitor);
+            verify(SET_1, never()).setPriorityProposal();
+            verify(SET_2, never()).setPriorityProposal();
+            verify(SET_3, never()).setPriorityProposal();
         }
     }
 
