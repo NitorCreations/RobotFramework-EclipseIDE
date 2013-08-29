@@ -54,10 +54,12 @@ public class AttemptGenerator implements IAttemptGenerator {
         List<String> attempts = new ArrayList<String>(3);
         attempts.add(lookFor);
         int argumentOffset = documentOffset - argument.getArgCharPos();
-        if (lookFor.length() > argumentOffset) {
+        if (argumentOffset > 0 && lookFor.length() > argumentOffset) {
             attempts.add(lookFor.substring(0, argumentOffset));
         }
-        attempts.add("");
+        if (!lookFor.isEmpty()) {
+            attempts.add("");
+        }
         return attempts;
     }
 }
