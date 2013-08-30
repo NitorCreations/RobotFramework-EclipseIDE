@@ -57,6 +57,7 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
 
     @Override
     public RobotCompletionProposalSet visitAttempt(String attempt, IRegion replacementRegion) {
+        assert attempt.equals(attempt.toLowerCase());
         RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
         for (Entry<String, List<KeywordDefinitionAttemptVisitor.KeywordNeed>> e : undefinedKeywords.entrySet()) {
             String key = e.getKey();

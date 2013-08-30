@@ -38,6 +38,7 @@ public class TableAttemptVisitor implements AttemptVisitor {
 
     @Override
     public RobotCompletionProposalSet visitAttempt(String attempt, IRegion replacementRegion) {
+        assert attempt.equals(attempt.toLowerCase());
         Map<String, RobotCompletionProposal> ourProposals = new LinkedHashMap<String, RobotCompletionProposal>();
         String tableArgument = ParserUtil.parseTable(attempt);
         for (Entry<String, String> e : tableNameToFull.entrySet()) {

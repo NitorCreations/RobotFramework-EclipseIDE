@@ -29,6 +29,7 @@ public class KeywordCallAttemptVisitor implements AttemptVisitor {
 
     @Override
     public RobotCompletionProposalSet visitAttempt(String attempt, IRegion replacementRegion) {
+        assert attempt.equals(attempt.toLowerCase());
         RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
         CompletionMatchVisitor visitor = new KeywordCompletionMatchVisitor(file, attempt, ourProposalSet.getProposals(), replacementRegion);
         DefinitionFinder.acceptMatches(file, visitor);

@@ -35,6 +35,7 @@ public class SettingTableAttemptVisitor implements AttemptVisitor {
 
     @Override
     public RobotCompletionProposalSet visitAttempt(String attempt, IRegion replacementRegion) {
+        assert attempt.equals(attempt.toLowerCase());
         RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
         for (String key : settingKeys) {
             if (key.toLowerCase().startsWith(attempt)) {

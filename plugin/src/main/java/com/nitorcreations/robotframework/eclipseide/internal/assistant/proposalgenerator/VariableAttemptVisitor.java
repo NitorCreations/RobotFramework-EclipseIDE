@@ -33,6 +33,7 @@ public class VariableAttemptVisitor implements AttemptVisitor {
 
     @Override
     public RobotCompletionProposalSet visitAttempt(String attempt, IRegion replacementRegion) {
+        assert attempt.equals(attempt.toLowerCase());
         RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
         CompletionMatchVisitor visitor = new VariableCompletionMatchVisitor(file, attempt, ourProposalSet.getProposals(), replacementRegion, maxVariableCharPos, maxSettingCharPos);
         DefinitionFinder.acceptMatches(file, visitor);
