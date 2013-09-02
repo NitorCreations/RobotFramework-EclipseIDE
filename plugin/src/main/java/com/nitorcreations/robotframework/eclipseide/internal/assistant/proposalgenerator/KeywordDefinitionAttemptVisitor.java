@@ -37,7 +37,7 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
-    final Map<String, List<KeywordDefinitionAttemptVisitor.KeywordNeed>> undefinedKeywords;
+    final Map<String, List<KeywordNeed>> undefinedKeywords;
 
     public KeywordDefinitionAttemptVisitor(IFile file, ParsedString argument) {
         undefinedKeywords = collectUndefinedKeywords(file, argument);
@@ -59,7 +59,7 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
     public RobotCompletionProposalSet visitAttempt(String attempt, IRegion replacementRegion) {
         assert attempt.equals(attempt.toLowerCase());
         RobotCompletionProposalSet ourProposalSet = new RobotCompletionProposalSet();
-        for (Entry<String, List<KeywordDefinitionAttemptVisitor.KeywordNeed>> e : undefinedKeywords.entrySet()) {
+        for (Entry<String, List<KeywordNeed>> e : undefinedKeywords.entrySet()) {
             String key = e.getKey();
             if (key.toLowerCase().startsWith(attempt)) {
                 String proposal = key;
@@ -67,7 +67,7 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
                 String displayString = key;
                 StringBuilder sb = new StringBuilder();
                 sb.append("Called from the following testcases/keywords:<ul>");
-                for (KeywordDefinitionAttemptVisitor.KeywordNeed need : e.getValue()) {
+                for (KeywordNeed need : e.getValue()) {
                     String callerType = need.callingTestcaseOrKeyword.getType() == ArgumentType.NEW_TESTCASE ? "TEST CASE" : "KEYWORD";
                     String callerName = need.callingTestcaseOrKeyword.getValue();
                     sb.append("<li><b>" + callerType + "</b> " + callerName + "</li>");
@@ -95,8 +95,8 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
      * resources/libraries. If assumeThisKeywordIsUndefined is not null, then it will not be considered as defined. This
      * is used to include the keyword already defined at the line where the cursor already is.
      */
-    private static Map<String, List<KeywordDefinitionAttemptVisitor.KeywordNeed>> collectUndefinedKeywords(final IFile file, final ParsedString assumeThisKeywordIsUndefined) {
-        final Map<String, List<KeywordDefinitionAttemptVisitor.KeywordNeed>> neededKeywords = new LinkedHashMap<String, List<KeywordDefinitionAttemptVisitor.KeywordNeed>>();
+    private static Map<String, List<KeywordNeed>> collectUndefinedKeywords(final IFile file, final ParsedString assumeThisKeywordIsUndefined) {
+        final Map<String, List<KeywordNeed>> neededKeywords = new LinkedHashMap<String, List<KeywordNeed>>();
         final List<String> definedKeywords = new ArrayList<String>();
         LineFinder.acceptMatches(file, new LineMatchVisitor() {
 
@@ -123,9 +123,9 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
                         case KEYWORD_CALL:
                         case KEYWORD_CALL_DYNAMIC:
                             String argumentStr = argument.getValue();
-                            List<KeywordDefinitionAttemptVisitor.KeywordNeed> list = neededKeywords.get(argumentStr);
+                            List<KeywordNeed> list = neededKeywords.get(argumentStr);
                             if (list == null) {
-                                list = new ArrayList<KeywordDefinitionAttemptVisitor.KeywordNeed>();
+                                list = new ArrayList<KeywordNeed>();
                                 neededKeywords.put(argumentStr, list);
                             }
                             list.add(new KeywordNeed(lastDefinedTestcaseOrKeyword, argument));
@@ -136,8 +136,8 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
 
             private void visitKeywordDefinition(RobotLine line, FileWithType lineLocation) {
                 ParsedString definedKeyword = line.arguments.get(0);
-                    definedKeywords.add(definedKeyword.getValue());
-                }
+                definedKeywords.add(definedKeyword.getValue());
+            }
 
             @Override
             public boolean visitImport(IFile currentFile, RobotLine line) {
