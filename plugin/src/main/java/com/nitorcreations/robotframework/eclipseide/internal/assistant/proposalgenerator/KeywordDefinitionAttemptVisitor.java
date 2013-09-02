@@ -17,11 +17,14 @@ package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposal
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
@@ -160,7 +163,49 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
             }
         });
         definedKeywords.remove(assumeThisKeywordIsUndefined.getValue());
-        neededKeywords.keySet().removeAll(definedKeywords);
+        if (!definedKeywords.isEmpty()) {
+            Pattern definedKeywordsRE = regexpify(definedKeywords);
+            removeKeywordsMatchingRegexp(neededKeywords, definedKeywordsRE);
+        }
         return neededKeywords;
     }
+
+    static final Pattern INLINE_PARAMETER_RE = Pattern.compile("\\$\\{[^}]+\\}");
+
+    private static Pattern regexpify(List<String> definedKeywords) {
+        StringBuilder regexpSb = new StringBuilder(4000);
+        for (String definedKeyword : definedKeywords) {
+            if (regexpSb.length() > 0) {
+                regexpSb.append('|');
+            }
+            regexpify(regexpSb, definedKeyword);
+        }
+        return Pattern.compile(regexpSb.toString());
+    }
+
+    /**
+     * Converts keywords to regular expressions by changing parameters embedded in keyword to ".*" and quoting
+     * everything else as necessary, appending the regular expression to the given target. Highly hypothetical example:
+     * "Should replace ** with ${variable}" appends the regexp "Should replace \*\* with .*" (or an equivalent form) to
+     * the target StringBuilder.
+     */
+    private static void regexpify(StringBuilder target, String definedKeyword) {
+        Matcher parameterMatcher = INLINE_PARAMETER_RE.matcher(definedKeyword);
+        int nextStart = 0;
+        while (parameterMatcher.find()) {
+            target.append(Pattern.quote(definedKeyword.substring(nextStart, parameterMatcher.start()))).append(".*");
+            nextStart = parameterMatcher.end();
+        }
+        target.append(Pattern.quote(definedKeyword.substring(nextStart)));
+    }
+
+    private static void removeKeywordsMatchingRegexp(final Map<String, List<KeywordNeed>> keywords, Pattern regexp) {
+        Iterator<String> it = keywords.keySet().iterator();
+        while (it.hasNext()) {
+            if (regexp.matcher(it.next()).matches()) {
+                it.remove();
+            }
+        }
+    }
+
 }
