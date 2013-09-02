@@ -136,7 +136,11 @@ public class LineFinder {
 
     private static void processLinkableFile(Collection<FileWithType> unprocessedFiles, Set<FileWithType> allFiles, IFile currentFile, RobotLine line, FileType type) {
         ParsedString secondArgument = line.arguments.get(1);
-        IFile resourceFile = PluginContext.getResourceManager().getRelativeFile(currentFile, secondArgument.getUnescapedValue());
+        String secondArgumentUnescaped = secondArgument.getUnescapedValue();
+        IFile resourceFile = PluginContext.getResourceManager().getRelativeFile(currentFile, secondArgumentUnescaped);
+        if (resourceFile == null) {
+            throw new IllegalStateException("Could not get relative path from \"" + currentFile + "\" to \"" + secondArgumentUnescaped + '"');
+        }
         FileWithType fileWithType = new FileWithType(type, resourceFile);
         if (resourceFile.exists()) {
             addIfNew(unprocessedFiles, allFiles, fileWithType);

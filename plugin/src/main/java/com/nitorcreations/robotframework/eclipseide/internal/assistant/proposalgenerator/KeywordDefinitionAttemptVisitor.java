@@ -136,10 +136,8 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
 
             private void visitKeywordDefinition(RobotLine line, FileWithType lineLocation) {
                 ParsedString definedKeyword = line.arguments.get(0);
-                if (definedKeyword != assumeThisKeywordIsUndefined) {
                     definedKeywords.add(definedKeyword.getValue());
                 }
-            }
 
             @Override
             public boolean visitImport(IFile currentFile, RobotLine line) {
@@ -161,6 +159,7 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
                 return true;
             }
         });
+        definedKeywords.remove(assumeThisKeywordIsUndefined.getValue());
         neededKeywords.keySet().removeAll(definedKeywords);
         return neededKeywords;
     }

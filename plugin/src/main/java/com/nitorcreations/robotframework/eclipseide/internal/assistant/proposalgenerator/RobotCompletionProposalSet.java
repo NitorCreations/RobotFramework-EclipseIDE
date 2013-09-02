@@ -46,4 +46,9 @@ public class RobotCompletionProposalSet {
     public void setPriorityProposal() {
         priorityProposal = true;
     }
+
+    @Override
+    public String toString() {
+        return "RobotCompletionProposalSet [proposals=" + proposals + ", basedOnInput=" + basedOnInput + ", priorityProposal=" + priorityProposal + "]";
+    }
 }

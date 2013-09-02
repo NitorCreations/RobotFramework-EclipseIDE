@@ -78,7 +78,15 @@ public class Content {
     }
 
     public ParsedString ps(IRegion region, int argIndex, ArgumentType argType) {
-        return new ParsedString(content.substring(region.getOffset(), region.getOffset() + region.getLength()), region.getOffset(), argIndex).setType(argType);
+        return new ParsedString(s(region), region.getOffset(), argIndex).setType(argType);
+    }
+
+    public String s(String pointerRange) {
+        return s(r(pointerRange));
+    }
+
+    public String s(IRegion region) {
+        return content.substring(region.getOffset(), region.getOffset() + region.getLength());
     }
 
     public String c() {

@@ -46,13 +46,16 @@ public abstract class BaseTestAttemptVisitor {
     final IProject project = mock(IProject.class, "project");
     final IResourceManager resourceManager = mock(IResourceManager.class, "resourceManager");
 
+    private IPath projectFullPath;
+    private IWorkspaceRoot workspaceRoot;
+
     @Before
     public void setup() throws Exception {
         PluginContext.setResourceManager(resourceManager);
 
         final IWorkspace workspace = mock(IWorkspace.class, "workspace");
-        final IWorkspaceRoot workspaceRoot = mock(IWorkspaceRoot.class, "workspaceRoot");
-        final IPath projectFullPath = mock(IPath.class, "projectFullPath");
+        workspaceRoot = mock(IWorkspaceRoot.class, "workspaceRoot");
+        projectFullPath = mock(IPath.class, "projectFullPath");
         final IPath builtinIndexPath = mock(IPath.class, "builtinIndexPath");
         final IFile builtinIndexFile = addFile(BUILTIN_INDEX_FILE, BUILTIN_KEYWORD + '\n' + BUILTIN_VARIABLE + '\n');
 
@@ -61,6 +64,13 @@ public abstract class BaseTestAttemptVisitor {
         when(project.getWorkspace()).thenReturn(workspace);
         when(workspace.getRoot()).thenReturn(workspaceRoot);
         when(workspaceRoot.getFile(builtinIndexPath)).thenReturn(builtinIndexFile);
+    }
+
+    protected void addLibraryIndex(String libraryName, String contents) throws Exception {
+        final IPath libraryIndexPath = mock(IPath.class, "libraryIndexPath for " + libraryName);
+        final IFile libraryIndexFile = addFile(libraryName + ".index", contents);
+        when(projectFullPath.append("robot-indices/" + BUILTIN_INDEX_FILE)).thenReturn(libraryIndexPath);
+        when(workspaceRoot.getFile(libraryIndexPath)).thenReturn(libraryIndexFile);
     }
 
     @SuppressWarnings("unchecked")
