@@ -121,4 +121,26 @@ public class TestKeywordDefinitionAttemptVisitor extends BaseTestAttemptVisitor 
         assertEquals("Keyword missing 2", proposals.get(1).getMatchArgument());
         assertTrue(proposals.get(1).getAdditionalProposalInfo().matches(".*Called from.*TestCase.*"));
     }
+
+    // TODO wildcard keywords:
+    // @Test
+    // public void should_not_propose_regular_calls_matched_by_wildcard_keyword_definitions() throws Exception {
+    // IFile origFile = addFile("orig.txt", "*Test cases\nTestCase\n  Say hello\n*Keywords\nSay ${something}");
+    // visitor = new KeywordDefinitionAttemptVisitor(origFile, new ParsedString("",
+    // 0).setType(ArgumentType.NEW_KEYWORD));
+    // RobotCompletionProposalSet proposalSet = visitor.visitAttempt("", new Region(0, 0));
+    // List<RobotCompletionProposal> proposals = proposalSet.getProposals();
+    // assertEquals(proposals.toString(), 0, proposals.size());
+    // }
+    //
+    // @Test
+    // public void should_not_propose_wildcard_calls_matched_by_regular_keyword_definitions() throws Exception {
+    // IFile origFile = addFile("orig.txt", "*Test cases\nTestCase\n  Say ${key}\n*Keywords\nSay hello");
+    // visitor = new KeywordDefinitionAttemptVisitor(origFile, new ParsedString("",
+    // 0).setType(ArgumentType.NEW_KEYWORD));
+    // RobotCompletionProposalSet proposalSet = visitor.visitAttempt("", new Region(0, 0));
+    // List<RobotCompletionProposal> proposals = proposalSet.getProposals();
+    // assertEquals(proposals.toString(), 0, proposals.size());
+    // }
+
 }
