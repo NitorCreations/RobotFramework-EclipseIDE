@@ -16,7 +16,7 @@
 package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized.Parameters;
+import org.mockito.internal.matchers.Matches;
 
 import com.nitorcreations.junit.runners.NicelyParameterized;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.Content;
@@ -62,9 +63,9 @@ public class TestKeywordDefinitionAttemptVisitor {
             List<RobotCompletionProposal> proposals = proposalSet.getProposals();
             assertEquals(proposals.toString(), 2, proposals.size());
             assertEquals("Missing keyword 1", proposals.get(0).getMatchArgument());
-            assertTrue(proposals.get(0).getAdditionalProposalInfo().matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
+            assertThat(proposals.get(0).getAdditionalProposalInfo(), new Matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
             assertEquals("Missing keyword 2", proposals.get(1).getMatchArgument());
-            assertTrue(proposals.get(1).getAdditionalProposalInfo().matches(".*Called from.*KEYWORD.*Existing keyword.*"));
+            assertThat(proposals.get(1).getAdditionalProposalInfo(), new Matches(".*Called from.*KEYWORD.*Existing keyword.*"));
         }
 
         @Test
@@ -76,9 +77,9 @@ public class TestKeywordDefinitionAttemptVisitor {
             List<RobotCompletionProposal> proposals = proposalSet.getProposals();
             assertEquals(proposals.toString(), 2, proposals.size());
             assertEquals("Existing keyword", proposals.get(0).getMatchArgument());
-            assertTrue(proposals.get(0).getAdditionalProposalInfo().matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
+            assertThat(proposals.get(0).getAdditionalProposalInfo(), new Matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
             assertEquals("Missing keyword 1", proposals.get(1).getMatchArgument());
-            assertTrue(proposals.get(1).getAdditionalProposalInfo().matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
+            assertThat(proposals.get(1).getAdditionalProposalInfo(), new Matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
         }
 
         @Test
@@ -91,7 +92,7 @@ public class TestKeywordDefinitionAttemptVisitor {
             List<RobotCompletionProposal> proposals = proposalSet.getProposals();
             assertEquals(proposals.toString(), 1, proposals.size());
             assertEquals("Missing keyword 1", proposals.get(0).getMatchArgument());
-            assertTrue(proposals.get(0).getAdditionalProposalInfo().matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
+            assertThat(proposals.get(0).getAdditionalProposalInfo(), new Matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
         }
 
         @Test
@@ -103,7 +104,7 @@ public class TestKeywordDefinitionAttemptVisitor {
             List<RobotCompletionProposal> proposals = proposalSet.getProposals();
             assertEquals(proposals.toString(), 1, proposals.size());
             assertEquals("Missing keyword 1", proposals.get(0).getMatchArgument());
-            assertTrue(proposals.get(0).getAdditionalProposalInfo().matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
+            assertThat(proposals.get(0).getAdditionalProposalInfo(), new Matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
         }
 
         @Test
@@ -116,7 +117,7 @@ public class TestKeywordDefinitionAttemptVisitor {
             List<RobotCompletionProposal> proposals = proposalSet.getProposals();
             assertEquals(proposals.toString(), 1, proposals.size());
             assertEquals("Missing keyword 1", proposals.get(0).getMatchArgument());
-            assertTrue(proposals.get(0).getAdditionalProposalInfo().matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
+            assertThat(proposals.get(0).getAdditionalProposalInfo(), new Matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
         }
 
         @Test
@@ -127,7 +128,7 @@ public class TestKeywordDefinitionAttemptVisitor {
             List<RobotCompletionProposal> proposals = proposalSet.getProposals();
             assertEquals(proposals.toString(), 1, proposals.size());
             assertEquals("Missing keyword 1", proposals.get(0).getMatchArgument());
-            assertTrue(proposals.get(0).getAdditionalProposalInfo().matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
+            assertThat(proposals.get(0).getAdditionalProposalInfo(), new Matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
         }
 
         @Test
@@ -139,9 +140,9 @@ public class TestKeywordDefinitionAttemptVisitor {
             List<RobotCompletionProposal> proposals = proposalSet.getProposals();
             assertEquals(proposals.toString(), 2, proposals.size());
             assertEquals("Keyword missing 1", proposals.get(0).getMatchArgument());
-            assertTrue(proposals.get(0).getAdditionalProposalInfo().matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
+            assertThat(proposals.get(0).getAdditionalProposalInfo(), new Matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
             assertEquals("Keyword missing 2", proposals.get(1).getMatchArgument());
-            assertTrue(proposals.get(1).getAdditionalProposalInfo().matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
+            assertThat(proposals.get(1).getAdditionalProposalInfo(), new Matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
         }
 
         @Test
@@ -188,7 +189,7 @@ public class TestKeywordDefinitionAttemptVisitor {
             List<RobotCompletionProposal> proposals = proposalSet.getProposals();
             assertEquals(proposals.toString(), 1, proposals.size());
             assertEquals("Missing keyword", proposals.get(0).getMatchArgument());
-            assertTrue(proposals.get(0).getAdditionalProposalInfo().matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
+            assertThat(proposals.get(0).getAdditionalProposalInfo(), new Matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword.*"));
         }
 
         @Test
