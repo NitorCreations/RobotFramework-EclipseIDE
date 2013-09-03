@@ -69,6 +69,17 @@ public class TestKeywordDefinitionAttemptVisitor {
         }
 
         @Test
+        public void should_propose_missing_keyword_used_multiple_times_only_once() throws Exception {
+            IFile origFile = addFile("orig.txt", "*" + table + "\nTestCaseOrKeyword1\n  Missing keyword\nTestCaseOrKeyword2\n  Missing keyword\n");
+            visitor = new KeywordDefinitionAttemptVisitor(origFile, new ParsedString("", 0).setType(ArgumentType.NEW_KEYWORD));
+            RobotCompletionProposalSet proposalSet = visitor.visitAttempt("", new Region(0, 0));
+            List<RobotCompletionProposal> proposals = proposalSet.getProposals();
+            assertEquals(proposals.toString(), 1, proposals.size());
+            assertEquals("Missing keyword", proposals.get(0).getMatchArgument());
+            assertThat(proposals.get(0).getAdditionalProposalInfo(), new Matches(".*Called from.*" + callHostIdentifier + ".*TestCaseOrKeyword1.*" + callHostIdentifier + ".*TestCaseOrKeyword2.*"));
+        }
+
+        @Test
         public void should_propose_keyword_at_cursor_as_missing() throws Exception {
             Content origContents = new Content("*" + table + "\nTestCaseOrKeyword\n  Existing keyword\n  Missing keyword 1  argument1\n*Keywords\n<arg>Existing keyword<argend>");
             IFile origFile = addFile("orig.txt", origContents.c());
