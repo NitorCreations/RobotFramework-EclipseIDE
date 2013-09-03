@@ -24,7 +24,6 @@ import java.util.List;
 import org.eclipse.jface.text.Region;
 import org.junit.Test;
 
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.VariableCompletionMatchVisitor;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileType;
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
 import com.nitorcreations.robotframework.eclipseide.internal.util.VisitorInterest;
@@ -38,25 +37,25 @@ public class TestVariableCompletionMatchVisitor {
     public void testVisitMatchAddsProposalIfMatchIsFound() throws Exception {
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
         VariableCompletionMatchVisitor visitor = getVisitor(proposals, "${fo");
-        assertEquals(visitor.visitMatch(PROPOSAL, DUMMY_LOCATION), VisitorInterest.CONTINUE);
-        assertEquals(proposals.size(), 1);
-        assertEquals(proposals.get(0).getMatchArgument(), PROPOSAL);
+        assertEquals(VisitorInterest.CONTINUE, visitor.visitMatch(PROPOSAL, DUMMY_LOCATION));
+        assertEquals(1, proposals.size());
+        assertEquals(PROPOSAL.getValue(), proposals.get(0).getMatchArgument());
     }
 
     @Test
     public void testVisitMatchAddsProposalIfMatchArgumentIsNull() throws Exception {
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
         VariableCompletionMatchVisitor visitor = getVisitor(proposals, null);
-        assertEquals(visitor.visitMatch(PROPOSAL, DUMMY_LOCATION), VisitorInterest.CONTINUE);
-        assertEquals(proposals.size(), 1);
-        assertEquals(proposals.get(0).getMatchArgument(), PROPOSAL);
+        assertEquals(VisitorInterest.CONTINUE, visitor.visitMatch(PROPOSAL, DUMMY_LOCATION));
+        assertEquals(1, proposals.size());
+        assertEquals(PROPOSAL.getValue(), proposals.get(0).getMatchArgument());
     }
 
     @Test
     public void testVisitMatchDoesNotAddProposalIfMatchIsNotFound() throws Exception {
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
         VariableCompletionMatchVisitor visitor = getVisitor(proposals, "${for");
-        assertEquals(visitor.visitMatch(PROPOSAL, DUMMY_LOCATION), VisitorInterest.CONTINUE);
+        assertEquals(VisitorInterest.CONTINUE, visitor.visitMatch(PROPOSAL, DUMMY_LOCATION));
         assertTrue(proposals.isEmpty());
     }
 
