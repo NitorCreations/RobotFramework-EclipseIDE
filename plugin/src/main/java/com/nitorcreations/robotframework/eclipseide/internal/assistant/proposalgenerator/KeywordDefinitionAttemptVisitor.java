@@ -50,11 +50,14 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
 
     static {
         // all LineTypes that might have KEYWORD_CALL arguments or keyword definitions
+        KEYWORD_CALLS_AND_DEFINITIONS_LINETYPES.add(LineType.TESTCASE_TABLE_BEGIN);
         KEYWORD_CALLS_AND_DEFINITIONS_LINETYPES.add(LineType.TESTCASE_TABLE_TESTCASE_BEGIN);
         KEYWORD_CALLS_AND_DEFINITIONS_LINETYPES.add(LineType.TESTCASE_TABLE_TESTCASE_LINE);
+        KEYWORD_CALLS_AND_DEFINITIONS_LINETYPES.add(LineType.KEYWORD_TABLE_BEGIN);
         KEYWORD_CALLS_AND_DEFINITIONS_LINETYPES.add(LineType.KEYWORD_TABLE_KEYWORD_BEGIN);
         KEYWORD_CALLS_AND_DEFINITIONS_LINETYPES.add(LineType.KEYWORD_TABLE_KEYWORD_LINE);
         KEYWORD_CALLS_AND_DEFINITIONS_LINETYPES.add(LineType.CONTINUATION_LINE);
+        KEYWORD_CALLS_AND_DEFINITIONS_LINETYPES.add(LineType.SETTING_TABLE_BEGIN);
         KEYWORD_CALLS_AND_DEFINITIONS_LINETYPES.add(LineType.SETTING_TABLE_LINE);
     }
 
@@ -69,11 +72,24 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
                 Image image = null;
                 String displayString = key;
                 StringBuilder sb = new StringBuilder();
-                sb.append("Called from the following testcases/keywords:<ul>");
+                sb.append("Called from the following locations:<ul>");
                 for (KeywordNeed need : e.getValue()) {
-                    String callerType = need.callingTestcaseOrKeyword.getType() == ArgumentType.NEW_TESTCASE ? "TEST CASE" : "KEYWORD";
-                    String callerName = need.callingTestcaseOrKeyword.getValue();
-                    sb.append("<li><b>" + callerType + "</b> " + callerName + "</li>");
+                    if (need.callingTestcaseOrKeyword != null) {
+                        ArgumentType type = need.callingTestcaseOrKeyword.getType();
+                        String callerType = type == ArgumentType.NEW_TESTCASE ? "TEST CASE" : type == ArgumentType.NEW_KEYWORD ? "KEYWORD" : "UNKNOWN";
+                        String callerName = need.callingTestcaseOrKeyword.getValue();
+                        sb.append("<li><b>").append(callerType).append("</b> ").append(callerName);
+                        if (need.callingSetting != null) {
+                            String settingType = need.callingSetting.getType() == ArgumentType.SETTING_KEY ? "SETTING" : "UNKNOWN";
+                            String settingName = need.callingSetting.getValue();
+                            sb.append(", via <b>").append(settingType).append("</b> ").append(settingName);
+                        }
+                        sb.append("</li>");
+                    } else {
+                        String settingType = need.callingSetting.getType() == ArgumentType.SETTING_KEY ? "SETTING" : "UNKNOWN";
+                        String settingName = need.callingSetting.getValue();
+                        sb.append("<li><b>").append(settingType).append("</b> ").append(settingName).append("</li>");
+                    }
                 }
                 String additionalProposalInfo = sb.toString();
                 String informationDisplayString = null;
@@ -85,10 +101,13 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
 
     private static class KeywordNeed {
         public final ParsedString callingTestcaseOrKeyword;
+        public final ParsedString callingSetting;
         public final ParsedString calledKeyword;
 
-        KeywordNeed(ParsedString callingTestcaseOrKeyword, ParsedString calledKeyword) {
+        KeywordNeed(ParsedString callingTestcaseOrKeyword, ParsedString callingSetting, ParsedString calledKeyword) {
+            assert callingTestcaseOrKeyword != null || callingSetting != null;
             this.callingTestcaseOrKeyword = callingTestcaseOrKeyword;
+            this.callingSetting = callingSetting;
             this.calledKeyword = calledKeyword;
         }
     }
@@ -115,10 +134,20 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
             }
 
             private ParsedString lastDefinedTestcaseOrKeyword;
+            private ParsedString lastDefinedSetting;
 
             private void visitKeywordCalls(RobotLine line) {
+                if (line.type != LineType.CONTINUATION_LINE) {
+                    lastDefinedSetting = null;
+                }
                 for (ParsedString argument : line.arguments) {
                     switch (argument.getType()) {
+                        case TABLE:
+                            lastDefinedTestcaseOrKeyword = null;
+                            break;
+                        case SETTING_KEY:
+                            lastDefinedSetting = argument;
+                            break;
                         case NEW_TESTCASE:
                         case NEW_KEYWORD:
                             lastDefinedTestcaseOrKeyword = argument;
@@ -131,7 +160,7 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
                                 list = new ArrayList<KeywordNeed>();
                                 neededKeywords.put(argumentStr, list);
                             }
-                            list.add(new KeywordNeed(lastDefinedTestcaseOrKeyword, argument));
+                            list.add(new KeywordNeed(lastDefinedTestcaseOrKeyword, lastDefinedSetting, argument));
                             break;
                     }
                 }
