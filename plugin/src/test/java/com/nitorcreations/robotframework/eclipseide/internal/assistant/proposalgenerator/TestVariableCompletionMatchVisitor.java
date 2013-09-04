@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nitorcreations.robotframework.eclipseide.internal.assistant;
+package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
@@ -36,30 +36,30 @@ public class TestVariableCompletionMatchVisitor {
     @Test
     public void testVisitMatchAddsProposalIfMatchIsFound() throws Exception {
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
-        VariableCompletionMatchVisitor visitor = getVisitor(proposals, new ParsedString("${fo", 0));
-        assertEquals(visitor.visitMatch(PROPOSAL, DUMMY_LOCATION), VisitorInterest.CONTINUE);
-        assertEquals(proposals.size(), 1);
-        assertEquals(proposals.get(0).getMatchArgument(), PROPOSAL);
+        VariableCompletionMatchVisitor visitor = getVisitor(proposals, "${fo");
+        assertEquals(VisitorInterest.CONTINUE, visitor.visitMatch(PROPOSAL, DUMMY_LOCATION));
+        assertEquals(1, proposals.size());
+        assertEquals(PROPOSAL.getValue(), proposals.get(0).getMatchArgument());
     }
 
     @Test
     public void testVisitMatchAddsProposalIfMatchArgumentIsNull() throws Exception {
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
         VariableCompletionMatchVisitor visitor = getVisitor(proposals, null);
-        assertEquals(visitor.visitMatch(PROPOSAL, DUMMY_LOCATION), VisitorInterest.CONTINUE);
-        assertEquals(proposals.size(), 1);
-        assertEquals(proposals.get(0).getMatchArgument(), PROPOSAL);
+        assertEquals(VisitorInterest.CONTINUE, visitor.visitMatch(PROPOSAL, DUMMY_LOCATION));
+        assertEquals(1, proposals.size());
+        assertEquals(PROPOSAL.getValue(), proposals.get(0).getMatchArgument());
     }
 
     @Test
     public void testVisitMatchDoesNotAddProposalIfMatchIsNotFound() throws Exception {
         List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
-        VariableCompletionMatchVisitor visitor = getVisitor(proposals, new ParsedString("${for", 0));
-        assertEquals(visitor.visitMatch(PROPOSAL, DUMMY_LOCATION), VisitorInterest.CONTINUE);
+        VariableCompletionMatchVisitor visitor = getVisitor(proposals, "${for");
+        assertEquals(VisitorInterest.CONTINUE, visitor.visitMatch(PROPOSAL, DUMMY_LOCATION));
         assertTrue(proposals.isEmpty());
     }
 
-    private VariableCompletionMatchVisitor getVisitor(List<RobotCompletionProposal> proposals, ParsedString userInput) {
+    private VariableCompletionMatchVisitor getVisitor(List<RobotCompletionProposal> proposals, String userInput) {
         return new VariableCompletionMatchVisitor(null, userInput, proposals, new Region(0, 0), Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 }

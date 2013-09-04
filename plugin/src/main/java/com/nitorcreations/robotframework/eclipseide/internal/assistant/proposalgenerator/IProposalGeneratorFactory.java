@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nitorcreations.robotframework.eclipseide.internal.util;
+package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
 import org.eclipse.core.resources.IFile;
 
-public abstract class BaseDefinitionMatchVisitor implements DefinitionMatchVisitor {
+import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
-    protected final IFile file;
+public interface IProposalGeneratorFactory {
 
-    public BaseDefinitionMatchVisitor(IFile file) {
-        this.file = file;
-    }
+    AttemptVisitor createTableAttemptVisitor();
 
-    protected String getDisplayString(String proposal, FileWithType proposalLocation) {
-        if (proposalLocation.getFile() == file) {
-            return proposal;
-        }
-        return '[' + proposalLocation.getName() + "] " + proposal;
-    }
+    AttemptVisitor createSettingTableAttemptVisitor();
+
+    AttemptVisitor createKeywordDefinitionAttemptVisitor(final IFile file, ParsedString argument);
+
+    AttemptVisitor createKeywordCallAttemptVisitor(IFile file);
+
+    AttemptVisitor createVariableAttemptVisitor(IFile file, int maxVariableCharPos, int maxSettingCharPos);
+
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2013 Nitor Creations Oy
+ * Copyright 2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nitorcreations.robotframework.eclipseide.internal.util;
+package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
+
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 
-public abstract class BaseDefinitionMatchVisitor implements DefinitionMatchVisitor {
+import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
-    protected final IFile file;
+public interface IProposalSuitabilityDeterminer {
 
-    public BaseDefinitionMatchVisitor(IFile file) {
-        this.file = file;
-    }
+    List<VisitorInfo> generateAttemptVisitors(IFile file, ParsedString argument, int documentOffset, int lineCharPos);
 
-    protected String getDisplayString(String proposal, FileWithType proposalLocation) {
-        if (proposalLocation.getFile() == file) {
-            return proposal;
-        }
-        return '[' + proposalLocation.getName() + "] " + proposal;
-    }
 }

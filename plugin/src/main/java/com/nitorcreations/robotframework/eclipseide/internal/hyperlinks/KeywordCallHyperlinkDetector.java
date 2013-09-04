@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,12 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
  */
 public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
 
-    private static final class KeywordMatchVisitor extends BaseDefinitionMatchVisitor {
+    private static final class KeywordHyperlinkMatchVisitor extends BaseDefinitionMatchVisitor {
         private final IRegion linkRegion;
         private final String linkString;
         private final List<IHyperlink> links;
 
-        KeywordMatchVisitor(String linkString, IRegion linkRegion, IFile file, List<IHyperlink> links) {
+        KeywordHyperlinkMatchVisitor(String linkString, IRegion linkRegion, IFile file, List<IHyperlink> links) {
             super(file);
             this.linkRegion = linkRegion;
             this.linkString = linkString;
@@ -65,7 +65,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
             KeywordMatchResult matchResult = KeywordInlineArgumentMatcher.match(match.getValue().toLowerCase(), matchString);
             if (matchResult != KeywordMatchResult.DIFFERENT) {
                 IRegion targetRegion = new Region(match.getArgEndCharPos(), 0);
-                links.add(new Hyperlink(linkRegion, getDisplayString(match, location), targetRegion, location));
+                links.add(new Hyperlink(linkRegion, getDisplayString(match.getValue(), location), targetRegion, location));
                 return VisitorInterest.CONTINUE_TO_END_OF_CURRENT_PRIORITY_LEVEL;
             }
             return VisitorInterest.CONTINUE;
@@ -97,7 +97,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
         }
         String linkString = argument.getUnescapedValue();
         IRegion linkRegion = new Region(argument.getArgCharPos(), argument.getValue().length());
-        DefinitionFinder.acceptMatches(file, new KeywordMatchVisitor(linkString, linkRegion, file, links));
+        DefinitionFinder.acceptMatches(file, new KeywordHyperlinkMatchVisitor(linkString, linkRegion, file, links));
         if (links.isEmpty()) {
             // try without possible BDD prefix
             String alternateValue = argument.getAlternateValue();
@@ -106,7 +106,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
                 linkString = ArgumentUtils.unescapeArgument(alternateValue, 0, alternateValue.length());
                 int lengthDiff = origLength - linkString.length();
                 linkRegion = new Region(argument.getArgCharPos() + lengthDiff, argument.getValue().length() - lengthDiff);
-                DefinitionFinder.acceptMatches(file, new KeywordMatchVisitor(linkString, linkRegion, file, links));
+                DefinitionFinder.acceptMatches(file, new KeywordHyperlinkMatchVisitor(linkString, linkRegion, file, links));
             }
         }
     }

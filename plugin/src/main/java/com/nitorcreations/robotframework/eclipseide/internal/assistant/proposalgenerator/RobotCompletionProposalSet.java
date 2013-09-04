@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nitorcreations.robotframework.eclipseide.internal.assistant;
+package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +22,7 @@ public class RobotCompletionProposalSet {
 
     private final List<RobotCompletionProposal> proposals = new ArrayList<RobotCompletionProposal>();
     private Boolean basedOnInput;
+    private boolean priorityProposal;
 
     public List<RobotCompletionProposal> getProposals() {
         return proposals;
@@ -38,4 +39,16 @@ public class RobotCompletionProposalSet {
         this.basedOnInput = basedOnInput;
     }
 
+    public boolean isPriorityProposal() {
+        return priorityProposal;
+    }
+
+    public void setPriorityProposal() {
+        priorityProposal = true;
+    }
+
+    @Override
+    public String toString() {
+        return "RobotCompletionProposalSet [proposals=" + proposals + ", basedOnInput=" + basedOnInput + ", priorityProposal=" + priorityProposal + "]";
+    }
 }

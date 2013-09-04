@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,34 +28,34 @@ import java.util.NoSuchElementException;
  * priority level. Priority levels can be given either explicitly or determined implicitly by a given
  * {@link Prioritizer} instance.
  */
-public class LinkedPriorityDeque<T> extends AbstractQueue<T> implements PriorityDeque<T> {
+public class ArrayPriorityDeque<T> extends AbstractQueue<T> implements PriorityDeque<T> {
 
     private final Deque<T>[] queues;
     private final Prioritizer<T> prioritizer;
     private int mod;
 
-    public LinkedPriorityDeque(int priorityLevels) {
+    public ArrayPriorityDeque(int priorityLevels) {
         this(priorityLevels, null);
     }
 
-    public LinkedPriorityDeque(Deque<T>[] queues) {
+    public ArrayPriorityDeque(Deque<T>[] queues) {
         this(queues, null);
     }
 
     @SuppressWarnings("unchecked")
-    public LinkedPriorityDeque(int priorityLevels, Prioritizer<T> prioritizer) {
+    public ArrayPriorityDeque(int priorityLevels, Prioritizer<T> prioritizer) {
         this(prioritizer, (Deque<T>[]) createDequesArray(priorityLevels));
     }
 
-    public LinkedPriorityDeque(Deque<T>[] queues, Prioritizer<T> prioritizer) {
+    public ArrayPriorityDeque(Deque<T>[] queues, Prioritizer<T> prioritizer) {
         this(prioritizer, Arrays.copyOf(queues, queues.length));
     }
 
-    private LinkedPriorityDeque(Prioritizer<T> prioritizer, Deque<T>[] queues) {
+    private ArrayPriorityDeque(Prioritizer<T> prioritizer, Deque<T>[] queues) {
         if (queues.length == 0) {
             throw new IllegalArgumentException("Must have a positive amount of priority levels");
         }
-        this.queues = Arrays.copyOf(queues, queues.length);
+        this.queues = queues;
         this.prioritizer = prioritizer;
     }
 
@@ -80,14 +80,18 @@ public class LinkedPriorityDeque<T> extends AbstractQueue<T> implements Priority
     }
 
     private Deque<T> q(int priority) {
+        qc(priority);
+        Deque<T> deque = queues[priority];
+        return deque;
+    }
+
+    private void qc(int priority) {
         if (priority < 0) {
             throw new IllegalArgumentException("Illegal negative priority level");
         }
         if (priority >= queues.length) {
             throw new IllegalArgumentException("Too great priority level - levels 0.." + (queues.length - 1) + " supported by this instance");
         }
-        Deque<T> deque = queues[priority];
-        return deque;
     }
 
     // --------------------------------------
@@ -148,6 +152,16 @@ public class LinkedPriorityDeque<T> extends AbstractQueue<T> implements Priority
     public void clear(int priority) {
         Deque<T> deque = q(priority);
         deque.clear();
+        ++mod;
+    }
+
+    @Override
+    public void clear(int minPriority, int maxPriority) {
+        qc(minPriority);
+        qc(maxPriority);
+        for (int i = minPriority; i <= maxPriority; ++i) {
+            queues[i].clear();
+        }
         ++mod;
     }
 

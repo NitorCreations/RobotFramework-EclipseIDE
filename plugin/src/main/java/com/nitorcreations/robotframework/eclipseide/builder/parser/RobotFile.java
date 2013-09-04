@@ -148,11 +148,11 @@ public class RobotFile {
 
     private static RobotFile parse(String filename, Lexer lexer) {
         try {
-            List<RobotLine> lines = lexer.lex();
-            new PreParser(filename, lines).preParse();
+            List<RobotLine> lines = lexer.lex(); // split input into lines & arguments
+            new PreParser(filename, lines).preParse(); // determine line types
             ArgumentPreParser app = new ArgumentPreParser();
             app.setRange(lines);
-            app.parseAll();
+            app.parseAll(); // determine argument types
             return new RobotFile(lines);
         } catch (CoreException e) {
             e.printStackTrace();

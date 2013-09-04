@@ -84,6 +84,15 @@
       </page>
    </extension>
    <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="com.nitorcreations.robotframework.eclipseide.preferences.TableNamingPreferencePage"
+            id="com.nitorcreations.robotframework.eclipseide.preferences.TableNamingPreferencePage"
+            category="com.nitorcreations.robotframework.eclipseide.preferences.MainPreferencePage"
+            name="Table naming">
+      </page>
+   </extension>
+   <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
             class="com.nitorcreations.robotframework.eclipseide.preferences.PreferenceInitializer">

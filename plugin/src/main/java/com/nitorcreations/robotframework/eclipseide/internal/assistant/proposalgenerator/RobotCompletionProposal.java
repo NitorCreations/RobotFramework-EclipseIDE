@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nitorcreations.robotframework.eclipseide.internal.assistant;
+package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -27,11 +27,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
-class RobotCompletionProposal implements ICompletionProposal, ICompletionProposalExtension6 {
+public class RobotCompletionProposal implements ICompletionProposal, ICompletionProposalExtension6 {
 
-    private final ParsedString matchArgument;
+    private final String matchArgument;
     private final FileWithType matchLocation;
     private final IRegion replacementRegion;
     private final Image image;
@@ -41,7 +40,7 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
     private boolean prefixRequired = false;
     private int cursorPositionAdjustment;
 
-    public RobotCompletionProposal(ParsedString matchArgument, FileWithType proposalLocation, IRegion replacementRegion, Image image, String displayString, String informationDisplayString, String additionalProposalInfo) {
+    public RobotCompletionProposal(String matchArgument, FileWithType proposalLocation, IRegion replacementRegion, Image image, String displayString, String informationDisplayString, String additionalProposalInfo) {
         this.matchArgument = matchArgument;
         this.matchLocation = proposalLocation;
         this.replacementRegion = replacementRegion;
@@ -55,7 +54,7 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
         cursorPositionAdjustment = adjustment;
     }
 
-    ParsedString getMatchArgument() {
+    String getMatchArgument() {
         return matchArgument;
     }
 
@@ -74,9 +73,9 @@ class RobotCompletionProposal implements ICompletionProposal, ICompletionProposa
 
     private String getReplacementString() {
         if (prefixRequired) {
-            return matchLocation.getName() + "." + matchArgument.getValue();
+            return matchLocation.getName() + "." + matchArgument;
         }
-        return matchArgument.getValue();
+        return matchArgument;
     }
 
     @Override

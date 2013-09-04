@@ -53,7 +53,7 @@ public class LineFinder {
          * definitions from included resource and variable files, recursively. Priority level 3: explicitly loaded
          * libraries. Priority level 4: built-in library.
          */
-        PriorityDeque<FileWithType> unprocessedFiles = new LinkedPriorityDeque<FileWithType>(5, new Prioritizer<FileWithType>() {
+        PriorityDeque<FileWithType> unprocessedFiles = new ArrayPriorityDeque<FileWithType>(5, new Prioritizer<FileWithType>() {
             @Override
             public int prioritize(FileWithType fileWithType) {
                 return fileWithType.getType() == FileType.LIBRARY ? 3 : 2;
@@ -136,7 +136,11 @@ public class LineFinder {
 
     private static void processLinkableFile(Collection<FileWithType> unprocessedFiles, Set<FileWithType> allFiles, IFile currentFile, RobotLine line, FileType type) {
         ParsedString secondArgument = line.arguments.get(1);
-        IFile resourceFile = PluginContext.getResourceManager().getRelativeFile(currentFile, secondArgument.getUnescapedValue());
+        String secondArgumentUnescaped = secondArgument.getUnescapedValue();
+        IFile resourceFile = PluginContext.getResourceManager().getRelativeFile(currentFile, secondArgumentUnescaped);
+        if (resourceFile == null) {
+            throw new IllegalStateException("Could not get relative path from \"" + currentFile + "\" to \"" + secondArgumentUnescaped + '"');
+        }
         FileWithType fileWithType = new FileWithType(type, resourceFile);
         if (resourceFile.exists()) {
             addIfNew(unprocessedFiles, allFiles, fileWithType);
@@ -176,7 +180,7 @@ public class LineFinder {
         for (String proposalStr : proposals) {
             ParsedString proposal = new ParsedString(proposalStr, 0); // offset 0 = "located" at beginning of file
             proposal.setType(type);
-            RobotLine line = new RobotLine(0, 0, Collections.singletonList(proposal));
+            RobotLine line = new RobotLine(-1, -1, Collections.singletonList(proposal));
             line.type = lineType;
             interest = visitor.visitMatch(line, fileWithType);
             if (interest == STOP) {

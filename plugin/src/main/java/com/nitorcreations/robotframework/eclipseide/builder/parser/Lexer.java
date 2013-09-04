@@ -106,7 +106,7 @@ public class Lexer {
             System.out.println("Lexing " + filename);
             CountingLineReader contents = new CountingLineReader(filestream);
             String line;
-            int lineNo = 1;
+            int lineNo = 0;
             int charPos = 0;
             while (null != (line = contents.readLine())) {
                 if (monitor.isCanceled()) {

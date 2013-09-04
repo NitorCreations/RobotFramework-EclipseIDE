@@ -15,14 +15,12 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
-import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.any;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -33,9 +31,6 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -44,25 +39,18 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import com.nitorcreations.robotframework.eclipseide.PluginContext;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotFile;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.editors.IResourceManager;
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.ArgumentType;
 
 @RunWith(Enclosed.class)
 public class TestRobotContentAssistant {
     @Ignore
     public abstract static class Base {
-        static final String BUILTIN_KEYWORD = "BuiltIn Keyword";
-        static final String BUILTIN_VARIABLE = "${BUILTIN_VARIABLE}";
-        static final String BUILTIN_PREFIX = "[BuiltIn] ";
-        static final String BUILTIN_INDEX_FILE = "BuiltIn.index";
-
-        IProposalGenerator proposalGenerator;
         ITextViewer textViewer;
+        IRobotContentAssistant2 rca2;
         RobotContentAssistant assistant;
         IDocument document;
 
@@ -71,25 +59,13 @@ public class TestRobotContentAssistant {
 
         @Before
         public void setup() throws Exception {
-            proposalGenerator = mock(IProposalGenerator.class, "proposalGenerator");
             textViewer = mock(ITextViewer.class, "textViewer");
-            assistant = new RobotContentAssistant(proposalGenerator);
+            rca2 = mock(IRobotContentAssistant2.class, "rca2");
+            assistant = new RobotContentAssistant(rca2);
             document = mock(IDocument.class, "document");
             when(textViewer.getDocument()).thenReturn(document);
 
             PluginContext.setResourceManager(resourceManager);
-
-            final IWorkspace workspace = mock(IWorkspace.class, "workspace");
-            final IWorkspaceRoot workspaceRoot = mock(IWorkspaceRoot.class, "workspaceRoot");
-            final IPath projectFullPath = mock(IPath.class, "projectFullPath");
-            final IPath builtinIndexPath = mock(IPath.class, "builtinIndexPath");
-            final IFile builtinIndexFile = addFile(BUILTIN_INDEX_FILE, BUILTIN_KEYWORD + '\n' + BUILTIN_VARIABLE + '\n');
-
-            when(project.getFullPath()).thenReturn(projectFullPath);
-            when(projectFullPath.append("robot-indices/" + BUILTIN_INDEX_FILE)).thenReturn(builtinIndexPath);
-            when(project.getWorkspace()).thenReturn(workspace);
-            when(workspace.getRoot()).thenReturn(workspaceRoot);
-            when(workspaceRoot.getFile(builtinIndexPath)).thenReturn(builtinIndexFile);
         }
 
         @SuppressWarnings("unchecked")
@@ -106,65 +82,27 @@ public class TestRobotContentAssistant {
         }
     }
 
-    @RunWith(Enclosed.class)
-    public static class VariableReferences {
+    public static class computeCompletionProposals extends Base {
 
-        public static class when_partially_entered extends Base {
-            private static final class MockProposalAdder implements Answer<Void> {
-                public final RobotCompletionProposalSet addedProposalSet = new RobotCompletionProposalSet();
-                public final RobotCompletionProposal addedProposal;
-                public final boolean insertInsteadOfAppend;
+        static final String FILE_CONTENTS = "*Variables\n${FOO}  bar\n*Testcases\nTest logging\n  Log  Hello";
+        static final int FAKE_DOCUMENT_OFFSET = 12345;
+        static final int FAKE_LINE_NO = 49;
+        static final ICompletionProposal[] EXPECTED_PROPOSALS = new ICompletionProposal[3];
 
-                MockProposalAdder(boolean basedOnInput, boolean insertInsteadOfAppend) {
-                    this.insertInsteadOfAppend = insertInsteadOfAppend;
-                    addedProposal = new RobotCompletionProposal(null, null, null, null, null, null, null);
-                    addedProposalSet.getProposals().add(addedProposal);
-                    addedProposalSet.setBasedOnInput(basedOnInput);
-                }
+        @Test
+        public void should_suggest_replacing_entered_variable() throws Exception {
+            IFile origFile = addFile("orig.txt", FILE_CONTENTS);
+            when(resourceManager.resolveFileFor(document)).thenReturn(origFile);
+            when(document.get()).thenReturn(FILE_CONTENTS);
+            when(document.getLineOfOffset(FAKE_DOCUMENT_OFFSET)).thenReturn(FAKE_LINE_NO);
+            when(rca2.generateProposals(eq(origFile), eq(FAKE_DOCUMENT_OFFSET), eq(FILE_CONTENTS), anyListOf(RobotLine.class), eq(FAKE_LINE_NO))).thenReturn(EXPECTED_PROPOSALS);
 
-                @Override
-                public Void answer(InvocationOnMock invocation) throws Throwable {
-                    @SuppressWarnings("unchecked")
-                    List<RobotCompletionProposalSet> proposalSets = (List<RobotCompletionProposalSet>) invocation.getArguments()[3];
-                    if (insertInsteadOfAppend) {
-                        proposalSets.add(0, addedProposalSet);
-                    } else {
-                        proposalSets.add(addedProposalSet);
-                    }
-                    return null;
-                }
-            }
+            ICompletionProposal[] proposals = assistant.computeCompletionProposals(textViewer, FAKE_DOCUMENT_OFFSET);
 
-            static final String LINKED_PREFIX = "[linked] ";
-            static final String LINKED_FILENAME = "linked.txt";
-            static final String FOO_VARIABLE = "${FOO}";
-            static final String LINKED_VARIABLE = "${LINKEDVAR}";
-
-            @Test
-            public void should_suggest_replacing_entered_variable() throws Exception {
-                final String origContents1 = "*Variables\n" + FOO_VARIABLE + "  bar\n*Testcases\nTestcase\n  Log  ";
-                final String origContents2 = "${F";
-                final String origContents = origContents1 + origContents2;
-                IFile origFile = addFile("orig.txt", origContents);
-                when(resourceManager.resolveFileFor(document)).thenReturn(origFile);
-                when(document.get()).thenReturn(origContents);
-                when(document.getLineOfOffset(anyInt())).thenAnswer(new Answer<Integer>() {
-                    @Override
-                    public Integer answer(InvocationOnMock invocation) throws Throwable {
-                        return document.get().substring(0, (Integer) invocation.getArguments()[0]).replaceAll("[^\n]+", "").length();
-                    }
-                });
-
-                MockProposalAdder proposalAdder = new MockProposalAdder(true, false);
-                doAnswer(proposalAdder).when(proposalGenerator).addVariableProposals(any(IFile.class), any(ParsedString.class), anyInt(), anyListOf(RobotCompletionProposalSet.class), anyInt(), anyInt());
-                ICompletionProposal[] proposals = assistant.computeCompletionProposals(textViewer, origContents.length());
-                assertSame(proposalAdder.addedProposal, proposals[0]);
-                ParsedString expectedArgument = new ParsedString(origContents2, origContents1.length());
-                expectedArgument.setHasSpaceAfter(false);
-                expectedArgument.setType(ArgumentType.KEYWORD_ARG);
-                verify(proposalGenerator).addVariableProposals(same(origFile), eq(expectedArgument), eq(origContents.length()), anyListOf(RobotCompletionProposalSet.class), eq(Integer.MAX_VALUE), eq(Integer.MAX_VALUE));
-                verifyNoMoreInteractions(proposalGenerator);
-            }
+            assertThat(proposals, is(sameInstance(EXPECTED_PROPOSALS)));
+            List<RobotLine> lines = RobotFile.parse(FILE_CONTENTS).getLines();
+            verify(rca2).generateProposals(origFile, FAKE_DOCUMENT_OFFSET, FILE_CONTENTS, lines, FAKE_LINE_NO);
+            verifyNoMoreInteractions(rca2);
         }
     }
 }

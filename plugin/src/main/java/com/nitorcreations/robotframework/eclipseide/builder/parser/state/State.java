@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,7 +175,7 @@ public abstract class State {
         IMarker marker = info.markerManager().createMarker(RobotBuilder.MARKER_TYPE);
         marker.setAttribute(IMarker.MESSAGE, error);
         marker.setAttribute(IMarker.SEVERITY, severity);
-        marker.setAttribute(IMarker.LINE_NUMBER, info.lineNo);
+        marker.setAttribute(IMarker.LINE_NUMBER, info.lineNo + 1);
         marker.setAttribute(IMarker.CHAR_START, startPos);
         marker.setAttribute(IMarker.CHAR_END, endPos);
         // marker.setAttribute(IMarker.LOCATION, "Somewhere");

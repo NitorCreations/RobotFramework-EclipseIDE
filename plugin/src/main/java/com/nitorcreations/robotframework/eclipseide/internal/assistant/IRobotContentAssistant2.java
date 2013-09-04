@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,12 @@ package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
+import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 
-public class KeywordCompletionMatchVisitorProvider extends CompletionMatchVisitorProvider {
+public interface IRobotContentAssistant2 {
 
-    public KeywordCompletionMatchVisitorProvider(IFile file, IRegion replacementRegion) {
-        super(file, replacementRegion);
-    }
+    ICompletionProposal[] generateProposals(IFile file, int documentOffset, String documentText, List<RobotLine> lines, int lineNo);
 
-    @Override
-    public CompletionMatchVisitor get(ParsedString argument, List<RobotCompletionProposal> proposals) {
-        return new KeywordCompletionMatchVisitor(file, argument, proposals, replacementRegion);
-    }
 }

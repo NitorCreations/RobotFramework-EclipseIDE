@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nitorcreations.robotframework.eclipseide.internal.assistant;
+package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
 import java.util.List;
 
@@ -28,25 +28,26 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
 
-    public KeywordCompletionMatchVisitor(IFile file, ParsedString argument, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
+    public KeywordCompletionMatchVisitor(IFile file, String argument, List<RobotCompletionProposal> proposals, IRegion replacementRegion) {
         super(file, argument, proposals, replacementRegion);
     }
 
     @Override
-    public VisitorInterest visitMatch(ParsedString proposal, FileWithType proposalLocation) {
+    public VisitorInterest visitMatch(ParsedString match, FileWithType matchLocation) {
         if (userInput == null) {
-            addProposal(proposal, proposalLocation);
+            addProposal(match.getValue(), matchLocation);
         } else {
-            String userInputString = userInput.getValue().toLowerCase();
-            String proposalString = proposal.getValue().toLowerCase();
-            if (proposalString.contains(userInputString) || matchesWithoutPrefix(userInputString, proposalString, proposalLocation)) {
-                addProposal(proposal, proposalLocation);
+            String userInputStringLower = userInput.toLowerCase();
+            String matchStringLower = match.getValue().toLowerCase();
+            if (matchStringLower.contains(userInputStringLower) || matchesWithoutPrefix(userInputStringLower, matchStringLower, matchLocation)) {
+                addProposal(match.getValue(), matchLocation);
             }
-            // if (KeywordMatchResult.DIFFERENT == match(proposalString, lookFor(userInputString))) {
-            // if (!prefixesMatch(userInputString, proposalLocation)) {
+            // if (KeywordMatchResult.DIFFERENT == match(matchStringLower, lookFor(userInputStringLower))) {
+            // if (!prefixesMatch(userInputStringLower, matchLocation)) {
             // return VisitorInterest.CONTINUE;
             // }
-            // if (KeywordMatchResult.DIFFERENT == match(proposalString, lookFor(valueWithoutPrefix(userInputString))))
+            // if (KeywordMatchResult.DIFFERENT == match(matchStringLower,
+            // lookFor(valueWithoutPrefix(userInputStringLower))))
             // {
             // return VisitorInterest.CONTINUE;
             // }
@@ -56,41 +57,41 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
     }
 
     @Override
-    protected void addProposal(ParsedString proposal, FileWithType proposalLocation) {
-        String proposalString = proposal.getValue().toLowerCase();
-        boolean proposalExisted = addedProposals.contains(proposalString);
+    protected void addProposal(String proposal, FileWithType proposalLocation) {
+        String proposalStringLower = proposal.toLowerCase();
+        boolean proposalExisted = addedProposals.contains(proposalStringLower);
         super.addProposal(proposal, proposalLocation);
         if (proposalExisted) {
             for (RobotCompletionProposal robotCompletionProposal : proposals) {
-                setPrefixRequiredIfNeeded(proposalString, robotCompletionProposal);
+                setPrefixRequiredIfNeeded(proposalStringLower, robotCompletionProposal);
             }
         }
     }
 
-    private void setPrefixRequiredIfNeeded(String proposalString, RobotCompletionProposal robotCompletionProposal) {
+    private void setPrefixRequiredIfNeeded(String proposalStringLower, RobotCompletionProposal robotCompletionProposal) {
         if (file == robotCompletionProposal.getMatchLocation().getFile()) {
             return;
         }
-        if (robotCompletionProposal.getMatchArgument().getValue().toLowerCase().equals(proposalString)) {
+        if (robotCompletionProposal.getMatchArgument().toLowerCase().equals(proposalStringLower)) {
             robotCompletionProposal.setPrefixRequired();
         }
     }
 
-    private boolean matchesWithoutPrefix(String userInputString, String proposalString, FileWithType proposalLocation) {
-        if (!prefixesMatch(userInputString, proposalLocation)) {
+    private boolean matchesWithoutPrefix(String userInputStringLower, String matchStringLower, FileWithType matchLocation) {
+        if (!prefixesMatch(userInputStringLower, matchLocation)) {
             return false;
         }
-        String valueWithoutPrefix = userInputString.substring(userInputString.indexOf('.') + 1);
-        return proposalString.contains(valueWithoutPrefix);
+        String valueWithoutPrefixLower = userInputStringLower.substring(userInputStringLower.indexOf('.') + 1);
+        return matchStringLower.contains(valueWithoutPrefixLower);
     }
 
-    private boolean prefixesMatch(String userInputString, FileWithType proposalLocation) {
-        int indexOfDot = userInputString.indexOf('.');
+    private boolean prefixesMatch(String userInputStringLower, FileWithType location) {
+        int indexOfDot = userInputStringLower.indexOf('.');
         if (indexOfDot == -1) {
             return false;
         }
-        String userInputPrefix = userInputString.substring(0, indexOfDot);
-        return proposalLocation.getName().toLowerCase().startsWith(userInputPrefix);
+        String userInputPrefixLower = userInputStringLower.substring(0, indexOfDot);
+        return location.getName().toLowerCase().startsWith(userInputPrefixLower);
     }
 
     // private String lookFor(String value) {

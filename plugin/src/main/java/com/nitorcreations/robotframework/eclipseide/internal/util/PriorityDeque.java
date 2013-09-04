@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import java.util.Deque;
 /**
  * Double-ended queue with priority level support. Extends the Deque interface with methods for explicitly specifying
  * priority levels. It is up to implementations of this interface whether to support and how to determine the priority
- * for methods of the Deque interface that do not specify the priority level.
+ * for methods of the Deque interface that do not specify the priority level - one option is to use the
+ * {@link Prioritizer} interface.
  */
 public interface PriorityDeque<T> extends Deque<T> {
 
@@ -39,6 +40,8 @@ public interface PriorityDeque<T> extends Deque<T> {
     void push(int priority, T e);
 
     void clear(int priority);
+
+    void clear(int minPriority, int maxPriority);
 
     int getNumberOfPriorityLevels();
 

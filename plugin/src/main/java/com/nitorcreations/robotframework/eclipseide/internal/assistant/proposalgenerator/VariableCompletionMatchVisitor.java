@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nitorcreations.robotframework.eclipseide.internal.assistant;
+package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
 import java.util.List;
 
@@ -31,25 +31,29 @@ public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
     private final int maxVariableCharPos;
     private final int maxSettingCharPos;
 
-    public VariableCompletionMatchVisitor(IFile file, ParsedString userInput, List<RobotCompletionProposal> proposals, IRegion replacementRegion, int maxVariableCharPos, int maxSettingCharPos) {
+    public VariableCompletionMatchVisitor(IFile file, String userInput, List<RobotCompletionProposal> proposals, IRegion replacementRegion, int maxVariableCharPos, int maxSettingCharPos) {
         super(file, userInput, proposals, replacementRegion);
         this.maxVariableCharPos = maxVariableCharPos;
         this.maxSettingCharPos = maxSettingCharPos;
     }
 
     @Override
-    public VisitorInterest visitMatch(ParsedString proposal, FileWithType proposalLocation) {
-        if (proposal.getArgCharPos() > maxVariableCharPos) {
+    public VisitorInterest visitMatch(ParsedString match, FileWithType matchLocation) {
+        if (match.getArgCharPos() > maxVariableCharPos) {
             return VisitorInterest.STOP;
         }
 
-        if (userInput == null || proposal.getUnescapedValue().toLowerCase().contains(userInput.getUnescapedValue().toLowerCase())) {
-            if (!addedProposals.contains(proposal.getValue().toLowerCase())) {
-                addProposal(proposal, proposalLocation);
+        if (userInput == null || match.getUnescapedValue().toLowerCase().contains(getUnescapedUserInputLowerCase())) {
+            if (!addedProposals.contains(match.getValue().toLowerCase())) {
+                addProposal(match.getValue(), matchLocation);
             }
         }
 
         return VisitorInterest.CONTINUE;
+    }
+
+    private String getUnescapedUserInputLowerCase() {
+        return new ParsedString(userInput, 0).getUnescapedValue().toLowerCase();
     }
 
     @Override

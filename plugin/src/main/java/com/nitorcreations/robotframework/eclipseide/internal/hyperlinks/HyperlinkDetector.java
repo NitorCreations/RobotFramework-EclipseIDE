@@ -58,17 +58,19 @@ public abstract class HyperlinkDetector implements IHyperlinkDetector {
             return null;
         }
         lines = RobotFile.get(document).getLines();
-        if (lineNumber >= lines.size()) {
-            return null;
+        List<IHyperlink> links;
+        try {
+            RobotLine rfeLine = lines.get(lineNumber);
+            ParsedString argument = rfeLine.getArgumentAt(offset);
+            if (argument == null) {
+                return null;
+            }
+            IFile file = PluginContext.getResourceManager().resolveFileFor(document);
+            links = new ArrayList<IHyperlink>();
+            getLinks(file, rfeLine, argument, offset, links);
+        } finally {
+            lines = null;
         }
-        RobotLine rfeLine = lines.get(lineNumber);
-        ParsedString argument = rfeLine.getArgumentAt(offset);
-        if (argument == null) {
-            return null;
-        }
-        IFile file = PluginContext.getResourceManager().resolveFileFor(document);
-        List<IHyperlink> links = new ArrayList<IHyperlink>();
-        getLinks(file, rfeLine, argument, offset, links);
         if (links.isEmpty()) {
             return null;
         }

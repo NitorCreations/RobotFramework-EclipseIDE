@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,12 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
  */
 public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
 
-    private static final class VariableMatchVisitor extends BaseDefinitionMatchVisitor {
+    private static final class VariableHyperlinkMatchVisitor extends BaseDefinitionMatchVisitor {
         private final IRegion linkRegion;
         private final String linkString;
         private final List<IHyperlink> links;
 
-        VariableMatchVisitor(String linkString, IRegion linkRegion, IFile file, List<IHyperlink> links) {
+        VariableHyperlinkMatchVisitor(String linkString, IRegion linkRegion, IFile file, List<IHyperlink> links) {
             super(file);
             this.linkRegion = linkRegion;
             this.linkString = linkString;
@@ -60,7 +60,7 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
             }
             if (match.getValue().equalsIgnoreCase(linkString)) {
                 IRegion targetRegion = new Region(match.getArgEndCharPos(), 0);
-                links.add(new Hyperlink(linkRegion, getDisplayString(match, location), targetRegion, location));
+                links.add(new Hyperlink(linkRegion, getDisplayString(match.getValue(), location), targetRegion, location));
                 return VisitorInterest.STOP;
             }
             return VisitorInterest.CONTINUE;
@@ -97,7 +97,7 @@ public class VariableAccessHyperlinkDetector extends HyperlinkDetector {
                 // pointing at variable access!
                 String linkString = argumentValue.substring(linkOffsetInArgument, linkOffsetInArgument + linkLength);
                 IRegion linkRegion = new Region(argument.getArgCharPos() + linkOffsetInArgument, linkLength);
-                DefinitionFinder.acceptMatches(file, new VariableMatchVisitor(linkString, linkRegion, file, links));
+                DefinitionFinder.acceptMatches(file, new VariableHyperlinkMatchVisitor(linkString, linkRegion, file, links));
                 return;
             }
             start = linkOffsetInArgument + linkLength;
