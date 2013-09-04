@@ -71,7 +71,7 @@ public class TestVariableAttemptVisitor {
         // #43
         public void should_replace_partially_typed_variable() throws Exception {
             String origContents1 = "*Variables\n" + FOO_VARIABLE + "  bar\n*Testcase\n  Log  ";
-            String origContents2 = "${F";
+            String origContents2 = "${f";
             String origContents = origContents1 + origContents2;
             IFile origFile = addFile("orig.txt", origContents);
 
