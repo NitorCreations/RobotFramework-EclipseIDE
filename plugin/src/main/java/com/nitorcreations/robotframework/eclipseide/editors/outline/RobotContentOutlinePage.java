@@ -16,20 +16,23 @@
 package com.nitorcreations.robotframework.eclipseide.editors.outline;
 
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
-public class RobotOutlinePage extends ContentOutlinePage {
+import com.nitorcreations.robotframework.eclipseide.editors.RobotFrameworkTextfileEditor;
 
-    private final IDocumentProvider documentProvider;
+public class RobotContentOutlinePage extends ContentOutlinePage {
+
+    // private final RobotFrameworkTextfileEditor robotFrameworkTextfileEditor;
+    // private final IDocumentProvider documentProvider;
     private IEditorInput editorInput;
 
-    public RobotOutlinePage(IDocumentProvider documentProvider) {
-        this.documentProvider = documentProvider;
+    public RobotContentOutlinePage(IDocumentProvider documentProvider, RobotFrameworkTextfileEditor robotFrameworkTextfileEditor) {
+        // this.documentProvider = documentProvider;
+        // this.robotFrameworkTextfileEditor = robotFrameworkTextfileEditor;
     }
 
     public void setInput(IEditorInput editorInput) {
@@ -40,18 +43,13 @@ public class RobotOutlinePage extends ContentOutlinePage {
     public void createControl(Composite parent) {
         super.createControl(parent);
         TreeViewer viewer = getTreeViewer();
-        viewer.setContentProvider(new RobotOutlineContentProvider(documentProvider));
-        viewer.setLabelProvider(new LabelProvider()); // we could use custom label provider here to get fancy icons
+        viewer.setContentProvider(new RobotOutlineContentProvider());
+        viewer.setLabelProvider(new LabelProvider());
+        viewer.addSelectionChangedListener(this);
 
         if (editorInput != null) {
             viewer.setInput(editorInput);
         }
     }
 
-    @Override
-    public void selectionChanged(SelectionChangedEvent event) {
-        super.selectionChanged(event);
-
-        // TODO Jump to selection
-    }
 }
