@@ -16,14 +16,17 @@
 package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.preference.IPreferenceStore;
 
+import com.nitorcreations.robotframework.eclipseide.Activator;
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public class ProposalGeneratorFactory implements IProposalGeneratorFactory {
 
     @Override
     public AttemptVisitor createTableAttemptVisitor() {
-        return new TableAttemptVisitor();
+        IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
+        return new TableAttemptVisitor(preferenceStore);
     }
 
     @Override

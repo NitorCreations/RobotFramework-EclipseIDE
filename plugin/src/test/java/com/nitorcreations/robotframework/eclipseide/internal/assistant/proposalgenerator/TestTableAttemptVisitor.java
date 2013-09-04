@@ -20,13 +20,18 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IRegion;
+import org.junit.Before;
 import org.junit.Test;
+
+import com.nitorcreations.robotframework.eclipseide.preferences.PreferenceConstants;
 
 public class TestTableAttemptVisitor {
 
@@ -35,9 +40,19 @@ public class TestTableAttemptVisitor {
     public static final String TEST_CASES_PROPOSAL = "* Test Cases";
     public static final String KEYWORDS_PROPOSAL = "* Keywords";
 
-    final TableAttemptVisitor visitor = new TableAttemptVisitor();
+    TableAttemptVisitor visitor;
 
     final IRegion replacementRegion = mock(IRegion.class);
+
+    @Before
+    public void setupVisitor() {
+        IPreferenceStore preferenceStore = mock(IPreferenceStore.class, "preferenceStore");
+        when(preferenceStore.getString(PreferenceConstants.P_VARIABLE_TABLE_FORMAT)).thenReturn(VARIABLES_PROPOSAL);
+        when(preferenceStore.getString(PreferenceConstants.P_SETTING_TABLE_FORMAT)).thenReturn(SETTINGS_PROPOSAL);
+        when(preferenceStore.getString(PreferenceConstants.P_TESTCASE_TABLE_FORMAT)).thenReturn(TEST_CASES_PROPOSAL);
+        when(preferenceStore.getString(PreferenceConstants.P_KEYWORD_TABLE_FORMAT)).thenReturn(KEYWORDS_PROPOSAL);
+        visitor = new TableAttemptVisitor(preferenceStore);
+    }
 
     @Test
     public void should_not_return_a_high_priority_proposalSet() {

@@ -19,21 +19,31 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.swt.graphics.Image;
 
 import com.nitorcreations.robotframework.eclipseide.builder.parser.util.ParserUtil;
+import com.nitorcreations.robotframework.eclipseide.preferences.PreferenceConstants;
 
 public class TableAttemptVisitor implements AttemptVisitor {
     private final Map<String, String> tableNameToFull = new LinkedHashMap<String, String>();
 
-    public TableAttemptVisitor() {
-        tableNameToFull.put("variables", "* Variables");
-        tableNameToFull.put("settings", "* Settings");
-        tableNameToFull.put("metadata", "* Settings");
-        tableNameToFull.put("testcases", "* Test Cases");
-        tableNameToFull.put("keywords", "* Keywords");
-        tableNameToFull.put("userkeywords", "* Keywords");
+    public TableAttemptVisitor(IPreferenceStore preferenceStore) {
+        String variableTableFormat = preferenceStore.getString(PreferenceConstants.P_VARIABLE_TABLE_FORMAT);
+        String settingTableFormat = preferenceStore.getString(PreferenceConstants.P_SETTING_TABLE_FORMAT);
+        String testcaseTableFormat = preferenceStore.getString(PreferenceConstants.P_TESTCASE_TABLE_FORMAT);
+        String keywordTableFormat = preferenceStore.getString(PreferenceConstants.P_KEYWORD_TABLE_FORMAT);
+        assert variableTableFormat != null;
+        assert settingTableFormat != null;
+        assert testcaseTableFormat != null;
+        assert keywordTableFormat != null;
+        tableNameToFull.put("variables", variableTableFormat);
+        tableNameToFull.put("settings", settingTableFormat);
+        tableNameToFull.put("metadata", settingTableFormat);
+        tableNameToFull.put("testcases", testcaseTableFormat);
+        tableNameToFull.put("keywords", keywordTableFormat);
+        tableNameToFull.put("userkeywords", keywordTableFormat);
     }
 
     @Override

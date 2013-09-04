@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ public class PreferenceConstants {
 
     private static final String base = "com.nitorcreations.robotframework.eclipseide.preferences.";
     private static final String baseSyntaxColoring = base + "syntaxcoloring.";
+    private static final String baseTableNaming = base + "tablenaming.";
 
     public static final String P_COMMENT = baseSyntaxColoring + "comment";
     public static final String P_TABLE = baseSyntaxColoring + "table";
@@ -38,4 +39,9 @@ public class PreferenceConstants {
     public static final String P_KEYWORD = baseSyntaxColoring + "keyword";
     public static final String P_KEYWORD_ARG = baseSyntaxColoring + "keyword_arg";
     public static final String P_FOR_PART = baseSyntaxColoring + "for_part";
+
+    public static final String P_VARIABLE_TABLE_FORMAT = baseTableNaming + "variableTableFormat";
+    public static final String P_SETTING_TABLE_FORMAT = baseTableNaming + "settingTableFormat";
+    public static final String P_TESTCASE_TABLE_FORMAT = baseTableNaming + "testcaseTableFormat";
+    public static final String P_KEYWORD_TABLE_FORMAT = baseTableNaming + "keywordTableFormat";
 }
