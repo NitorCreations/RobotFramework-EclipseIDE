@@ -1,4 +1,4 @@
-# RobotFramework-EclipseIDE 1.2.0
+# RobotFramework-EclipseIDE 1.3.0
 
 
 RobotFramework-EclipseIDE is an Eclipse IDE plugin for the [Robot Framework test automation tool](https://code.google.com/p/robotframework/) developed by [Nitor Creations Oy](http://nitorcreations.com/).
