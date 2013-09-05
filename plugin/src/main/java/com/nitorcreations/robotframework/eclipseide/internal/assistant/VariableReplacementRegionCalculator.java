@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
-public class VariableReplacementRegionCalculator {
-    public static Region calculate(ParsedString argument, int cursorOffsetInDocument) {
+public class VariableReplacementRegionCalculator implements IVariableReplacementRegionCalculator {
+    @Override
+    public IRegion calculate(ParsedString argument, int cursorOffsetInDocument) {
         String arg = argument.getValue();
         int cursorOffset = cursorOffsetInDocument - argument.getArgCharPos();
         if (cursorOffset == 0) {

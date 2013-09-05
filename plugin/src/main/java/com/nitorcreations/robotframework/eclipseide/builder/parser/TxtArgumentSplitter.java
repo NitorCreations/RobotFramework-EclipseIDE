@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class TxtArgumentSplitter {
         Matcher m = SEPARATOR_RE.matcher(line);
         List<ParsedString> arguments = new ArrayList<ParsedString>();
         int lastEnd = 0;
-        while (true) {
+        for (int argumentIndex = 0;; ++argumentIndex) {
             // if next cell starts with #, the rest of the line is a comment
             boolean isComment = lastEnd < line.length() && line.charAt(lastEnd) == '#';
             boolean isLastArgument = isComment || !m.find();
@@ -59,7 +59,7 @@ public class TxtArgumentSplitter {
                  */
                 ++lastEnd;
             }
-            ParsedString parsedString = new ParsedString(line.substring(lastEnd, nextStart), charPos + lastEnd);
+            ParsedString parsedString = new ParsedString(line.substring(lastEnd, nextStart), charPos + lastEnd, argumentIndex);
             int nextLen = (!isLastArgument ? m.end() : origLine.length()) - nextStart;
             if (nextLen >= 1 && origLine.charAt(nextStart) == ' ') {
                 parsedString.setHasSpaceAfter(true);

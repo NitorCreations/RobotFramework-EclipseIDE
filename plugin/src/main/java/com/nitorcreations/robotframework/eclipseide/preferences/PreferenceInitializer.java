@@ -37,6 +37,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         // store.setDefault(PreferenceConstants.P_CHOICE, "choice2");
         // store.setDefault(PreferenceConstants.P_STRING, "Default value");
 
+        // syntax coloring preferences
         // commented colors are for dark background
         store.setDefault(PreferenceConstants.P_COMMENT, "128,128,128"); // 128,128,128
         store.setDefault(PreferenceConstants.P_TABLE, "192,0,192"); // 192,0,192
@@ -53,6 +54,12 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
         store.setDefault(PreferenceConstants.P_KEYWORD, "212,149,0"); // 255,180,0
         store.setDefault(PreferenceConstants.P_KEYWORD_ARG, "255,100,0"); // 255,100,0
         store.setDefault(PreferenceConstants.P_FOR_PART, "0,128,128"); // 0,255,255
+
+        // table naming preferences
+        store.setDefault(PreferenceConstants.P_VARIABLE_TABLE_FORMAT, "* Variables");
+        store.setDefault(PreferenceConstants.P_SETTING_TABLE_FORMAT, "* Settings");
+        store.setDefault(PreferenceConstants.P_TESTCASE_TABLE_FORMAT, "* Test Cases");
+        store.setDefault(PreferenceConstants.P_KEYWORD_TABLE_FORMAT, "* Keywords");
     }
 
 }

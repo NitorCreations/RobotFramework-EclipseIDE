@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,9 @@
  */
 package com.nitorcreations.robotframework.eclipseide.internal.assistant;
 
-import static com.nitorcreations.robotframework.eclipseide.internal.assistant.VariableReplacementRegionCalculator.calculate;
 import static junit.framework.Assert.assertEquals;
 
-import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.IRegion;
 import org.junit.Test;
 
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
@@ -49,9 +48,11 @@ public class TestVariableReplacementRegionCalculator {
 
     private static final int AFTER_CLOSED_VARIABLE_POS = ARG_START_POS + 8;
 
+    private static final VariableReplacementRegionCalculator c = new VariableReplacementRegionCalculator();
+
     @Test
     public void partialVariableIsReplacedWhenCursonIsInsidePartialVariable() {
-        Region region = calculate(ARGUMENT, INSIDE_PARTIAL_VARIABLE_POS);
+        IRegion region = c.calculate(ARGUMENT, INSIDE_PARTIAL_VARIABLE_POS);
         assertEquals(PARTIAL_VARIABLE_START_POS, region.getOffset());
         assertEquals(PARTIAL_VARIABLE_LENGTH, region.getLength());
     }
@@ -59,21 +60,21 @@ public class TestVariableReplacementRegionCalculator {
     // #43
     @Test
     public void partialVariableIsReplacedWhenCursonIsAfterPartialVariable() {
-        Region region = calculate(ARGUMENT, PARTIAL_VARIABLE_START_POS + PARTIAL_VARIABLE_LENGTH);
+        IRegion region = c.calculate(ARGUMENT, PARTIAL_VARIABLE_START_POS + PARTIAL_VARIABLE_LENGTH);
         assertEquals(PARTIAL_VARIABLE_START_POS, region.getOffset());
         assertEquals(PARTIAL_VARIABLE_LENGTH, region.getLength());
     }
 
     @Test
     public void doesNotReplaceAnythingWhenCursorIsBeforePartialVariable() {
-        Region region = calculate(ARGUMENT, PARTIAL_VARIABLE_START_POS);
+        IRegion region = c.calculate(ARGUMENT, PARTIAL_VARIABLE_START_POS);
         assertEquals(PARTIAL_VARIABLE_START_POS, region.getOffset());
         assertEquals(0, region.getLength());
     }
 
     @Test
     public void partialVariableAtTheEndIsReplacedWhenCursonIsInsidePartialVariable() {
-        Region region = calculate(PARTIAL_VARIABLE_AT_THE_END, INSIDE_PARTIAL_VARIABLE_AT_THE_END_POS);
+        IRegion region = c.calculate(PARTIAL_VARIABLE_AT_THE_END, INSIDE_PARTIAL_VARIABLE_AT_THE_END_POS);
         assertEquals(PARTIAL_VARIABLE_AT_THE_END_START_POS, region.getOffset());
         assertEquals(PARTIAL_VARIABLE_AT_THE_END_LENGTH, region.getLength());
     }
@@ -81,133 +82,133 @@ public class TestVariableReplacementRegionCalculator {
     // #43
     @Test
     public void partialVariableAtTheEndIsReplacedWhenCursonIsAfterPartialVariable() {
-        Region region = calculate(PARTIAL_VARIABLE_AT_THE_END, PARTIAL_VARIABLE_AT_THE_END_START_POS + PARTIAL_VARIABLE_AT_THE_END_LENGTH);
+        IRegion region = c.calculate(PARTIAL_VARIABLE_AT_THE_END, PARTIAL_VARIABLE_AT_THE_END_START_POS + PARTIAL_VARIABLE_AT_THE_END_LENGTH);
         assertEquals(PARTIAL_VARIABLE_AT_THE_END_START_POS, region.getOffset());
         assertEquals(PARTIAL_VARIABLE_AT_THE_END_LENGTH, region.getLength());
     }
 
     @Test
     public void doesNotReplaceAnythingWhenCursorIsBeforePartialVariableAtTheEnd() {
-        Region region = calculate(PARTIAL_VARIABLE_AT_THE_END, PARTIAL_VARIABLE_AT_THE_END_START_POS);
+        IRegion region = c.calculate(PARTIAL_VARIABLE_AT_THE_END, PARTIAL_VARIABLE_AT_THE_END_START_POS);
         assertEquals(PARTIAL_VARIABLE_AT_THE_END_START_POS, region.getOffset());
         assertEquals(0, region.getLength());
     }
 
     @Test
     public void completeVariableAtTheEndIsReplacedWhenCursonIsInsideCompleteVariable() {
-        Region region = calculate(COMPLETE_VARIABLE_AT_THE_END, INSIDE_COMPLETE_VARIABLE_AT_THE_END_POS);
+        IRegion region = c.calculate(COMPLETE_VARIABLE_AT_THE_END, INSIDE_COMPLETE_VARIABLE_AT_THE_END_POS);
         assertEquals(COMPLETE_VARIABLE_AT_THE_END_START_POS, region.getOffset());
         assertEquals(COMPLETE_VARIABLE_AT_THE_END_LENGTH, region.getLength());
     }
 
     @Test
     public void doesNotReplaceAnythingWhenCursonIsAfterCompleteVariableAtTheEnd() {
-        Region region = calculate(COMPLETE_VARIABLE_AT_THE_END, COMPLETE_VARIABLE_AT_THE_END_START_POS + COMPLETE_VARIABLE_AT_THE_END_LENGTH);
+        IRegion region = c.calculate(COMPLETE_VARIABLE_AT_THE_END, COMPLETE_VARIABLE_AT_THE_END_START_POS + COMPLETE_VARIABLE_AT_THE_END_LENGTH);
         assertEquals(COMPLETE_VARIABLE_AT_THE_END_START_POS + COMPLETE_VARIABLE_AT_THE_END_LENGTH, region.getOffset());
         assertEquals(0, region.getLength());
     }
 
     @Test
     public void doesNotReplaceAnythingWhenCursorIsBeforeCompleteVariableAtTheEnd() {
-        Region region = calculate(COMPLETE_VARIABLE_AT_THE_END, COMPLETE_VARIABLE_AT_THE_END_START_POS);
+        IRegion region = c.calculate(COMPLETE_VARIABLE_AT_THE_END, COMPLETE_VARIABLE_AT_THE_END_START_POS);
         assertEquals(COMPLETE_VARIABLE_AT_THE_END_START_POS, region.getOffset());
         assertEquals(0, region.getLength());
     }
 
     @Test
     public void completeVariableIsReplacedWhenCursorIsInsideVariable() {
-        Region region = calculate(ARGUMENT, INSIDE_COMPLETE_VARIABLE_POS);
+        IRegion region = c.calculate(ARGUMENT, INSIDE_COMPLETE_VARIABLE_POS);
         assertEquals(COMPLETE_VARIABLE_START_POS, region.getOffset());
         assertEquals(COMPLETE_VARIABLE_LENGTH, region.getLength());
     }
 
     @Test
     public void doesNotReplaceAnythingWhenCursorIsBeforeVariable() {
-        Region region = calculate(ARGUMENT, COMPLETE_VARIABLE_START_POS);
+        IRegion region = c.calculate(ARGUMENT, COMPLETE_VARIABLE_START_POS);
         assertEquals(COMPLETE_VARIABLE_START_POS, region.getOffset());
         assertEquals(0, region.getLength());
     }
 
     @Test
     public void doesNotReplaceAnythingWhenCursorIsAfterVariable() {
-        Region region = calculate(ARGUMENT, COMPLETE_VARIABLE_START_POS + COMPLETE_VARIABLE_LENGTH);
+        IRegion region = c.calculate(ARGUMENT, COMPLETE_VARIABLE_START_POS + COMPLETE_VARIABLE_LENGTH);
         assertEquals(COMPLETE_VARIABLE_START_POS + COMPLETE_VARIABLE_LENGTH, region.getOffset());
         assertEquals(0, region.getLength());
     }
 
     @Test
     public void doesNotReplaceAnythingWhenCursorIsInsideTextAfterClosedVariable() {
-        Region region = calculate(ARGUMENT_2, AFTER_CLOSED_VARIABLE_POS);
+        IRegion region = c.calculate(ARGUMENT_2, AFTER_CLOSED_VARIABLE_POS);
         assertEquals(AFTER_CLOSED_VARIABLE_POS, region.getOffset());
         assertEquals(0, region.getLength());
     }
 
     @Test
     public void variableStartIsReplacedWhenCursorIsInPartialVariableStart() {
-        Region region = calculate(ARGUMENT, PARTIAL_VARIABLE_START_POS + 1);
+        IRegion region = c.calculate(ARGUMENT, PARTIAL_VARIABLE_START_POS + 1);
         assertEquals(PARTIAL_VARIABLE_START_POS, region.getOffset());
         assertEquals(2, region.getLength());
     }
 
     @Test
     public void variableStartIsReplacedWhenCursorIsAfterPartialVariableStart() {
-        Region region = calculate(ARGUMENT, PARTIAL_VARIABLE_START_POS + 2);
+        IRegion region = c.calculate(ARGUMENT, PARTIAL_VARIABLE_START_POS + 2);
         assertEquals(PARTIAL_VARIABLE_START_POS, region.getOffset());
         assertEquals(2, region.getLength());
     }
 
     @Test
     public void variableIsReplacedWhenCursorIsInCompleteVariableStart() {
-        Region region = calculate(ARGUMENT, COMPLETE_VARIABLE_START_POS + 1);
+        IRegion region = c.calculate(ARGUMENT, COMPLETE_VARIABLE_START_POS + 1);
         assertEquals(COMPLETE_VARIABLE_START_POS, region.getOffset());
         assertEquals(COMPLETE_VARIABLE_LENGTH, region.getLength());
     }
 
     @Test
     public void variableIsReplacedWhenCursorIsAfterCompleteVariableStart() {
-        Region region = calculate(ARGUMENT, COMPLETE_VARIABLE_START_POS + 2);
+        IRegion region = c.calculate(ARGUMENT, COMPLETE_VARIABLE_START_POS + 2);
         assertEquals(COMPLETE_VARIABLE_START_POS, region.getOffset());
         assertEquals(COMPLETE_VARIABLE_LENGTH, region.getLength());
     }
 
     @Test
     public void doesNotReplaceAnythingForEmptyArgument() {
-        Region region = calculate(new ParsedString("", ARG_START_POS), ARG_START_POS);
+        IRegion region = c.calculate(new ParsedString("", ARG_START_POS), ARG_START_POS);
         assertEquals(ARG_START_POS, region.getOffset());
         assertEquals(0, region.getLength());
     }
 
     @Test
     public void doesNotReplaceAnythingWhenAtBeginningOfArgument() {
-        Region region = calculate(ARGUMENT, ARG_START_POS);
+        IRegion region = c.calculate(ARGUMENT, ARG_START_POS);
         assertEquals(ARG_START_POS, region.getOffset());
         assertEquals(0, region.getLength());
     }
 
     @Test
     public void doesNotReplaceAnythingWhenThereIsNotVariableInArgument() {
-        Region region = calculate(new ParsedString("foobar{foobar}", ARG_START_POS), ARG_START_POS + 8);
+        IRegion region = c.calculate(new ParsedString("foobar{foobar}", ARG_START_POS), ARG_START_POS + 8);
         assertEquals(ARG_START_POS + 8, region.getOffset());
         assertEquals(0, region.getLength());
     }
 
     @Test
     public void replacesStartCharacterBeforeCursorIfNotFollowedByCurlyBrace() {
-        Region region = calculate(new ParsedString("foobar$foobar", ARG_START_POS), ARG_START_POS + 7);
+        IRegion region = c.calculate(new ParsedString("foobar$foobar", ARG_START_POS), ARG_START_POS + 7);
         assertEquals(ARG_START_POS + 6, region.getOffset());
         assertEquals(1, region.getLength());
     }
 
     @Test
     public void replacesStartCharacterBeforeCursorIfItIsTheLastCharacter() {
-        Region region = calculate(new ParsedString("foobar$", ARG_START_POS), ARG_START_POS + 7);
+        IRegion region = c.calculate(new ParsedString("foobar$", ARG_START_POS), ARG_START_POS + 7);
         assertEquals(ARG_START_POS + 6, region.getOffset());
         assertEquals(1, region.getLength());
     }
 
     @Test
     public void replacesStartCharacterBeforeCursorIfItIsTheOnlyCharacter() {
-        Region region = calculate(new ParsedString("@", ARG_START_POS), ARG_START_POS + 1);
+        IRegion region = c.calculate(new ParsedString("@", ARG_START_POS), ARG_START_POS + 1);
         assertEquals(ARG_START_POS, region.getOffset());
         assertEquals(1, region.getLength());
     }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,13 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString.Argum
 
 @RunWith(Enclosed.class)
 public class TestArgumentPreParser {
+
+    public static class Empty_file_parsing {
+        @Test
+        public void at_start_of_line() throws Exception {
+            t("");
+        }
+    }
 
     public static class Comment_parsing {
         @Test
@@ -141,8 +148,15 @@ public class TestArgumentPreParser {
         }
 
         @Test
+        public void dynamickeyword_args_settings() throws Exception {
+            for (String key : new String[] { "Test Setup", "Test Teardown", "Suite Setup", "Suite Teardown" }) {
+                t("*Settings\n" + key + "  Keyword  arg", TABLE, SETTING_KEY, KEYWORD_CALL_DYNAMIC, KEYWORD_ARG);
+            }
+        }
+
+        @Test
         public void keyword_args_settings() throws Exception {
-            for (String key : new String[] { "Test Setup", "Test Teardown", "Test Template", "Suite Setup", "Suite Teardown" }) {
+            for (String key : new String[] { "Test Template" }) {
                 t("*Settings\n" + key + "  Keyword  arg", TABLE, SETTING_KEY, KEYWORD_CALL, KEYWORD_ARG);
             }
         }
@@ -194,6 +208,13 @@ public class TestArgumentPreParser {
         }
 
         @Test
+        public void setup_and_teardown_settings() throws Exception {
+            for (String key : new String[] { "[Setup]", "[Teardown]" }) {
+                t("*Test cases\nTC1  " + key + "  Keyword", TABLE, NEW_TESTCASE, SETTING_KEY, KEYWORD_CALL_DYNAMIC);
+            }
+        }
+
+        @Test
         public void when_global_template_is_set_then_regular_lines_should_emit_KEYWORD_ARG_only() throws Exception {
             t("*Settings\nTest Template  Log\n*Test cases\nTC1  Hello", TABLE, SETTING_KEY, KEYWORD_CALL, TABLE, NEW_TESTCASE, KEYWORD_ARG);
             t("*Test cases\nTC1\n  Hello\n*Settings\nTest Template  Log", TABLE, NEW_TESTCASE, IGNORED, KEYWORD_ARG, TABLE, SETTING_KEY, KEYWORD_CALL);
@@ -222,6 +243,16 @@ public class TestArgumentPreParser {
             t("*Test cases\n", TABLE);
             t("*Test cases\n  ", TABLE);
             t("*Test cases\n  \n", TABLE);
+        }
+
+        @Test
+        public void local_template_is_not_detected_from_next_testcase() throws Exception {
+            t("*Test cases\nTC1\n  Keyword\nTC2\n  [Template]  Log", TABLE, NEW_TESTCASE, IGNORED, KEYWORD_CALL, NEW_TESTCASE, IGNORED, SETTING_KEY, KEYWORD_CALL);
+        }
+
+        @Test
+        public void local_template_is_still_detected_when_empty_lines_in_front() throws Exception {
+            t("*Test cases\nTC1\n  Keyword\n\n  [Template]  Log", TABLE, NEW_TESTCASE, IGNORED, KEYWORD_ARG, IGNORED, SETTING_KEY, KEYWORD_CALL);
         }
     }
 
@@ -263,9 +294,19 @@ public class TestArgumentPreParser {
         }
 
         @Test
-        public void recursive_keyword_calls_by_template() throws Exception {
-            t("*Keywords\nKW1\n  [Template]  Run Keyword\n  Test", TABLE, NEW_KEYWORD, IGNORED, SETTING_KEY, KEYWORD_CALL, IGNORED, KEYWORD_CALL_DYNAMIC);
-            t("*Settings\nTest Template  Run Keyword\n*Keywords\nKW1\n  Test", TABLE, SETTING_KEY, KEYWORD_CALL, TABLE, NEW_KEYWORD, IGNORED, KEYWORD_CALL_DYNAMIC);
+        public void template_settings_are_ignored_in_keywords() throws Exception {
+            t("*Keywords\nKW1\n  [Template]  Run Keyword\n  Test", TABLE, NEW_KEYWORD, IGNORED, SETTING_KEY, KEYWORD_CALL, IGNORED, KEYWORD_CALL);
+            t("*Settings\nTest Template  Run Keyword\n*Keywords\nKW1\n  Test", TABLE, SETTING_KEY, KEYWORD_CALL, TABLE, NEW_KEYWORD, IGNORED, KEYWORD_CALL);
+        }
+
+        @Test
+        public void recursive_keyword_calls_by_local_template_setting() throws Exception {
+            t("*Test Cases\nTC1\n  [Template]  Run Keyword\n  Test", TABLE, NEW_TESTCASE, IGNORED, SETTING_KEY, KEYWORD_CALL, IGNORED, KEYWORD_CALL_DYNAMIC);
+        }
+
+        @Test
+        public void recursive_keyword_calls_by_global_template_setting() throws Exception {
+            t("*Settings\nTest Template  Run Keyword\n*Test Cases\nTC1\n  Test", TABLE, SETTING_KEY, KEYWORD_CALL, TABLE, NEW_KEYWORD, IGNORED, KEYWORD_CALL_DYNAMIC);
         }
     }
 

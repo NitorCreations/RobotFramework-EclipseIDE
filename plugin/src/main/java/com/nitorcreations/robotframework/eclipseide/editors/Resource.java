@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.nitorcreations.robotframework.eclipseide.PluginContext;
 
 /**
  * A representation of a robot framework file, which is here called a
@@ -59,7 +61,7 @@ public class Resource {
             return new ResourceLocation(this, line);
         }
         for (File f : includedResources) {
-            Resource r = ResourceManagerProvider.get().getResource(f);
+            Resource r = PluginContext.getResourceManager().getResource(f);
             if (r == null) {
                 continue;
             }
@@ -77,7 +79,7 @@ public class Resource {
             return new ResourceLocation(this, line);
         }
         for (File f : includedResources) {
-            Resource r = ResourceManagerProvider.get().getResource(f);
+            Resource r = PluginContext.getResourceManager().getResource(f);
             if (r == null) {
                 continue;
             }

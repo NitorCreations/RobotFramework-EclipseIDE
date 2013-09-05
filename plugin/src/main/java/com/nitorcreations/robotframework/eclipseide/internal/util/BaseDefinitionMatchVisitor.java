@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@ package com.nitorcreations.robotframework.eclipseide.internal.util;
 
 import org.eclipse.core.resources.IFile;
 
-import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
-
 public abstract class BaseDefinitionMatchVisitor implements DefinitionMatchVisitor {
 
     protected final IFile file;
@@ -27,10 +25,10 @@ public abstract class BaseDefinitionMatchVisitor implements DefinitionMatchVisit
         this.file = file;
     }
 
-    protected String getDisplayString(ParsedString proposal, FileWithType proposalLocation) {
+    protected String getDisplayString(String proposal, FileWithType proposalLocation) {
         if (proposalLocation.getFile() == file) {
-            return proposal.getValue();
+            return proposal;
         }
-        return '[' + proposalLocation.getName() + "] " + proposal.getValue();
+        return '[' + proposalLocation.getName() + "] " + proposal;
     }
 }

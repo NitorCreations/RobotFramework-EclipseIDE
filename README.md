@@ -25,12 +25,12 @@ This plugin helps you to write tests with Robot Framework directly from the comf
 
 ## Installation
 
-See [Installation instructions](/NitorCreations/RobotFramework-EclipseIDE/wiki/Installation).
+See [Installation instructions](https://github.com/NitorCreations/RobotFramework-EclipseIDE/wiki/Installation).
 
 ## Usage
 
-See [Usage](/NitorCreations/RobotFramework-EclipseIDE/wiki/Usage).
+See [Usage](https://github.com/NitorCreations/RobotFramework-EclipseIDE/wiki/Usage).
 
 ## More info
 
-See [Wiki pages](/NitorCreations/RobotFramework-EclipseIDE/wiki).
+See [Wiki pages](https://github.com/NitorCreations/RobotFramework-EclipseIDE/wiki).

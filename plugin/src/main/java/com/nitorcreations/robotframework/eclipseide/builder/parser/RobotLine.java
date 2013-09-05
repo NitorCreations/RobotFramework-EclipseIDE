@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,9 @@ public class RobotLine {
     }
 
     public ParsedString getArgumentAt(int offset) {
+        if (offset < lineCharPos) { // TODO verify upper boundary too
+            throw new IndexOutOfBoundsException(offset + "<" + lineCharPos);
+        }
         for (ParsedString argument : arguments) {
             if (offset >= argument.getArgCharPos() && offset <= argument.getExtendedArgEndCharPos()) {
                 return argument;
@@ -74,6 +77,40 @@ public class RobotLine {
             return false;
         }
         return firstArgument.getValue().equals(setting);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((arguments == null) ? 0 : arguments.hashCode());
+        result = prime * result + lineCharPos;
+        result = prime * result + lineNo;
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RobotLine other = (RobotLine) obj;
+        if (arguments == null) {
+            if (other.arguments != null)
+                return false;
+        } else if (!arguments.equals(other.arguments))
+            return false;
+        if (lineCharPos != other.lineCharPos)
+            return false;
+        if (lineNo != other.lineNo)
+            return false;
+        if (type != other.type)
+            return false;
+        return true;
     }
 
 }

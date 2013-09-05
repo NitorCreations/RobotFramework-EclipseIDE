@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nitorcreations.robotframework.eclipseide.internal.assistant;
-
-import java.util.List;
+package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.text.IRegion;
 
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
-public class KeywordCompletionMatchVisitorProvider extends CompletionMatchVisitorProvider {
+public interface IProposalGeneratorFactory {
 
-    public KeywordCompletionMatchVisitorProvider(IFile file, IRegion replacementRegion) {
-        super(file, replacementRegion);
-    }
+    AttemptVisitor createTableAttemptVisitor();
 
-    @Override
-    public CompletionMatchVisitor get(ParsedString argument, List<RobotCompletionProposal> proposals) {
-        return new KeywordCompletionMatchVisitor(file, argument, proposals, replacementRegion);
-    }
+    AttemptVisitor createSettingTableAttemptVisitor();
+
+    AttemptVisitor createKeywordDefinitionAttemptVisitor(final IFile file, ParsedString argument);
+
+    AttemptVisitor createKeywordCallAttemptVisitor(IFile file);
+
+    AttemptVisitor createVariableAttemptVisitor(IFile file, int maxVariableCharPos, int maxSettingCharPos);
+
 }

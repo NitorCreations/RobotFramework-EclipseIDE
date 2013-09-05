@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nitorcreations.robotframework.eclipseide.internal.assistant;
+package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
-import java.util.List;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.text.IRegion;
+import java.util.Collection;
 
 import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
-public abstract class CompletionMatchVisitorProvider {
+public interface IAttemptGenerator {
 
-    protected final IFile file;
-    protected final IRegion replacementRegion;
+    void acceptAttempts(ParsedString argument, int documentOffset, Collection<RobotCompletionProposalSet> proposalSets, AttemptVisitor attemptVisitor);
 
-    public CompletionMatchVisitorProvider(IFile file, IRegion replacementRegion) {
-        this.file = file;
-        this.replacementRegion = replacementRegion;
-
-    }
-
-    public abstract CompletionMatchVisitor get(ParsedString argument, List<RobotCompletionProposal> proposals);
 }

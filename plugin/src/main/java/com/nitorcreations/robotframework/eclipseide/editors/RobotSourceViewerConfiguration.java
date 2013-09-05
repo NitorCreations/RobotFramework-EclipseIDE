@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,13 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
-import com.nitorcreations.robotframework.eclipseide.internal.assistant.ProposalGenerator;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.RobotContentAssistant;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.RobotContentAssistant2;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.VariableReplacementRegionCalculator;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.AttemptGenerator;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.ProposalGeneratorFactory;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.ProposalSuitabilityDeterminer;
+import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RelevantProposalsFilter;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.KeywordCallHyperlinkDetector;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.ResourceHyperlinkDetector;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.VariableAccessHyperlinkDetector;
@@ -94,7 +99,9 @@ public class RobotSourceViewerConfiguration extends TextSourceViewerConfiguratio
         // assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
         // assistant.setStatusLineVisible(true);
 
-        assistant.setContentAssistProcessor(new RobotContentAssistant(new ProposalGenerator()), IDocument.DEFAULT_CONTENT_TYPE);
+        ProposalSuitabilityDeterminer proposalSuitabilityDeterminer = new ProposalSuitabilityDeterminer(new ProposalGeneratorFactory(), new VariableReplacementRegionCalculator());
+        RobotContentAssistant2 assistant2 = new RobotContentAssistant2(proposalSuitabilityDeterminer, new AttemptGenerator(), new RelevantProposalsFilter());
+        assistant.setContentAssistProcessor(new RobotContentAssistant(assistant2), IDocument.DEFAULT_CONTENT_TYPE);
 
         assistant.setInformationControlCreator(new AbstractReusableInformationControlCreator() {
             @Override

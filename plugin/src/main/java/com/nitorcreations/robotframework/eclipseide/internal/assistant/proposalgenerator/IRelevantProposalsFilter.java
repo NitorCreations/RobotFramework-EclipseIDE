@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.nitorcreations.robotframework.eclipseide.editors;
+package com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator;
 
-public class ResourceManagerProvider {
-    private static IResourceManager resourceManager = new ResourceManager();
+import java.util.List;
 
-    public static IResourceManager get() {
-        return resourceManager;
-    }
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
-    public static void set(IResourceManager resourceManager) {
-        ResourceManagerProvider.resourceManager = resourceManager;
-    }
+public interface IRelevantProposalsFilter {
+
+    ICompletionProposal[] extractMostRelevantProposals(List<RobotCompletionProposalSet> proposalSets);
 
 }

@@ -1,0 +1,6 @@
+# -*-sh-*-
+
+# When committing text files, convert platform line endings to LF in
+# repository (and back)
+
+*	text=auto

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,13 @@ import com.nitorcreations.robotframework.eclipseide.structure.ParsedString;
 
 public interface DefinitionMatchVisitor {
 
-    public enum VisitorInterest {
-        CONTINUE, CONTINUE_TO_END_OF_CURRENT_PRIORITY_LEVEL, CONTINUE_TO_END_OF_CURRENT_FILE, STOP
-    }
-
     /**
-     * @param proposal
-     *            the proposal
-     * @param proposalLocation
-     *            where proposal is located - null if the proposal is located in a variable file or a library
+     * @param match
+     *            the match
+     * @param matchLocation
+     *            where match is located - null if the match is located in a variable file or a library
      */
-    VisitorInterest visitMatch(ParsedString proposal, FileWithType proposalLocation);
+    VisitorInterest visitMatch(ParsedString match, FileWithType matchLocation);
 
     LineType getWantedLineType();
 

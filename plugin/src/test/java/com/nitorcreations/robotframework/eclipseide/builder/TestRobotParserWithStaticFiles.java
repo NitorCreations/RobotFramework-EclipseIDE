@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012-2013 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,15 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.nitorcreations.junit.runners.NicelyParameterized;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.Lexer;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotLine;
 import com.nitorcreations.robotframework.eclipseide.builder.parser.RobotParser;
 import com.nitorcreations.robotframework.eclipseide.builder.util.MarkerManager;
 
-@RunWith(Parameterized.class)
+@RunWith(NicelyParameterized.class)
 public class TestRobotParserWithStaticFiles {
 
     private static final class NullMarkerParser implements MarkerManager {
