@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Copyright 2013 Nitor Creations Oy
+# Copyright 2013 Nitor Creations Oy, Jonas Berlin
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ sub resolveLicenseFormat {
     my $licenseFormat;
     if ($file =~ m!\.java$!) {
 	$licenseFormat = 'javadoc';
-    } elsif ($file =~ m!\.txt$! || $file =~ m!\.pl$! || $file eq '.githooks/pre-commit') {
+    } elsif ($file =~ m!\.txt$! || $file =~ m!\.p[lm]$! || $file eq '.githooks/pre-commit') {
 	$licenseFormat = 'hash';
     }
     return $licenseFormat;
@@ -40,6 +40,15 @@ my $scriptDir = $repoRootDir.'/.githooks';
 
 my $origLineSeparator = $/;
 $/="\0";
+
+# Fetch author string to use
+my $author = `git config --get license.author`;
+unless(length($author)) {
+    print STDERR "ERROR: Author not configured.\n\nConfigure with:\n\n\tgit config license.author \"My Company Inc\"\n";
+    exit(1);
+}
+$author =~ s!^\s+!!;
+$author =~ s!\s+$!!;
 
 # get list of files in stage
 my @filesInStage;
@@ -90,7 +99,7 @@ foreach my $staged (@filesInStage) {
     if (!$isFileChangedByCommit) {
 	# file not changed, just check license
 
-	my $ret = My::License::isLackingProperLicense($license_text_file, $staged->{name}, $origFileContent);
+	my $ret = My::License::isLackingProperLicense($license_text_file, $staged->{name}, $origFileContent, $author);
 	if ($ret == 0) {
 	    # license ok
 	} elsif ($ret == 1) {
@@ -106,7 +115,7 @@ foreach my $staged (@filesInStage) {
     } else {
 	# file changed, add license or update license to contain current year
 
-	my ($ret, @transformedContent) = My::License::maintainLicense($license_text_file, $staged->{name}, $origFileContent);
+	my ($ret, @transformedContent) = My::License::maintainLicense($license_text_file, $staged->{name}, $origFileContent, $author);
 	if ($ret == 1) {
 	    print STDERR "Please correct the problems before re-attempting commit\n";
 	    exit(1);
