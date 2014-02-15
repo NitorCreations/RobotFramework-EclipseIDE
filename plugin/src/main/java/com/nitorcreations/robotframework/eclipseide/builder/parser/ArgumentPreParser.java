@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2013 Nitor Creations Oy
+ * Copyright 2012-2014 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -572,9 +572,12 @@ public class ArgumentPreParser {
     /* The value of the map is the argument position of the keyword that the key keyword takes as a parameter. */
     private static final Map<String, Integer> keywordsTakingKeywords = new HashMap<String, Integer>();
     static {
+        keywordsTakingKeywords.put("Keyword Should Exist", 1);
         keywordsTakingKeywords.put("Run Keyword", 1);
         keywordsTakingKeywords.put("Run Keyword And Continue On Failure", 1);
         keywordsTakingKeywords.put("Run Keyword And Ignore Error", 1);
+        keywordsTakingKeywords.put("Run Keyword And Return", 1);
+        keywordsTakingKeywords.put("Run Keyword And Return Status", 1);
         keywordsTakingKeywords.put("Run Keyword If All Critical Tests Passed", 1);
         keywordsTakingKeywords.put("Run Keyword If All Tests Passed", 1);
         keywordsTakingKeywords.put("Run Keyword If Any Critical Tests Failed", 1);
@@ -582,9 +585,9 @@ public class ArgumentPreParser {
         keywordsTakingKeywords.put("Run Keyword If Test Failed", 1);
         keywordsTakingKeywords.put("Run Keyword If Test Passed", 1);
         keywordsTakingKeywords.put("Run Keyword If Timeout Occurred", 1);
-        keywordsTakingKeywords.put("Keyword Should Exist", 1);
 
         keywordsTakingKeywords.put("Run Keyword And Expect Error", 2);
+        keywordsTakingKeywords.put("Run Keyword And Return If", 2);
         keywordsTakingKeywords.put("Run Keyword If", 2);
         keywordsTakingKeywords.put("Run Keyword Unless", 2);
         keywordsTakingKeywords.put("Repeat Keyword", 2);
