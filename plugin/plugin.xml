@@ -6,7 +6,7 @@
          point="org.eclipse.ui.editors">
       <editor
             name="Robot Framework Textfile Editor"
-            extensions="txt"
+            extensions="txt,robot"
             icon="src/main/resources/robo1.png"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             class="com.nitorcreations.robotframework.eclipseide.editors.RobotFrameworkTextfileEditor"
