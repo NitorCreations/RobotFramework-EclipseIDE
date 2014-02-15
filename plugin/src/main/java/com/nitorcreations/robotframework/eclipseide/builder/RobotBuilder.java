@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012, 2014 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,8 @@ public class RobotBuilder extends IncrementalProjectBuilder {
         if (!(resource instanceof IFile))
             return;
         IFile file = (IFile) resource;
-        if (!file.getName().endsWith(".txt") || file.getProjectRelativePath().toPortableString().startsWith("target/")) {
+	String fileNameLc = file.getName().toLowerCase();
+        if (!(fileNameLc.endsWith(".txt") || fileNameLc.endsWith(".robot")) || file.getProjectRelativePath().toPortableString().startsWith("target/")) {
             try {
                 file.deleteMarkers(RobotBuilder.MARKER_TYPE, false, IResource.DEPTH_ZERO);
             } catch (CoreException e) {
