@@ -1,4 +1,4 @@
-# RobotFramework-EclipseIDE 1.3.0
+# RobotFramework-EclipseIDE 1.4.0
 
 
 RobotFramework-EclipseIDE is an Eclipse IDE plugin for the [Robot Framework test automation tool](https://code.google.com/p/robotframework/) developed by [Nitor Creations Oy](http://nitorcreations.com/).
@@ -9,7 +9,7 @@ This plugin helps you to write tests with Robot Framework directly from the comf
 
 ## IDE Features
 
-* Support for <code>.txt</code> files using the "two spaces or tab" format
+* Support for <code>.txt</code> and (since 1.4.0) <code>.robot</code> files using the "two spaces or tab" format
 * Syntax coloring (colors configurable since 1.2.0)
 * Hyperlinks to keyword definitions
 * Hyperlinks to global variable definitions
