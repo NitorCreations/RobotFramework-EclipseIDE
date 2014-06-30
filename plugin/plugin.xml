@@ -93,6 +93,15 @@
       </page>
    </extension>
    <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="com.nitorcreations.robotframework.eclipseide.preferences.FormattingPreferencePage"
+            id="com.nitorcreations.robotframework.eclipseide.preferences.FormattingPreferencePage"
+            category="com.nitorcreations.robotframework.eclipseide.preferences.MainPreferencePage"
+            name="Formatting">
+      </page>
+   </extension>
+   <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
             class="com.nitorcreations.robotframework.eclipseide.preferences.PreferenceInitializer">
