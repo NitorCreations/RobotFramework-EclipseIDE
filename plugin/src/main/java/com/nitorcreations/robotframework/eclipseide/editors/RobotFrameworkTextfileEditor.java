@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2013 Nitor Creations Oy
+ * Copyright 2012-2014 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,13 +44,7 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
 
     public static final String EDITOR_ID = RobotFrameworkTextfileEditor.class.getName();
 
-    private final ColorManager colorManager;
-
-    public RobotFrameworkTextfileEditor() {
-        colorManager = new ColorManager();
-        setSourceViewerConfiguration(new RobotSourceViewerConfiguration(colorManager));
-        setDocumentProvider(new FileDocumentProvider());
-    }
+    private ColorManager colorManager;
 
     @Override
     protected void doSetInput(IEditorInput input) throws CoreException {
@@ -140,6 +134,11 @@ public class RobotFrameworkTextfileEditor extends TextEditor {
         IPreferenceStore baseEditorPreferenceStore = getPreferenceStore();
         IPreferenceStore ourPreferenceStore = Activator.getDefault().getPreferenceStore();
         setPreferenceStore(new ChainedPreferenceStore(new IPreferenceStore[] { ourPreferenceStore, baseEditorPreferenceStore }));
+
+        colorManager = new ColorManager();
+
+        setSourceViewerConfiguration(new RobotSourceViewerConfiguration(colorManager, getPreferenceStore()));
+        setDocumentProvider(new FileDocumentProvider());
     }
 }
 

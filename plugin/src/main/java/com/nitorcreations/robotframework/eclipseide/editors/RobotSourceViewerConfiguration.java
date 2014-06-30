@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2013 Nitor Creations Oy
+ * Copyright 2012-2014 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
@@ -46,9 +47,9 @@ public class RobotSourceViewerConfiguration extends TextSourceViewerConfiguratio
 
     private final ColorManager colorManager;
 
-    public RobotSourceViewerConfiguration(ColorManager colorManager) {
+    public RobotSourceViewerConfiguration(ColorManager colorManager, IPreferenceStore prefStore) {
+        super(prefStore);
         this.colorManager = colorManager;
-
     }
 
     // public ITextDoubleClickStrategy getDoubleClickStrategy(
