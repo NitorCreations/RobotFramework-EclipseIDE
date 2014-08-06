@@ -27,6 +27,8 @@ public interface IResourceManager {
 
     IFile getRelativeFile(IFile originalFile, String pathRelativeToOriginalFile);
 
+    IFile getJavaFile(String fullyQualifiedName);
+
     IDocument resolveDocumentFor(IFile file);
 
     IFile resolveFileFor(IDocument document);

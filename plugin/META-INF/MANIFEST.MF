@@ -6,6 +6,7 @@ Bundle-Version: 1.4.0
 Bundle-Activator: com.nitorcreations.robotframework.eclipseide.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
+ org.eclipse.jdt.core,
  org.eclipse.jface.text,
  org.eclipse.ui.editors,
  org.eclipse.core.resources,

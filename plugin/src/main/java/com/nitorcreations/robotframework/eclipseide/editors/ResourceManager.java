@@ -23,8 +23,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -125,6 +131,26 @@ public final class ResourceManager implements IResourceManager {
 
     private URI uriForPath(IPath path) {
         return new File(path.toString()).toURI();
+    }
+
+    @Override
+    public IFile getJavaFile(String fullyQualifiedName) {
+        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+        for (IProject project : root.getProjects()) {
+            try {
+                IJavaProject javaProject = JavaCore.create(project);
+                IType type = javaProject.findType(fullyQualifiedName);
+                if (type != null) {
+                    IFile file = root.getFile(type.getPath());
+                    if (file.exists()) {
+                        return file;
+                    }
+                }
+            } catch (JavaModelException e) {
+                // non-Java or unopened projects are simple skipped
+            }
+        }
+        return null;
     }
 
     @Override
