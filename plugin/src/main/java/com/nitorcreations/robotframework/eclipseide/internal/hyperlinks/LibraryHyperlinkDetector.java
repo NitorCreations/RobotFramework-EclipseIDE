@@ -16,8 +16,11 @@
 package com.nitorcreations.robotframework.eclipseide.internal.hyperlinks;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
@@ -41,9 +44,10 @@ public class LibraryHyperlinkDetector extends HyperlinkDetector {
     protected void getLinks(IFile file, RobotLine rfeLine, ParsedString argument, int offset, List<IHyperlink> links) {
         if (isLibraryLineWithFileArgument(rfeLine, argument)) {
             String fullyQualifiedName = argument.getUnescapedValue();
-            List<IFile> targetJavaFiles = PluginContext.getResourceManager().getJavaFiles(fullyQualifiedName);
-            for (IFile targetJavaFile : targetJavaFiles) {
-                links.add(createLinkForArgument(argument, targetJavaFile, fullyQualifiedName));
+            Map<IFile, IPath> targetJavaFiles = PluginContext.getResourceManager().getJavaFiles(fullyQualifiedName);
+            for (Entry<IFile, IPath> targetJavaFile : targetJavaFiles.entrySet()) {
+                String linkText = fullyQualifiedName + " in " + targetJavaFile.getValue().toString();
+                links.add(createLinkForArgument(argument, targetJavaFile.getKey(), linkText));
             }
         }
     }

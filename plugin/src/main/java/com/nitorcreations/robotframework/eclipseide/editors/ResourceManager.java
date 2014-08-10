@@ -18,10 +18,9 @@ package com.nitorcreations.robotframework.eclipseide.editors;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -29,6 +28,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -136,9 +136,9 @@ public final class ResourceManager implements IResourceManager {
     }
 
     @Override
-    public List<IFile> getJavaFiles(String fullyQualifiedName) {
+    public Map<IFile, IPath> getJavaFiles(String fullyQualifiedName) {
         IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-        List<IFile> files = new ArrayList<IFile>();
+        Map<IFile, IPath> files = new LinkedHashMap<IFile, IPath>();
         for (IProject project : root.getProjects()) {
             try {
                 IJavaProject javaProject = JavaCore.create(project);
@@ -146,7 +146,9 @@ public final class ResourceManager implements IResourceManager {
                 if (type != null) {
                     IFile file = root.getFile(type.getPath());
                     if (file.exists()) {
-                        files.add(file);
+                        IJavaElement ancestor = type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+                        IPath path = ancestor != null ? ancestor.getPath() : type.getPath();
+                        files.put(file, path);
                     }
                 }
             } catch (JavaModelException e) {

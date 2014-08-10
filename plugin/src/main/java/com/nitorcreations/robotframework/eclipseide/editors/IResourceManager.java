@@ -16,9 +16,10 @@
 package com.nitorcreations.robotframework.eclipseide.editors;
 
 import java.io.File;
-import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorPart;
 
@@ -28,7 +29,7 @@ public interface IResourceManager {
 
     IFile getRelativeFile(IFile originalFile, String pathRelativeToOriginalFile);
 
-    List<IFile> getJavaFiles(String fullyQualifiedName);
+    Map<IFile, IPath> getJavaFiles(String fullyQualifiedName);
 
     IDocument resolveDocumentFor(IFile file);
 
