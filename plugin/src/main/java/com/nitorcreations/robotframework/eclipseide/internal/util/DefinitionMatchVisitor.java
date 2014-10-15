@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2013 Nitor Creations Oy
+ * Copyright 2012-2014 Nitor Creations Oy, Dreamhunters-net
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,9 @@ public interface DefinitionMatchVisitor {
      *            the match
      * @param matchLocation
      *            where match is located - null if the match is located in a variable file or a library
+     * @param context
      */
-    VisitorInterest visitMatch(ParsedString match, FileWithType matchLocation);
+    VisitorInterest visitMatch(ParsedString match, FileWithType matchLocation, String context);
 
     LineType getWantedLineType();
 
@@ -37,4 +38,6 @@ public interface DefinitionMatchVisitor {
      * @return true if {@link DefinitionFinder} should descend into the given import, false if not
      */
     boolean visitImport(IFile currentFile, RobotLine line);
+
+    VisitorInterest visitMatch(ParsedString match, FileWithType matchLocation);
 }

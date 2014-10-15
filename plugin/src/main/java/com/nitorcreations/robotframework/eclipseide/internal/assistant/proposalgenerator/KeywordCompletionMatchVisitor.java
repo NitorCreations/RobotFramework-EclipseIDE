@@ -33,6 +33,11 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
     }
 
     @Override
+    public VisitorInterest visitMatch(ParsedString match, FileWithType matchLocation) {
+        return visitMatch(match, matchLocation, "");
+    }
+
+    @Override
     public VisitorInterest visitMatch(ParsedString match, FileWithType matchLocation, String context) {
         if (userInput == null) {
             addProposal(match.getValue(), matchLocation, context);
@@ -57,10 +62,10 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
     }
 
     @Override
-    protected void addProposal(String proposal, FileWithType proposalLocation) {
+    protected void addProposal(String proposal, FileWithType proposalLocation, String context) {
         String proposalStringLower = proposal.toLowerCase();
         boolean proposalExisted = addedProposals.contains(proposalStringLower);
-        super.addProposal(proposal, proposalLocation);
+        super.addProposal(proposal, proposalLocation, context);
         if (proposalExisted) {
             for (RobotCompletionProposal robotCompletionProposal : proposals) {
                 setPrefixRequiredIfNeeded(proposalStringLower, robotCompletionProposal);

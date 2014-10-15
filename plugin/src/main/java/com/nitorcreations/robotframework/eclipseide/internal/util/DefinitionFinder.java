@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012, 2014 Nitor Creations Oy, Dreamhunters-net
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,13 @@ public class DefinitionFinder {
         }
 
         @Override
+        public VisitorInterest visitMatch(RobotLine line, FileWithType lineLocation, String context) {
+            return delegate.visitMatch(line.arguments.get(0), lineLocation, context);
+        }
+
+        @Override
         public VisitorInterest visitMatch(RobotLine line, FileWithType lineLocation) {
-            return delegate.visitMatch(line.arguments.get(0), lineLocation);
+            return delegate.visitMatch(line.arguments.get(0), lineLocation, "");
         }
 
         @Override

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2013 Nitor Creations Oy
+ * Copyright 2012-2014 Nitor Creations Oy, Dreamhunters-net
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
         }
 
         @Override
-        public VisitorInterest visitMatch(ParsedString match, FileWithType location) {
+        public VisitorInterest visitMatch(ParsedString match, FileWithType location, String context) {
             if (location.getFile() == null) {
                 return VisitorInterest.CONTINUE;
             }
@@ -69,6 +69,11 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
                 return VisitorInterest.CONTINUE_TO_END_OF_CURRENT_PRIORITY_LEVEL;
             }
             return VisitorInterest.CONTINUE;
+        }
+
+        @Override
+        public VisitorInterest visitMatch(ParsedString match, FileWithType location) {
+            return visitMatch(match, location, "");
         }
 
         private String getMatchStringInFile(FileWithType location, String linkString) {

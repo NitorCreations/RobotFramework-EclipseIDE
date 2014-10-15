@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 Nitor Creations Oy
+ * Copyright 2013-2014 Nitor Creations Oy, Dreamhunters-net
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,6 +189,12 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
             @Override
             public boolean wantsLibraryKeywords() {
                 return true;
+            }
+
+            @Override
+            public VisitorInterest visitMatch(RobotLine line, FileWithType lineLocation, String keywordContext) {
+                // TODO Auto-generated method stub
+                return null;
             }
         });
         definedKeywords.remove(assumeThisKeywordIsUndefined.getValue());
