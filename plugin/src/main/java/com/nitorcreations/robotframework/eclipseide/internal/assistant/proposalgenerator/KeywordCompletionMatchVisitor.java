@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2013 Nitor Creations Oy
+ * Copyright 2012-2014 Nitor Creations Oy, Dreamhunters-net
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,14 @@ public class KeywordCompletionMatchVisitor extends CompletionMatchVisitor {
     }
 
     @Override
-    public VisitorInterest visitMatch(ParsedString match, FileWithType matchLocation) {
+    public VisitorInterest visitMatch(ParsedString match, FileWithType matchLocation, String context) {
         if (userInput == null) {
-            addProposal(match.getValue(), matchLocation);
+            addProposal(match.getValue(), matchLocation, context);
         } else {
             String userInputStringLower = userInput.toLowerCase();
             String matchStringLower = match.getValue().toLowerCase();
             if (matchStringLower.contains(userInputStringLower) || matchesWithoutPrefix(userInputStringLower, matchStringLower, matchLocation)) {
-                addProposal(match.getValue(), matchLocation);
+                addProposal(match.getValue(), matchLocation, context);
             }
             // if (KeywordMatchResult.DIFFERENT == match(matchStringLower, lookFor(userInputStringLower))) {
             // if (!prefixesMatch(userInputStringLower, matchLocation)) {

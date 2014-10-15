@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2013 Nitor Creations Oy
+ * Copyright 2012-2014 Nitor Creations Oy, Dreamhunters-net
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,14 @@ public abstract class CompletionMatchVisitor extends BaseDefinitionMatchVisitor 
     }
 
     protected void addProposal(String proposal, FileWithType proposalLocation) {
+        addProposal(proposal, proposalLocation, "");
+    }
+
+    protected void addProposal(String proposal, FileWithType proposalLocation, String contextInformation) {
         Image image = null;
         String displayString = getDisplayString(proposal, proposalLocation);
         String replacementString = proposal;
-        String additionalProposalInfo = "I recommend: " + replacementString;
+        String additionalProposalInfo = "I recommend: " + replacementString + contextInformation;
         String informationDisplayString = "You chose: " + replacementString;
         proposals.add(new RobotCompletionProposal(proposal, proposalLocation, replacementRegion, image, displayString, informationDisplayString, additionalProposalInfo));
         addedProposals.add(proposal.toLowerCase());

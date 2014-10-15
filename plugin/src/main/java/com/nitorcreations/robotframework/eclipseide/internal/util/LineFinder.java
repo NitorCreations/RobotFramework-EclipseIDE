@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2013 Nitor Creations Oy
+ * Copyright 2012-2014 Nitor Creations Oy, Dreamhunters-net
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -108,7 +109,77 @@ public class LineFinder {
         VisitorInterest interest = CONTINUE;
         for (RobotLine line : lines) {
             if (visitor.getWantedLineTypes().contains(line.type)) {
-                interest = visitor.visitMatch(line, currentFileWithType);
+                // Visit the next few lines to build the context of the keyword
+                String keywordContext = "";
+                // Flag for continuing 0 is no context, 1 is Arguments, 2 is Documentation
+                int contextCont = 0;
+                // If the Arguments are part of the line
+                if (line.arguments.size() > 1) {
+                    if (line.arguments.get(1).getValue().equals("[Arguments]")) {
+                        keywordContext = keywordContext + "\r";
+                        for (int i = 1; i < line.arguments.size(); i++) {
+                            keywordContext = keywordContext + " " + line.arguments.get(i).getValue();
+                        }
+                    }
+                }
+                for (ListIterator<RobotLine> iter = lines.listIterator(lines.indexOf(line) + 1); iter.hasNext();) {
+                    RobotLine contextLine = iter.next();
+                    if (contextLine.arguments.size() <= 1) {
+                        break;
+                    }
+                    if (contextCont == 0) {
+                        if ((contextLine.arguments.get(1).getValue().equals("[Arguments]")) || (contextLine.arguments.get(1).getValue().equals("[Documentation]"))) {
+                            keywordContext = keywordContext + "\r";
+                            for (int i = 1; i < contextLine.arguments.size(); i++) {
+                                keywordContext = keywordContext + " " + contextLine.arguments.get(i).getValue();
+                            }
+                            if (contextLine.arguments.get(0).getValue().equals("[Arguments]")) {
+                                contextCont = 1;
+                            } else {
+                                contextCont = 2;
+                            }
+                        } else if (contextLine.arguments.get(1).getType().name().equals("COMMENT")) {
+                            // Do nothing if it's a comment
+                        } else {
+                            break;
+                        }
+                    } else if (contextCont == 1) {
+                        if (contextLine.arguments.get(1).getValue().equals("[Documentation]")) {
+                            keywordContext = keywordContext + "\r";
+                            for (int i = 1; i < contextLine.arguments.size(); i++) {
+                                keywordContext = keywordContext + " " + contextLine.arguments.get(i).getValue();
+                            }
+                            contextCont = 0;
+                            break;
+                        } else if (contextLine.arguments.get(1).getValue().equals("...")) {
+                            for (int i = 2; i < contextLine.arguments.size(); i++) {
+                                keywordContext = keywordContext + " " + contextLine.arguments.get(i).getValue();
+                            }
+                        } else if (contextLine.arguments.get(1).getType().equals("COMMENT")) {
+                            // Do nothing if it's a comment
+                        } else {
+                            contextCont = 0;
+                        }
+                    } else if (contextCont == 2) {
+                        if (contextLine.arguments.get(1).getValue().equals("[Arguments]")) {
+                            keywordContext = keywordContext + "\r";
+                            for (int i = 1; i < contextLine.arguments.size(); i++) {
+                                keywordContext = keywordContext + " " + contextLine.arguments.get(i).getValue();
+                            }
+                            contextCont = 0;
+                            break;
+                        } else if (contextLine.arguments.get(1).getValue().equals("...")) {
+                            for (int i = 2; i < contextLine.arguments.size(); i++) {
+                                keywordContext = keywordContext + " " + contextLine.arguments.get(i).getValue();
+                            }
+                        } else if (contextLine.arguments.get(1).getType().equals("COMMENT")) {
+                            // Do nothing if it's a comment
+                        } else {
+                            contextCont = 0;
+                        }
+                    }
+                }
+                interest = visitor.visitMatch(line, currentFileWithType, keywordContext);
                 if (interest == STOP) {
                     return STOP;
                 }
