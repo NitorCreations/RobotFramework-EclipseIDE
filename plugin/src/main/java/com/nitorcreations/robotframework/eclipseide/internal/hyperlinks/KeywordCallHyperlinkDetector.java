@@ -57,7 +57,7 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
         }
 
         @Override
-        public VisitorInterest visitMatch(ParsedString match, FileWithType location, String context) {
+        public VisitorInterest visitMatch(ParsedString match, FileWithType location) {
             if (location.getFile() == null) {
                 return VisitorInterest.CONTINUE;
             }
@@ -72,8 +72,8 @@ public class KeywordCallHyperlinkDetector extends HyperlinkDetector {
         }
 
         @Override
-        public VisitorInterest visitMatch(ParsedString match, FileWithType location) {
-            return visitMatch(match, location, "");
+        public VisitorInterest visitMatch(ParsedString match, FileWithType location, String context) {
+            return visitMatch(match, location);
         }
 
         private String getMatchStringInFile(FileWithType location, String linkString) {

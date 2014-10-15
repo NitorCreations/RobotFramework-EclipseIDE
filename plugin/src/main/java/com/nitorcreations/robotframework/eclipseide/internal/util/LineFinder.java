@@ -116,7 +116,7 @@ public class LineFinder {
                 // If the Arguments are part of the line
                 if (line.arguments.size() > 1) {
                     if (line.arguments.get(1).getValue().equals("[Arguments]")) {
-                        keywordContext = keywordContext + "\r";
+                        keywordContext = keywordContext + "<br>";
                         for (int i = 1; i < line.arguments.size(); i++) {
                             keywordContext = keywordContext + " " + line.arguments.get(i).getValue();
                         }
@@ -129,7 +129,7 @@ public class LineFinder {
                     }
                     if (contextCont == 0) {
                         if ((contextLine.arguments.get(1).getValue().equals("[Arguments]")) || (contextLine.arguments.get(1).getValue().equals("[Documentation]"))) {
-                            keywordContext = keywordContext + "\r";
+                            keywordContext = keywordContext + "<br>";
                             for (int i = 1; i < contextLine.arguments.size(); i++) {
                                 keywordContext = keywordContext + " " + contextLine.arguments.get(i).getValue();
                             }
@@ -145,7 +145,7 @@ public class LineFinder {
                         }
                     } else if (contextCont == 1) {
                         if (contextLine.arguments.get(1).getValue().equals("[Documentation]")) {
-                            keywordContext = keywordContext + "\r";
+                            keywordContext = keywordContext + "<br>";
                             for (int i = 1; i < contextLine.arguments.size(); i++) {
                                 keywordContext = keywordContext + " " + contextLine.arguments.get(i).getValue();
                             }
@@ -162,7 +162,7 @@ public class LineFinder {
                         }
                     } else if (contextCont == 2) {
                         if (contextLine.arguments.get(1).getValue().equals("[Arguments]")) {
-                            keywordContext = keywordContext + "\r";
+                            keywordContext = keywordContext + "<br>";
                             for (int i = 1; i < contextLine.arguments.size(); i++) {
                                 keywordContext = keywordContext + " " + contextLine.arguments.get(i).getValue();
                             }

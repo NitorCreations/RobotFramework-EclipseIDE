@@ -133,6 +133,11 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
                 return VisitorInterest.CONTINUE;
             }
 
+            @Override
+            public VisitorInterest visitMatch(RobotLine line, FileWithType lineLocation, String keywordContext) {
+                return visitMatch(line, lineLocation);
+            }
+
             private ParsedString lastDefinedTestcaseOrKeyword;
             private ParsedString lastDefinedSetting;
 
@@ -191,11 +196,6 @@ public class KeywordDefinitionAttemptVisitor implements AttemptVisitor {
                 return true;
             }
 
-            @Override
-            public VisitorInterest visitMatch(RobotLine line, FileWithType lineLocation, String keywordContext) {
-                // TODO Auto-generated method stub
-                return null;
-            }
         });
         definedKeywords.remove(assumeThisKeywordIsUndefined.getValue());
         if (!definedKeywords.isEmpty()) {

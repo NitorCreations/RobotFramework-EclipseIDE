@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2013 Nitor Creations Oy
+ * Copyright 2012-2014 Nitor Creations Oy, Dreamhunters-net
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,11 @@ public class VariableCompletionMatchVisitor extends CompletionMatchVisitor {
         super(file, userInput, proposals, replacementRegion);
         this.maxVariableCharPos = maxVariableCharPos;
         this.maxSettingCharPos = maxSettingCharPos;
+    }
+
+    @Override
+    public VisitorInterest visitMatch(ParsedString match, FileWithType matchLocation, String context) {
+        return visitMatch(match, matchLocation);
     }
 
     @Override
