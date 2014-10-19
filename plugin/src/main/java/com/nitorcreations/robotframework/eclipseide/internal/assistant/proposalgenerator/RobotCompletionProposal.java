@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2013 Nitor Creations Oy
+ * Copyright 2012-2014 Nitor Creations Oy, Dreamhunters-net
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,31 @@ public class RobotCompletionProposal implements ICompletionProposal, ICompletion
         if (prefixRequired) {
             return matchLocation.getName() + "." + matchArgument;
         }
-        return matchArgument;
+        String arguments = getArgumentString();
+        return matchArgument + arguments;
+    }
+
+    private String getArgumentString() {
+        String argumentString = "";
+        if (additionalProposalInfo.contains("[Arguments]")) {
+            int start = additionalProposalInfo.indexOf("[Arguments]");
+            String tempParse = additionalProposalInfo.substring(start + new String("[Arguments]").length());
+            start = tempParse.indexOf("[Documentation]");
+            if (start == -1) { // substring doesn't contain Documentation, Arguments go right to the end
+                argumentString = tempParse;
+            } else { // substring contains Documentation, we strip it out
+                argumentString = tempParse.substring(0, start);
+            }
+            argumentString = argumentString.trim();
+            String tempSubstring = "";
+            String[] arguments = argumentString.split(" ");
+            for (int i = 0; i < arguments.length; i++) {
+                tempSubstring = tempSubstring + "    ";
+                tempSubstring = tempSubstring + arguments[i];
+            }
+            argumentString = tempSubstring;
+        }
+        return argumentString;
     }
 
     @Override
