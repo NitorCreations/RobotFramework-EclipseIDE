@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2014 Nitor Creations Oy, Dreamhunters-net
+ * Copyright 2012-2015 Nitor Creations Oy, Dreamhunters-net
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,10 +72,10 @@ public class RobotCompletionProposal implements ICompletionProposal, ICompletion
     }
 
     private String getReplacementString() {
-        if (prefixRequired) {
-            return matchLocation.getName() + "." + matchArgument;
-        }
         String arguments = getArgumentString();
+        if (prefixRequired) {
+            return matchLocation.getName() + "." + matchArgument + arguments;
+        }
         return matchArgument + arguments;
     }
 
