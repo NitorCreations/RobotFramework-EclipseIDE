@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2013 Nitor Creations Oy
+ * Copyright 2012-2014 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
@@ -39,6 +40,7 @@ import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalg
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.ProposalSuitabilityDeterminer;
 import com.nitorcreations.robotframework.eclipseide.internal.assistant.proposalgenerator.RelevantProposalsFilter;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.KeywordCallHyperlinkDetector;
+import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.LibraryHyperlinkDetector;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.ResourceHyperlinkDetector;
 import com.nitorcreations.robotframework.eclipseide.internal.hyperlinks.VariableAccessHyperlinkDetector;
 
@@ -46,9 +48,9 @@ public class RobotSourceViewerConfiguration extends TextSourceViewerConfiguratio
 
     private final ColorManager colorManager;
 
-    public RobotSourceViewerConfiguration(ColorManager colorManager) {
+    public RobotSourceViewerConfiguration(ColorManager colorManager, IPreferenceStore prefStore) {
+        super(prefStore);
         this.colorManager = colorManager;
-
     }
 
     // public ITextDoubleClickStrategy getDoubleClickStrategy(
@@ -74,6 +76,7 @@ public class RobotSourceViewerConfiguration extends TextSourceViewerConfiguratio
         detectors.add(new ResourceHyperlinkDetector());
         detectors.add(new KeywordCallHyperlinkDetector());
         detectors.add(new VariableAccessHyperlinkDetector());
+        detectors.add(new LibraryHyperlinkDetector());
         return detectors.toArray(new IHyperlinkDetector[detectors.size()]);
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012, 2014 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 package com.nitorcreations.robotframework.eclipseide.editors;
 
 import java.io.File;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorPart;
 
@@ -26,6 +28,8 @@ public interface IResourceManager {
     IEditorPart openOrReuseEditorFor(IFile file, boolean isRobotFile);
 
     IFile getRelativeFile(IFile originalFile, String pathRelativeToOriginalFile);
+
+    Map<IFile, IPath> getJavaFiles(String fullyQualifiedName);
 
     IDocument resolveDocumentFor(IFile file);
 
