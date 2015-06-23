@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Copyright 2013 Nitor Creations Oy, Jonas Berlin
+# Copyright 2013, 2015 Nitor Creations Oy, Jonas Berlin
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ sub resolveLicenseFormat {
     my $licenseFormat;
     if ($file =~ m!\.java$!) {
 	$licenseFormat = 'javadoc';
-    } elsif ($file =~ m!\.txt$! || $file =~ m!\.p[lm]$! || $file eq '.githooks/pre-commit') {
+    } elsif ($file =~ m!\.txt$! || $file =~ m!\.p[lm]$! || $file eq '.githooks/pre-commit' || $file eq '.githooks/install') {
 	$licenseFormat = 'hash';
     }
     return $licenseFormat;
