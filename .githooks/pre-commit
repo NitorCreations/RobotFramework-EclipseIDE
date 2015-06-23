@@ -107,7 +107,7 @@ foreach my $staged (@filesInStage) {
 	    ++$numFilesWithLicenseBrokenOrMissing;
 	} elsif ($ret == 2) {
 	    # license missing
-	    print STDERR "ERROR: License missing in ",$staged->{name},"\n";
+	    print STDERR "WARNING: License missing in ",$staged->{name},"\n";
 	    ++$numFilesWithLicenseBrokenOrMissing;
 	} else {
 	    die "Unhandled isLackingProperLicense() return code $ret";
