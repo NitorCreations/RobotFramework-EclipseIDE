@@ -1,4 +1,4 @@
-# Copyright 2013 Nitor Creations Oy, Jonas Berlin
+# Copyright 2013, 2015 Nitor Creations Oy, Jonas Berlin
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ our $AUTHORS_CAPTURE_GROUP = 'author';
 my $EMPTY_LINE_AFTER_HASHBANG = 1;
 
 my %licenseTextCache; # filename => contents
-my $author_year;
 
 sub _getLicenseText {
     my $license_text_file = $_[0];
@@ -50,14 +49,6 @@ sub _getLicenseText {
 	$licenseTextCache{$license_text_file} = $license;
     }
     return $license;
-}
-
-sub extract_timestamp {
-    my $gitdate = $_[0];
-    if (defined($gitdate)) {
-       $gitdate =~ m!(\d{9,})! and return $1;
-    }
-    return undef;
 }
 
 # transform license into a regexp that matches an existing license
@@ -97,7 +88,6 @@ sub regexpify_license {
 sub unpack_ranges {
     my $years_str = $_[0];
     my @year_ranges = split(/\s*,\s*/,$years_str);
-    my $found = 0;
     my %years;
     for (my $i=0; $i<=$#year_ranges; ++$i) {
 	my $year_range = $year_ranges[$i];
@@ -110,7 +100,6 @@ sub unpack_ranges {
 	    $low_year = $year_range;
 	    $high_year = $year_range;
 	}
-	$found = 1 if ($low_year <= $author_year && $author_year <= $high_year);
 	for (my $y=$low_year; $y<=$high_year; ++$y) {
 	    $years{$y} = 1;
 	}
@@ -139,15 +128,11 @@ sub unpack_authors {
 }
 
 sub pack_authors {
-    return join(", ", @_);
+    return join(", ", grep { defined($_) && length($_) } @_);
 }
 
-sub _execute {
-    my ($license_text_file, $source_file, $contents, $author, $dry_run) = @_;
-
-    my $author_date = extract_timestamp($ENV{'GIT_AUTHOR_DATE'}) || time();
-    my @author_date_fields = localtime($author_date);
-    $author_year = $author_date_fields[5] + 1900;
+sub _execute($$$$$$$) {
+    my ($license_text_file, $source_file, $contents, $author, $add_author_only_if_no_authors_listed, $author_years, $dry_run) = @_;
 
     my $license = _getLicenseText($license_text_file);
 
@@ -170,24 +155,26 @@ sub _execute {
     my $years_str;
     my $authors_str;
     if ($contents =~ s!^$license_regexp!!s) { # this removes the license as a side effect
-	# license present, construct new $years_str based on currently mentioned years
+	# license present, construct new $years_str based on currently mentioned years combined with provided list of years, and list of authors merged with provided author
 	return 0 if($dry_run);
 
 	my $old_years_str = $+{$YEARS_CAPTURE_GROUP};
 	my $old_authors_str = $+{$AUTHORS_CAPTURE_GROUP};
 
 	my %years = unpack_ranges($old_years_str);
-	$years{$author_year} = 1; # add current year to set if not yet there
+	foreach my $author_year (keys %{$author_years}) {
+	    $years{$author_year} = 1; # add year to set if not yet there
+	}
 	$years_str = pack_ranges(%years);
 
 	my @authors = unpack_authors($old_authors_str);
 	my %authors = map { $_ => 1 } @authors;
-	if (defined($authors{$author})) {
+	if (defined($authors{$author}) || ($#authors >= 0 && $add_author_only_if_no_authors_listed)) {
 	    $authors_str = $old_authors_str;
 	} else {
 	    push @authors, $author;
 	    $authors_str = pack_authors(@authors);
-	}	
+	}
 
     } else {
 	# full license not present - see if any single line of license is
@@ -200,9 +187,9 @@ sub _execute {
 	    }
 	}
 
-	# no license - new list of years is just current year, and list of authors is just author
+	# no license - new list of years is just provided list of years, and list of authors is just provided author
 	return 2 if($dry_run);
-	$years_str = $author_year;
+	$years_str = pack_ranges(%{$author_years});
 	$authors_str = $author;
     }
 
@@ -217,14 +204,14 @@ sub _execute {
     return 0, $hashbang, $newlicense, $contents;
 }
 
-sub isLackingProperLicense($$$$) {
-    my ($license_text_file, $source_file, $contents, $author) = @_;
-    return _execute($license_text_file, $source_file, $contents, $author, 1);
+sub isLackingProperLicense($$$) {
+    my ($license_text_file, $source_file, $contents) = @_;
+    return _execute($license_text_file, $source_file, $contents, undef, 0, undef, 1);
 }
 
-sub maintainLicense($$$$) {
-    my ($license_text_file, $source_file, $contents, $author) = @_;
-    return _execute($license_text_file, $source_file, $contents, $author, 0);
+sub maintainLicense($$$$$) {
+    my ($license_text_file, $source_file, $contents, $author, $add_author_only_if_no_authors_listed, $author_years) = @_;
+    return _execute($license_text_file, $source_file, $contents, $author, $add_author_only_if_no_authors_listed, $author_years, 0);
 }
 
 1;
