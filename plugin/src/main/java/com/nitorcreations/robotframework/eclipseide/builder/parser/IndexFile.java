@@ -111,7 +111,7 @@ public class IndexFile {
             return lines;
         } catch (CoreException e) {
             if (e.getCause() instanceof FileNotFoundException) {
-                System.err.println("Workspace out of sync for file " + indexFile + " - it no longer exists in the file system. Please refresh the workspace.");
+                System.out.println("Workspace out of sync for file " + indexFile + " - it no longer exists in the file system. Please refresh the workspace.");
             } else {
                 e.printStackTrace();
             }
