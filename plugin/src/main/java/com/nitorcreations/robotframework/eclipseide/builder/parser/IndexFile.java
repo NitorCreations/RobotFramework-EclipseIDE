@@ -15,6 +15,8 @@
  */
 package com.nitorcreations.robotframework.eclipseide.builder.parser;
 
+import static com.nitorcreations.robotframework.eclipseide.internal.util.Reporter.report;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -89,9 +91,9 @@ public class IndexFile {
         }
         if (!indexFile.exists()) {
             if (indexFile.isSynchronized(IFile.DEPTH_ZERO)) {
-                System.out.println("Warning: index file " + indexFile + " not found, not able to do proper error checking / hyperlinking / code completion");
+                report("Warning: index file " + indexFile + " not found, not able to do proper error checking / hyperlinking / code completion");
             } else {
-                System.out.println("Warning: index file " + indexFile + " is out of sync. Please refresh the workspace.");
+                report("Warning: index file " + indexFile + " is out of sync. Please refresh the workspace.");
             }
             return Collections.emptyList();
         }
@@ -115,7 +117,7 @@ public class IndexFile {
             return lines;
         } catch (CoreException e) {
             if (e.getCause() instanceof FileNotFoundException) {
-                System.out.println("Workspace out of sync for file " + indexFile + " - it no longer exists in the file system. Please refresh the workspace.");
+                report("Workspace out of sync for file " + indexFile + " - it no longer exists in the file system. Please refresh the workspace.");
             } else {
                 e.printStackTrace();
             }
