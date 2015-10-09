@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Nitor Creations Oy
+ * Copyright 2012, 2015 Nitor Creations Oy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package com.nitorcreations.robotframework.eclipseide.builder.parser;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,6 +28,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import com.nitorcreations.robotframework.eclipseide.internal.util.FileWithType;
@@ -107,6 +109,13 @@ public class IndexFile {
                 lines.add(line);
             }
             return lines;
+        } catch (CoreException e) {
+            if (e.getCause() instanceof FileNotFoundException) {
+                System.err.println("Workspace out of sync for file " + indexFile + " - it no longer exists in the file system. Please refresh the workspace.");
+            } else {
+                e.printStackTrace();
+            }
+            return Collections.emptyList();
         } catch (Exception e) {
             e.printStackTrace();
             return Collections.emptyList();
