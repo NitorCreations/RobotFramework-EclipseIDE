@@ -88,7 +88,11 @@ public class IndexFile {
             return Collections.emptyList();
         }
         if (!indexFile.exists()) {
-            System.out.println("Warning: index file " + indexFile + " not found, not able to do proper error checking / hyperlinking / code completion");
+            if (indexFile.isSynchronized(IFile.DEPTH_ZERO)) {
+                System.out.println("Warning: index file " + indexFile + " not found, not able to do proper error checking / hyperlinking / code completion");
+            } else {
+                System.out.println("Warning: index file " + indexFile + " is out of sync. Please refresh the workspace.");
+            }
             return Collections.emptyList();
         }
         List<String> contents = load(indexFile);
