@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
@@ -91,9 +92,9 @@ public class IndexFile {
         }
         if (!indexFile.exists()) {
             if (indexFile.isSynchronized(IFile.DEPTH_ZERO)) {
-                report("Warning: index file " + indexFile + " not found, not able to do proper error checking / hyperlinking / code completion");
+                report("Warning: index file " + formatForLog(indexFile) + " not found, not able to do proper error checking / hyperlinking / code completion");
             } else {
-                report("Warning: index file " + indexFile + " is out of sync. Please refresh the workspace.");
+                report("Warning: index file " + formatForLog(indexFile) + " is out of sync. Please refresh the workspace.");
             }
             return Collections.emptyList();
         }
@@ -117,7 +118,7 @@ public class IndexFile {
             return lines;
         } catch (CoreException e) {
             if (e.getCause() instanceof FileNotFoundException) {
-                report("Workspace out of sync for file " + indexFile + " - it no longer exists in the file system. Please refresh the workspace.");
+                report("Workspace out of sync for file " + formatForLog(indexFile) + " - it no longer exists in the file system. Please refresh the workspace.");
             } else {
                 e.printStackTrace();
             }
@@ -156,6 +157,17 @@ public class IndexFile {
                 it.remove();
             }
         }
+    }
+
+    private static String formatForLog(IResource resource) {
+        if (resource == null) {
+            return null;
+        }
+        IPath location = resource.getLocation();
+        if (location == null) {
+            return resource.toString();
+        }
+        return location.toOSString() + " (" + resource + ')';
     }
 
 }
