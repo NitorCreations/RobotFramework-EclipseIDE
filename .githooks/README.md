@@ -18,7 +18,7 @@ In the suggested default configuration, the tool is imported to be a part of you
 # Requirements
 
 * Perl 5
-* Bash (for automatic install)
+* Bash (for automatic install, optional)
 
 Honestly I have only tested this on Linux so far. Please file any issues you have with any operating system you end up using this tool in.
 
