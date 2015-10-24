@@ -40,7 +40,7 @@ sub _getLicenseText {
     my $license_text_file = $_[0];
     my $license = $licenseTextCache{$license_text_file};
     unless (defined($license)) {
-	open F, '<', $license_text_file or die 'Could not read license file';
+	open F, '<', $license_text_file or die 'Could not read license file '.$license_text_file;
 	my $sep = $/;
 	undef $/;
 	$license = <F>;
