@@ -59,31 +59,6 @@ To import and later update the license-maintainer code in your project, execute 
 
 Now you have the code in your repository. The next step is to enable it.
 
-# Configuration
-
-Now we configure which files should have automatic copyright/license maintenance, and which style of copyright/license should be used for each.
-
-*The license maintainer configuration is currently inside the pre-commit git hook script - hopefully we will later extract the configuration to a separate file or use some existing git construct to configure it.*
-
-So, open the `pre-commit` script, and locate the following snippet:
-
-    sub resolveLicenseFormat {
-        my $file = $_[0];
-        my $licenseFormat;
-        if ($file =~ m!\.java$!) {
-            $licenseFormat = 'javadoc';
-        } elsif ($file =~ m!\.txt$! || $file =~ m!\.p[lm]$! || $file eq '.githooks/pre-commit' || $file eq '.githooks/install') {
-            $licenseFormat = 'hash';
-        }
-        return $licenseFormat;
-    }
-
-It is a function that is called once for every file for which it needs to decide what license template to use for that file, if any.
-    
-The default configuration (as pictured above) uses the `javadoc` license format for files ending in `.java` and the `hash` license format for files ending in `.txt` `.pm` `.pl` and additionally the license mainainer scripts. For all other files, no format is set.
-
-The license maintainer then takes the thus determined format, adds the prefix "LICENSE-" to it. This is then the filename it will use as template for the license/copyright for the file. For example for a .java file the LICENSE-javadoc file would be used.
-
 # Enabling the license maintainer in a git repository
 
 Using the the license maintainer is an opt-in procedure that everybody using your repository (or rather every clone of the repository) will need to do once in order for the license maintainer to do its work.
@@ -102,3 +77,22 @@ This will create a symbolic link from .git/hooks/pre-commit to .githooks/pre-com
 
 If you already have a `pre-commit` hook in use, you just need to call the `.githooks/pre-commit` script at some point during the execution of your `pre-commit` script (perhaps preferrably as late as possible), and make sure that your script also exits with failure if the license-maintainer pre-commit script exits with failure when you call it.
 
+# Configuration
+
+Now we configure which files should have automatic copyright/license maintenance, and which template of copyright/license should be used for each.
+
+Configuration is done using the "gitattributes" mechanism, which is similar to gitignore. See `gitattributes(5)` manual page for details.
+
+The license maintainer includes its own configuration for license maintenance in `.githooks/.gitattributes`. That is the only maintenance done by default. To enable license maintaintenance for files in your project, you specify the license template file to use for a file, or a filename pattern. First create a `.gitattributes` file, for example in the root directory of your repository. Then, for each file or pattern, specify the license using the "licensefile" attribute, e.g. with lines like:
+
+    *.java    licensefile=.gitattributes/LICENSE-javadoc
+    *.sh      licensefile=.gitattributes/LICENSE-hash
+    /install  licensefile=.gitattributes/LICENSE-hash
+
+This will enable maintenance of all `*.java` files in the project with the `LICENSE-javadoc` license template and all `*.sh` files with the `LICENSE-hash` license template. The `install` file in the root directory of the repository also uses the `LICENSE-hash` template.
+
+Patterns starting with / are effective only in the directory where the `.gitattributes` file resides, and patterns without are effective also in subdirectories recursively. Again, see the `gitattributes(5)` manual page for more information.
+
+If you want to inhibit license maintenance for some specific file/pattern that otherwise would have license maintenance (by an earlier pattern match for example), you can specify `!licensefile` for that file to remove the setting.
+
+The example `LICENSE-*` template files included in the `.gitattributes/` directory are based on the Apache 2.0 license that the license maintainer itself is licensed under. You can freely use them or create your own template files anywhere in your repository with the license(s) you want to use for your project.
