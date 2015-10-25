@@ -30,6 +30,7 @@ Honestly I have only tested this on Linux so far. Please file any issues you hav
 * `.githooks/install` - script for automatic install
 * `.githooks/pre-commit` - entry point for "pre-commit" git hook, has the git-specific parts
 * `.githooks/license.pm` - perl module for adding & updating license in a single file at a time
+* `.githooks/.gitattributes` - license maintenance configuration for the license maintainer itself
 * `.githooks/LICENSE-hash` - sample (Apache 2.0) license file formatted for inclusion in files using `#` for end-of-line comments
 * `.githooks/LICENSE-javadoc` - sample (Apache 2.0) license file formatted for inclusion with javadoc style comments
 
