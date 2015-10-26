@@ -24,11 +24,11 @@ if [ "$#" -gt 0 ]; then
    exit 1
 fi
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 for i in pre-commit ; do
     oldlink="$(readlink .git/hooks/${i} ||:)"
-    newlink="../../.githooks/${i}"
+    newlink="../../.githooks/license-maintainer/${i}"
     if [ "$newlink" != "$oldlink" ]; then
 	ln -snv --backup=numbered "${newlink}" .git/hooks/
     fi
