@@ -96,6 +96,10 @@ Patterns starting with / are effective only in the directory where the `.gitattr
 
 If you want to inhibit license maintenance for some specific file/pattern that otherwise would have license maintenance (by an earlier pattern match for example), you can specify `!licensefile` for that file to remove the setting.
 
+If you want to verify that the correct license templates will be used for each file, you can do that with the following command:
+
+    git ls-files | git check-attr licensefile --stdin | sed -e 's!licensefile: !!' -e 's!un\(set\|specified\)$!-!'
+
 The example `LICENSE-*` template files included in the `.gitattributes/` directory are based on the Apache 2.0 license that the license maintainer itself is licensed under. You can freely use them or create your own template files anywhere in your repository with the license(s) you want to use for your project.
 
 # Temporarily avoiding license maintenance
