@@ -19,7 +19,7 @@ use warnings;
 use IPC::Open2;
 use File::Temp qw(mktemp);
 
-require '.githooks/license.pm';
+require '.githooks/license-maintainer/license.pm';
 
 sub extract_timestamp($) {
     my $gitdate = $_[0];
@@ -48,7 +48,7 @@ if ($INJECT_LICENSES) {
 my $repoRootDir = `pwd`;
 chomp $repoRootDir;
 
-my $scriptDir = $repoRootDir.'/.githooks';
+my $scriptDir = $repoRootDir.'/.githooks/license-maintainer';
 
 my $origLineSeparator = $/;
 $/="\0";

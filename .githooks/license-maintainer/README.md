@@ -25,21 +25,22 @@ Honestly I have only tested this on Linux so far. Please file any issues you hav
 # Overview of the relevant part of this repository
 
 * `.githooks/`
-* `.githooks/README.md` - this file
-* `.githooks/LICENSE` - license by which the license-maintainer is distributed
-* `.githooks/install` - script for automatic install
-* `.githooks/pre-commit` - entry point for "pre-commit" git hook, has the git-specific parts
-* `.githooks/license.pm` - perl module for adding & updating license in a single file at a time
-* `.githooks/.gitattributes` - license maintenance configuration for the license maintainer itself
-* `.githooks/LICENSE-hash` - sample (Apache 2.0) license file formatted for inclusion in files using `#` for end-of-line comments
-* `.githooks/LICENSE-javadoc` - sample (Apache 2.0) license file formatted for inclusion with javadoc style comments
+* `.githooks/license-maintainer/`
+* `.githooks/license-maintainer/README.md` - this file
+* `.githooks/license-maintainer/LICENSE` - license by which the license-maintainer is distributed
+* `.githooks/license-maintainer/install` - script for automatic install
+* `.githooks/license-maintainer/pre-commit` - entry point for "pre-commit" git hook, has the git-specific parts
+* `.githooks/license-maintainer/license.pm` - perl module for adding & updating license in a single file at a time
+* `.githooks/license-maintainer/.gitattributes` - license maintenance configuration for the license maintainer itself
+* `.githooks/license-maintainer/LICENSE-hash` - sample (Apache 2.0) license file formatted for inclusion in files using `#` for end-of-line comments
+* `.githooks/license-maintainer/LICENSE-javadoc` - sample (Apache 2.0) license file formatted for inclusion with javadoc style comments
 
 # Importing the license maintainer into your project
 
-* **one-shot**: If you want, you can just copy the `.githooks` directory into the root of your project. Jump over the rest of this section and continue from the "Enabling the license maintainer in a git repository" section after copying the directory.
+* **one-shot**: If you want, you can just copy the `.githooks/license-maintainer` directory into the same location in your project. Jump over the rest of this section and continue from the "Enabling the license maintainer in a git repository" section after copying the directory.
 * **the git way**: I recommend importing it using git itself, which will allow you to update it easily later, should you want to. Continue with the instructions below.
 
-The "master" branch of this project contains both the .githooks directory (containing the files you want) and other project files such as this README file. But for your own project you want just the .githooks directory. So for easy deployment into your project, there is a separate "hooks-only" branch which contains just the .githooks directory.
+The "master" branch of this project contains both the .githooks/license-maintainer directory (containing the files you want) and some github-required files. But for your own project you want just the .githooks/license-maintainer directory. So for easy deployment into your project, there is a separate "hooks-only" branch which contains just the .githooks/license-maintainer directory.
 
 ## Adding the license-maintainer repository as a remote repository in your project
 
@@ -70,13 +71,13 @@ There are two ways to do it, automatic or manual. If you don't have any other gi
 
 To automatically enable the license maintainer in your git checkout, run the following command in the base directory of your project.
 
-    .githooks/install
+    .githooks/license-maintainer/install
 
-This will create a symbolic link from .git/hooks/pre-commit to .githooks/pre-commit
+This will create a symbolic link from .git/hooks/pre-commit to .githooks/license-maintainer/pre-commit
 
 ## Manual install
 
-If you already have a `pre-commit` hook in use, you just need to call the `.githooks/pre-commit` script at some point during the execution of your `pre-commit` script (perhaps preferrably as late as possible), and make sure that your script also exits with failure if the license-maintainer pre-commit script exits with failure when you call it.
+If you already have a `pre-commit` hook in use, you just need to call the `.githooks/license-maintainer/pre-commit` script at some point during the execution of your `pre-commit` script (perhaps preferrably as late as possible), and make sure that your script also exits with failure if the license-maintainer pre-commit script exits with failure when you call it.
 
 # Configuration
 
@@ -84,7 +85,7 @@ Now we configure which files should have automatic copyright/license maintenance
 
 Configuration is done using the "gitattributes" mechanism, which is similar to gitignore. See `gitattributes(5)` manual page for details.
 
-The license maintainer includes its own configuration for license maintenance in `.githooks/.gitattributes`. That is the only maintenance done by default. To enable license maintaintenance for files in your project, you specify the license template file to use for a file, or a filename pattern. First create a `.gitattributes` file, for example in the root directory of your repository. Then, for each file or pattern, specify the license using the "licensefile" attribute, e.g. with lines like:
+The license maintainer includes its own configuration for license maintenance in `.githooks/license-maintainer/.gitattributes`. That is the only maintenance done by default. To enable license maintaintenance for files in your project, you specify the license template file to use for a file, or a filename pattern. First create a `.gitattributes` file, for example in the root directory of your repository. Then, for each file or pattern, specify the license using the "licensefile" attribute, e.g. with lines like:
 
     *.java    licensefile=.gitattributes/LICENSE-javadoc
     *.sh      licensefile=.gitattributes/LICENSE-hash
@@ -95,6 +96,10 @@ This will enable maintenance of all `*.java` files in the project with the `LICE
 Patterns starting with / are effective only in the directory where the `.gitattributes` file resides, and patterns without are effective also in subdirectories recursively. Again, see the `gitattributes(5)` manual page for more information.
 
 If you want to inhibit license maintenance for some specific file/pattern that otherwise would have license maintenance (by an earlier pattern match for example), you can specify `!licensefile` for that file to remove the setting.
+
+If you want to verify that the correct license templates will be used for each file, you can do that with the following command:
+
+    git ls-files | git check-attr licensefile --stdin | sed -e 's!licensefile: !!' -e 's!un\(set\|specified\)$!-!'
 
 The example `LICENSE-*` template files included in the `.gitattributes/` directory are based on the Apache 2.0 license that the license maintainer itself is licensed under. You can freely use them or create your own template files anywhere in your repository with the license(s) you want to use for your project.
 
