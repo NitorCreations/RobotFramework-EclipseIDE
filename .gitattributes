@@ -4,3 +4,6 @@
 # repository (and back)
 
 *	text=auto
+*.robot	licensefile=.githooks/LICENSE-hash
+*.txt	licensefile=.githooks/LICENSE-hash
+*.java	licensefile=.githooks/LICENSE-javadoc
