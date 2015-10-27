@@ -1,7 +1,7 @@
 # RobotFramework-EclipseIDE 1.4.0
 
 
-RobotFramework-EclipseIDE is an Eclipse IDE plugin for the [Robot Framework test automation tool](https://code.google.com/p/robotframework/) developed by [Nitor Creations Oy](http://nitorcreations.com/).
+RobotFramework-EclipseIDE is an Eclipse IDE plugin for the [Robot Framework test automation tool](https://code.google.com/p/robotframework/). It is developed by [Nitor Creations Oy](http://nitorcreations.com/).
 
 Robot Framework is a generic test automation framework for acceptance testing and acceptance test-driven development (ATDD). [Acceptance Test-Driven Development](http://testobsessed.com/2008/12/acceptance-test-driven-development-atdd-an-overview/) is a process used to construct executable requirements before the implementation starts.
 
